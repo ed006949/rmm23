@@ -1,6 +1,7 @@
 package io_ldap
 
 import (
+	"encoding/xml"
 	"net/netip"
 	"time"
 
@@ -137,18 +138,24 @@ type ElementHost struct {
 
 // type AttrDN *ldap.DN //
 
-type attrCN string                                     //
-type attrCreateTimestamp time.Time                     //
-type attrCreatorsName AttrDN                           //
-type AttrDN string                                     //
-type attrDescription string                            //
-type AttrDestinationIndicators map[string]struct{}     // interim host list
-type attrDisplayName string                            //
-type attrEntryUUID uuid.UUID                           //
-type attrGIDNumber uint64                              //
-type attrHomeDirectory string                          //
-type AttrIPHostNumbers map[netip.Prefix]struct{}       //
-type AttrLabeledURIs map[string]AttrLabeledURI         // custom scheme alternative TODO implement custom schemas
+type attrCN string                                 //
+type attrCreateTimestamp time.Time                 //
+type attrCreatorsName AttrDN                       //
+type AttrDN string                                 //
+type attrDescription string                        //
+type AttrDestinationIndicators map[string]struct{} // interim host list
+type attrDisplayName string                        //
+type attrEntryUUID uuid.UUID                       //
+type attrGIDNumber uint64                          //
+type attrHomeDirectory string                      //
+type AttrIPHostNumbers struct {
+	modified bool
+	data     netip.Prefix
+} //
+type AttrLabeledURIs struct {
+	modified bool
+	data     *LabeledURI
+}                                                      // custom schema alternative TO DO implement custom schemas
 type AttrMails map[string]struct{}                     //
 type attrMembers map[AttrDN]struct{}                   //
 type attrMembersOf map[AttrDN]struct{}                 //
@@ -175,7 +182,7 @@ type AttrStrings map[AttrString]struct{} //
 type AttrTimestamp time.Time             //
 type AttrUUID uuid.UUID                  //
 
-type AttrLabeledURI map[string]struct{} // custom scheme alternative TODO implement custom schemas
+// type Attr Labeled URI map[string]struct{} // custom schema alternative TO DO implement custom schemas
 
 type schema struct {
 	OID           string
@@ -198,12 +205,11 @@ type schema struct {
 	RawDefinition string
 }
 
-// LabeledURI
-// Name map[] with `luri:"tag_"` means
-// unsorted map of ordered settings delimited with ','
 type LabeledURI struct {
-	Host    bool                `luri:"host"`
-	ACL     map[string][]string `luri:"acl_"`
-	Service map[string][]string `luri:"service_"`
-	// ....
+	XMLName     xml.Name             `xml:"luri"`
+	OpenVPN     []io_net.OpenVPN     `xml:"OpenVPN,omitempty"`
+	CiscoVPN    []io_net.CiscoVPN    `xml:"CiscoVPN,omitempty"`
+	InterimHost []io_net.InterimHost `xml:"InterimHost,omitempty"`
+	// Type    []string `xml:"type,omitempty"`
+	// Service []string `xml:"service,omitempty"`
 }
