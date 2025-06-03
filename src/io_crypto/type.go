@@ -3,7 +3,11 @@ package io_crypto
 import (
 	"crypto"
 	"crypto/x509"
+
+	"github.com/go-git/go-git/v5/plumbing/transport"
 )
+
+type AuthDB map[string]transport.AuthMethod
 
 type PemCertKey string
 type PemCertKeyList map[string]*PemCertKey
