@@ -1,7 +1,6 @@
 package io_ldap
 
 import (
-	"encoding/xml"
 	"net/netip"
 	"time"
 
@@ -156,7 +155,7 @@ type AttrIPHostNumbers struct {
 type AttrLabeledURIs struct {
 	modified bool
 	invalid  error
-	data     *LabeledURI
+	data     LabeledURI
 }                                                      // custom schema alternative TO DO implement custom schemas
 type AttrMails map[string]struct{}                     //
 type attrMembers map[AttrDN]struct{}                   //
@@ -208,10 +207,13 @@ type schema struct {
 }
 
 type LabeledURI struct {
-	XMLName     xml.Name             `xml:"luri"`
+	// XMLName     xml.Name             `xml:"luri"`
 	OpenVPN     []io_net.OpenVPN     `xml:"OpenVPN,omitempty"`
 	CiscoVPN    []io_net.CiscoVPN    `xml:"CiscoVPN,omitempty"`
 	InterimHost []io_net.InterimHost `xml:"InterimHost,omitempty"`
-	// Type    []string `xml:"type,omitempty"`
-	// Service []string `xml:"service,omitempty"`
+	Legacy      []LabeledURILegacy   `xml:"Legacy,omitempty"`
+}
+type LabeledURILegacy struct {
+	Key   string `xml:"key,attr,omitempty"`
+	Value string `xml:"value,attr,omitempty"`
 }
