@@ -1,3 +1,3 @@
-package io_ssh
+package mod_ssh
 
 type PublicKey string

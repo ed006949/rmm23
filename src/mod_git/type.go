@@ -1,4 +1,4 @@
-package io_git
+package mod_git
 
 import (
 	"github.com/go-git/go-git/v5"

@@ -1,1 +1,1 @@
-package io_ldap
+package mod_ldap

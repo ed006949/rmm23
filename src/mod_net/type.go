@@ -1,10 +1,10 @@
-package io_net
+package mod_net
 
 import (
 	"net/netip"
 	"net/url"
 
-	"rmm23/src/io_crypto"
+	"rmm23/src/mod_crypto"
 )
 
 type URL struct{ *url.URL }
@@ -20,5 +20,5 @@ type CiscoVPN struct {
 type InterimHost struct {
 	ASN      uint32 `xml:"asn,omitempty"`
 	Hostname string `xml:"hostname,omitempty"`
-	Auth     io_crypto.AuthDB
+	Auth     mod_crypto.AuthDB
 }

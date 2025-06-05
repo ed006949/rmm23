@@ -1,4 +1,4 @@
-package io_ldap
+package mod_ldap
 
 const decoderTagName = "ldap"
 const lURIdecoderTagName = "luri"

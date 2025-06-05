@@ -1,4 +1,4 @@
-package io_ldap
+package mod_ldap
 
 import (
 	"net/netip"
@@ -7,15 +7,15 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
 
-	"rmm23/src/io_crypto"
-	"rmm23/src/io_net"
-	"rmm23/src/io_ssh"
+	"rmm23/src/mod_crypto"
+	"rmm23/src/mod_net"
+	"rmm23/src/mod_ssh"
 )
 
 type Entry struct{ *ldap.Entry }
 
 type Conf struct {
-	URL      *io_net.URL     `xml:"url,attr"`
+	URL      *mod_net.URL    `xml:"url,attr"`
 	Settings []*ConfSettings `xml:"settings"`
 	Domain   []*ConfDomain   `xml:"domain"`
 
@@ -156,24 +156,24 @@ type AttrLabeledURIs struct {
 	modified bool
 	invalid  error
 	data     LabeledURI
-}                                                      // custom schema alternative TO DO implement custom schemas
-type AttrMails map[string]struct{}                     //
-type attrMembers map[AttrDN]struct{}                   //
-type attrMembersOf map[AttrDN]struct{}                 //
-type attrModifiersName AttrDN                          //
-type attrModifyTimestamp time.Time                     //
-type attrO string                                      //
-type attrOU string                                     //
-type attrObjectClasses map[string]struct{}             //
-type attrOwners map[AttrDN]struct{}                    //
-type attrSN string                                     //
-type AttrSSHPublicKeys map[string]io_ssh.PublicKey     //
-type attrTelephoneNumbers map[string]struct{}          //
-type attrTelexNumbers map[string]struct{}              //
-type attrUID string                                    //
-type attrUIDNumber uint64                              //
-type AttrUserPKCS12s map[AttrDN]*io_crypto.Certificate // any type of cert-key pairs list TODO implement seamless migration from any to P12
-type AttrUserPassword string                           //
+}                                                       // custom schema alternative TO DO implement custom schemas
+type AttrMails map[string]struct{}                      //
+type attrMembers map[AttrDN]struct{}                    //
+type attrMembersOf map[AttrDN]struct{}                  //
+type attrModifiersName AttrDN                           //
+type attrModifyTimestamp time.Time                      //
+type attrO string                                       //
+type attrOU string                                      //
+type attrObjectClasses map[string]struct{}              //
+type attrOwners map[AttrDN]struct{}                     //
+type attrSN string                                      //
+type AttrSSHPublicKeys map[string]mod_ssh.PublicKey     //
+type attrTelephoneNumbers map[string]struct{}           //
+type attrTelexNumbers map[string]struct{}               //
+type attrUID string                                     //
+type attrUIDNumber uint64                               //
+type AttrUserPKCS12s map[AttrDN]*mod_crypto.Certificate // any type of cert-key pairs list TODO implement seamless migration from any to P12
+type AttrUserPassword string                            //
 
 type AttrDNs map[AttrDN]struct{}         //
 type AttrID string                       //
@@ -208,10 +208,10 @@ type schema struct {
 
 type LabeledURI struct {
 	// XMLName     xml.Name             `xml:"luri"`
-	OpenVPN     []io_net.OpenVPN     `xml:"OpenVPN,omitempty"`
-	CiscoVPN    []io_net.CiscoVPN    `xml:"CiscoVPN,omitempty"`
-	InterimHost []io_net.InterimHost `xml:"InterimHost,omitempty"`
-	Legacy      []LabeledURILegacy   `xml:"Legacy,omitempty"`
+	OpenVPN     []mod_net.OpenVPN     `xml:"OpenVPN,omitempty"`
+	CiscoVPN    []mod_net.CiscoVPN    `xml:"CiscoVPN,omitempty"`
+	InterimHost []mod_net.InterimHost `xml:"InterimHost,omitempty"`
+	Legacy      []LabeledURILegacy    `xml:"Legacy,omitempty"`
 }
 type LabeledURILegacy struct {
 	Key   string `xml:"key,attr,omitempty"`

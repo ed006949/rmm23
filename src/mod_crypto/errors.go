@@ -1,4 +1,4 @@
-package io_crypto
+package mod_crypto
 
 const (
 	EX509ParsePrivKey errorNumber = iota

@@ -1,4 +1,4 @@
-package io_ldap
+package mod_ldap
 
 // LDAPAttributeUnmarshaler is the interface implemented by types
 // that can unmarshal an LDAP attribute value representation of themselves.

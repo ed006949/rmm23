@@ -1,4 +1,4 @@
-package io_pgp
+package mod_pgp
 
 import (
 	"github.com/ProtonMail/go-crypto/openpgp"

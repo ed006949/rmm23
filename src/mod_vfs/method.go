@@ -1,4 +1,4 @@
-package io_vfs
+package mod_vfs
 
 import (
 	"bytes"
@@ -10,9 +10,9 @@ import (
 	"github.com/avfs/avfs"
 	"github.com/go-ini/ini"
 
-	"rmm23/src/io_crypto"
-	"rmm23/src/io_fs"
 	"rmm23/src/l"
+	"rmm23/src/mod_crypto"
+	"rmm23/src/mod_fs"
 )
 
 func (r *VFSDB) MustReadlink(name string) string {
@@ -206,7 +206,7 @@ func (r *VFSDB) WriteVFS() (err error) {
 					return
 				}
 
-				switch err = io_fs.Symlink(linkVFS, name); {
+				switch err = mod_fs.Symlink(linkVFS, name); {
 				case err != nil:
 					return
 				}
@@ -291,7 +291,7 @@ func (r *VFSDB) CompareAndCopyFileToFS(name string) (err error) {
 	return
 }
 
-func (r *VFSDB) LoadX509KeyPair(chain string, key string) (outbound *io_crypto.Certificate, err error) {
+func (r *VFSDB) LoadX509KeyPair(chain string, key string) (outbound *mod_crypto.Certificate, err error) {
 	var (
 		chainData []byte
 		keyData   []byte
@@ -304,7 +304,7 @@ func (r *VFSDB) LoadX509KeyPair(chain string, key string) (outbound *io_crypto.C
 	case err != nil:
 		return
 	}
-	switch outbound, err = io_crypto.X509KeyPair(chainData, keyData); {
+	switch outbound, err = mod_crypto.X509KeyPair(chainData, keyData); {
 	case err != nil:
 		return nil, err
 	}

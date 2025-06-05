@@ -1,4 +1,4 @@
-package io_pgp
+package mod_pgp
 
 import (
 	"bytes"

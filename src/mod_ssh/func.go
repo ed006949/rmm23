@@ -1,4 +1,4 @@
-package io_ssh
+package mod_ssh
 
 // import (
 // 	"crypto"

@@ -1,4 +1,4 @@
-package io_vfs
+package mod_vfs
 
 import (
 	"github.com/avfs/avfs"

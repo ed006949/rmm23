@@ -1,4 +1,4 @@
-package io_ldap
+package mod_ldap
 
 import (
 	"encoding/xml"
@@ -11,8 +11,8 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
 
-	"rmm23/src/io_crypto"
-	"rmm23/src/io_ssh"
+	"rmm23/src/mod_crypto"
+	"rmm23/src/mod_ssh"
 )
 
 func (r *AttrDN) UnmarshalLDAPAttr(values []string) (err error) {
@@ -130,7 +130,7 @@ func (r AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
 }
 func (r AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
-		r[value] = io_ssh.PublicKey(value)
+		r[value] = mod_ssh.PublicKey(value)
 	}
 	return
 }
@@ -143,9 +143,9 @@ func (r AttrStrings) UnmarshalLDAPAttr(values []string) (err error) {
 func (r AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		var (
-			interim *io_crypto.Certificate
+			interim *mod_crypto.Certificate
 		)
-		switch interim, err = io_crypto.ParsePEM([]byte(value)); {
+		switch interim, err = mod_crypto.ParsePEM([]byte(value)); {
 		case err != nil:
 			continue
 		}

@@ -1,4 +1,4 @@
-package io_net
+package mod_net
 
 import (
 	"encoding/xml"
