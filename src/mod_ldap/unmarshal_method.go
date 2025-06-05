@@ -91,31 +91,41 @@ func (r *AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err erro
 	}
 	return
 }
+
+// UnmarshalLDAPAttr for AttrIPHostNumbers
+// there must be only one valid netip.Prefix data or nothing
+// in other cases r.modified needs to be set, to update data in LDAP later
 func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
-		switch r.data, r.invalid = netip.ParsePrefix(value); {
-		case r.invalid != nil:
-			r.modified = true
-			continue
+		var (
+			data netip.Prefix
+		)
+		switch data, err = netip.ParsePrefix(value); {
+		case err == nil:
+			r.data = data
+			return
 		}
-		break
+		r.modified = true
 	}
-	r.modified = r.modified || r.invalid != nil || len(values) > 1
-	return
+	return nil
 }
+
+// UnmarshalLDAPAttr for AttrLabeledURIs
+// with legacy processing
+// there must be only one valid XML data or nothing
+// in other cases r.modified needs to be set, to update data in LDAP later
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
-	// legacy processing included
-	// TODO there must be only one (xml)
 	for _, value := range values {
 		var (
 			data LabeledURI
 		)
-		switch r.invalid = xml.Unmarshal([]byte(value), &data); {
-		case r.invalid == nil:
+		switch err = xml.Unmarshal([]byte(value), &data); {
+		case err == nil:
 			switch {
 			case r.data == nil:
 				r.data = &data
 			default:
+				// another XML data in values - append (!good)
 				r.modified = true
 				r.data.OpenVPN = append(r.data.OpenVPN, data.OpenVPN...)
 				r.data.CiscoVPN = append(r.data.CiscoVPN, data.CiscoVPN...)
@@ -124,25 +134,32 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 			}
 			continue
 		}
-		r.modified = true
 
+		// fallback to legacy key-value space-separated schema - append if any (!good)
+		r.modified = true
 		var (
-			legacy []string
+			legacy = strings.SplitN(value, " ", 2)
 		)
-		switch legacy = strings.SplitN(value, " ", 2); len(legacy) {
+		switch len(legacy) {
 		case 0:
 			continue
 		case 1:
+			switch {
+			case r.data == nil:
+				r.data = &LabeledURI{}
+			}
+			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: legacy[0], Value: ""})
+		case 2:
 			legacy = append(legacy, "")
+			switch {
+			case r.data == nil:
+				r.data = &LabeledURI{}
+			}
+			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: legacy[0], Value: legacy[1]})
 		}
-		switch {
-		case r.data == nil:
-			r.data = &LabeledURI{}
-		}
-		r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: legacy[0], Value: legacy[1]})
 	}
-	r.modified = r.modified || r.invalid != nil || len(values) > 1 || (r.data != nil && len(r.data.Legacy) != 0)
-	return
+
+	return nil
 }
 func (r *AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
