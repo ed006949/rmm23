@@ -104,22 +104,44 @@ func (r AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
+	// legacy processing
+	var (
+		interimData LabeledURI
+	)
 	for _, value := range values {
-		switch r.invalid = xml.Unmarshal([]byte(value), &r.data); {
-		case r.invalid != nil:
-			r.modified = true
-			switch interim := strings.SplitN(value, " ", 2); len(interim) {
-			case 0:
-			case 1:
-				r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: interim[0], Value: ""})
-			case 2:
-				r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: interim[0], Value: interim[1]})
+		switch r.invalid = xml.Unmarshal([]byte(value), &interimData); {
+		case r.invalid == nil:
+			switch {
+			case r.data == nil:
+				r.data = &interimData
+			default:
+				r.modified = true
+				r.data.OpenVPN = append(r.data.OpenVPN, interimData.OpenVPN...)
+				r.data.CiscoVPN = append(r.data.CiscoVPN, interimData.CiscoVPN...)
+				r.data.InterimHost = append(r.data.InterimHost, interimData.InterimHost...)
+				r.data.Legacy = append(r.data.Legacy, interimData.Legacy...)
 			}
 			continue
 		}
-		break
+
+		r.modified = true
+		switch interim := strings.SplitN(value, " ", 2); len(interim) {
+		case 0:
+		case 1:
+			switch {
+			case r.data == nil:
+				r.data = &LabeledURI{}
+			}
+			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: interim[0], Value: ""})
+		case 2:
+			switch {
+			case r.data == nil:
+				r.data = &LabeledURI{}
+			}
+			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: interim[0], Value: interim[1]})
+		}
 	}
-	r.modified = r.modified || r.invalid != nil || len(values) > 1
+	r.modified = r.modified || r.invalid != nil || len(values) > 1 || (r.data != nil && len(r.data.Legacy) != 0)
 	return
 }
 func (r AttrMails) UnmarshalLDAPAttr(values []string) (err error) {

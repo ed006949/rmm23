@@ -155,7 +155,7 @@ type AttrIPHostNumbers struct {
 type AttrLabeledURIs struct {
 	modified bool
 	invalid  error
-	data     LabeledURI
+	data     *LabeledURI
 }                                                       // custom schema alternative TO DO implement custom schemas
 type AttrMails map[string]struct{}                      //
 type attrMembers map[AttrDN]struct{}                    //
