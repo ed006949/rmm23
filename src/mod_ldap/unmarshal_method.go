@@ -111,7 +111,6 @@ func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 // UnmarshalLDAPAttr for AttrLabeledURIs
-// with legacy processing
 // there must be only one valid XML data or nothing
 // in other cases r.modified needs to be set, to update data in LDAP later
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
