@@ -91,27 +91,45 @@ func (r AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error
 	return
 }
 func (r AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
-	switch len(values) {
-	case 0:
-		return
-	case 1:
-	default:
-		r.modified = true
+	// switch len(values) {
+	// case 0:
+	// 	return
+	// case 1:
+	// default:
+	// 	r.modified = true
+	// }
+	// r.data, r.invalid = netip.ParsePrefix(values[0])
+	// r.modified = r.modified == true || r.invalid != nil || len(values) > 1
+	for _, value := range values {
+		switch r.data, r.invalid = netip.ParsePrefix(value); {
+		case r.invalid != nil:
+			r.modified = true
+			continue
+		}
+		break
 	}
-	r.data, r.invalid = netip.ParsePrefix(values[0])
-	r.modified = r.modified == true || r.invalid != nil
+	r.modified = r.modified || r.invalid != nil || len(values) > 1
 	return
 }
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
-	switch len(values) {
-	case 0:
-		return
-	case 1:
-	default:
-		r.modified = true
+	// switch len(values) {
+	// case 0:
+	// 	return
+	// case 1:
+	// default:
+	// 	r.modified = true
+	// }
+	// r.invalid = xml.Unmarshal([]byte(values[0]), &r.data)
+	// r.modified = r.modified == true || r.invalid != nil
+	for _, value := range values {
+		switch r.invalid = xml.Unmarshal([]byte(value), &r.data); {
+		case r.invalid != nil:
+			r.modified = true
+			continue
+		}
+		break
 	}
-	r.invalid = xml.Unmarshal([]byte(values[0]), &r.data)
-	r.modified = r.modified == true || r.invalid != nil
+	r.modified = r.modified || r.invalid != nil || len(values) > 1
 	return
 }
 func (r AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
