@@ -98,27 +98,8 @@ func (r AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 	default:
 		r.modified = true
 	}
-
-	var (
-		interim netip.Prefix
-	)
-	switch interim, err = netip.ParsePrefix(values[0]); {
-	case err != nil:
-		return
-	}
-	r.data = interim
-
-	// for _, value := range values {
-	// 	var (
-	// 		interim netip.Prefix
-	// 	)
-	// 	switch interim, err = netip.ParsePrefix(value); {
-	// 	case err != nil:
-	// 		return
-	// 	}
-	// 	r.data[interim] = struct{}{}
-	// }
-
+	r.data, r.invalid = netip.ParsePrefix(values[0])
+	r.modified = r.modified == true || r.invalid != nil
 	return
 }
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
@@ -129,47 +110,8 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 	default:
 		r.modified = true
 	}
-
-	var (
-		interim LabeledURI
-	)
-	switch err = xml.Unmarshal([]byte(values[0]), &interim); {
-	case err != nil:
-		r.modified = true
-		return
-	}
-	r.data = &interim
-
-	// var (
-	// 	kv = make(map[string]AttrLabeledURIs)
-	// )
-	// for _, value := range values {
-	// 	// test for XML
-	//
-	// 	// test for JSON
-	//
-	// 	// test for URL
-	//
-	// 	// test for key-value
-	// 	var (
-	// 		interim = strings.SplitN(value, " ", 2)
-	// 	)
-	// 	switch len(interim) {
-	// 	case 0:
-	// 	case 1:
-	// 		switch {
-	// 		case kv[interim[0]] == nil:
-	// 			kv[interim[0]] = make(AttrLabeledURIs)
-	// 		}
-	// 	case 2:
-	// 		switch {
-	// 		case kv[interim[0]] == nil:
-	// 			kv[interim[0]] = make(AttrLabeledURIs)
-	// 		}
-	// 		kv[interim[0]][interim[1]] = struct{}{}
-	// 	}
-	// }
-
+	r.invalid = xml.Unmarshal([]byte(values[0]), &r.data)
+	r.modified = r.modified == true || r.invalid != nil
 	return
 }
 func (r AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
