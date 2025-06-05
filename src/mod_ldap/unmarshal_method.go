@@ -72,7 +72,7 @@ func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 
-func (r AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		var (
 			interim AttrDN
@@ -81,17 +81,17 @@ func (r AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 		case err != nil:
 			return
 		}
-		r[interim] = struct{}{}
+		(*r)[interim] = struct{}{}
 	}
 	return
 }
-func (r AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
-		r[value] = struct{}{}
+		(*r)[value] = struct{}{}
 	}
 	return
 }
-func (r AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		switch r.data, r.invalid = netip.ParsePrefix(value); {
 		case r.invalid != nil:
@@ -104,65 +104,65 @@ func (r AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
-	// legacy processing
-	var (
-		interimData LabeledURI
-	)
+	// legacy processing included
+	// TODO there must be only one (xml)
 	for _, value := range values {
-		switch r.invalid = xml.Unmarshal([]byte(value), &interimData); {
+		var (
+			data LabeledURI
+		)
+		switch r.invalid = xml.Unmarshal([]byte(value), &data); {
 		case r.invalid == nil:
 			switch {
 			case r.data == nil:
-				r.data = &interimData
+				r.data = &data
 			default:
 				r.modified = true
-				r.data.OpenVPN = append(r.data.OpenVPN, interimData.OpenVPN...)
-				r.data.CiscoVPN = append(r.data.CiscoVPN, interimData.CiscoVPN...)
-				r.data.InterimHost = append(r.data.InterimHost, interimData.InterimHost...)
-				r.data.Legacy = append(r.data.Legacy, interimData.Legacy...)
+				r.data.OpenVPN = append(r.data.OpenVPN, data.OpenVPN...)
+				r.data.CiscoVPN = append(r.data.CiscoVPN, data.CiscoVPN...)
+				r.data.InterimHost = append(r.data.InterimHost, data.InterimHost...)
+				r.data.Legacy = append(r.data.Legacy, data.Legacy...)
 			}
 			continue
 		}
-
 		r.modified = true
-		switch interim := strings.SplitN(value, " ", 2); len(interim) {
+
+		var (
+			legacy []string
+		)
+		switch legacy = strings.SplitN(value, " ", 2); len(legacy) {
 		case 0:
+			continue
 		case 1:
-			switch {
-			case r.data == nil:
-				r.data = &LabeledURI{}
-			}
-			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: interim[0], Value: ""})
-		case 2:
-			switch {
-			case r.data == nil:
-				r.data = &LabeledURI{}
-			}
-			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: interim[0], Value: interim[1]})
+			legacy = append(legacy, "")
 		}
+		switch {
+		case r.data == nil:
+			r.data = &LabeledURI{}
+		}
+		r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: legacy[0], Value: legacy[1]})
 	}
 	r.modified = r.modified || r.invalid != nil || len(values) > 1 || (r.data != nil && len(r.data.Legacy) != 0)
 	return
 }
-func (r AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
-		r[value] = struct{}{}
+		(*r)[value] = struct{}{}
 	}
 	return
 }
-func (r AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
-		r[value] = mod_ssh.PublicKey(value)
+		(*r)[value] = mod_ssh.PublicKey(value)
 	}
 	return
 }
-func (r AttrStrings) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *AttrStrings) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
-		r[AttrString(value)] = struct{}{}
+		(*r)[AttrString(value)] = struct{}{}
 	}
 	return
 }
-func (r AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		var (
 			interim *mod_crypto.Certificate
@@ -171,7 +171,7 @@ func (r AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 		case err != nil:
 			continue
 		}
-		r[AttrDN(interim.Certificates[0].Subject.String())] = interim
+		(*r)[AttrDN(interim.Certificates[0].Subject.String())] = interim
 	}
 	return
 }
