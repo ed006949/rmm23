@@ -4,6 +4,7 @@ import (
 	"encoding/xml"
 	"net/netip"
 	"strconv"
+	"strings"
 	"time"
 
 	ber "github.com/go-asn1-ber/asn1-ber"
@@ -91,15 +92,6 @@ func (r AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error
 	return
 }
 func (r AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
-	// switch len(values) {
-	// case 0:
-	// 	return
-	// case 1:
-	// default:
-	// 	r.modified = true
-	// }
-	// r.data, r.invalid = netip.ParsePrefix(values[0])
-	// r.modified = r.modified == true || r.invalid != nil || len(values) > 1
 	for _, value := range values {
 		switch r.data, r.invalid = netip.ParsePrefix(value); {
 		case r.invalid != nil:
@@ -112,19 +104,17 @@ func (r AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
-	// switch len(values) {
-	// case 0:
-	// 	return
-	// case 1:
-	// default:
-	// 	r.modified = true
-	// }
-	// r.invalid = xml.Unmarshal([]byte(values[0]), &r.data)
-	// r.modified = r.modified == true || r.invalid != nil
 	for _, value := range values {
 		switch r.invalid = xml.Unmarshal([]byte(value), &r.data); {
 		case r.invalid != nil:
 			r.modified = true
+			switch interim := strings.SplitN(value, " ", 2); len(interim) {
+			case 0:
+			case 1:
+				r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: interim[0], Value: ""})
+			case 2:
+				r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: interim[0], Value: interim[1]})
+			}
 			continue
 		}
 		break
@@ -163,17 +153,3 @@ func (r AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 	}
 	return
 }
-
-// func (r *LabeledURI) UnmarshalLDAPAttr(values []string) (err error) {
-// 	for _, value := range values {
-// 		var (
-// 			interim = strings.SplitN(value, " ", 2)
-// 		)
-// 		switch len(interim) {
-// 		case 0:
-// 		case 1:
-// 		case 2:
-// 		}
-// 	}
-// 	return
-// }
