@@ -1,4 +1,4 @@
-package io_cgp
+package mod_cgp
 
 const (
 	ECom errorNumber = iota
