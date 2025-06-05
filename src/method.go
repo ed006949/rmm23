@@ -7,13 +7,13 @@ import (
 	"github.com/avfs/avfs"
 	"github.com/avfs/avfs/vfs/memfs"
 
-	"rmm23/src/io_vfs"
 	"rmm23/src/l"
+	"rmm23/src/mod_vfs"
 )
 
 func (r *xmlConf) load() (err error) {
 	var (
-		vfsDB = &io_vfs.VFSDB{
+		vfsDB = &mod_vfs.VFSDB{
 			List: make(map[string]string),
 			VFS: memfs.NewWithOptions(&memfs.Options{
 				Idm:        avfs.NewDummyIdm(),
