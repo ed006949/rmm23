@@ -18,6 +18,7 @@ type CiscoVPN struct {
 	Hostname []string         `xml:"hostname,omitempty"`
 }
 type InterimHost struct {
-	Hostname []string `xml:"hostname,omitempty"`
+	ASN      uint32 `xml:"asn,omitempty"`
+	Hostname string `xml:"hostname,omitempty"`
 	Auth     io_crypto.AuthDB
 }
