@@ -150,10 +150,12 @@ type attrGIDNumber uint64                          //
 type attrHomeDirectory string                      //
 type AttrIPHostNumbers struct {
 	modified bool
+	invalid  error
 	data     netip.Prefix
 } //
 type AttrLabeledURIs struct {
 	modified bool
+	invalid  error
 	data     *LabeledURI
 }                                                      // custom schema alternative TO DO implement custom schemas
 type AttrMails map[string]struct{}                     //
