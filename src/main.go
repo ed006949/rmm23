@@ -4,7 +4,11 @@ import (
 	"errors"
 	"flag"
 
+	"github.com/avfs/avfs"
+	"github.com/avfs/avfs/vfs/memfs"
+
 	"rmm23/src/l"
+	"rmm23/src/mod_vfs"
 )
 
 func main() {
@@ -17,6 +21,16 @@ func main() {
 	var (
 		err       error
 		xmlConfig = new(xmlConf)
+		vfsDB     = &mod_vfs.VFSDB{
+			List: make(map[string]string),
+			VFS: memfs.NewWithOptions(&memfs.Options{
+				Idm:        avfs.NotImplementedIdm,
+				User:       nil,
+				Name:       "",
+				OSType:     avfs.CurrentOSType(),
+				SystemDirs: nil,
+			}),
+		}
 	)
 
 	switch err = xmlConfig.load(); {
@@ -28,8 +42,59 @@ func main() {
 		l.Z{l.E: err}.Critical()
 	}
 
+	switch err = vfsDB.CopyFromFS("./etc/"); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+	}
+
 	switch err = xmlConfig.LDAP.Fetch(); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
 }
+
+// 	var (
+//		vfsDB = &mod_vfs.VFSDB{
+//			List: make(map[string]string),
+//			VFS: memfs.NewWithOptions(&memfs.Options{
+//				Idm:        avfs.NewDummyIdm(),
+//				User:       nil,
+//				Name:       "",
+//				OSType:     avfs.CurrentOSType(),
+//				SystemDirs: nil,
+//			}),
+//		}
+//	)
+//	l.InitCLI()
+//
+//	switch {
+//	case len(l.Config.String()) != 0: //
+//		l.CLI.Set()
+//
+//		var (
+//			cliConfigFile string
+//			data          []byte
+//		)
+//
+//		switch cliConfigFile, err = filepath.Abs(l.Config.String()); {
+//		case err != nil:
+//			return
+//		}
+//		switch err = vfsDB.CopyFromFS(cliConfigFile); {
+//		case err != nil:
+//			return
+//		}
+//		switch data, err = vfsDB.VFS.ReadFile(cliConfigFile); {
+//		case err != nil:
+//			return
+//		}
+//		switch err = xml.Unmarshal(data, r); {
+//		case err != nil:
+//			return
+//		}
+//
+//	default:
+//		return l.ENOCONF
+//	}
+//
+//	return
