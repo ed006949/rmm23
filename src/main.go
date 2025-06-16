@@ -42,7 +42,7 @@ func main() {
 		l.Z{l.E: err}.Critical()
 	}
 
-	switch err = vfsDB.CopyFromFS("./etc/"); {
+	switch err = vfsDB.CopyFromFS("./etc/legacy/"); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}

@@ -276,10 +276,9 @@ func (r *Conf) close() /*(err error)*/ {
 // XML
 func (r *AttrDN) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 	switch _, err = ldap.ParseDN(attr.Value); {
-	case err != nil:
-		return
+	case err == nil:
+		*r = AttrDN(attr.Value)
 	}
-	*r = AttrDN(attr.Value)
 	return
 }
 func (r *AttrDN) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
