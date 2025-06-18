@@ -153,69 +153,72 @@ Welcome to the Remote Monitoring and Management (episode 23).
 
 ### domain management
 
-- [ ] UUID
-- [ ] ACL
+* UUID
+* ACL
 
 ### user management
 
-- [ ] UUID
-- [ ] entities
-	- [ ] ipHostNumber
-	- [ ] AAA
-		- [ ] PKI
-	- [ ] ACL
-- [ ] uid
-- [ ] uidNumber
-- [ ] gidNumber
-- [ ] home
-- [ ] userPassword
-- [ ] mail
-- [ ] memberOf
-- [ ] cn
-- [ ] AAA
-	- [ ] SSH
-	- [ ] PKI
-	- [ ] MFA
+* UUID
+* entities
+	* ipHostNumber
+	* AAA
+		* PKI
+	* ACL
+* uid
+* uidNumber
+* gidNumber
+* home
+* userPassword
+* mail
+* memberOf
+* cn
+* AAA
+	* SSH
+	* PKI
+	* MFA
 
 ### group management
 
-- [ ] UUID
-- [ ] gid
-- [ ] gidNumber
-- [ ] member
-- [ ] ACL
-- [ ] special groups
-	- [ ] VPN-groups
-		- [ ] "vpn": allow user to connect
-		- [ ] "vpn-host-${ASN}": allow user to connect to specified host
-		- [ ] "vpn-entity-[a-z]": allow user entity to connect
-		- [ ] "vpn-acl-${user_group}": group ACL
-		- [ ] "vpn-acl-${user_group}-[a-z]": group's entity ACL
-	- [ ] service groups
-- [ ] groups (for messaging, etc)
-	- [ ] cn
+* UUID
+* gid
+* gidNumber
+* member
+* ACL
+* special groups
+* VPN-groups
+	* user permissions
+		* "vpn": allow user to connect
+		* "vpn-entity-[a-z]": allow user entity to connect
+		* "vpn-host-${ASN}": allow user to connect to host
+	* ACL
+		* "vpn-acl-${user_group}": group ACL
+		* "vpn-acl-${user_group}-[a-z]": group's entity ACL
+
+	* service groups
+* groups (for messaging, etc)
+	* cn
 
 ### host management
 
-- [ ] UUID
-- [ ] uid
-- [ ] uidNumber
-- [ ] gidNumber
-- [ ] memberOf
-- [ ] cn
-- [ ] AAA
-	- [ ] SSH
-	- [ ] PKI
-	- [ ] MFA
-- [ ] ACL
-- [ ] host type:
-	- [ ] interim
-		- [ ] ASN
-		- [ ] upstream ASN
-		- [ ] hostname
-	- [ ] OpenVPN
-		- [ ] listen
-		- [ ] hostname
-	- [ ] CiscoVPN
-		- [ ] listen
-		- [ ] hostname
+* UUID
+* uid
+* uidNumber
+* gidNumber
+* memberOf
+* cn
+* AAA
+	* SSH
+	* PKI
+	* MFA
+* ACL
+* host type:
+	* interim
+		* ASN
+		* upstream ASN
+		* hostname
+	* OpenVPN
+		* listen
+		* hostname
+	* CiscoVPN
+		* listen
+		* hostname
