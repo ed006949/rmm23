@@ -2,51 +2,68 @@
 
 Welcome to the Remote Monitoring and Management (episode 23).
 
-# development
+# Development
 
-## notes
+## Notes
 
-* работа с ACL: синтаксис JunOS
-	* JunOS:
+* ASN: `uint32`
+	* uidNumber == ASN
+* ACL: `JunOS` view:
+	* style: `JunOS`
 		* security policy
 		* policy options
 		* firewall
-	* применение ACL:
-		* вся инфра
-		* домен
-		* сущности в домене (?)
-		* группа
-		* сущности в группе (?)
-		* пользователь
-		* сущности пользователя
-* создание файлов на FS: go templates
-* учёт пользователей: LDAP
-	* рассматривается возможность вести собственную БД пользователей
+	* application order:
+		* infra (?)
+			* entities (?)
+		* domain (?)
+			* entities (?)
+		* ACL-groups
+			* entities
+		* user (?)
+			* entities (?)
+* `uidNumber`: `uint32` важно только в случае взаимодействия с FS
+* `gidNumber`: `uint32` основная группа, важно только в случае взаимодействия с FS
+* `home`: важно только в случае взаимодействия с OS
+* `memberOf`:
+	* членство в группах, выдаётся сервером автоматически отдельным модулем, были замечены несоответствия с актуальной информацией, лучше не опираться, а как и модуль сервера высчитывать из полей member в группах
+* `ipHostNumber`:
+	* user's IPv4 subnet (`/27`)
+* `device` = special `user`
+
+* data must be unique within the entire infrastructure:
+	* UUID
+	* `ipHostNumber`
+	* `dn`
+	* все сертификаты (`fingerprint`) и `CN` в них
+	* `uid`
+	* `gid`
+	* ASN
+	* `uidNumber`
+	* `gidNumber`
+	* only show `notice`:
+		* `uid` + `gid`
+		* `uidNumber` + `gidNumber`
+		* `uidNumber` + `gidNumber` + ASN
+
+
+* формирование файлов для создания на FS: go templates
+
+* Учёт пользователей: LDAP
+	* Рассматривается возможность вести собственную БД пользователей:
 		* SQL/NoSQL для хранения дерева
 		* NoSQL для обмена diff
-		* реализаця встроенных LDAP-демонов для различных "миров":
+		* Реализация встроенных LDAP-демонов для различных "миров":
 			* OpenLDAP
 			* MS AD
-		* это позволит:
-			* увеличить гибкость применения
-			* упростит реализацию
-			* избавит от зависимости от сторонних LDAP-серверов
-			* ускорит обработку
-* уникальность данных в масштабах всей инфры:
-	* UUID
-	* ipHostNumber
-	* dn
-	* все сертификаты (отпечатки) и CN в них
-	* uid
-	* uidNumber
-	* gid
-	* gidNumber
-* uidNumber: важно только в случае взаимодействия с FS
-* gidNumber: основная группа, важно только в случае взаимодействия с FS
-* home: важно только в случае взаимодействия с OS
-* memberOf: членство в группах, выдаётся сервером автоматически отдельным модулем, были замечены несоответствия с актуальной информацией, лучше не опираться, а как и модуль сервера высчитывать из полей member в группах
-* ipHostNumber: user's IPv4 subnet (/27)
-* entities:
+	* Это позволит:
+		* увеличить гибкость применения
+		* упростит реализацию
+		* избавит от зависимости от сторонних LDAP-серверов
+		* ускорит обработку
+
+
+* Entities:
 	* `0x00` `a.uid`
 	* `0x01` `b.uid`
 	* `0x02` `c.uid`
@@ -79,43 +96,44 @@ Welcome to the Remote Monitoring and Management (episode 23).
 	* `0x1d` `special0x1d`
 	* `0x1e` `special0x1e`
 	* `0x1f` `special0x1f`
-		- [ ] TODO: передалать 0xXX (на данном этапе это не повлечёт каких-то жутких последствий):
-			* `0x00` `subnet`
-			* `0x01` `gateway`
-			* `0x02` `a.uid`
-			* `0x03` `b.uid`
-			* `0x04` `c.uid`
-			* `0x05` `d.uid`
-			* `0x06` `e.uid`
-			* `0x07` `f.uid`
-			* `0x08` `g.uid`
-			* `0x09` `h.uid`
-			* `0x0a` `i.uid`
-			* `0x0b` `j.uid`
-			* `0x0c` `k.uid`
-			* `0x0d` `l.uid`
-			* `0x0e` `m.uid` (mobile)
-			* `0x0f` `n.uid` (notebook)
-			* `0x10` `o.uid`
-			* `0x11` `p.uid`
-			* `0x12` `q.uid`
-			* `0x13` `r.uid`
-			* `0x14` `s.uid`
-			* `0x15` `t.uid` (tablet)
-			* `0x16` `u.uid`
-			* `0x17` `v.uid`
-			* `0x18` `w.uid`
-			* `0x19` `x.uid`
-			* `0x1a` `y.uid`
-			* `0x1b` `z.uid`
-			* `0x1c` `reserved`
-			* `0x1d` `reserved`
-			* `0x1e` `reserved`
-			* `0x1f` `broadcast`
 
-## core
+	- [ ] TODO: передалать 0xXX (на данном этапе это не повлечёт каких-то жутких последствий):
+		* `0x00` `subnet`
+		* `0x01` `gateway`
+		* `0x02` `a.uid`
+		* `0x03` `b.uid`
+		* `0x04` `c.uid`
+		* `0x05` `d.uid`
+		* `0x06` `e.uid`
+		* `0x07` `f.uid`
+		* `0x08` `g.uid`
+		* `0x09` `h.uid`
+		* `0x0a` `i.uid`
+		* `0x0b` `j.uid`
+		* `0x0c` `k.uid`
+		* `0x0d` `l.uid`
+		* `0x0e` `m.uid` (mobile)
+		* `0x0f` `n.uid` (notebook)
+		* `0x10` `o.uid`
+		* `0x11` `p.uid`
+		* `0x12` `q.uid`
+		* `0x13` `r.uid`
+		* `0x14` `s.uid`
+		* `0x15` `t.uid` (tablet)
+		* `0x16` `u.uid`
+		* `0x17` `v.uid`
+		* `0x18` `w.uid`
+		* `0x19` `x.uid`
+		* `0x1a` `y.uid`
+		* `0x1b` `z.uid`
+		* `0x1c` `reserved`
+		* `0x1d` `reserved`
+		* `0x1e` `reserved`
+		* `0x1f` `broadcast`
 
-- [ ] implement go routines
+## Core
+
+- [ ] implement go routines (`context`)
 - [x] FS i/o
 - [ ] network i/o
 	- [ ] ssh i/o
@@ -149,45 +167,49 @@ Welcome to the Remote Monitoring and Management (episode 23).
 	- [ ] key-cert validator
 	- [ ] issuer-cert validator
 	- [ ] implement ACME
-- [ ] implement protobuf
+- [ ] implement `protobuf`
 
-## internal DB structure
+## Internal DB Structure
 
-### domain management
-
-* UUID
-* ACL
-* AAA
-	* PKI
-
-### user management
+### Domain Management
 
 * UUID
-* entities
-	* ipHostNumber
+* `labeledURI`:
+	* ACL
 	* AAA
 		* PKI
-	* ACL
-* uid
-* uidNumber
-* gidNumber
-* home
-* userPassword
-* mail
-* memberOf
-* cn
-* AAA
-	* SSH
-	* PKI
-	* MFA
+			* CA cert-key pair
 
-### group management
+### User Management
 
 * UUID
-* gid
-* gidNumber
-* member
-* ACL
+* `uid`
+* `uidNumber`
+* `gidNumber`
+* `home`
+* `userPassword`
+* `mail`
+* `memberOf`
+* `cn`
+* `ipHostNumber`
+* `labeledURI`:
+	* AAA
+		* SSH
+		* PKI
+			* cert-key pairs signed with domain's CA
+				* entities
+		* MFA
+	* ACL
+		* entities
+
+### Group Management
+
+* UUID
+* `gid`
+* `gidNumber`
+* `member`
+* `labeledURI`:
+	* ACL
 * special groups
 * VPN-groups
 	* user permissions
@@ -200,24 +222,49 @@ Welcome to the Remote Monitoring and Management (episode 23).
 
 * service groups
 * groups `[a-z][a-z0-9]+` (for messaging, etc)
-	* cn
+	* `cn`
 
-### host management
+### Device Management
+
+TODO
 
 * UUID (ASN?)
-* uid
-* uidNumber
-* gidNumber
-* memberOf
-* cn
-* AAA
-	* SSH
-	* PKI
-	* MFA
-* ACL
-* upstream host ASN `${uint32}`
-* host `address`
-* API `address`
-* ASN `${uint32}`
-* listen `IPAddrPort`
-* host type `(provider|interim|openvpn|ciscovpn)`
+* `uid`
+* `uidNumber`
+* `gidNumber`
+* `memberOf`
+* `cn`
+* `labeledURI`:
+	* host type:
+		* provider:
+			* API:
+				* host `address`
+				* AAA
+			* ASN
+			* AAA
+		* interim:
+			* ASN
+			* upstream host ASN
+			* AAA
+		* openvpn:
+			* URL
+			* listen `IPAddrPort`
+			* AAA
+		* ciscovpn:
+			* URL
+			* listen `IPAddrPort`
+			* AAA
+
+	* TODO:
+	* host type: `(provider|interim|openvpn|ciscovpn)`
+	* ASN
+	* upstream device ASN
+	* URL
+	* listen `IPAddrPort`
+	* AAA
+		* SSH
+		* PKI
+			* cert-key pairs signed with domain's CA
+			* cert-key pairs signed with LE CA
+		* MFA
+	* ACL

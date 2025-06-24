@@ -208,6 +208,8 @@ type schema struct {
 
 type LabeledURI struct {
 	// XMLName     xml.Name             `xml:"luri"`
+	HostType string `xml:"host_type,attr"`
+
 	OpenVPN     []mod_net.OpenVPN     `xml:"OpenVPN,omitempty"`
 	CiscoVPN    []mod_net.CiscoVPN    `xml:"CiscoVPN,omitempty"`
 	InterimHost []mod_net.InterimHost `xml:"InterimHost,omitempty"`
