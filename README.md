@@ -235,30 +235,32 @@ TODO
 * `memberOf`
 * `cn`
 * `labeledURI`:
-	* host type:
-		* provider:
-			* API:
-				* host `address`
-				* AAA
-			* ASN
-			* AAA
-		* interim:
-			* ASN
-			* upstream host ASN
-			* AAA
-		* openvpn:
-			* URL
-			* listen `IPAddrPort`
-			* AAA
-		* ciscovpn:
-			* URL
-			* listen `IPAddrPort`
-			* AAA
 
-	* TODO:
-	* host type: `(provider|interim|openvpn|ciscovpn)`
+	* ~~host type:~~
+		* ~~provider:~~
+			* ~~API:~~
+				* ~~host `address`~~
+				* ~~AAA~~
+			* ~~ASN~~
+			* ~~AAA~~
+		* ~~interim:~~
+			* ~~ASN~~
+			* ~~upstream host ASN~~
+			* ~~hosting ASN~~
+			* ~~AAA~~
+		* ~~openvpn:~~
+			* ~~URL~~
+			* ~~listen `IPAddrPort`~~
+			* ~~AAA~~
+		* ~~ciscovpn:~~
+			* ~~URL~~
+			* ~~listen `IPAddrPort`~~
+			* ~~AAA~~
+
+	* type: `(provider|interim|openvpn|ciscovpn)`
 	* ASN
 	* upstream device ASN
+	* hosting device ASN
 	* URL
 	* listen `IPAddrPort`
 	* AAA
