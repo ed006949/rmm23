@@ -149,7 +149,6 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 			}
 			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: legacy[0], Value: ""})
 		case 2:
-			legacy = append(legacy, "")
 			switch {
 			case r.data == nil:
 				r.data = &LabeledURI{}
