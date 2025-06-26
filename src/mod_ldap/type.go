@@ -2,6 +2,7 @@ package mod_ldap
 
 import (
 	"net/netip"
+	"net/url"
 	"time"
 
 	"github.com/go-ldap/ldap/v3"
@@ -208,7 +209,13 @@ type schema struct {
 
 type LabeledURI struct {
 	// XMLName     xml.Name             `xml:"luri"`
-	HostType string `xml:"host_type,attr"`
+	HostType    string     `xml:"host_type,attr,omitempty"`
+	ASN         uint32     `xml:"asn,attr,omitempty"`
+	UpstreamASN uint32     `xml:"upstream_asn,attr,omitempty"`
+	URL         *url.URL   `xml:"url,attr,omitempty"`
+	Listen      netip.Addr `xml:"listen,attr,omitempty"`
+	ACL         string     `xml:"acl,attr,omitempty"`
+	AAA         string     `xml:"aaa,attr,omitempty"`
 
 	OpenVPN     []mod_net.OpenVPN     `xml:"OpenVPN,omitempty"`
 	CiscoVPN    []mod_net.CiscoVPN    `xml:"CiscoVPN,omitempty"`
