@@ -151,14 +151,24 @@ Welcome to the Remote Monitoring and Management (episode 23).
 			- [ ] w/ caching (?)
 			- [ ] readonly slave
 		- [ ] multimaster
-- [ ] built-in DB (?)
-	- [ ] storage: SQL/NoSQL
-	- [ ] sync: NoSQL (diff)
-	- [ ] implement MQTT (?)
-	- [ ] built-in LDAP
-		- [ ] frontend
-			- [ ] OpenLDAP
-			- [ ] MS AD
+- [ ] DB
+	- [ ] use in-memory DB (`go-memdb`) for `alpha` stage
+		- [ ] load data from `LDAP` store in `go-memdb`
+		- [ ] parse data
+		- [ ] use data
+		- [ ] write changes to `LDAP`
+	- [ ] use `go-redis` for `beta` and later stages
+		- [ ] use `redisearch-go` for DB-schema
+		- [ ] rework DB i/o
+		- [ ] use `LDAP` as an auth-frontend only
+	- [ ] rework:
+		- [ ] storage: SQL/NoSQL
+		- [ ] sync: NoSQL (diff)
+		- [ ] implement MQTT (?)
+		- [ ] built-in LDAP (?)
+			- [ ] frontend
+				- [ ] OpenLDAP
+				- [ ] MS AD
 - [ ] ACL
 	- [ ] sanitize/normalize
 	- [ ] weigh/prioritize
