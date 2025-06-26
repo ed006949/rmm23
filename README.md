@@ -280,3 +280,11 @@ TODO
 			* cert-key pairs signed with LE CA
 		* MFA
 	* ACL
+
+## requirements
+
+### run
+
+* [RediSearch][URL_RediSearch]
+
+[URL_RediSearch]: https://github.com/RediSearch/RediSearch
