@@ -55,13 +55,14 @@ type ElementUsers map[AttrDN]*ElementUser
 type ElementGroups map[AttrDN]*ElementGroup
 
 type ElementDomain struct {
+	UUID AttrUUID `ldap:"entryUUID"`
+
 	DN          AttrDN      `ldap:"dn"`
 	ObjectClass AttrStrings `ldap:"objectClass"`
 
 	DC AttrString `ldap:"dc"`
 	O  AttrString `ldap:"o"`
 
-	EntryUUID       AttrUUID      `ldap:"entryUUID"`
 	CreatorsName    AttrDN        `ldap:"creatorsName"`
 	CreateTimestamp AttrTimestamp `ldap:"createTimestamp"`
 	ModifiersName   AttrDN        `ldap:"modifiersName"`
@@ -69,6 +70,8 @@ type ElementDomain struct {
 }
 
 type ElementUser struct {
+	UUID AttrUUID `ldap:"entryUUID"`
+
 	DN          AttrDN      `ldap:"dn"`
 	ObjectClass AttrStrings `ldap:"objectClass"`
 
@@ -93,13 +96,14 @@ type ElementUser struct {
 	UserPKCS12           AttrUserPKCS12s           `ldap:"userPKCS12"`
 	UserPassword         AttrUserPassword          `ldap:"userPassword"`
 
-	EntryUUID       AttrUUID      `ldap:"entryUUID"`
 	CreatorsName    AttrDN        `ldap:"creatorsName"`
 	CreateTimestamp AttrTimestamp `ldap:"createTimestamp"`
 	ModifiersName   AttrDN        `ldap:"modifiersName"`
 	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp"`
 }
 type ElementGroup struct {
+	UUID AttrUUID `ldap:"entryUUID"`
+
 	DN          AttrDN      `ldap:"dn"`
 	ObjectClass AttrStrings `ldap:"objectClass"`
 
@@ -109,13 +113,14 @@ type ElementGroup struct {
 	Member     AttrDNs         `ldap:"member"`
 	Owner      AttrDNs         `ldap:"owner"`
 
-	EntryUUID       AttrUUID      `ldap:"entryUUID"`
 	CreatorsName    AttrDN        `ldap:"creatorsName"`
 	CreateTimestamp AttrTimestamp `ldap:"createTimestamp"`
 	ModifiersName   AttrDN        `ldap:"modifiersName"`
 	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp"`
 }
 type ElementHost struct {
+	UUID AttrUUID `ldap:"entryUUID"`
+
 	DN          AttrDN      `ldap:"dn"`
 	ObjectClass AttrStrings `ldap:"objectClass"`
 
@@ -129,7 +134,6 @@ type ElementHost struct {
 	UIDNumber     AttrIDNumber    `ldap:"uidNumber"`
 	UserPKCS12    AttrUserPKCS12s `ldap:"userPKCS12"`
 
-	EntryUUID       AttrUUID      `ldap:"entryUUID"`
 	CreatorsName    AttrDN        `ldap:"creatorsName"`
 	CreateTimestamp AttrTimestamp `ldap:"createTimestamp"`
 	ModifiersName   AttrDN        `ldap:"modifiersName"`
@@ -157,24 +161,24 @@ type AttrLabeledURIs struct {
 	modified bool
 	// invalid  error
 	data *LabeledURI
-}                                                       // custom schema alternative TO DO implement custom schemas
-type AttrMails map[string]struct{}                      //
-type attrMembers map[AttrDN]struct{}                    //
-type attrMembersOf map[AttrDN]struct{}                  //
-type attrModifiersName AttrDN                           //
-type attrModifyTimestamp time.Time                      //
-type attrO string                                       //
-type attrOU string                                      //
-type attrObjectClasses map[string]struct{}              //
-type attrOwners map[AttrDN]struct{}                     //
-type attrSN string                                      //
-type AttrSSHPublicKeys map[string]mod_ssh.PublicKey     //
-type attrTelephoneNumbers map[string]struct{}           //
-type attrTelexNumbers map[string]struct{}               //
-type attrUID string                                     //
-type attrUIDNumber uint64                               //
-type AttrUserPKCS12s map[AttrDN]*mod_crypto.Certificate // any type of cert-key pairs list TODO implement seamless migration from any to P12
-type AttrUserPassword string                            //
+}                                                      // custom schema alternative TO DO implement custom schemas
+type AttrMails map[string]struct{}                     //
+type attrMembers map[AttrDN]struct{}                   //
+type attrMembersOf map[AttrDN]struct{}                 //
+type attrModifiersName AttrDN                          //
+type attrModifyTimestamp time.Time                     //
+type attrO string                                      //
+type attrOU string                                     //
+type attrObjectClasses map[string]struct{}             //
+type attrOwners map[AttrDN]struct{}                    //
+type attrSN string                                     //
+type AttrSSHPublicKeys map[string]mod_ssh.PublicKey    //
+type attrTelephoneNumbers map[string]struct{}          //
+type attrTelexNumbers map[string]struct{}              //
+type attrUID string                                    //
+type attrUIDNumber uint64                              //
+type AttrUserPKCS12s map[AttrDN]mod_crypto.Certificate // any type of cert-key pairs list TODO implement seamless migration from any to P12
+type AttrUserPassword string                           //
 
 type AttrDNs map[AttrDN]struct{}         //
 type AttrID string                       //
@@ -209,10 +213,11 @@ type schema struct {
 
 type LabeledURI struct {
 	// XMLName     xml.Name             `xml:"luri"`
-	HostType    string     `xml:"host_type,attr,omitempty"`
+	Type        string     `xml:"type,attr,omitempty"` // `(provider|interim|openvpn|ciscovpn)`
 	ASN         uint32     `xml:"asn,attr,omitempty"`
 	UpstreamASN uint32     `xml:"upstream_asn,attr,omitempty"`
-	URL         *url.URL   `xml:"url,attr,omitempty"`
+	HostASN     uint32     `xml:"host_asn,attr,omitempty"`
+	URL         url.URL    `xml:"url,attr,omitempty"`
 	Listen      netip.Addr `xml:"listen,attr,omitempty"`
 	ACL         string     `xml:"acl,attr,omitempty"`
 	AAA         string     `xml:"aaa,attr,omitempty"`

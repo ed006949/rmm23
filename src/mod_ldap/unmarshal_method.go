@@ -186,7 +186,7 @@ func (r *AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 		case err != nil:
 			continue
 		}
-		(*r)[AttrDN(interim.Certificates[0].Subject.String())] = interim
+		(*r)[AttrDN(interim.Certificates[0].Subject.String())] = *interim
 	}
 	return
 }
