@@ -1,7 +1,7 @@
 package l
 
 var (
-	GitCommit string
+	gitCommit string
 )
 var (
 	control = &ControlType{
@@ -10,7 +10,7 @@ var (
 		DryRun:    DoDryRun,
 		Mode:      Init,
 		Verbosity: Informational,
-		// GitCommit: gitCommitValue(GitCommit),
+		GitCommit: gitCommitValue(gitCommit),
 	}
 )
 var (

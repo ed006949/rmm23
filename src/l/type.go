@@ -11,16 +11,14 @@ type configType string
 type dryRunType string
 type modeType string
 type verbosityType string
-
-// type gitCommitType string
+type gitCommitType string
 
 type nameValue string
 type configValue string
 type dryRunFlag bool
 type modeValue int
 type verbosityLevel zerolog.Level
-
-// type gitCommitValue string
+type gitCommitValue string
 
 type ControlType struct {
 	Name      nameValue      `xml:"name,attr,omitempty"`
@@ -28,5 +26,5 @@ type ControlType struct {
 	DryRun    dryRunFlag     `xml:"dry-run,attr,omitempty"`
 	Mode      modeValue      `xml:"mode,attr,omitempty"`
 	Verbosity verbosityLevel `xml:"verbosity,attr,omitempty"`
-	// GitCommit gitCommitValue `xml:"-"`
+	GitCommit gitCommitValue `xml:"-"`
 }

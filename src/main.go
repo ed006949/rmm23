@@ -15,7 +15,7 @@ func main() {
 	l.Name.Set("rmm23")
 	l.CLI.Set()
 
-	l.Z{l.M: "main", "daemon": l.Name.String(), "build": l.GitCommit}.Informational()
+	l.Z{l.M: "main", "daemon": l.Name.String(), "build": l.GitCommit.String()}.Informational()
 	defer l.Z{l.M: "exit", "daemon": l.Name.String()}.Debug()
 
 	var (
