@@ -1,5 +1,6 @@
 DATE		=	`date`
 GIT_STATUS	=	`git status --short`
+GIT_COMMIT	=	`git rev-parse --short HEAD`
 
 all:	commit
 all:	vet
@@ -8,8 +9,8 @@ all:	build
 all:	status
 
 build:
-	go build -ldflags="-s -w" -trimpath -o "./bin/${NAME}" ./src/*.go
-	GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w" -trimpath -o "./bin/${NAME}-freebsd-amd64" ./src/*.go
+	go build -ldflags="-s -w -X ${NAME}/src/l.GitCommit=${GIT_COMMIT}" -trimpath -o "./bin/${NAME}" ./src/*.go
+	GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w -X ${NAME}/src/l.GitCommit=${GIT_COMMIT}" -trimpath -o "./bin/${NAME}-freebsd-amd64" ./src/*.go
 
 clean:
 	-gh auth logout

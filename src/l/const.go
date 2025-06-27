@@ -16,6 +16,7 @@ const (
 	DryRun    dryRunType    = "dry-run"
 	Mode      modeType      = "mode"
 	Verbosity verbosityType = "verbosity"
+	// GitCommit gitCommitType = "gitCommit"
 )
 const (
 	NoDryRun dryRunFlag = false

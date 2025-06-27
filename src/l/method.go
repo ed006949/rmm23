@@ -83,12 +83,14 @@ func (configType) Name() string    { return string(Config) }    // Package Flag 
 func (dryRunType) Name() string    { return string(DryRun) }    // Package Flag Name
 func (modeType) Name() string      { return string(Mode) }      // Package Flag Name
 func (verbosityType) Name() string { return string(Verbosity) } // Package Flag Name
+// func (gitCommitType) Name() string { return string(GitCommit) } // Package Flag Name
 
 func (nameType) Value() nameValue           { return control.Name }      // Package Flag Value
 func (configType) Value() configValue       { return control.Config }    // Package Flag Value
 func (dryRunType) Value() dryRunFlag        { return control.DryRun }    // Package Flag Value
 func (modeType) Value() modeValue           { return control.Mode }      // Package Flag Value
 func (verbosityType) Value() verbosityLevel { return control.Verbosity } // Package Flag Value
+// func (gitCommitType) Value() gitCommitValue { return control.GitCommit } // Package Flag Value
 
 func (r nameType) EnvName() string      { return EnvName(r.Name()) } // Package Flag Env Name
 func (r configType) EnvName() string    { return EnvName(r.Name()) } // Package Flag Env Name
@@ -109,6 +111,7 @@ func (r configType) String() string          { return r.Value().String() } // Pa
 func (r dryRunType) String() string          { return r.Value().String() } // Package Flag String Value
 func (r modeType) String() string            { return r.Value().String() } // Package Flag String Value
 func (r verbosityType) String() string       { return r.Value().String() } // Package Flag String Value
+// func (r gitCommitType) String() string       { return r.Value().String() } // Package Flag String Value
 
 func (r dryRunFlag) Flag() bool               { return bool(r) }                   // Package Flag flag
 func (r verbosityLevel) Level() zerolog.Level { return zerolog.Level(r) }          // Package Flag level
@@ -117,6 +120,7 @@ func (r configValue) String() string          { return string(r) }              
 func (r dryRunFlag) String() string           { return dryRunDescription[r] }      // Package Flag description
 func (r modeValue) String() string            { return modeDescription[r] }        // Package Flag description
 func (r verbosityLevel) String() string       { return zerolog.Level(r).String() } // Package Flag description
+// func (r gitCommitValue) String() string       { return string(r) }                 // Package Flag description
 
 func (r *nameValue) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 	switch {
