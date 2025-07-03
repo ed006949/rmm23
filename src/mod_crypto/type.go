@@ -14,8 +14,8 @@ type PemCertKeyList map[string]*PemCertKey
 type SignatureScheme uint16
 
 type Certificate struct {
-	PrivateKeyDER   []byte
-	CertificatesDER [][]byte
+	PrivateKeyDER   []byte   `redis:"priv" redisearch:"text,sortable"`
+	CertificatesDER [][]byte `redis:"crt" redisearch:"text,sortable"`
 	// CertificateCAChainPEM    []byte
 
 	PrivateKeyPEM         []byte

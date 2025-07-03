@@ -70,6 +70,22 @@ type ElementDomain struct {
 	DC AttrString `ldap:"dc" redis:"dc" redisearch:"text,sortable"`
 	O  AttrString `ldap:"o" redis:"o" redisearch:"text,sortable"`
 }
+type ElementGroup struct {
+	UUID            AttrUUID      `ldap:"entryUUID" redis:"uuid" redisearch:"text,sortable"`
+	DN              AttrDN        `ldap:"dn" redis:"dn" redisearch:"text,sortable"`
+	ObjectClass     AttrStrings   `ldap:"objectClass" redis:"objectClass" redisearch:"text"`
+	CreatorsName    AttrDN        `ldap:"creatorsName" redis:"creatorsName" redisearch:"text"`
+	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" redis:"createTimestamp" redisearch:"text"`
+	ModifiersName   AttrDN        `ldap:"modifiersName" redis:"modifiersName" redisearch:"text"`
+	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" redis:"modifyTimestamp" redisearch:"text"`
+
+	CN        AttrString   `ldap:"cn" redis:"cn" redisearch:"text"`
+	GIDNumber AttrIDNumber `ldap:"gidNumber" redis:"gidNumber" redisearch:"numeric,sortable"`
+	Member    AttrDNs      `ldap:"member" redis:"member" redisearch:"text,sortable"`
+	Owner     AttrDNs      `ldap:"owner" redis:"owner" redisearch:"text"`
+
+	LabeledURI AttrLabeledURIs `ldap:"labeledURI"`
+}
 type ElementUser struct {
 	UUID            AttrUUID      `ldap:"entryUUID" redis:"uuid" redisearch:"text,sortable"`
 	DN              AttrDN        `ldap:"dn" redis:"dn" redisearch:"text,sortable"`
@@ -86,7 +102,6 @@ type ElementUser struct {
 	GIDNumber            AttrIDNumber              `ldap:"gidNumber" redis:"gidNumber" redisearch:"numeric"`
 	HomeDirectory        AttrString                `ldap:"homeDirectory" redis:"homeDirectory" redisearch:"text"`
 	IPHostNumber         AttrIPHostNumbers         `ldap:"ipHostNumber" redis:"ipHostNumber" redisearch:"text,sortable"`
-	LabeledURI           AttrLabeledURIs           `ldap:"labeledURI"`
 	Mail                 AttrMails                 `ldap:"mail" redis:"mail" redisearch:"text"`
 	MemberOf             AttrDNs                   `ldap:"memberOf"`
 	O                    AttrString                `ldap:"o" redis:"o" redisearch:"text"`
@@ -97,23 +112,10 @@ type ElementUser struct {
 	TelexNumber          AttrStrings               `ldap:"telexNumber" redis:"telexNumber" redisearch:"text"`
 	UID                  AttrID                    `ldap:"uid" redis:"uid" redisearch:"text,sortable"`
 	UIDNumber            AttrIDNumber              `ldap:"uidNumber" redis:"uidNumber" redisearch:"numeric,sortable"`
-	UserPKCS12           AttrUserPKCS12s           `ldap:"userPKCS12"`
+	UserPKCS12           AttrUserPKCS12s           `ldap:"userPKCS12" redis:"userPKCS12" redisearch:"text"`
 	UserPassword         AttrUserPassword          `ldap:"userPassword" redis:"userPassword" redisearch:"text"`
-}
-type ElementGroup struct {
-	UUID            AttrUUID      `ldap:"entryUUID" redis:"uuid" redisearch:"text,sortable"`
-	DN              AttrDN        `ldap:"dn" redis:"dn" redisearch:"text,sortable"`
-	ObjectClass     AttrStrings   `ldap:"objectClass" redis:"objectClass" redisearch:"text"`
-	CreatorsName    AttrDN        `ldap:"creatorsName" redis:"creatorsName" redisearch:"text"`
-	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" redis:"createTimestamp" redisearch:"text"`
-	ModifiersName   AttrDN        `ldap:"modifiersName" redis:"modifiersName" redisearch:"text"`
-	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" redis:"modifyTimestamp" redisearch:"text"`
 
-	CN         AttrString      `ldap:"cn" redis:"cn" redisearch:"text"`
-	GIDNumber  AttrIDNumber    `ldap:"gidNumber" redis:"gidNumber" redisearch:"numeric,sortable"`
 	LabeledURI AttrLabeledURIs `ldap:"labeledURI"`
-	Member     AttrDNs         `ldap:"member" redis:"member" redisearch:"text,sortable"`
-	Owner      AttrDNs         `ldap:"owner" redis:"owner" redisearch:"text"`
 }
 type ElementHost struct {
 	UUID            AttrUUID      `ldap:"entryUUID" redis:"uuid" redisearch:"text,sortable"`
@@ -124,20 +126,31 @@ type ElementHost struct {
 	ModifiersName   AttrDN        `ldap:"modifiersName" redis:"modifiersName" redisearch:"text"`
 	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" redis:"modifyTimestamp" redisearch:"text"`
 
-	CN            AttrString      `ldap:"cn"`
-	GIDNumber     AttrIDNumber    `ldap:"gidNumber"`
-	HomeDirectory AttrString      `ldap:"homeDirectory"`
-	LabeledURI    AttrLabeledURIs `ldap:"labeledURI"`
+	CN            AttrString      `ldap:"cn" redis:"cn" redisearch:"text"`
+	GIDNumber     AttrIDNumber    `ldap:"gidNumber" redis:"gidNumber" redisearch:"numeric"`
+	HomeDirectory AttrString      `ldap:"homeDirectory" redis:"homeDirectory" redisearch:"text"`
 	MemberOf      AttrDNs         `ldap:"memberOf"`
-	SN            AttrString      `ldap:"sn"`
-	UID           AttrID          `ldap:"uid"`
-	UIDNumber     AttrIDNumber    `ldap:"uidNumber"`
-	UserPKCS12    AttrUserPKCS12s `ldap:"userPKCS12"`
+	SN            AttrString      `ldap:"sn" redis:"sn" redisearch:"text"`
+	UID           AttrID          `ldap:"uid" redis:"uid" redisearch:"text,sortable"`
+	UIDNumber     AttrIDNumber    `ldap:"uidNumber" redis:"uidNumber" redisearch:"numeric,sortable"`
+	UserPKCS12    AttrUserPKCS12s `ldap:"userPKCS12" redis:"userPKCS12" redisearch:"text"`
+
+	LabeledURI AttrLabeledURIs `ldap:"labeledURI"`
+
+	// Type `(provider|interim|openvpn|ciscovpn)`
+	Type        string     `xml:"type,attr,omitempty" redis:"host_type" redisearch:"text"`
+	ASN         uint32     `xml:"asn,attr,omitempty" redis:"host_asn" redisearch:"numeric,sortable"`
+	UpstreamASN uint32     `xml:"upstream_asn,attr,omitempty" redis:"host_upstream_asn" redisearch:"numeric"`
+	HostUUID    uint32     `xml:"host_uuid,attr,omitempty" redis:"host_host_uuid" redisearch:"numeric"`
+	URL         url.URL    `xml:"url,attr,omitempty"`
+	Listen      netip.Addr `xml:"listen,attr,omitempty"`
+	ACL         string     `xml:"acl,attr,omitempty"`
+	AAA         string     `xml:"aaa,attr,omitempty"`
 }
 
 type LabeledURI struct {
 	// XMLName     xml.Name             `xml:"luri"`
-	Type        string     `xml:"type,attr,omitempty"` // `(provider|interim|openvpn|ciscovpn)`
+	Type        string     `xml:"type,attr,omitempty"`
 	ASN         uint32     `xml:"asn,attr,omitempty"`
 	UpstreamASN uint32     `xml:"upstream_asn,attr,omitempty"`
 	HostASN     uint32     `xml:"host_asn,attr,omitempty"`
