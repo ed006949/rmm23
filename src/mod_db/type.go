@@ -126,14 +126,14 @@ type ElementHost struct {
 	ModifiersName   AttrDN        `ldap:"modifiersName" redis:"modifiersName" redisearch:"text"`
 	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" redis:"modifyTimestamp" redisearch:"text"`
 
-	CN            AttrString      `ldap:"cn" redis:"cn" redisearch:"text"`
-	GIDNumber     AttrIDNumber    `ldap:"gidNumber" redis:"gidNumber" redisearch:"numeric"`
-	HomeDirectory AttrString      `ldap:"homeDirectory" redis:"homeDirectory" redisearch:"text"`
-	MemberOf      AttrDNs         `ldap:"memberOf"`
-	SN            AttrString      `ldap:"sn" redis:"sn" redisearch:"text"`
-	UID           AttrID          `ldap:"uid" redis:"uid" redisearch:"text,sortable"`
-	UIDNumber     AttrIDNumber    `ldap:"uidNumber" redis:"uidNumber" redisearch:"numeric,sortable"`
-	UserPKCS12    AttrUserPKCS12s `ldap:"userPKCS12" redis:"userPKCS12" redisearch:"text"`
+	CN            AttrString   `ldap:"cn" redis:"cn" redisearch:"text"`
+	GIDNumber     AttrIDNumber `ldap:"gidNumber" redis:"gidNumber" redisearch:"numeric"`
+	HomeDirectory AttrString   `ldap:"homeDirectory" redis:"homeDirectory" redisearch:"text"`
+	// MemberOf      AttrDNs         `ldap:"memberOf"`
+	SN         AttrString      `ldap:"sn" redis:"sn" redisearch:"text"`
+	UID        AttrID          `ldap:"uid" redis:"uid" redisearch:"text,sortable"`
+	UIDNumber  AttrIDNumber    `ldap:"uidNumber" redis:"uidNumber" redisearch:"numeric,sortable"`
+	UserPKCS12 AttrUserPKCS12s `ldap:"userPKCS12" redis:"userPKCS12" redisearch:"text"`
 
 	LabeledURI AttrLabeledURIs `ldap:"labeledURI"`
 
@@ -146,6 +146,11 @@ type ElementHost struct {
 	Listen      netip.Addr `xml:"listen,attr,omitempty"`
 	ACL         string     `xml:"acl,attr,omitempty"`
 	AAA         string     `xml:"aaa,attr,omitempty"`
+
+	// (?)
+	Member   AttrDNs `ldap:"member" redis:"member" redisearch:"text,sortable"`
+	Owner    AttrDNs `ldap:"owner" redis:"owner" redisearch:"text"`
+	MemberOf AttrDNs `ldap:"memberOf" redis:"memberOf" redisearch:"text"`
 }
 
 type LabeledURI struct {
