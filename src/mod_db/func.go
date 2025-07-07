@@ -12,42 +12,46 @@ import (
 // Example: `redis:"user_name" redisearch:"text,sortable"`
 func buildRedisearchSchema(s interface{}) *redisearch.Schema {
 	var (
-		schema = redisearch.NewSchema(redisearch.DefaultOptions)
-		elem   = reflect.TypeOf(s).Elem()
+		schema = redisearch.NewSchema(redisearch.DefaultOptions) // Initialize a new schema with default options.
+		elem   = reflect.TypeOf(s).Elem()                        // Get the type of the element that the interface `s` points to.
 	)
 
+	// Iterate over all the fields of the struct.
 	for i := 0; i < elem.NumField(); i++ {
 		var (
 			field    = elem.Field(i)
-			redisTag = field.Tag.Get("redis")
+			redisTag = field.Tag.Get("redis") // Get the `redis` tag, which defines the field name in Redis.
 		)
 		switch redisTag {
-		case "":
+		case "": // Skip fields that don't have a `redis` tag.
 			continue
 		}
 
 		var (
-			redisearchTag = field.Tag.Get("redisearch")
+			redisearchTag = field.Tag.Get("redisearch") // Get the `redisearch` tag, which defines the field type and options for RediSearch.
 		)
 		switch redisearchTag {
-		case "":
+		case "": // Skip fields that don't have a `redisearch` tag.
 			continue
 		}
 
-		// Parse the redisearch tag string.
+		// Parse the redisearch tag string, which is expected to be comma-separated.
 		var (
 			parts = strings.Split(redisearchTag, ",")
 		)
+		// If the tag is empty after splitting, skip this field.
 		switch len(parts) {
 		case 0:
 			continue
 		}
 
+		// maps to hold the parsed tag components.
 		var (
-			types    = make(map[string]bool)
-			options  = make(map[string]bool)
-			unknowns = make(map[string]bool)
+			types    = make(map[string]bool) // e.g., "text", "numeric"
+			options  = make(map[string]bool) // e.g., "sortable"
+			unknowns = make(map[string]bool) // for any unrecognized parts
 		)
+		// Categorize each part of the tag.
 		for _, opt := range parts {
 			var (
 				trimmedOpt = strings.TrimSpace(opt)
@@ -62,26 +66,28 @@ func buildRedisearchSchema(s interface{}) *redisearch.Schema {
 			}
 		}
 
-		// check for tag-errors
+		// Check for errors in the tag definition.
 		switch {
-		case len(types) > 1:
+		case len(types) > 1: // A field can only have one type.
 			panic("multiple types")
-		case len(unknowns) > 0:
+		case len(unknowns) > 0: // The tag should not contain any unknown options.
 			panic("unknown options")
 		}
 
-		// parsing types
+		// Add the field to the schema based on its type.
 		switch {
-		case types["-"]:
-		case types["text"]:
+		case types["-"]: // The "-" type indicates that the field should be ignored.
+		case types["text"]: // Handle 'text' type fields.
 			schema.AddField(redisearch.NewTextFieldOptions(redisTag, redisearch.TextFieldOptions{
 				Sortable: options["sortable"],
 			}))
-		case types["numeric"]:
+		case types["numeric"]: // Handle 'numeric' type fields.
 			schema.AddField(redisearch.NewNumericFieldOptions(redisTag, redisearch.NumericFieldOptions{
 				Sortable: options["sortable"],
 			}))
 		}
 	}
+
+	// Return the fully constructed schema.
 	return schema
 }
