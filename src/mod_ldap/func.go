@@ -2,11 +2,133 @@ package mod_ldap
 
 import (
 	"fmt"
+	"log"
 	"reflect"
 	"strings"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
+	"github.com/go-ldap/ldap/v3"
+
+	"rmm23/src/mod_db"
 )
+
+// SearchLDAP connects to an LDAP server, performs a search, and returns the entries.
+func SearchLDAP(ldapURL, bindDN, bindPassword, baseDN, filter string, attributes []string) ([]*ldap.Entry, error) {
+	l, err := ldap.DialURL(ldapURL)
+	if err != nil {
+		return nil, fmt.Errorf("failed to connect to LDAP server: %w", err)
+	}
+	defer l.Close()
+
+	// Bind to the LDAP server
+	err = l.Bind(bindDN, bindPassword)
+	if err != nil {
+		return nil, fmt.Errorf("failed to bind to LDAP server: %w", err)
+	}
+
+	// Create a search request
+	searchRequest := ldap.NewSearchRequest(
+		baseDN,
+		ldap.ScopeWholeSubtree, ldap.DerefAlways, 0, 0,
+		false,
+		filter,
+		attributes,
+		nil,
+	)
+
+	sr, err := l.Search(searchRequest)
+	if err != nil {
+		return nil, fmt.Errorf("failed to perform LDAP search: %w", err)
+	}
+
+	return sr.Entries, nil
+}
+
+// ReadLDAPAndStoreInRedis reads LDAP entries, unmarshals them, and stores them in Redis with RediSearch schemas.
+func ReadLDAPAndStoreInRedis(redisAddr, redisIndexName, ldapURL, bindDN, bindPassword, baseDN, filter string, attributes []string) error {
+	// Initialize RediSearch client
+	client := redisearch.NewClient(redisAddr, redisIndexName)
+
+	// Create LDAP schema in RediSearch
+	err := createLDAPSchema(client)
+	if err != nil {
+		return fmt.Errorf("failed to create RediSearch schema: %w", err)
+	}
+
+	// Search LDAP entries
+	entries, err := SearchLDAP(ldapURL, bindDN, bindPassword, baseDN, filter, attributes)
+	if err != nil {
+		return fmt.Errorf("failed to search LDAP: %w", err)
+	}
+
+	var docs []redisearch.Document
+	for _, entry := range entries {
+		// Determine the type of LDAP entry based on objectClass and unmarshal accordingly
+		objectClasses := entry.GetAttributeValues("objectClass")
+		switch {
+		case contains(objectClasses, "person"):
+			var user mod_db.ElementUser
+			err = unmarshal(entry, &user)
+			if err != nil {
+				log.Printf("Warning: failed to unmarshal user entry %s: %v", entry.DN, err)
+				continue
+			}
+			doc, err := StructToDocument(entry.DN, 1.0, user)
+			if err != nil {
+				log.Printf("Warning: failed to convert user to document %s: %v", entry.DN, err)
+				continue
+			}
+			docs = append(docs, *doc)
+		case contains(objectClasses, "groupOfNames"), contains(objectClasses, "groupOfUniqueNames"):
+			var group mod_db.ElementGroup
+			err = unmarshal(entry, &group)
+			if err != nil {
+				log.Printf("Warning: failed to unmarshal group entry %s: %v", entry.DN, err)
+				continue
+			}
+			doc, err := StructToDocument(entry.DN, 1.0, group)
+			if err != nil {
+				log.Printf("Warning: failed to convert group to document %s: %v", entry.DN, err)
+				continue
+			}
+			docs = append(docs, *doc)
+		case contains(objectClasses, "device"):
+			var host mod_db.ElementHost
+			err = unmarshal(entry, &host)
+			if err != nil {
+				log.Printf("Warning: failed to unmarshal host entry %s: %v", entry.DN, err)
+				continue
+			}
+			doc, err := StructToDocument(entry.DN, 1.0, host)
+			if err != nil {
+				log.Printf("Warning: failed to convert host to document %s: %v", entry.DN, err)
+				continue
+			}
+			docs = append(docs, *doc)
+		default:
+			log.Printf("Info: Skipping unsupported LDAP entry type for DN: %s, ObjectClasses: %v", entry.DN, objectClasses)
+		}
+	}
+
+	// Index documents in RediSearch
+	if len(docs) > 0 {
+		if err := client.Index(docs...); err != nil {
+			return fmt.Errorf("failed to index documents in RediSearch: %w", err)
+		}
+	}
+
+	log.Printf("Successfully read %d LDAP entries and stored them in Redis with RediSearch.", len(docs))
+	return nil
+}
+
+func contains(s []string, str string) bool {
+	for _, v := range s {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}
 
 func createLDAPSchema(client *redisearch.Client) (err error) {
 	// Drop existing index if any
@@ -86,3 +208,4 @@ func main() {
 	//     log.Fatalf("Failed to create LDAP schema: %v", err)
 	// }
 }
+
