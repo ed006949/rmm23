@@ -60,142 +60,141 @@ type AttrUUID uuid.UUID                  //
 
 type ElementEntry struct {
 	// element meta
-	UUID            AttrUUID      `ldap:"entryUUID" msgpack:"entryUUID" redis:"uuid" redisearch:"text,sortable"`               // must be unique
-	DN              AttrDN        `ldap:"dn" msgpack:"dn" redis:"dn" redisearch:"text,sortable"`                               // must be unique
-	ObjectClass     AttrStrings   `ldap:"objectClass" msgpack:"objectClass" redis:"objectClass" redisearch:"text"`             // entry type
-	CreatorsName    AttrDN        `ldap:"creatorsName" msgpack:"creatorsName" redis:"creatorsName" redisearch:"text"`          //
-	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" msgpack:"createTimestamp" redis:"createTimestamp" redisearch:"text"` //
-	ModifiersName   AttrDN        `ldap:"modifiersName" msgpack:"modifiersName" redis:"modifiersName" redisearch:"text"`       //
-	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" msgpack:"modifyTimestamp" redis:"modifyTimestamp" redisearch:"text"` //
+	UUID            AttrUUID      `ldap:"entryUUID" msgpack:"entryUUID,omitempty" redis:"uuid" redisearch:"text,sortable"`               // must be unique
+	DN              AttrDN        `ldap:"dn" msgpack:"dn,omitempty" redis:"dn" redisearch:"text,sortable"`                               // must be unique
+	ObjectClass     AttrStrings   `ldap:"objectClass" msgpack:"objectClass,omitempty" redis:"objectClass" redisearch:"text"`             // entry type
+	CreatorsName    AttrDN        `ldap:"creatorsName" msgpack:"creatorsName,omitempty" redis:"creatorsName" redisearch:"text"`          //
+	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"text"` //
+	ModifiersName   AttrDN        `ldap:"modifiersName" msgpack:"modifiersName,omitempty" redis:"modifiersName" redisearch:"text"`       //
+	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"text"` //
 
 	// element data
-	CN                   AttrString                `ldap:"cn" msgpack:"cn" redis:"cn" redisearch:"text"`                                                       // RDN in group's context
-	DC                   AttrString                `ldap:"dc" msgpack:"dc" redis:"dc" redisearch:"text,sortable"`                                              //
-	Description          AttrString                `ldap:"description" msgpack:"description" redis:"description" redisearch:"text"`                            //
-	DestinationIndicator AttrDestinationIndicators `ldap:"destinationIndicator" msgpack:"destinationIndicator" redis:"destinationIndicator" redisearch:"text"` //
-	DisplayName          AttrString                `ldap:"displayName" msgpack:"displayName" redis:"displayName" redisearch:"text,sortable"`                   //
-	GIDNumber            AttrIDNumber              `ldap:"gidNumber" msgpack:"gidNumber" redis:"gidNumber" redisearch:"numeric"`                               // Primary GIDNumber in user's context and GIDNumber in group's context
-	HomeDirectory        AttrString                `ldap:"homeDirectory" msgpack:"homeDirectory" redis:"homeDirectory" redisearch:"text"`                      //
-	IPHostNumber         AttrIPHostNumbers         `ldap:"ipHostNumber" msgpack:"ipHostNumber" redis:"ipHostNumber" redisearch:"text,sortable"`                //
-	Mail                 AttrMails                 `ldap:"mail" msgpack:"mail" redis:"mail" redisearch:"text"`                                                 //
-	Member               AttrDNs                   `ldap:"member" msgpack:"member" redis:"member" redisearch:"text,sortable"`                                  //
-	MemberOf             AttrDNs                   `ldap:"memberOf" msgpack:"memberOf" redis:"memberOf" redisearch:"text"`                                     //
-	O                    AttrString                `ldap:"o" msgpack:"o" redis:"o" redisearch:"text"`                                                          //
-	OU                   AttrString                `ldap:"ou" msgpack:"ou" redis:"ou" redisearch:"text"`                                                       //
-	Owner                AttrDNs                   `ldap:"owner" msgpack:"owner" redis:"owner" redisearch:"text"`                                              //
-	SN                   AttrString                `ldap:"sn" msgpack:"sn" redis:"sn" redisearch:"text"`                                                       //
-	SSHPublicKey         AttrSSHPublicKeys         `ldap:"sshPublicKey" msgpack:"sshPublicKey" redis:"sshPublicKey" redisearch:"text"`                         //
-	TelephoneNumber      AttrStrings               `ldap:"telephoneNumber" msgpack:"telephoneNumber" redis:"telephoneNumber" redisearch:"text"`                //
-	TelexNumber          AttrStrings               `ldap:"telexNumber" msgpack:"telexNumber" redis:"telexNumber" redisearch:"text"`                            //
-	UID                  AttrID                    `ldap:"uid" msgpack:"uid" redis:"uid" redisearch:"text,sortable"`                                           // RDN in user's context
-	UIDNumber            AttrIDNumber              `ldap:"uidNumber" msgpack:"uidNumber" redis:"uidNumber" redisearch:"numeric,sortable"`                      //
-	UserPKCS12           AttrUserPKCS12s           `ldap:"userPKCS12" msgpack:"userPKCS12" redis:"userPKCS12" redisearch:"text"`                               //
-	UserPassword         AttrUserPassword          `ldap:"userPassword" msgpack:"userPassword" redis:"userPassword" redisearch:"text"`                         //
+	CN                   AttrString                `ldap:"cn" msgpack:"cn,omitempty" redis:"cn" redisearch:"text"`                                                       // RDN in group's context
+	DC                   AttrString                `ldap:"dc" msgpack:"dc,omitempty" redis:"dc" redisearch:"text,sortable"`                                              //
+	Description          AttrString                `ldap:"description" msgpack:"description,omitempty" redis:"description" redisearch:"text"`                            //
+	DestinationIndicator AttrDestinationIndicators `ldap:"destinationIndicator" msgpack:"destinationIndicator,omitempty" redis:"destinationIndicator" redisearch:"text"` //
+	DisplayName          AttrString                `ldap:"displayName" msgpack:"displayName,omitempty" redis:"displayName" redisearch:"text,sortable"`                   //
+	GIDNumber            AttrIDNumber              `ldap:"gidNumber" msgpack:"gidNumber,omitempty" redis:"gidNumber" redisearch:"numeric"`                               // Primary GIDNumber in user's context and GIDNumber in group's context
+	HomeDirectory        AttrString                `ldap:"homeDirectory" msgpack:"homeDirectory,omitempty" redis:"homeDirectory" redisearch:"text"`                      //
+	IPHostNumber         AttrIPHostNumbers         `ldap:"ipHostNumber" msgpack:"ipHostNumber,omitempty" redis:"ipHostNumber" redisearch:"text,sortable"`                //
+	Mail                 AttrMails                 `ldap:"mail" msgpack:"mail,omitempty" redis:"mail" redisearch:"text"`                                                 //
+	Member               AttrDNs                   `ldap:"member" msgpack:"member,omitempty" redis:"member" redisearch:"text,sortable"`                                  //
+	MemberOf             AttrDNs                   `ldap:"memberOf" msgpack:"memberOf,omitempty" redis:"memberOf" redisearch:"text"`                                     //
+	O                    AttrString                `ldap:"o" msgpack:"o,omitempty" redis:"o" redisearch:"text"`                                                          //
+	OU                   AttrString                `ldap:"ou" msgpack:"ou,omitempty" redis:"ou" redisearch:"text"`                                                       //
+	Owner                AttrDNs                   `ldap:"owner" msgpack:"owner,omitempty" redis:"owner" redisearch:"text"`                                              //
+	SN                   AttrString                `ldap:"sn" msgpack:"sn,omitempty" redis:"sn" redisearch:"text"`                                                       //
+	SSHPublicKey         AttrSSHPublicKeys         `ldap:"sshPublicKey" msgpack:"sshPublicKey,omitempty" redis:"sshPublicKey" redisearch:"text"`                         //
+	TelephoneNumber      AttrStrings               `ldap:"telephoneNumber" msgpack:"telephoneNumber,omitempty" redis:"telephoneNumber" redisearch:"text"`                //
+	TelexNumber          AttrStrings               `ldap:"telexNumber" msgpack:"telexNumber,omitempty" redis:"telexNumber" redisearch:"text"`                            //
+	UID                  AttrID                    `ldap:"uid" msgpack:"uid,omitempty" redis:"uid" redisearch:"text,sortable"`                                           // RDN in user's context
+	UIDNumber            AttrIDNumber              `ldap:"uidNumber" msgpack:"uidNumber,omitempty" redis:"uidNumber" redisearch:"numeric,sortable"`                      //
+	UserPKCS12           AttrUserPKCS12s           `ldap:"userPKCS12" msgpack:"userPKCS12,omitempty" redis:"userPKCS12" redisearch:"text"`                               //
+	UserPassword         AttrUserPassword          `ldap:"userPassword" msgpack:"userPassword,omitempty" redis:"userPassword" redisearch:"text"`                         //
 
 	// host specific data
-	Type        string     `xml:"type,attr,omitempty" msgpack:"type" redis:"host_type" redisearch:"text"`                            // host type `(provider|interim|openvpn|ciscovpn)`
-	ASN         uint32     `xml:"asn,attr,omitempty" msgpack:"asn" redis:"host_asn" redisearch:"numeric,sortable"`                   //
-	UpstreamASN uint32     `xml:"upstream_asn,attr,omitempty" msgpack:"upstream_asn" redis:"host_upstream_asn" redisearch:"numeric"` //
-	HostUUID    uint32     `xml:"host_uuid,attr,omitempty" msgpack:"host_uuid" redis:"host_host_uuid" redisearch:"numeric"`          // (?) replace with member/memberOf
-	URL         url.URL    `xml:"url,attr,omitempty"`                                                                                //
-	Listen      netip.Addr `xml:"listen,attr,omitempty"`                                                                             //
-	ACL         string     `xml:"acl,attr,omitempty"`                                                                                //
-	AAA         string     `xml:"aaa,attr,omitempty"`                                                                                //
+	Type        string     `xml:"type,attr,omitempty" msgpack:"type,omitempty" redis:"host_type" redisearch:"text"`                            // host type `(provider|interim|openvpn|ciscovpn)`
+	ASN         uint32     `xml:"asn,attr,omitempty" msgpack:"asn,omitempty" redis:"host_asn" redisearch:"numeric,sortable"`                   //
+	UpstreamASN uint32     `xml:"upstream_asn,attr,omitempty" msgpack:"upstream_asn,omitempty" redis:"host_upstream_asn" redisearch:"numeric"` //
+	HostUUID    uint32     `xml:"host_uuid,attr,omitempty" msgpack:"host_uuid,omitempty" redis:"host_host_uuid" redisearch:"numeric"`          // (?) replace with member/memberOf
+	URL         url.URL    `xml:"url,attr,omitempty"`                                                                                          //
+	Listen      netip.Addr `xml:"listen,attr,omitempty"`                                                                                       //
+	ACL         string     `xml:"acl,attr,omitempty"`                                                                                          //
+	AAA         string     `xml:"aaa,attr,omitempty"`                                                                                          //
 }
 
 type ElementDomain struct {
-	UUID            AttrUUID      `ldap:"entryUUID" msgpack:"entryUUID" redis:"uuid" redisearch:"text,sortable"`
-	DN              AttrDN        `ldap:"dn" msgpack:"dn" redis:"dn" redisearch:"text,sortable"`
-	ObjectClass     AttrStrings   `ldap:"objectClass" msgpack:"objectClass" redis:"objectClass" redisearch:"text"`
-	CreatorsName    AttrDN        `ldap:"creatorsName" msgpack:"creatorsName" redis:"creatorsName" redisearch:"text"`
-	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" msgpack:"createTimestamp" redis:"createTimestamp" redisearch:"text"`
-	ModifiersName   AttrDN        `ldap:"modifiersName" msgpack:"modifiersName" redis:"modifiersName" redisearch:"text"`
-	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" msgpack:"modifyTimestamp" redis:"modifyTimestamp" redisearch:"text"`
+	UUID            AttrUUID      `ldap:"entryUUID" msgpack:"entryUUID,omitempty" redis:"uuid" redisearch:"text,sortable"`
+	DN              AttrDN        `ldap:"dn" msgpack:"dn,omitempty" redis:"dn" redisearch:"text,sortable"`
+	ObjectClass     AttrStrings   `ldap:"objectClass" msgpack:"objectClass,omitempty" redis:"objectClass" redisearch:"text"`
+	CreatorsName    AttrDN        `ldap:"creatorsName" msgpack:"creatorsName,omitempty" redis:"creatorsName" redisearch:"text"`
+	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"text"`
+	ModifiersName   AttrDN        `ldap:"modifiersName" msgpack:"modifiersName,omitempty" redis:"modifiersName" redisearch:"text"`
+	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"text"`
 
-	DC AttrString `ldap:"dc" msgpack:"dc" redis:"dc" redisearch:"text,sortable"`
-	O  AttrString `ldap:"o" msgpack:"o" redis:"o" redisearch:"text,sortable"`
+	DC AttrString `ldap:"dc" msgpack:"dc,omitempty" redis:"dc" redisearch:"text,sortable"`
+	O  AttrString `ldap:"o" msgpack:"o,omitempty" redis:"o" redisearch:"text,sortable"`
 }
 type ElementGroup struct {
-	UUID            AttrUUID      `ldap:"entryUUID" msgpack:"entryUUID" redis:"uuid" redisearch:"text,sortable"`
-	DN              AttrDN        `ldap:"dn" msgpack:"dn" redis:"dn" redisearch:"text,sortable"`
-	ObjectClass     AttrStrings   `ldap:"objectClass" msgpack:"objectClass" redis:"objectClass" redisearch:"text"`
-	CreatorsName    AttrDN        `ldap:"creatorsName" msgpack:"creatorsName" redis:"creatorsName" redisearch:"text"`
-	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" msgpack:"createTimestamp" redis:"createTimestamp" redisearch:"text"`
-	ModifiersName   AttrDN        `ldap:"modifiersName" msgpack:"modifiersName" redis:"modifiersName" redisearch:"text"`
-	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" msgpack:"modifyTimestamp" redis:"modifyTimestamp" redisearch:"text"`
+	UUID            AttrUUID      `ldap:"entryUUID" msgpack:"entryUUID,omitempty" redis:"uuid" redisearch:"text,sortable"`
+	DN              AttrDN        `ldap:"dn" msgpack:"dn,omitempty" redis:"dn" redisearch:"text,sortable"`
+	ObjectClass     AttrStrings   `ldap:"objectClass" msgpack:"objectClass,omitempty" redis:"objectClass" redisearch:"text"`
+	CreatorsName    AttrDN        `ldap:"creatorsName" msgpack:"creatorsName,omitempty" redis:"creatorsName" redisearch:"text"`
+	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"text"`
+	ModifiersName   AttrDN        `ldap:"modifiersName" msgpack:"modifiersName,omitempty" redis:"modifiersName" redisearch:"text"`
+	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"text"`
 
-	CN        AttrString   `ldap:"cn" msgpack:"cn" redis:"cn" redisearch:"text"`
-	GIDNumber AttrIDNumber `ldap:"gidNumber" msgpack:"gidNumber" redis:"gidNumber" redisearch:"numeric,sortable"`
-	Member    AttrDNs      `ldap:"member" msgpack:"member" redis:"member" redisearch:"text,sortable"`
-	Owner     AttrDNs      `ldap:"owner" msgpack:"owner" redis:"owner" redisearch:"text"`
+	CN        AttrString   `ldap:"cn" msgpack:"cn,omitempty" redis:"cn" redisearch:"text"`
+	GIDNumber AttrIDNumber `ldap:"gidNumber" msgpack:"gidNumber,omitempty" redis:"gidNumber" redisearch:"numeric,sortable"`
+	Member    AttrDNs      `ldap:"member" msgpack:"member,omitempty" redis:"member" redisearch:"text,sortable"`
+	Owner     AttrDNs      `ldap:"owner" msgpack:"owner,omitempty" redis:"owner" redisearch:"text"`
 
 	LabeledURI AttrLabeledURIs `ldap:"labeledURI"`
 }
 type ElementUser struct {
-	UUID            AttrUUID      `ldap:"entryUUID" msgpack:"entryUUID" redis:"uuid" redisearch:"text,sortable"`
-	DN              AttrDN        `ldap:"dn" msgpack:"dn" redis:"dn" redisearch:"text,sortable"`
-	ObjectClass     AttrStrings   `ldap:"objectClass" msgpack:"objectClass" redis:"objectClass" redisearch:"text"`
-	CreatorsName    AttrDN        `ldap:"creatorsName" msgpack:"creatorsName" redis:"creatorsName" redisearch:"text"`
-	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" msgpack:"createTimestamp" redis:"createTimestamp" redisearch:"text"`
-	ModifiersName   AttrDN        `ldap:"modifiersName" msgpack:"modifiersName" redis:"modifiersName" redisearch:"text"`
-	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" msgpack:"modifyTimestamp" redis:"modifyTimestamp" redisearch:"text"`
+	UUID            AttrUUID      `ldap:"entryUUID" msgpack:"entryUUID,omitempty" redis:"uuid" redisearch:"text,sortable"`
+	DN              AttrDN        `ldap:"dn" msgpack:"dn,omitempty" redis:"dn" redisearch:"text,sortable"`
+	ObjectClass     AttrStrings   `ldap:"objectClass" msgpack:"objectClass,omitempty" redis:"objectClass" redisearch:"text"`
+	CreatorsName    AttrDN        `ldap:"creatorsName" msgpack:"creatorsName,omitempty" redis:"creatorsName" redisearch:"text"`
+	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"text"`
+	ModifiersName   AttrDN        `ldap:"modifiersName" msgpack:"modifiersName,omitempty" redis:"modifiersName" redisearch:"text"`
+	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"text"`
 
-	CN                   AttrString                `ldap:"cn" msgpack:"cn" redis:"cn" redisearch:"text"`
-	Description          AttrString                `ldap:"description" msgpack:"description" redis:"description" redisearch:"text"`
-	DestinationIndicator AttrDestinationIndicators `ldap:"destinationIndicator" msgpack:"destinationIndicator" redis:"destinationIndicator" redisearch:"text"`
-	DisplayName          AttrString                `ldap:"displayName" msgpack:"displayName" redis:"displayName" redisearch:"text,sortable"`
-	GIDNumber            AttrIDNumber              `ldap:"gidNumber" msgpack:"gidNumber" redis:"gidNumber" redisearch:"numeric"`
-	HomeDirectory        AttrString                `ldap:"homeDirectory" msgpack:"homeDirectory" redis:"homeDirectory" redisearch:"text"`
-	IPHostNumber         AttrIPHostNumbers         `ldap:"ipHostNumber" msgpack:"ipHostNumber" redis:"ipHostNumber" redisearch:"text,sortable"`
-	Mail                 AttrMails                 `ldap:"mail" msgpack:"mail" redis:"mail" redisearch:"text"`
-	MemberOf             AttrDNs                   `ldap:"memberOf" msgpack:"memberOf"`
-	O                    AttrString                `ldap:"o" msgpack:"o" redis:"o" redisearch:"text"`
-	OU                   AttrString                `ldap:"ou" msgpack:"ou" redis:"ou" redisearch:"text"`
-	SN                   AttrString                `ldap:"sn" msgpack:"sn" redis:"sn" redisearch:"text"`
-	SSHPublicKey         AttrSSHPublicKeys         `ldap:"sshPublicKey" msgpack:"sshPublicKey" redis:"sshPublicKey" redisearch:"text"`
-	TelephoneNumber      AttrStrings               `ldap:"telephoneNumber" msgpack:"telephoneNumber" redis:"telephoneNumber" redisearch:"text"`
-	TelexNumber          AttrStrings               `ldap:"telexNumber" msgpack:"telexNumber" redis:"telexNumber" redisearch:"text"`
-	UID                  AttrID                    `ldap:"uid" msgpack:"uid" redis:"uid" redisearch:"text,sortable"`
-	UIDNumber            AttrIDNumber              `ldap:"uidNumber" msgpack:"uidNumber" redis:"uidNumber" redisearch:"numeric,sortable"`
-	UserPKCS12           AttrUserPKCS12s           `ldap:"userPKCS12" msgpack:"userPKCS12" redis:"userPKCS12" redisearch:"text"`
-	UserPassword         AttrUserPassword          `ldap:"userPassword" msgpack:"userPassword" redis:"userPassword" redisearch:"text"`
+	CN                   AttrString                `ldap:"cn" msgpack:"cn,omitempty" redis:"cn" redisearch:"text"`
+	Description          AttrString                `ldap:"description" msgpack:"description,omitempty" redis:"description" redisearch:"text"`
+	DestinationIndicator AttrDestinationIndicators `ldap:"destinationIndicator" msgpack:"destinationIndicator,omitempty" redis:"destinationIndicator" redisearch:"text"`
+	DisplayName          AttrString                `ldap:"displayName" msgpack:"displayName,omitempty" redis:"displayName" redisearch:"text,sortable"`
+	GIDNumber            AttrIDNumber              `ldap:"gidNumber" msgpack:"gidNumber,omitempty" redis:"gidNumber" redisearch:"numeric"`
+	HomeDirectory        AttrString                `ldap:"homeDirectory" msgpack:"homeDirectory,omitempty" redis:"homeDirectory" redisearch:"text"`
+	IPHostNumber         AttrIPHostNumbers         `ldap:"ipHostNumber" msgpack:"ipHostNumber,omitempty" redis:"ipHostNumber" redisearch:"text,sortable"`
+	Mail                 AttrMails                 `ldap:"mail" msgpack:"mail,omitempty" redis:"mail" redisearch:"text"`
+	MemberOf             AttrDNs                   `ldap:"memberOf" msgpack:"memberOf,omitempty"`
+	O                    AttrString                `ldap:"o" msgpack:"o,omitempty" redis:"o" redisearch:"text"`
+	OU                   AttrString                `ldap:"ou" msgpack:"ou,omitempty" redis:"ou" redisearch:"text"`
+	SN                   AttrString                `ldap:"sn" msgpack:"sn,omitempty" redis:"sn" redisearch:"text"`
+	SSHPublicKey         AttrSSHPublicKeys         `ldap:"sshPublicKey" msgpack:"sshPublicKey,omitempty" redis:"sshPublicKey" redisearch:"text"`
+	TelephoneNumber      AttrStrings               `ldap:"telephoneNumber" msgpack:"telephoneNumber,omitempty" redis:"telephoneNumber" redisearch:"text"`
+	TelexNumber          AttrStrings               `ldap:"telexNumber" msgpack:"telexNumber,omitempty" redis:"telexNumber" redisearch:"text"`
+	UID                  AttrID                    `ldap:"uid" msgpack:"uid,omitempty" redis:"uid" redisearch:"text,sortable"`
+	UIDNumber            AttrIDNumber              `ldap:"uidNumber" msgpack:"uidNumber,omitempty" redis:"uidNumber" redisearch:"numeric,sortable"`
+	UserPKCS12           AttrUserPKCS12s           `ldap:"userPKCS12" msgpack:"userPKCS12,omitempty" redis:"userPKCS12" redisearch:"text"`
+	UserPassword         AttrUserPassword          `ldap:"userPassword" msgpack:"userPassword,omitempty" redis:"userPassword" redisearch:"text"`
 
 	LabeledURI AttrLabeledURIs `ldap:"labeledURI"`
 }
 type ElementHost struct {
-	UUID            AttrUUID      `ldap:"entryUUID" msgpack:"entryUUID" redis:"uuid" redisearch:"text,sortable"`
-	DN              AttrDN        `ldap:"dn" msgpack:"dn" redis:"dn" redisearch:"text,sortable"`
-	ObjectClass     AttrStrings   `ldap:"objectClass" msgpack:"objectClass" redis:"objectClass" redisearch:"text"`
-	CreatorsName    AttrDN        `ldap:"creatorsName" msgpack:"creatorsName" redis:"creatorsName" redisearch:"text"`
-	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" msgpack:"createTimestamp" redis:"createTimestamp" redisearch:"text"`
-	ModifiersName   AttrDN        `ldap:"modifiersName" msgpack:"modifiersName" redis:"modifiersName" redisearch:"text"`
-	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" msgpack:"modifyTimestamp" redis:"modifyTimestamp" redisearch:"text"`
+	UUID            AttrUUID      `ldap:"entryUUID" msgpack:"entryUUID,omitempty" redis:"uuid" redisearch:"text,sortable"`
+	DN              AttrDN        `ldap:"dn" msgpack:"dn,omitempty" redis:"dn" redisearch:"text,sortable"`
+	ObjectClass     AttrStrings   `ldap:"objectClass" msgpack:"objectClass,omitempty" redis:"objectClass" redisearch:"text"`
+	CreatorsName    AttrDN        `ldap:"creatorsName" msgpack:"creatorsName,omitempty" redis:"creatorsName" redisearch:"text"`
+	CreateTimestamp AttrTimestamp `ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"text"`
+	ModifiersName   AttrDN        `ldap:"modifiersName" msgpack:"modifiersName,omitempty" redis:"modifiersName" redisearch:"text"`
+	ModifyTimestamp AttrTimestamp `ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"text"`
 
-	CN            AttrString   `ldap:"cn" msgpack:"cn" redis:"cn" redisearch:"text"`
-	GIDNumber     AttrIDNumber `ldap:"gidNumber" msgpack:"gidNumber" redis:"gidNumber" redisearch:"numeric"`
-	HomeDirectory AttrString   `ldap:"homeDirectory" msgpack:"homeDirectory" redis:"homeDirectory" redisearch:"text"`
-	// MemberOf      AttrDNs         `ldap:"memberOf"`
-	SN         AttrString      `ldap:"sn" msgpack:"sn" redis:"sn" redisearch:"text"`
-	UID        AttrID          `ldap:"uid" msgpack:"uid" redis:"uid" redisearch:"text,sortable"`
-	UIDNumber  AttrIDNumber    `ldap:"uidNumber" msgpack:"uidNumber" redis:"uidNumber" redisearch:"numeric,sortable"`
-	UserPKCS12 AttrUserPKCS12s `ldap:"userPKCS12" msgpack:"userPKCS12" redis:"userPKCS12" redisearch:"text"`
+	CN            AttrString      `ldap:"cn" msgpack:"cn,omitempty" redis:"cn" redisearch:"text"`
+	GIDNumber     AttrIDNumber    `ldap:"gidNumber" msgpack:"gidNumber,omitempty" redis:"gidNumber" redisearch:"numeric"`
+	HomeDirectory AttrString      `ldap:"homeDirectory" msgpack:"homeDirectory,omitempty" redis:"homeDirectory" redisearch:"text"`
+	SN            AttrString      `ldap:"sn" msgpack:"sn,omitempty" redis:"sn" redisearch:"text"`
+	UID           AttrID          `ldap:"uid" msgpack:"uid,omitempty" redis:"uid" redisearch:"text,sortable"`
+	UIDNumber     AttrIDNumber    `ldap:"uidNumber" msgpack:"uidNumber,omitempty" redis:"uidNumber" redisearch:"numeric,sortable"`
+	UserPKCS12    AttrUserPKCS12s `ldap:"userPKCS12" msgpack:"userPKCS12,omitempty" redis:"userPKCS12" redisearch:"text"`
 
 	LabeledURI AttrLabeledURIs `ldap:"labeledURI"`
 
 	// Type `(provider|interim|openvpn|ciscovpn)`
-	Type        string     `xml:"type,attr,omitempty" msgpack:"type" redis:"host_type" redisearch:"text"`
-	ASN         uint32     `xml:"asn,attr,omitempty" msgpack:"asn" redis:"host_asn" redisearch:"numeric,sortable"`
-	UpstreamASN uint32     `xml:"upstream_asn,attr,omitempty" msgpack:"upstream_asn" redis:"host_upstream_asn" redisearch:"numeric"`
-	HostUUID    uint32     `xml:"host_uuid,attr,omitempty" msgpack:"host_uuid" redis:"host_host_uuid" redisearch:"numeric"`
-	URL         url.URL    `xml:"url,attr,omitempty"`
-	Listen      netip.Addr `xml:"listen,attr,omitempty"`
-	ACL         string     `xml:"acl,attr,omitempty"`
-	AAA         string     `xml:"aaa,attr,omitempty"`
+	Type        string     `xml:"type,attr,omitempty" msgpack:"type,omitempty" redis:"host_type" redisearch:"text"`
+	ASN         uint32     `xml:"asn,attr,omitempty" msgpack:"asn,omitempty" redis:"host_asn" redisearch:"numeric,sortable"`
+	UpstreamASN uint32     `xml:"upstream_asn,attr,omitempty" msgpack:"upstream_asn,omitempty" redis:"host_upstream_asn" redisearch:"numeric"`
+	HostUUID    uint32     `xml:"host_uuid,attr,omitempty" msgpack:"host_uuid,omitempty" redis:"host_host_uuid" redisearch:"numeric"`
+	URL         url.URL    `xml:"url,attr,omitempty" msgpack:"url,omitempty"`
+	Listen      netip.Addr `xml:"listen,attr,omitempty" msgpack:"listen,omitempty"`
+	ACL         string     `xml:"acl,attr,omitempty" msgpack:"acl,omitempty"`
+	AAA         string     `xml:"aaa,attr,omitempty" msgpack:"aaa,omitempty"`
 
 	// (?)
-	Member   AttrDNs `ldap:"member" msgpack:"member" redis:"member" redisearch:"text,sortable"`
-	Owner    AttrDNs `ldap:"owner" msgpack:"owner" redis:"owner" redisearch:"text"`
-	MemberOf AttrDNs `ldap:"memberOf" msgpack:"memberOf" redis:"memberOf" redisearch:"text"`
+	Member   AttrDNs `ldap:"member" msgpack:"member,omitempty" redis:"member" redisearch:"text,sortable"`
+	Owner    AttrDNs `ldap:"owner" msgpack:"owner,omitempty" redis:"owner" redisearch:"text"`
+	MemberOf AttrDNs `ldap:"memberOf" msgpack:"memberOf,omitempty" redis:"memberOf" redisearch:"text"`
 }
 
 type LabeledURI struct {
