@@ -49,16 +49,20 @@ func buildRedisearchSchema(s interface{}) *redisearch.Schema {
 			unknowns = make(map[string]bool)
 		)
 		for _, opt := range parts {
-			switch strings.TrimSpace(opt) {
+			var (
+				trimmedOpt = strings.TrimSpace(opt)
+			)
+			switch trimmedOpt {
 			case "-", "text", "numeric":
-				types[opt] = true
+				types[trimmedOpt] = true
 			case "sortable":
-				options[opt] = true
+				options[trimmedOpt] = true
 			default:
-				unknowns[opt] = true
+				unknowns[trimmedOpt] = true
 			}
 		}
 
+		// check for tag-errors
 		switch {
 		case len(types) > 1:
 			panic("multiple types")
@@ -66,7 +70,6 @@ func buildRedisearchSchema(s interface{}) *redisearch.Schema {
 			panic("unknown options")
 		}
 
-		// Build the field based on its type and options.
 		// parsing types
 		switch {
 		case types["-"]:
