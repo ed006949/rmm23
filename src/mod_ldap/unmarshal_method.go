@@ -160,7 +160,7 @@ func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
 		case len(interim) > 0:
 			*r = AttrString(interim)
 		}
-		return // take only first value
+		return // return only first value
 	}
 	return
 }

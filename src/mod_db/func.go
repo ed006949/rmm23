@@ -20,7 +20,7 @@ func buildRedisearchSchema(s interface{}) *redisearch.Schema {
 	for i := 0; i < elem.NumField(); i++ {
 		var (
 			field    = elem.Field(i)
-			redisTag = field.Tag.Get("redis") // Get the `redis` tag, which defines the field name in Redis.
+			redisTag = field.Tag.Get(redisTagName) // Get the `redis` tag, which defines the field name in Redis.
 		)
 		switch redisTag {
 		case "": // Skip fields that don't have a `redis` tag.
@@ -28,7 +28,7 @@ func buildRedisearchSchema(s interface{}) *redisearch.Schema {
 		}
 
 		var (
-			redisearchTag = field.Tag.Get("redisearch") // Get the `redisearch` tag, which defines the field type and options for RediSearch.
+			redisearchTag = field.Tag.Get(rediSearchTagName) // Get the `redisearch` tag, which defines the field type and options for RediSearch.
 		)
 		switch redisearchTag {
 		case "": // Skip fields that don't have a `redisearch` tag.
@@ -57,9 +57,9 @@ func buildRedisearchSchema(s interface{}) *redisearch.Schema {
 				trimmedOpt = strings.TrimSpace(opt)
 			)
 			switch trimmedOpt {
-			case "-", "text", "numeric":
+			case rediSearchTagTypeIgnore, rediSearchTagTypeText, rediSearchTagTypeNumeric:
 				types[trimmedOpt] = true
-			case "sortable":
+			case rediSearchTagOptionSortable:
 				options[trimmedOpt] = true
 			default:
 				unknowns[trimmedOpt] = true
@@ -76,14 +76,14 @@ func buildRedisearchSchema(s interface{}) *redisearch.Schema {
 
 		// Add the field to the schema based on its type.
 		switch {
-		case types["-"]: // The "-" type indicates that the field should be ignored.
-		case types["text"]: // Handle 'text' type fields.
+		case types[rediSearchTagTypeIgnore]: // The "-" type indicates that the field should be ignored.
+		case types[rediSearchTagTypeText]: // Handle 'text' type fields.
 			schema.AddField(redisearch.NewTextFieldOptions(redisTag, redisearch.TextFieldOptions{
-				Sortable: options["sortable"],
+				Sortable: options[rediSearchTagOptionSortable],
 			}))
-		case types["numeric"]: // Handle 'numeric' type fields.
+		case types[rediSearchTagTypeNumeric]: // Handle 'numeric' type fields.
 			schema.AddField(redisearch.NewNumericFieldOptions(redisTag, redisearch.NumericFieldOptions{
-				Sortable: options["sortable"],
+				Sortable: options[rediSearchTagOptionSortable],
 			}))
 		}
 	}

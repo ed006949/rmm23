@@ -9,9 +9,11 @@ import (
 	"rmm23/src/l"
 )
 
+// portions taken from "github.com/go-ldap/ldap/v3"
+
 func readTag(f reflect.StructField) (options string, flag bool) {
 	var (
-		val, ok = f.Tag.Lookup(decoderTagName)
+		val, ok = f.Tag.Lookup(ldapTagName)
 	)
 	switch {
 	case !ok:
@@ -26,7 +28,7 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 		flag = opts[1] == "omitempty"
 	}
 	return opts[0], flag
-} // portions taken from "github.com/go-ldap/ldap/v3"
+}
 
 func unmarshal(e *ldap.Entry, i interface{}) (err error) {
 	var (
@@ -115,4 +117,4 @@ func unmarshal(e *ldap.Entry, i interface{}) (err error) {
 		}
 	}
 	return
-} // portions taken from "github.com/go-ldap/ldap/v3"
+}
