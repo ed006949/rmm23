@@ -26,51 +26,6 @@ func (r *AttrDN) UnmarshalLDAPAttr(values []string) (err error) {
 	*r = AttrDN(value.String())
 	return
 }
-func (r *AttrIDNumber) UnmarshalLDAPAttr(values []string) (err error) {
-	var (
-		value uint64
-	)
-	switch value, err = strconv.ParseUint(values[0], 0, 0); {
-	case err != nil:
-		return
-	}
-	*r = AttrIDNumber(value)
-	return
-}
-func (r *AttrTimestamp) UnmarshalLDAPAttr(values []string) (err error) {
-	var (
-		value time.Time
-	)
-	switch value, err = ber.ParseGeneralizedTime([]byte(values[0])); {
-	case err != nil:
-		return
-	}
-	*r = AttrTimestamp(value)
-	return
-}
-func (r *AttrUUID) UnmarshalLDAPAttr(values []string) (err error) {
-	var (
-		value uuid.UUID
-	)
-	switch value, err = uuid.Parse(values[0]); {
-	case err != nil:
-		return
-	}
-	*r = AttrUUID(value)
-	return
-}
-func (r *AttrUserPassword) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = AttrUserPassword(values[0])
-	return
-}
-func (r *AttrID) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = AttrID(values[0])
-	return
-}
-func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = AttrString(values[0])
-	return
-}
 
 func (r *AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
@@ -85,10 +40,28 @@ func (r *AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 	}
 	return
 }
+
 func (r *AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		(*r)[value] = struct{}{}
 	}
+	return
+}
+
+func (r *AttrID) UnmarshalLDAPAttr(values []string) (err error) {
+	*r = AttrID(values[0])
+	return
+}
+
+func (r *AttrIDNumber) UnmarshalLDAPAttr(values []string) (err error) {
+	var (
+		value uint64
+	)
+	switch value, err = strconv.ParseUint(values[0], 0, 0); {
+	case err != nil:
+		return
+	}
+	*r = AttrIDNumber(value)
 	return
 }
 
@@ -159,24 +132,57 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 
 	return nil
 }
+
 func (r *AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		(*r)[value] = struct{}{}
 	}
 	return
 }
+
+func (r *AttrObjectClasses) UnmarshalLDAPAttr(values []string) (err error) {
+	for _, value := range values {
+		(*r)[value] = struct{}{}
+	}
+	return
+}
+
 func (r *AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		(*r)[value] = mod_ssh.PublicKey(value)
 	}
 	return
 }
+
+func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
+	*r = AttrString(values[0])
+	return
+}
+
 func (r *AttrStrings) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		(*r)[AttrString(value)] = struct{}{}
 	}
 	return
 }
+
+func (r *AttrTimestamp) UnmarshalLDAPAttr(values []string) (err error) {
+	var (
+		value time.Time
+	)
+	switch value, err = ber.ParseGeneralizedTime([]byte(values[0])); {
+	case err != nil:
+		return
+	}
+	*r = AttrTimestamp(value)
+	return
+}
+
+func (r *AttrUserPassword) UnmarshalLDAPAttr(values []string) (err error) {
+	*r = AttrUserPassword(values[0])
+	return
+}
+
 func (r *AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		var (
@@ -188,5 +194,17 @@ func (r *AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 		}
 		(*r)[AttrDN(interim.Certificates[0].Subject.String())] = *interim
 	}
+	return
+}
+
+func (r *AttrUUID) UnmarshalLDAPAttr(values []string) (err error) {
+	var (
+		value uuid.UUID
+	)
+	switch value, err = uuid.Parse(values[0]); {
+	case err != nil:
+		return
+	}
+	*r = AttrUUID(value)
 	return
 }

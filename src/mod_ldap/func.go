@@ -8,8 +8,6 @@ import (
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/go-ldap/ldap/v3"
-
-	"rmm23/src/mod_db"
 )
 
 // SearchLDAP connects to an LDAP server, performs a search, and returns the entries.
@@ -67,7 +65,7 @@ func ReadLDAPAndStoreInRedis(redisAddr, redisIndexName, ldapURL, bindDN, bindPas
 		objectClasses := entry.GetAttributeValues("objectClass")
 		switch {
 		case contains(objectClasses, "person"):
-			var user mod_db.ElementUser
+			var user ElementUser
 			err = unmarshal(entry, &user)
 			if err != nil {
 				log.Printf("Warning: failed to unmarshal user entry %s: %v", entry.DN, err)
@@ -80,7 +78,7 @@ func ReadLDAPAndStoreInRedis(redisAddr, redisIndexName, ldapURL, bindDN, bindPas
 			}
 			docs = append(docs, *doc)
 		case contains(objectClasses, "groupOfNames"), contains(objectClasses, "groupOfUniqueNames"):
-			var group mod_db.ElementGroup
+			var group ElementGroup
 			err = unmarshal(entry, &group)
 			if err != nil {
 				log.Printf("Warning: failed to unmarshal group entry %s: %v", entry.DN, err)
@@ -93,7 +91,7 @@ func ReadLDAPAndStoreInRedis(redisAddr, redisIndexName, ldapURL, bindDN, bindPas
 			}
 			docs = append(docs, *doc)
 		case contains(objectClasses, "device"):
-			var host mod_db.ElementHost
+			var host ElementHost
 			err = unmarshal(entry, &host)
 			if err != nil {
 				log.Printf("Warning: failed to unmarshal host entry %s: %v", entry.DN, err)
@@ -208,4 +206,3 @@ func main() {
 	//     log.Fatalf("Failed to create LDAP schema: %v", err)
 	// }
 }
-
