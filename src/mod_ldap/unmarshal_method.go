@@ -155,7 +155,10 @@ func (r *AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = AttrString(values[0])
+	switch {
+	case len(values) > 0 && len(strings.TrimSpace(values[0])) > 0:
+		*r = AttrString(values[0])
+	}
 	return
 }
 
