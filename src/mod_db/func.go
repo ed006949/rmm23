@@ -71,7 +71,7 @@ func buildRedisearchSchema(s interface{}) *redisearch.Schema {
 		case len(types) > 1: // A field can only have one type.
 			panic("multiple types")
 		case len(unknowns) > 0: // The tag should not contain any unknown options.
-			panic("unknown options")
+			panic("unknown tag fields")
 		}
 
 		// Add the field to the schema based on its type.

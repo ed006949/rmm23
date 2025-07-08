@@ -25,7 +25,7 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 	)
 	switch {
 	case len(opts) == 2:
-		flag = opts[1] == "omitempty"
+		flag = opts[1] == ldapTagOptionOmitEmpty
 	}
 	return opts[0], flag
 }
