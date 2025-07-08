@@ -155,16 +155,22 @@ func (r *AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
-	switch {
-	case len(values) > 0 && len(strings.TrimSpace(values[0])) > 0:
-		*r = AttrString(values[0])
+	for _, value := range values {
+		switch interim := strings.TrimSpace(value); {
+		case len(interim) > 0:
+			*r = AttrString(interim)
+		}
+		return // take only first value
 	}
 	return
 }
 
 func (r *AttrStrings) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
-		(*r)[AttrString(value)] = struct{}{}
+		switch interim := strings.TrimSpace(value); {
+		case len(interim) > 0:
+			(*r)[AttrString(interim)] = struct{}{}
+		}
 	}
 	return
 }
