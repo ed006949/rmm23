@@ -57,8 +57,8 @@ type ElementGroups map[AttrDN]*ElementGroup
 type ElementDomain struct {
 	UUID AttrUUID `ldap:"entryUUID"`
 
-	DN          AttrDN      `ldap:"dn"`
-	ObjectClass AttrStrings `ldap:"objectClass"`
+	DN          AttrDN            `ldap:"dn"`
+	ObjectClass AttrObjectClasses `ldap:"objectClass"`
 
 	DC AttrString `ldap:"dc"`
 	O  AttrString `ldap:"o"`
@@ -71,7 +71,7 @@ type ElementDomain struct {
 type ElementUser struct {
 	UUID                 AttrUUID                  `ldap:"entryUUID" redis:"uuid" redisearch:"text,sortable"`
 	DN                   AttrDN                    `ldap:"dn" redis:"dn" redisearch:"text,sortable"`
-	ObjectClass          AttrStrings               `ldap:"objectClass" redis:"objectClass" redisearch:"text"`
+	ObjectClass          AttrObjectClasses         `ldap:"objectClass" redis:"objectClass" redisearch:"text"`
 	CN                   AttrString                `ldap:"cn" redis:"cn" redisearch:"text"`
 	Description          AttrString                `ldap:"description" redis:"description" redisearch:"text"`
 	DestinationIndicator AttrDestinationIndicators `ldap:"destinationIndicator" redis:"destinationIndicator" redisearch:"text"`
@@ -100,8 +100,8 @@ type ElementUser struct {
 type ElementGroup struct {
 	UUID AttrUUID `ldap:"entryUUID"`
 
-	DN          AttrDN      `ldap:"dn"`
-	ObjectClass AttrStrings `ldap:"objectClass"`
+	DN          AttrDN            `ldap:"dn"`
+	ObjectClass AttrObjectClasses `ldap:"objectClass"`
 
 	CN         AttrString      `ldap:"cn"`
 	GIDNumber  AttrIDNumber    `ldap:"gidNumber"`
@@ -117,8 +117,8 @@ type ElementGroup struct {
 type ElementHost struct {
 	UUID AttrUUID `ldap:"entryUUID"`
 
-	DN          AttrDN      `ldap:"dn"`
-	ObjectClass AttrStrings `ldap:"objectClass"`
+	DN          AttrDN            `ldap:"dn"`
+	ObjectClass AttrObjectClasses `ldap:"objectClass"`
 
 	CN            AttrString      `ldap:"cn"`
 	GIDNumber     AttrIDNumber    `ldap:"gidNumber"`
@@ -176,13 +176,14 @@ type attrUIDNumber uint64                              //
 type AttrUserPKCS12s map[AttrDN]mod_crypto.Certificate // any type of cert-key pairs list TODO implement seamless migration from any to P12
 type AttrUserPassword string                           //
 
-type AttrDNs map[AttrDN]struct{}         //
-type AttrID string                       //
-type AttrIDNumber uint64                 //
-type AttrString string                   //
-type AttrStrings map[AttrString]struct{} //
-type AttrTimestamp time.Time             //
-type AttrUUID uuid.UUID                  //
+type AttrDNs map[AttrDN]struct{}           //
+type AttrObjectClasses map[string]struct{} //
+type AttrID string                         //
+type AttrIDNumber uint64                   //
+type AttrString string                     //
+type AttrStrings map[AttrString]struct{}   //
+type AttrTimestamp time.Time               //
+type AttrUUID uuid.UUID                    //
 
 // type Attr Labeled URI map[string]struct{} // custom schema alternative TO DO implement custom schemas
 
