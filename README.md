@@ -4,6 +4,10 @@ Welcome to the Remote Monitoring and Management (episode 23).
 
 # Development
 
+## TODO
+
+- [ ] implement error arrays instead of wrapped errors
+
 ## Notes
 
 * ASN: `uint32`
