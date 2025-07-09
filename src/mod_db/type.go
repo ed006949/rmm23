@@ -28,7 +28,7 @@ type ElementEntry struct {
 	IPHostNumber         mod_ldap.AttrIPHostNumbers         `ldap:"ipHostNumber" msgpack:"ipHostNumber,omitempty" redis:"ipHostNumber" redisearch:"text,sortable"`                //
 	Mail                 mod_ldap.AttrMails                 `ldap:"mail" msgpack:"mail,omitempty" redis:"mail" redisearch:"text"`                                                 //
 	Member               mod_ldap.AttrDNs                   `ldap:"member" msgpack:"member,omitempty" redis:"member" redisearch:"text,sortable"`                                  //
-	MemberOf             mod_ldap.AttrDNs                   `ldap:"memberOf" msgpack:"memberOf,omitempty" redis:"memberOf" redisearch:"text"`                                     // ignore it
+	MemberOf             mod_ldap.AttrDNs                   `ldap:"memberOf" msgpack:"memberOf,omitempty" redis:"memberOf" redisearch:"text"`                                     // ignore it, don't cache, calculate on the fly or avoid
 	O                    mod_ldap.AttrString                `ldap:"o" msgpack:"o,omitempty" redis:"o" redisearch:"text"`                                                          //
 	OU                   mod_ldap.AttrString                `ldap:"ou" msgpack:"ou,omitempty" redis:"ou" redisearch:"text"`                                                       //
 	Owner                mod_ldap.AttrDNs                   `ldap:"owner" msgpack:"owner,omitempty" redis:"owner" redisearch:"text"`                                              //
