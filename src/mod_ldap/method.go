@@ -21,6 +21,7 @@ func (r *Conf) Fetch() (err error) {
 	}()
 
 	switch err = r.bind(); {
+	case errors.Is(err, EAnonymousBind):
 	case err != nil:
 		return
 	}
