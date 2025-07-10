@@ -48,14 +48,12 @@ func unmarshal(e *ldap.Entry, i interface{}) (err error) {
 	}
 
 	for n := 0; n < st.NumField(); n++ {
-		// Holds struct field value and type
 		var (
-			fv, ft = sv.Field(n), st.Field(n)
+			fv, ft = sv.Field(n), st.Field(n) // Holds struct field value and type
 		)
 
-		// skip unexported fields
 		switch {
-		case ft.PkgPath != "":
+		case ft.PkgPath != "": // skip unexported fields
 			continue
 		}
 

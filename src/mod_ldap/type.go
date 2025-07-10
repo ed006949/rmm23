@@ -185,29 +185,6 @@ type AttrStrings map[AttrString]struct{}   //
 type AttrTimestamp time.Time               //
 type AttrUUID uuid.UUID                    //
 
-// type Attr Labeled URI map[string]struct{} // custom schema alternative TO DO implement custom schemas
-
-// type schema struct {
-// 	OID           string
-// 	Name          string
-// 	Description   string
-// 	Type          string
-// 	Syntax        string
-// 	SubtypeOf     []string
-// 	MustContain   []string
-// 	MayContain    []string
-// 	SingleValue   bool
-// 	Collective    bool
-// 	NoUserMod     bool
-// 	Usage         string
-// 	Obsolete      bool
-// 	SUP           []string
-// 	Structural    bool
-// 	Auxiliary     bool
-// 	Abstract      bool
-// 	RawDefinition string
-// }
-
 type LabeledURI struct {
 	// XMLName     xml.Name             `xml:"luri"`
 	Type        string     `xml:"type,attr,omitempty"` // `(provider|interim|openvpn|ciscovpn)`
