@@ -30,7 +30,7 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 	return opts[0], flag
 }
 
-func unmarshal(e *ldap.Entry, i interface{}) (err error) {
+func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 	var (
 		vo = reflect.ValueOf(i).Kind()
 	)

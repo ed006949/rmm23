@@ -61,14 +61,14 @@ func ReadLDAPAndStoreInRedis(redisAddr, redisIndexName, ldapURL, bindDN, bindPas
 
 	var docs []redisearch.Document
 	for _, entry := range entries {
-		// Determine the type of LDAP entry based on objectClass and unmarshal accordingly
+		// Determine the type of LDAP entry based on objectClass and UnmarshalEntry accordingly
 		objectClasses := entry.GetAttributeValues("objectClass")
 		switch {
 		case contains(objectClasses, "person"):
 			var user ElementUser
-			err = unmarshal(entry, &user)
+			err = UnmarshalEntry(entry, &user)
 			if err != nil {
-				log.Printf("Warning: failed to unmarshal user entry %s: %v", entry.DN, err)
+				log.Printf("Warning: failed to UnmarshalEntry user entry %s: %v", entry.DN, err)
 				continue
 			}
 			doc, err := StructToDocument(entry.DN, 1.0, user)
@@ -79,9 +79,9 @@ func ReadLDAPAndStoreInRedis(redisAddr, redisIndexName, ldapURL, bindDN, bindPas
 			docs = append(docs, *doc)
 		case contains(objectClasses, "groupOfNames"), contains(objectClasses, "groupOfUniqueNames"):
 			var group ElementGroup
-			err = unmarshal(entry, &group)
+			err = UnmarshalEntry(entry, &group)
 			if err != nil {
-				log.Printf("Warning: failed to unmarshal group entry %s: %v", entry.DN, err)
+				log.Printf("Warning: failed to UnmarshalEntry group entry %s: %v", entry.DN, err)
 				continue
 			}
 			doc, err := StructToDocument(entry.DN, 1.0, group)
@@ -92,9 +92,9 @@ func ReadLDAPAndStoreInRedis(redisAddr, redisIndexName, ldapURL, bindDN, bindPas
 			docs = append(docs, *doc)
 		case contains(objectClasses, "device"):
 			var host ElementHost
-			err = unmarshal(entry, &host)
+			err = UnmarshalEntry(entry, &host)
 			if err != nil {
-				log.Printf("Warning: failed to unmarshal host entry %s: %v", entry.DN, err)
+				log.Printf("Warning: failed to UnmarshalEntry host entry %s: %v", entry.DN, err)
 				continue
 			}
 			doc, err := StructToDocument(entry.DN, 1.0, host)

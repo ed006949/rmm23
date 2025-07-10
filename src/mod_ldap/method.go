@@ -16,7 +16,10 @@ func (r *Conf) Fetch() (err error) {
 	case err != nil:
 		return
 	}
-	defer r.close()
+	defer func() {
+		_ = r.close()
+	}()
+
 	switch err = r.bind(); {
 	case err != nil:
 		return
@@ -111,7 +114,7 @@ func (r *Conf) parse() (err error) {
 	return
 }
 
-// unmarshal
+// UnmarshalEntry
 func (r *ConfDomain) unmarshal() (err error) {
 	r.domain = &ElementDomain{}
 	switch newErr := r.domain.unmarshal(r.searchResults["domain"]); {
@@ -144,7 +147,7 @@ func (r *ElementDomain) unmarshal(inbound *ldap.SearchResult) (err error) {
 		var (
 			interim ElementDomain
 		)
-		switch newErr := unmarshal(entry, &interim); {
+		switch newErr := UnmarshalEntry(entry, &interim); {
 		case newErr != nil:
 			err = errors.Join(err, newErr)
 			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
@@ -158,7 +161,7 @@ func (r ElementHosts) unmarshal(inbound *ldap.SearchResult) (err error) {
 		var (
 			interim ElementHost
 		)
-		switch newErr := unmarshal(entry, &interim); {
+		switch newErr := UnmarshalEntry(entry, &interim); {
 		case newErr != nil:
 			err = errors.Join(err, newErr)
 			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
@@ -172,7 +175,7 @@ func (r ElementUsers) unmarshal(inbound *ldap.SearchResult) (err error) {
 		var (
 			interim ElementUser
 		)
-		switch newErr := unmarshal(entry, &interim); {
+		switch newErr := UnmarshalEntry(entry, &interim); {
 		case newErr != nil:
 			err = errors.Join(err, newErr)
 			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
@@ -186,7 +189,7 @@ func (r ElementGroups) unmarshal(inbound *ldap.SearchResult) (err error) {
 		var (
 			interim ElementGroup
 		)
-		switch newErr := unmarshal(entry, &interim); {
+		switch newErr := UnmarshalEntry(entry, &interim); {
 		case newErr != nil:
 			err = errors.Join(err, newErr)
 			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
@@ -243,34 +246,30 @@ func (r *Conf) AddUser(inbound *ElementUser) (err error) {
 
 // conn
 func (r *Conf) connect() (err error) {
-	switch r.conn, err = ldap.DialURL(r.URL.String()); {
-	case err != nil:
-		return
-	}
+	r.conn, err = ldap.DialURL(r.URL.String())
 	return
 }
 func (r *Conf) bind() (err error) {
 	switch {
 	case r.conn == nil:
 		return ENoConn
-	case len(r.URL.CleanUsername()) == 0:
-		l.Z{l.M: "LDAP Bind", l.E: EAnonymousBind, "URL": r.URL.Redacted()}.Warning()
-		return
 	}
-	return r.conn.Bind(r.URL.CleanUsername(), r.URL.CleanPassword())
+
+	switch err = r.conn.Bind(r.URL.CleanUsername(), r.URL.CleanPassword()); {
+	case err != nil:
+		return
+	case len(r.URL.CleanUsername()) == 0:
+		return EAnonymousBind
+	}
+
+	return
 }
-func (r *Conf) close() /*(err error)*/ {
+func (r *Conf) close() (err error) {
 	switch {
 	case r.conn == nil:
-		l.Z{l.M: "LDAP Close", l.E: ENoConn, "URL": r.URL.Redacted()}.Warning()
-		return /*ENoConn*/
+		return ENoConn
 	}
-	switch err := r.conn.Close(); {
-	case err != nil:
-		l.Z{l.M: "LDAP Close", l.E: err, "URL": r.URL.Redacted()}.Warning()
-		return
-	}
-	return
+	return r.conn.Close()
 }
 
 // XML
