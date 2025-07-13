@@ -112,25 +112,25 @@ func (r *Conf) parse() (err error) {
 // UnmarshalEntry
 func (r *ConfDomain) unmarshal() (err error) {
 	r.Domain = &ElementDomain{}
-	switch newErr := r.Domain.unmarshal(r.searchResults["Domain"]); {
+	switch newErr := r.Domain.unmarshal(r.searchResults["domain"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Domain", "DN": r.DN}.Warning()
 	}
 	r.Hosts = make(ElementHosts)
-	switch newErr := r.Hosts.unmarshal(r.searchResults["Hosts"]); {
+	switch newErr := r.Hosts.unmarshal(r.searchResults["hosts"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Hosts", "DN": r.DN}.Warning()
 	}
 	r.Users = make(ElementUsers)
-	switch newErr := r.Users.unmarshal(r.searchResults["Users"]); {
+	switch newErr := r.Users.unmarshal(r.searchResults["users"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Users", "DN": r.DN}.Warning()
 	}
 	r.Groups = make(ElementGroups)
-	switch newErr := r.Groups.unmarshal(r.searchResults["Groups"]); {
+	switch newErr := r.Groups.unmarshal(r.searchResults["groups"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Groups", "DN": r.DN}.Warning()
