@@ -78,11 +78,11 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 		switch {
 		case types[rediSearchTagTypeIgnore]: // The "-" type indicates that the field should be ignored.
 		case types[rediSearchTagTypeText]: // Handle 'text' type fields.
-			schema.AddField(redisearch.NewTextFieldOptions(redisTag, redisearch.TextFieldOptions{
+			schema.AddField(redisearch.NewTextFieldOptions("$."+redisTag, redisearch.TextFieldOptions{
 				Sortable: options[rediSearchTagOptionSortable],
 			}))
 		case types[rediSearchTagTypeNumeric]: // Handle 'numeric' type fields.
-			schema.AddField(redisearch.NewNumericFieldOptions(redisTag, redisearch.NumericFieldOptions{
+			schema.AddField(redisearch.NewNumericFieldOptions("$."+redisTag, redisearch.NumericFieldOptions{
 				Sortable: options[rediSearchTagOptionSortable],
 			}))
 		}
