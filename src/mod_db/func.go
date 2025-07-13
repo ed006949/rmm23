@@ -38,6 +38,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		rsClient = redisearch.NewClient("10.133.0.223:6379", "entryIdx")
 		entry    = Entry{}
 		_        = rsClient.Drop()
+		// _        = rsClient.DropIndex(false)
 	)
 
 	switch err = rsClient.CreateIndex(entry.RedisearchSchema()); {
