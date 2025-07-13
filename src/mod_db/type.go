@@ -44,9 +44,6 @@ type Entry struct {
 	UserPKCS12           mod_ldap.AttrUserPKCS12s           `ldap:"userPKCS12" msgpack:"userPKCS12,omitempty" json:"userPKCS12,omitempty" redis:"userPKCS12" redisearch:"text"`                                         //
 	UserPassword         mod_ldap.AttrUserPassword          `ldap:"userPassword" msgpack:"userPassword,omitempty" json:"userPassword,omitempty" redis:"userPassword" redisearch:"text"`                                 //
 
-	// specific data (space-separated KV DB stored as labelledURIs)
-	Legacy mod_ldap.LabeledURILegacy `ldap:"labelledURI" msgpack:"-" json:"-" redis:"-" redisearch:"-"` //
-
 	// specific data
 	Type EntryType `msgpack:"type,omitempty" json:"type,omitempty" redis:"type" redisearch:"text"`             // entry's type `(domain|group|user|host)`
 	AAA  string    `msgpack:"host_aaa,omitempty" json:"host_aaa,omitempty" redis:"host_aaa" redisearch:"text"` // entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`
@@ -59,4 +56,7 @@ type Entry struct {
 	HostHostingUUID uint32     `msgpack:"host_hosting_uuid,omitempty" json:"host_hosting_uuid,omitempty" redis:"host_hosting_uuid" redisearch:"text"`    // (?) replace with member/memberOf
 	HostURL         url.URL    `msgpack:"host_url,omitempty" json:"host_url,omitempty" redis:"host_url" redisearch:"text,sortable"`                      //
 	HostListen      netip.Addr `msgpack:"host_listen,omitempty" json:"host_listen,omitempty" redis:"host_listen" redisearch:"text,sortable"`             //
+
+	// specific data (space-separated KV DB stored as labelledURIs)
+	Legacy mod_ldap.LabeledURILegacy `ldap:"labelledURI" msgpack:"-" json:"-" redis:"-" redisearch:"-"` //
 }
