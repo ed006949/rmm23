@@ -8,6 +8,7 @@ import (
 	"github.com/avfs/avfs/vfs/memfs"
 
 	"rmm23/src/l"
+	"rmm23/src/mod_db"
 	"rmm23/src/mod_vfs"
 )
 
@@ -31,7 +32,10 @@ func main() {
 				SystemDirs: nil,
 			}),
 		}
+		a = mod_db.Entry{}
+		b = a.RedisearchSchema()
 	)
+	b = b
 
 	switch err = xmlConfig.load(); {
 	case errors.Is(err, l.ENOCONF):

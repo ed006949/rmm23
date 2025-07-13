@@ -13,7 +13,11 @@ import (
 	"rmm23/src/mod_ssh"
 )
 
-type Entry struct{ *ldap.Entry }
+type entries struct {
+	url   *mod_net.URL
+	conn  *ldap.Conn
+	entry map[AttrDN]*ldap.Entry
+}
 
 type Conf struct {
 	URL      *mod_net.URL    `xml:"url,attr"`

@@ -1,8 +1,17 @@
 package mod_db
 
-const redisTagName = "redis"
-const rediSearchTagName = "redisearch"
-const rediSearchTagTypeIgnore = "-"
-const rediSearchTagTypeText = "text"
-const rediSearchTagTypeNumeric = "numeric"
-const rediSearchTagOptionSortable = "sortable"
+const (
+	redisTagName                = "redis"
+	rediSearchTagName           = "redisearch"
+	rediSearchTagTypeIgnore     = "-"
+	rediSearchTagTypeText       = "text"
+	rediSearchTagTypeNumeric    = "numeric"
+	rediSearchTagOptionSortable = "sortable"
+)
+
+const (
+	EntryTypeDomain EntryType = iota
+	EntryTypeGroup
+	EntryTypeUser
+	EntryTypeHost
+)

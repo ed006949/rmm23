@@ -9,8 +9,6 @@ import (
 	"rmm23/src/l"
 )
 
-// func (r *Conf) UnmarshalXML(d *xml.Decoder, start xml.StartElement) (err error) { return }
-
 func (r *Conf) Fetch() (err error) {
 	switch err = r.connect(); {
 	case err != nil:
@@ -38,7 +36,6 @@ func (r *Conf) Fetch() (err error) {
 	return
 }
 
-// searchResults
 func (r *Conf) search() (err error) {
 	for _, b := range r.Domain {
 		switch {
@@ -108,9 +105,6 @@ func (r *Conf) parse() (err error) {
 			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": b.DN, "URL": r.URL.Redacted()}.Warning()
 		}
 	}
-	// for _, b := range r.Domain {
-	// 	b = b
-	// }
 
 	return
 }
