@@ -11,6 +11,9 @@ type EntryType int
 
 // Entry is the struct that represents an LDAP-compatible entry.
 type Entry struct {
+	// element specific meta data
+	Type EntryType `msgpack:"type,omitempty" json:"type,omitempty" redis:"type" redisearch:"text"` // entry's type `(domain|group|user|host)`
+
 	// element meta data
 	UUID            mod_ldap.AttrUUID          `ldap:"entryUUID" msgpack:"entryUUID,omitempty" json:"entryUUID,omitempty" redis:"uuid" redisearch:"text,sortable"`                     // must be unique
 	DN              mod_ldap.AttrDN            `ldap:"dn" msgpack:"dn,omitempty" json:"dn,omitempty" redis:"dn" redisearch:"text,sortable"`                                            // must be unique
@@ -45,9 +48,8 @@ type Entry struct {
 	UserPassword         mod_ldap.AttrUserPassword          `ldap:"userPassword" msgpack:"userPassword,omitempty" json:"userPassword,omitempty" redis:"userPassword" redisearch:"text"`                                 //
 
 	// specific data
-	Type EntryType `msgpack:"type,omitempty" json:"type,omitempty" redis:"type" redisearch:"text"`             // entry's type `(domain|group|user|host)`
-	AAA  string    `msgpack:"host_aaa,omitempty" json:"host_aaa,omitempty" redis:"host_aaa" redisearch:"text"` // entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`
-	ACL  string    `msgpack:"host_acl,omitempty" json:"host_acl,omitempty" redis:"host_acl" redisearch:"text"` // entry's ACL
+	AAA string `msgpack:"host_aaa,omitempty" json:"host_aaa,omitempty" redis:"host_aaa" redisearch:"text"` // entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`
+	ACL string `msgpack:"host_acl,omitempty" json:"host_acl,omitempty" redis:"host_acl" redisearch:"text"` // entry's ACL
 
 	// host specific data
 	HostType        string     `msgpack:"host_type,omitempty" json:"host_type,omitempty" redis:"host_type" redisearch:"text"`                            // host type `(provider|interim|openvpn|ciscovpn)`
@@ -58,5 +60,5 @@ type Entry struct {
 	HostListen      netip.Addr `msgpack:"host_listen,omitempty" json:"host_listen,omitempty" redis:"host_listen" redisearch:"text,sortable"`             //
 
 	// specific data (space-separated KV DB stored as labelledURIs)
-	Legacy mod_ldap.LabeledURILegacy `ldap:"labelledURI" msgpack:"-" json:"-" redis:"-" redisearch:"-"` //
+	Legacy []mod_ldap.LabeledURILegacy `ldap:"labelledURI" msgpack:"-" json:"-" redis:"-" redisearch:"-"` //
 }

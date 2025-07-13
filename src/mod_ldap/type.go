@@ -22,7 +22,7 @@ type entries struct {
 type Conf struct {
 	URL      *mod_net.URL    `xml:"url,attr"`
 	Settings []*ConfSettings `xml:"settings"`
-	Domain   []*ConfDomain   `xml:"domain"`
+	Domain   []*ConfDomain   `xml:"Domain"`
 
 	// schema map[string]*schema
 	conn *ldap.Conn
@@ -38,10 +38,10 @@ type ConfSettings struct {
 type ConfDomain struct {
 	DN AttrDN `xml:"dn,attr"`
 
-	domain *ElementDomain
-	users  ElementUsers
-	groups ElementGroups
-	hosts  ElementHosts
+	Domain *ElementDomain
+	Users  ElementUsers
+	Groups ElementGroups
+	Hosts  ElementHosts
 
 	searchResults map[string]*ldap.SearchResult
 }
@@ -66,6 +66,8 @@ type ElementDomain struct {
 
 	DC AttrString `ldap:"dc"`
 	O  AttrString `ldap:"o"`
+
+	LabeledURI AttrLabeledURIs `ldap:"labeledURI"`
 
 	CreatorsName    AttrDN        `ldap:"creatorsName"`
 	CreateTimestamp AttrTimestamp `ldap:"createTimestamp"`
@@ -142,26 +144,18 @@ type ElementHost struct {
 
 // type AttrDN *ldap.DN //
 
-type attrCN string                                 //
-type attrCreateTimestamp time.Time                 //
-type attrCreatorsName AttrDN                       //
-type AttrDN string                                 //
-type attrDescription string                        //
-type AttrDestinationIndicators map[string]struct{} // interim host list
-type attrDisplayName string                        //
-type attrEntryUUID uuid.UUID                       //
-type attrGIDNumber uint64                          //
-type attrHomeDirectory string                      //
-type AttrIPHostNumbers struct {
-	modified bool
-	// invalid  error
-	data netip.Prefix
-} //
-type AttrLabeledURIs struct {
-	modified bool
-	// invalid  error
-	data *LabeledURI
-}                                                      // custom schema alternative TO DO implement custom schemas
+type attrCN string                                     //
+type attrCreateTimestamp time.Time                     //
+type attrCreatorsName AttrDN                           //
+type AttrDN string                                     //
+type attrDescription string                            //
+type AttrDestinationIndicators map[string]struct{}     // interim host list
+type attrDisplayName string                            //
+type attrEntryUUID uuid.UUID                           //
+type attrGIDNumber uint64                              //
+type attrHomeDirectory string                          //
+type AttrIPHostNumbers map[netip.Prefix]struct{}       //
+type AttrLabeledURIs []LabeledURILegacy                // custom schema alternative TO DO implement custom schemas
 type AttrMails map[string]struct{}                     //
 type attrMembers map[AttrDN]struct{}                   //
 type attrMembersOf map[AttrDN]struct{}                 //

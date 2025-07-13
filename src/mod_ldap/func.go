@@ -132,7 +132,7 @@ func createLDAPSchema(client *redisearch.Client) (err error) {
 	// Drop existing index if any
 	_ = client.Drop()
 
-	// Define schema for entire LDAP tree: users, groups, devices, etc.
+	// Define schema for entire LDAP tree: Users, Groups, devices, etc.
 	// Common LDAP attributes and indexes for fast search
 
 	var (
@@ -149,12 +149,12 @@ func createLDAPSchema(client *redisearch.Client) (err error) {
 			AddField(redisearch.NewTextField("description")).
 			AddField(redisearch.NewTextField("homeDirectory")).
 			AddField(redisearch.NewTextField("loginShell")).
-			AddField(redisearch.NewTextField("memberOf")). // groups user belongs to
+			AddField(redisearch.NewTextField("memberOf")). // Groups user belongs to
 
 			// Group attributes
 			AddField(redisearch.NewTextFieldOptions("cn", redisearch.TextFieldOptions{Sortable: true})).
 			AddField(redisearch.NewTextField("gidNumber")).
-			AddField(redisearch.NewTextField("member")). // users in group
+			AddField(redisearch.NewTextField("member")). // Users in group
 
 			// Device attributes (example)
 			AddField(redisearch.NewTextField("deviceID")).

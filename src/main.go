@@ -6,6 +6,7 @@ import (
 
 	"github.com/avfs/avfs"
 	"github.com/avfs/avfs/vfs/memfs"
+	"github.com/redis/go-redis/v9"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_db"
@@ -51,7 +52,14 @@ func main() {
 		l.Z{l.E: err}.Critical()
 	}
 
-	switch err = xmlConfig.LDAP.Fetch(); {
+	var (
+		// Initialize Redis client
+		rdb = redis.NewClient(&redis.Options{
+			Addr: "localhost:6379",
+		})
+	)
+
+	switch err = mod_db.CopyLDAP2DB(xmlConfig.LDAP, rdb); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}

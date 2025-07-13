@@ -1,7 +1,6 @@
 package mod_ldap
 
 import (
-	"encoding/xml"
 	"net/netip"
 	"strconv"
 	"strings"
@@ -65,68 +64,32 @@ func (r *AttrIDNumber) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 
-// UnmarshalLDAPAttr for AttrIPHostNumbers
-// there must be only one valid netip.Prefix data or nothing
-// in other cases r.modified needs to be set, to update data in LDAP later
 func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		var (
-			data netip.Prefix
+			interim netip.Prefix
 		)
-		switch data, err = netip.ParsePrefix(value); {
+		switch interim, err = netip.ParsePrefix(value); {
 		case err == nil:
-			r.data = data
+			(*r)[interim] = struct{}{}
 			return
 		}
-		r.modified = true
 	}
 	return nil
 }
 
-// UnmarshalLDAPAttr for AttrLabeledURIs
-// there must be only one valid XML data or nothing
-// in other cases r.modified needs to be set, to update data in LDAP later
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		var (
-			data LabeledURI
+			interim = strings.SplitN(value, " ", 2)
 		)
-		switch err = xml.Unmarshal([]byte(value), &data); {
-		case err == nil:
-			switch {
-			case r.data == nil:
-				r.data = &data
-			default:
-				// another XML data in values - append (!good)
-				r.modified = true
-				r.data.OpenVPN = append(r.data.OpenVPN, data.OpenVPN...)
-				r.data.CiscoVPN = append(r.data.CiscoVPN, data.CiscoVPN...)
-				r.data.InterimHost = append(r.data.InterimHost, data.InterimHost...)
-				r.data.Legacy = append(r.data.Legacy, data.Legacy...)
-			}
-			continue
-		}
-
-		// fallback to legacy key-value space-separated schema - append if any (!good)
-		r.modified = true
-		var (
-			legacy = strings.SplitN(value, " ", 2)
-		)
-		switch len(legacy) {
+		switch len(interim) {
 		case 0:
 			continue
 		case 1:
-			switch {
-			case r.data == nil:
-				r.data = &LabeledURI{}
-			}
-			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: legacy[0], Value: ""})
+			*r = append(*r, LabeledURILegacy{Key: interim[0]})
 		case 2:
-			switch {
-			case r.data == nil:
-				r.data = &LabeledURI{}
-			}
-			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: legacy[0], Value: legacy[1]})
+			*r = append(*r, LabeledURILegacy{Key: interim[0], Value: interim[1]})
 		}
 	}
 
@@ -217,3 +180,54 @@ func (r *AttrUUID) UnmarshalLDAPAttr(values []string) (err error) {
 	*r = AttrUUID(value)
 	return
 }
+
+/*// UnmarshalLDAPAttr for AttrLabeledURIs
+// there must be only one valid XML data or nothing
+// in other cases r.modified needs to be set, to update data in LDAP later
+func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
+	for _, value := range values {
+		var (
+			data LabeledURI
+		)
+		switch err = xml.Unmarshal([]byte(value), &data); {
+		case err == nil:
+			switch {
+			case r.data == nil:
+				r.data = &data
+			default:
+				// another XML data in values - append (!good)
+				r.modified = true
+				r.data.OpenVPN = append(r.data.OpenVPN, data.OpenVPN...)
+				r.data.CiscoVPN = append(r.data.CiscoVPN, data.CiscoVPN...)
+				r.data.InterimHost = append(r.data.InterimHost, data.InterimHost...)
+				r.data.Legacy = append(r.data.Legacy, data.Legacy...)
+			}
+			continue
+		}
+
+		// fallback to legacy key-value space-separated schema - append if any (!good)
+		r.modified = true
+		var (
+			legacy = strings.SplitN(value, " ", 2)
+		)
+		switch len(legacy) {
+		case 0:
+			continue
+		case 1:
+			switch {
+			case r.data == nil:
+				r.data = &LabeledURI{}
+			}
+			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: legacy[0], Value: ""})
+		case 2:
+			switch {
+			case r.data == nil:
+				r.data = &LabeledURI{}
+			}
+			r.data.Legacy = append(r.data.Legacy, LabeledURILegacy{Key: legacy[0], Value: legacy[1]})
+		}
+	}
+
+	return nil
+}
+*/
