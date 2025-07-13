@@ -22,7 +22,7 @@ type entries struct {
 type Conf struct {
 	URL      *mod_net.URL    `xml:"url,attr"`
 	Settings []*ConfSettings `xml:"settings"`
-	Domain   []*ConfDomain   `xml:"Domain"`
+	Domain   []*ConfDomain   `xml:"domain"`
 
 	// schema map[string]*schema
 	conn *ldap.Conn

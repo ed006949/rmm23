@@ -44,7 +44,7 @@ func (r *Conf) search() (err error) {
 		}
 		for _, d := range r.Settings {
 			switch d.Type {
-			case "Domain":
+			case "domain":
 				var (
 					newErr        error
 					searchResult  *ldap.SearchResult
@@ -67,7 +67,7 @@ func (r *Conf) search() (err error) {
 				}
 				b.searchResults[d.Type] = searchResult
 
-			case "Hosts", "Users", "Groups":
+			case "hosts", "users", "groups":
 				var (
 					newErr        error
 					searchResult  *ldap.SearchResult
@@ -115,7 +115,7 @@ func (r *ConfDomain) unmarshal() (err error) {
 	switch newErr := r.Domain.unmarshal(r.searchResults["Domain"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
-		l.Z{l.E: err, l.M: "LDAP Unmarshal Hosts", "DN": r.DN}.Warning()
+		l.Z{l.E: err, l.M: "LDAP Unmarshal Domain", "DN": r.DN}.Warning()
 	}
 	r.Hosts = make(ElementHosts)
 	switch newErr := r.Hosts.unmarshal(r.searchResults["Hosts"]); {
@@ -254,7 +254,7 @@ func (r *Conf) bind() (err error) {
 	case err != nil:
 		return
 	case len(r.URL.CleanUsername()) == 0:
-		return EAnonymousBind
+		// return EAnonymousBind
 	}
 
 	return
