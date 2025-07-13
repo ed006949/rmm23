@@ -1,10 +1,10 @@
 package mod_db
 
 import (
-	"net/netip"
-	"net/url"
+	"context"
 
-	"github.com/redis/go-redis/v9"
+	"github.com/RediSearch/redisearch-go/redisearch"
+	"github.com/google/uuid"
 
 	"rmm23/src/mod_ldap"
 )
@@ -27,8 +27,19 @@ import (
 //    searchResults map[string]*ldap.SearchResult
 // }
 
-func CopyLDAP2DB(inbound *mod_ldap.Conf, rdb *redis.Client) (err error) {
+func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 	switch err = inbound.Fetch(); {
+	case err != nil:
+		return
+	}
+
+	var (
+		rsClient = redisearch.NewClient("10.133.0.223:6379", "entryIdx")
+		entry    = Entry{}
+		_        = rsClient.Drop()
+	)
+
+	switch err = rsClient.CreateIndex(entry.RedisearchSchema()); {
 	case err != nil:
 		return
 	}
@@ -49,7 +60,38 @@ func CopyLDAP2DB(inbound *mod_ldap.Conf, rdb *redis.Client) (err error) {
 				O:               b.Domain.O,
 				Legacy:          b.Domain.LabeledURI,
 			}
+			doc = redisearch.NewDocument(uuid.UUID(interim.UUID).String(), 1.0)
 		)
+		doc.Set("Type", interim.Type)
+		doc.Set("UUID", interim.UUID)
+		doc.Set("DN", interim.DN)
+		doc.Set("ObjectClass", interim.ObjectClass)
+		doc.Set("CreatorsName", interim.CreatorsName)
+		doc.Set("CreateTimestamp", interim.CreateTimestamp)
+		doc.Set("ModifiersName", interim.ModifiersName)
+		doc.Set("ModifyTimestamp", interim.ModifyTimestamp)
+		doc.Set("DC", interim.DC)
+		doc.Set("O", interim.O)
+		doc.Set("Legacy", interim.Legacy)
+
+		switch err = rsClient.Index([]redisearch.Document{doc}...); {
+		case err != nil:
+			return
+		}
+
+		// var (
+		// 	jsonData []byte
+		// )
+		//
+		// switch jsonData, err = json.Marshal(interim); {
+		// case err != nil:
+		// 	return
+		// }
+		//
+		// switch err = rdb.Set(ctx, uuid.UUID(interim.UUID).String(), jsonData, 0).Err(); {
+		// case err != nil:
+		// 	return
+		// }
 
 	}
 	//

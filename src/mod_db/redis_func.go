@@ -1,16 +1,11 @@
 package mod_db
 
 import (
-	"context"
 	"reflect"
 	"strings"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 )
-
-func InitRDB(ctx context.Context) (err error) {
-	return
-}
 
 // buildRedisearchSchema dynamically builds a RediSearch schema from a struct's tags.
 // It uses the `redis` tag for the field name and the `redisearch` tag for the type and options.

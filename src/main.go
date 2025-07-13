@@ -6,7 +6,6 @@ import (
 
 	"github.com/avfs/avfs"
 	"github.com/avfs/avfs/vfs/memfs"
-	"github.com/redis/go-redis/v9"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_db"
@@ -18,7 +17,7 @@ func main() {
 	l.CLI.Set()
 
 	l.Z{l.M: "main", "daemon": l.Name.String(), "commit": l.GitCommit.String()}.Informational()
-	defer l.Z{l.M: "exit", "daemon": l.Name.String()}.Debug()
+	defer l.Z{l.M: "exit", "daemon": l.Name.String()}.Informational()
 
 	var (
 		err       error
@@ -52,14 +51,7 @@ func main() {
 		l.Z{l.E: err}.Critical()
 	}
 
-	var (
-		// Initialize Redis client
-		rdb = redis.NewClient(&redis.Options{
-			Addr: "localhost:6379",
-		})
-	)
-
-	switch err = mod_db.CopyLDAP2DB(xmlConfig.LDAP, rdb); {
+	switch err = mod_db.CopyLDAP2DB(ctx, xmlConfig.LDAP); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
