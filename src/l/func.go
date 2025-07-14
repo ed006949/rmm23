@@ -3,7 +3,6 @@ package l
 import (
 	"flag"
 	"net/url"
-	"sort"
 	"strings"
 )
 
@@ -73,26 +72,6 @@ func FormatBool(inbound bool) string {
 	}
 }
 
-func FilterSlice[S ~[]E, E comparable](inbound S, filter ...E) (outbound S) {
-	var (
-		interim = IndexSlice(filter)
-	)
-	for _, b := range inbound {
-		switch _, ok := interim[b]; {
-		case !ok:
-			outbound = append(outbound, b)
-		}
-	}
-	return
-}
-func IndexSlice[S ~[]E, E comparable, M map[E]int](inbound S) (outbound M) {
-	outbound = make(M)
-	for a, b := range inbound {
-		outbound[b] = a
-	}
-	return
-}
-
 func StripErr(err error)                                 {}
 func StripErr1[E any](inbound E, err error) (outbound E) { return inbound }
 
@@ -124,53 +103,4 @@ func StripIfBool1[E any](inbound E, flag bool) (outbound E) {
 	default:
 		return
 	}
-}
-func StringsJoin(elems []string, sep string) string {
-	var (
-		interim []string
-	)
-	for _, elem := range elems {
-		switch {
-		case len(elem) > 0:
-			interim = append(interim, elem)
-		}
-	}
-	return strings.Join(interim, sep)
-}
-func StringsJoinAndRemoveDuplicatesAndSort(elems []string, sep string) string {
-	var (
-		interim  = make(map[string]struct{})
-		outbound []string
-	)
-	for _, elem := range elems {
-		switch {
-		case len(elem) == 0:
-			continue
-		}
-		switch _, ok := interim[elem]; {
-		case !ok:
-			interim[elem] = struct{}{}
-			outbound = append(outbound, elem)
-		}
-	}
-	sort.Strings(outbound)
-	return strings.Join(outbound, sep)
-}
-func StringsRemoveDuplicatesAndSort(elems []string) (outbound []string) {
-	var (
-		interim = make(map[string]struct{})
-	)
-	for _, elem := range elems {
-		switch {
-		case len(elem) == 0:
-			continue
-		}
-		switch _, ok := interim[elem]; {
-		case !ok:
-			interim[elem] = struct{}{}
-			outbound = append(outbound, elem)
-		}
-	}
-	sort.Strings(outbound)
-	return
 }

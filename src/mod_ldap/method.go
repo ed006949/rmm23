@@ -281,3 +281,9 @@ func (r *AttrDN) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
 
 // String
 func (r *AttrDN) String() string { return string(*r) }
+func (r *AttrDNs) String() (outbound []string) {
+	for _, b := range *r {
+		outbound = append(outbound, b.String())
+	}
+	return
+}

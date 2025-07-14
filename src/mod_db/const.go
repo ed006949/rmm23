@@ -15,3 +15,7 @@ const (
 	EntryTypeUser
 	EntryTypeHost
 )
+
+const (
+	sliceDelimiter = "\x1f"
+)
