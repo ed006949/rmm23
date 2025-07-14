@@ -37,8 +37,8 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 	var (
 		rsClient = redisearch.NewClient("10.133.0.223:6379", "entryIdx")
 		entry    = Entry{}
-		_        = rsClient.Drop()
-		// _        = rsClient.DropIndex(false)
+		_        = rsClient.Drop() // test&dev
+		// _        = rsClient.DropIndex(false) // don't delete old entries
 	)
 
 	switch err = rsClient.CreateIndex(entry.RedisearchSchema()); {
@@ -46,27 +46,95 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		return
 	}
 
-	for _, b := range inbound.Domain {
+	for _, d := range inbound.Domain {
 		var (
-			doc = redisearch.NewDocument("ldap:entry:"+uuid.UUID(b.Domain.UUID).String(), 1.0)
+			doc = redisearch.NewDocument("ldap:entry:"+uuid.UUID(d.Domain.UUID).String(), 1.0)
 		)
 		doc.Set("Type", EntryTypeDomain)
-		doc.Set("UUID", b.Domain.UUID)
-		doc.Set("DN", b.Domain.DN)
-		doc.Set("ObjectClass", b.Domain.ObjectClass)
-		doc.Set("CreatorsName", b.Domain.CreatorsName)
-		doc.Set("CreateTimestamp", b.Domain.CreateTimestamp)
-		doc.Set("ModifiersName", b.Domain.ModifiersName)
-		doc.Set("ModifyTimestamp", b.Domain.ModifyTimestamp)
-		doc.Set("DC", b.Domain.DC)
-		doc.Set("O", b.Domain.O)
-		doc.Set("Legacy", b.Domain.LabeledURI)
-		doc.SetPayload(nil)
+		doc.Set("UUID", d.Domain.UUID)
+		doc.Set("DN", d.Domain.DN)
+		doc.Set("ObjectClass", d.Domain.ObjectClass)
+		doc.Set("CreatorsName", d.Domain.CreatorsName)
+		doc.Set("CreateTimestamp", d.Domain.CreateTimestamp)
+		doc.Set("ModifiersName", d.Domain.ModifiersName)
+		doc.Set("ModifyTimestamp", d.Domain.ModifyTimestamp)
+		doc.Set("DC", d.Domain.DC)
+		doc.Set("O", d.Domain.O)
+		doc.Set("Legacy", d.Domain.LabeledURI)
 
 		switch err = rsClient.Index([]redisearch.Document{doc}...); {
 		case err != nil && strings.Contains(err.Error(), "Document already exists"):
+			err = nil
 		case err != nil:
 			return
+		}
+
+		for _, g := range d.Groups {
+			doc = redisearch.NewDocument("ldap:entry:"+uuid.UUID(g.UUID).String(), 1.0)
+			doc.Set("Type", EntryTypeGroup)
+			doc.Set("UUID", g.UUID)
+			doc.Set("DN", g.DN)
+			doc.Set("ObjectClass", g.ObjectClass)
+			doc.Set("CreatorsName", g.CreatorsName)
+			doc.Set("CreateTimestamp", g.CreateTimestamp)
+			doc.Set("ModifiersName", g.ModifiersName)
+			doc.Set("ModifyTimestamp", g.ModifyTimestamp)
+			doc.Set("CN", g.CN)
+			doc.Set("Owner", g.Owner)
+			doc.Set("Member", g.Member)
+			doc.Set("GIDNumber", g.GIDNumber)
+			doc.Set("Legacy", g.LabeledURI)
+
+			switch err = rsClient.Index([]redisearch.Document{doc}...); {
+			case err != nil && strings.Contains(err.Error(), "Document already exists"):
+				err = nil
+			case err != nil:
+				return
+			}
+		}
+
+		for _, u := range d.Users {
+			doc = redisearch.NewDocument("ldap:entry:"+uuid.UUID(u.UUID).String(), 1.0)
+			doc.Set("Type", EntryTypeUser)
+			doc.Set("UUID", u.UUID)
+			doc.Set("DN", u.DN)
+			doc.Set("ObjectClass", u.ObjectClass)
+			doc.Set("CreatorsName", u.CreatorsName)
+			doc.Set("CreateTimestamp", u.CreateTimestamp)
+			doc.Set("ModifiersName", u.ModifiersName)
+			doc.Set("ModifyTimestamp", u.ModifyTimestamp)
+			doc.Set("CN", u.CN)
+			doc.Set("GIDNumber", u.GIDNumber)
+			doc.Set("Legacy", u.LabeledURI)
+
+			switch err = rsClient.Index([]redisearch.Document{doc}...); {
+			case err != nil && strings.Contains(err.Error(), "Document already exists"):
+				err = nil
+			case err != nil:
+				return
+			}
+		}
+
+		for _, h := range d.Hosts {
+			doc = redisearch.NewDocument("ldap:entry:"+uuid.UUID(h.UUID).String(), 1.0)
+			doc.Set("Type", EntryTypeHost)
+			doc.Set("UUID", h.UUID)
+			doc.Set("DN", h.DN)
+			doc.Set("ObjectClass", h.ObjectClass)
+			doc.Set("CreatorsName", h.CreatorsName)
+			doc.Set("CreateTimestamp", h.CreateTimestamp)
+			doc.Set("ModifiersName", h.ModifiersName)
+			doc.Set("ModifyTimestamp", h.ModifyTimestamp)
+			doc.Set("CN", h.CN)
+			doc.Set("GIDNumber", h.GIDNumber)
+			doc.Set("Legacy", h.LabeledURI)
+
+			switch err = rsClient.Index([]redisearch.Document{doc}...); {
+			case err != nil && strings.Contains(err.Error(), "Document already exists"):
+				err = nil
+			case err != nil:
+				return
+			}
 		}
 
 	}

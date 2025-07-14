@@ -149,39 +149,39 @@ type attrCreateTimestamp time.Time                     //
 type attrCreatorsName AttrDN                           //
 type AttrDN string                                     //
 type attrDescription string                            //
-type AttrDestinationIndicators map[string]struct{}     // interim host list
+type AttrDestinationIndicators []string                // interim host list
 type attrDisplayName string                            //
 type attrEntryUUID uuid.UUID                           //
 type attrGIDNumber uint64                              //
 type attrHomeDirectory string                          //
 type AttrIPHostNumbers map[netip.Prefix]struct{}       //
 type AttrLabeledURIs []LabeledURILegacy                // custom schema alternative TO DO implement custom schemas
-type AttrMails map[string]struct{}                     //
-type attrMembers map[AttrDN]struct{}                   //
-type attrMembersOf map[AttrDN]struct{}                 //
+type AttrMails []string                                //
+type attrMembers []AttrDN                              //
+type attrMembersOf []AttrDN                            //
 type attrModifiersName AttrDN                          //
 type attrModifyTimestamp time.Time                     //
 type attrO string                                      //
 type attrOU string                                     //
-type attrObjectClasses map[string]struct{}             //
-type attrOwners map[AttrDN]struct{}                    //
+type attrObjectClasses []string                        //
+type attrOwners []AttrDN                               //
 type attrSN string                                     //
 type AttrSSHPublicKeys map[string]mod_ssh.PublicKey    //
-type attrTelephoneNumbers map[string]struct{}          //
-type attrTelexNumbers map[string]struct{}              //
+type attrTelephoneNumbers []string                     //
+type attrTelexNumbers []string                         //
 type attrUID string                                    //
 type attrUIDNumber uint64                              //
 type AttrUserPKCS12s map[AttrDN]mod_crypto.Certificate // any type of cert-key pairs list TODO implement seamless migration from any to P12
 type AttrUserPassword string                           //
 
-type AttrDNs map[AttrDN]struct{}           //
-type AttrObjectClasses map[string]struct{} //
-type AttrID string                         //
-type AttrIDNumber uint64                   //
-type AttrString string                     //
-type AttrStrings map[AttrString]struct{}   //
-type AttrTimestamp time.Time               //
-type AttrUUID uuid.UUID                    //
+type AttrDNs []AttrDN           //
+type AttrObjectClasses []string //
+type AttrID string              //
+type AttrIDNumber uint64        //
+type AttrString string          //
+type AttrStrings []AttrString   //
+type AttrTimestamp time.Time    //
+type AttrUUID uuid.UUID         //
 
 type LabeledURI struct {
 	// XMLName     xml.Name             `xml:"luri"`

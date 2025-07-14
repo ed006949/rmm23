@@ -3,6 +3,7 @@ package l
 import (
 	"flag"
 	"net/url"
+	"sort"
 	"strings"
 )
 
@@ -135,4 +136,41 @@ func StringsJoin(elems []string, sep string) string {
 		}
 	}
 	return strings.Join(interim, sep)
+}
+func StringsJoinAndRemoveDuplicatesAndSort(elems []string, sep string) string {
+	var (
+		interim  = make(map[string]struct{})
+		outbound []string
+	)
+	for _, elem := range elems {
+		switch {
+		case len(elem) == 0:
+			continue
+		}
+		switch _, ok := interim[elem]; {
+		case !ok:
+			interim[elem] = struct{}{}
+			outbound = append(outbound, elem)
+		}
+	}
+	sort.Strings(outbound)
+	return strings.Join(outbound, sep)
+}
+func StringsRemoveDuplicatesAndSort(elems []string) (outbound []string) {
+	var (
+		interim = make(map[string]struct{})
+	)
+	for _, elem := range elems {
+		switch {
+		case len(elem) == 0:
+			continue
+		}
+		switch _, ok := interim[elem]; {
+		case !ok:
+			interim[elem] = struct{}{}
+			outbound = append(outbound, elem)
+		}
+	}
+	sort.Strings(outbound)
+	return
 }
