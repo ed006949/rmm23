@@ -7,6 +7,7 @@ import (
 	"github.com/go-ldap/ldap/v3"
 
 	"rmm23/src/l"
+	"rmm23/src/mod_slices"
 )
 
 func (r *Conf) Fetch() (err error) {
@@ -49,7 +50,7 @@ func (r *Conf) search() (err error) {
 					newErr        error
 					searchResult  *ldap.SearchResult
 					searchRequest = ldap.NewSearchRequest(
-						l.StringsJoin([]string{d.DN.String(), b.DN.String()}, ","), // Base DN
+						mod_slices.Join([]string{d.DN.String(), b.DN.String()}, ","), // Base DN
 						ldap.ScopeBaseObject, // Scope - search entire tree
 						ldap.DerefAlways,     // Deref
 						0,                    // Size limit (0 = no limit)
@@ -72,7 +73,7 @@ func (r *Conf) search() (err error) {
 					newErr        error
 					searchResult  *ldap.SearchResult
 					searchRequest = ldap.NewSearchRequest(
-						l.StringsJoin([]string{d.DN.String(), b.DN.String()}, ","), // Base DN
+						mod_slices.Join([]string{d.DN.String(), b.DN.String()}, ","), // Base DN
 						ldap.ScopeWholeSubtree, // Scope - search entire tree
 						ldap.DerefAlways,       // Deref
 						0,                      // Size limit (0 = no limit)

@@ -7,8 +7,8 @@ import (
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/google/uuid"
 
-	"rmm23/src/l"
 	"rmm23/src/mod_ldap"
+	"rmm23/src/mod_slices"
 )
 
 // type ConfTable struct {
@@ -54,7 +54,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		doc.Set("Type", EntryTypeDomain)
 		doc.Set("UUID", d.Domain.UUID)
 		doc.Set("DN", d.Domain.DN)
-		doc.Set("ObjectClass", l.StringsJoin(d.Domain.ObjectClass, sliceDelimiter))
+		doc.Set("ObjectClass", mod_slices.NormalizeAndJoin(d.Domain.ObjectClass, sliceDelimiter))
 		doc.Set("CreatorsName", d.Domain.CreatorsName)
 		doc.Set("CreateTimestamp", d.Domain.CreateTimestamp)
 		doc.Set("ModifiersName", d.Domain.ModifiersName)
@@ -75,14 +75,14 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Type", EntryTypeGroup)
 			doc.Set("UUID", g.UUID)
 			doc.Set("DN", g.DN)
-			doc.Set("ObjectClass", l.StringsJoin(g.ObjectClass, sliceDelimiter))
+			doc.Set("ObjectClass", mod_slices.NormalizeAndJoin(g.ObjectClass, sliceDelimiter))
 			doc.Set("CreatorsName", g.CreatorsName)
 			doc.Set("CreateTimestamp", g.CreateTimestamp)
 			doc.Set("ModifiersName", g.ModifiersName)
 			doc.Set("ModifyTimestamp", g.ModifyTimestamp)
 			doc.Set("CN", g.CN)
-			doc.Set("Owner", l.StringsJoin(g.Owner.String(), sliceDelimiter))
-			doc.Set("Member", l.StringsJoin(g.Member.String(), sliceDelimiter))
+			doc.Set("Owner", mod_slices.NormalizeAndJoin(g.Owner, sliceDelimiter))
+			doc.Set("Member", mod_slices.NormalizeAndJoin(g.Member, sliceDelimiter))
 			doc.Set("GIDNumber", g.GIDNumber)
 			doc.Set("Legacy", g.LabeledURI)
 
@@ -99,7 +99,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Type", EntryTypeUser)
 			doc.Set("UUID", u.UUID)
 			doc.Set("DN", u.DN)
-			doc.Set("ObjectClass", l.StringsJoin(u.ObjectClass, sliceDelimiter))
+			doc.Set("ObjectClass", mod_slices.NormalizeAndJoin(u.ObjectClass, sliceDelimiter))
 			doc.Set("CreatorsName", u.CreatorsName)
 			doc.Set("CreateTimestamp", u.CreateTimestamp)
 			doc.Set("ModifiersName", u.ModifiersName)
@@ -121,7 +121,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Type", EntryTypeHost)
 			doc.Set("UUID", h.UUID)
 			doc.Set("DN", h.DN)
-			doc.Set("ObjectClass", l.StringsJoin(h.ObjectClass, sliceDelimiter))
+			doc.Set("ObjectClass", mod_slices.NormalizeAndJoin(h.ObjectClass, sliceDelimiter))
 			doc.Set("CreatorsName", h.CreatorsName)
 			doc.Set("CreateTimestamp", h.CreateTimestamp)
 			doc.Set("ModifiersName", h.ModifiersName)

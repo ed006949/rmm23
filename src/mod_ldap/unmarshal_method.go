@@ -10,8 +10,8 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
 
-	"rmm23/src/l"
 	"rmm23/src/mod_crypto"
+	"rmm23/src/mod_slices"
 	"rmm23/src/mod_ssh"
 )
 
@@ -42,7 +42,8 @@ func (r *AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = l.StringsRemoveDuplicatesAndSort(values)
+	mod_slices.Normalize(values)
+	*r = values
 	return
 }
 
@@ -96,12 +97,14 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = l.StringsRemoveDuplicatesAndSort(values)
+	mod_slices.Normalize(values)
+	*r = values
 	return
 }
 
 func (r *AttrObjectClasses) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = l.StringsRemoveDuplicatesAndSort(values)
+	mod_slices.Normalize(values)
+	*r = values
 	return
 }
 
