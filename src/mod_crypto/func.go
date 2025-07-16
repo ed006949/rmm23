@@ -10,6 +10,8 @@ import (
 	"encoding/base64"
 	"encoding/pem"
 	"strings"
+
+	"rmm23/src/mod_errors"
 )
 
 //
@@ -51,7 +53,7 @@ func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate
 	}()
 	switch {
 	case len(outbound.CertificatesDER) == 0:
-		return nil, EPEMNoDataCert
+		return nil, mod_errors.EPEMNoDataCert
 	}
 	outbound.CertificateCAChainRawPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.CertificateCAChainDER))
 
@@ -70,7 +72,7 @@ func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate
 	}()
 	switch {
 	case len(outbound.PrivateKeyDER) == 0:
-		return nil, EPEMNoDataKey
+		return nil, mod_errors.EPEMNoDataKey
 	}
 
 	for _, b := range outbound.CertificatesDER {
@@ -95,26 +97,26 @@ func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate
 	case *rsa.PublicKey:
 		switch priv, ok := outbound.PrivateKey.(*rsa.PrivateKey); {
 		case !ok:
-			return nil, ETypeMismatchPrivKeyPubKey
+			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
 		case pub.N.Cmp(priv.N) != 0:
-			return nil, EMismatchPrivKeyPubKey
+			return nil, mod_errors.EMismatchPrivKeyPubKey
 		}
 	case *ecdsa.PublicKey:
 		switch priv, ok := outbound.PrivateKey.(*ecdsa.PrivateKey); {
 		case !ok:
-			return nil, ETypeMismatchPrivKeyPubKey
+			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
 		case pub.X.Cmp(priv.X) != 0 || pub.Y.Cmp(priv.Y) != 0:
-			return nil, EMismatchPrivKeyPubKey
+			return nil, mod_errors.EMismatchPrivKeyPubKey
 		}
 	case ed25519.PublicKey:
 		switch priv, ok := outbound.PrivateKey.(ed25519.PrivateKey); {
 		case !ok:
-			return nil, ETypeMismatchPrivKeyPubKey
+			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
 		case !bytes.Equal(priv.Public().(ed25519.PublicKey), pub):
-			return nil, EMismatchPrivKeyPubKey
+			return nil, mod_errors.EMismatchPrivKeyPubKey
 		}
 	default:
-		return nil, EUnknownPubKeyAlgo
+		return nil, mod_errors.EUnknownPubKeyAlgo
 	}
 
 	return
@@ -131,7 +133,7 @@ func ParsePrivateKey(der []byte) (key crypto.PrivateKey, err error) {
 		case *rsa.PrivateKey, *ecdsa.PrivateKey, ed25519.PrivateKey:
 			return value, nil
 		default:
-			return nil, EUnknownPrivKeyType
+			return nil, mod_errors.EUnknownPrivKeyType
 		}
 	}
 
@@ -140,7 +142,7 @@ func ParsePrivateKey(der []byte) (key crypto.PrivateKey, err error) {
 		return
 	}
 
-	return nil, EX509ParsePrivKey
+	return nil, mod_errors.EX509ParsePrivKey
 }
 
 func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
@@ -180,9 +182,9 @@ func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
 	}()
 	switch {
 	case len(outbound.CertificatesDER) == 0:
-		return nil, EPEMNoDataCert
+		return nil, mod_errors.EPEMNoDataCert
 	case len(outbound.PrivateKeyDER) == 0:
-		return nil, EPEMNoDataKey
+		return nil, mod_errors.EPEMNoDataKey
 	}
 
 	outbound.CertificateCAChainRawPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.CertificateCAChainDER))
@@ -209,26 +211,26 @@ func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
 	case *rsa.PublicKey:
 		switch priv, ok := outbound.PrivateKey.(*rsa.PrivateKey); {
 		case !ok:
-			return nil, ETypeMismatchPrivKeyPubKey
+			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
 		case pub.N.Cmp(priv.N) != 0:
-			return nil, EMismatchPrivKeyPubKey
+			return nil, mod_errors.EMismatchPrivKeyPubKey
 		}
 	case *ecdsa.PublicKey:
 		switch priv, ok := outbound.PrivateKey.(*ecdsa.PrivateKey); {
 		case !ok:
-			return nil, ETypeMismatchPrivKeyPubKey
+			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
 		case pub.X.Cmp(priv.X) != 0 || pub.Y.Cmp(priv.Y) != 0:
-			return nil, EMismatchPrivKeyPubKey
+			return nil, mod_errors.EMismatchPrivKeyPubKey
 		}
 	case ed25519.PublicKey:
 		switch priv, ok := outbound.PrivateKey.(ed25519.PrivateKey); {
 		case !ok:
-			return nil, ETypeMismatchPrivKeyPubKey
+			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
 		case !bytes.Equal(priv.Public().(ed25519.PublicKey), pub):
-			return nil, EMismatchPrivKeyPubKey
+			return nil, mod_errors.EMismatchPrivKeyPubKey
 		}
 	default:
-		return nil, EUnknownPubKeyAlgo
+		return nil, mod_errors.EUnknownPubKeyAlgo
 	}
 
 	return

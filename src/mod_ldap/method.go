@@ -7,6 +7,7 @@ import (
 	"github.com/go-ldap/ldap/v3"
 
 	"rmm23/src/l"
+	"rmm23/src/mod_errors"
 	"rmm23/src/mod_slices"
 )
 
@@ -20,7 +21,7 @@ func (r *Conf) Fetch() (err error) {
 	}()
 
 	switch err = r.bind(); {
-	case errors.Is(err, EAnonymousBind):
+	case errors.Is(err, mod_errors.EAnonymousBind):
 	case err != nil:
 		return
 	}
@@ -234,8 +235,8 @@ func (r *Conf) FindHost(inbound AttrDN) (outbound *ElementHost) {
 func (r *Conf) AddUser(inbound *ElementUser) (err error) {
 	switch {
 	case r.FindUser(inbound.DN) != nil:
-		l.Z{l.E: l.EEXIST, "DN": inbound.DN}.Warning()
-		return l.EEXIST
+		l.Z{l.E: mod_errors.EEXIST, "DN": inbound.DN}.Warning()
+		return mod_errors.EEXIST
 	}
 	return
 }
@@ -248,7 +249,7 @@ func (r *Conf) connect() (err error) {
 func (r *Conf) bind() (err error) {
 	switch {
 	case r.conn == nil:
-		return ENoConn
+		return mod_errors.ENoConn
 	}
 
 	switch err = r.conn.Bind(r.URL.CleanUsername(), r.URL.CleanPassword()); {
@@ -263,7 +264,7 @@ func (r *Conf) bind() (err error) {
 func (r *Conf) close() (err error) {
 	switch {
 	case r.conn == nil:
-		return ENoConn
+		return mod_errors.ENoConn
 	}
 	return r.conn.Close()
 }

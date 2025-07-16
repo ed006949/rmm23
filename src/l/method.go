@@ -9,6 +9,8 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
+
+	"rmm23/src/mod_errors"
 )
 
 func (r Z) MarshalZerologObject(e *zerolog.Event) {
@@ -165,7 +167,7 @@ func (r *dryRunFlag) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 		*r = false
 	default:
 		*r = DryRun.Value()
-		return EINVAL
+		return mod_errors.EINVAL
 	}
 
 	switch {
@@ -195,7 +197,7 @@ func (r *modeValue) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 	}
 
 	*r = Mode.Value()
-	return EINVAL
+	return mod_errors.EINVAL
 }
 func (r *verbosityLevel) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 	switch {

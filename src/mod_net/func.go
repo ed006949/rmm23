@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"rmm23/src/l"
+	"rmm23/src/mod_errors"
 )
 
 func LookupMX(names []string) (outbound []string) {
@@ -35,7 +36,7 @@ func UrlParse(inbound string) (outbound *url.URL, err error) {
 	case err != nil:
 		return nil, err
 	case len(outbound.String()) == 0:
-		return nil, ENODATA
+		return nil, mod_errors.ENODATA
 	default:
 		return outbound, nil
 	}

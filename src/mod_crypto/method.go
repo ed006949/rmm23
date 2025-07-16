@@ -5,13 +5,13 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
 
-	"rmm23/src/l"
+	"rmm23/src/mod_errors"
 )
 
 func (r *AuthDB) WriteSSH(name string, user string, pemBytes []byte, password string) (err error) {
 	switch _, ok := (*r)[name]; {
 	case ok:
-		return l.EDUPDATA
+		return mod_errors.EDUPDATA
 	}
 
 	var (
@@ -29,7 +29,7 @@ func (r *AuthDB) WriteSSH(name string, user string, pemBytes []byte, password st
 func (r *AuthDB) WriteToken(name string, user string, tokenBytes []byte) (err error) {
 	switch _, ok := (*r)[name]; {
 	case ok:
-		return l.EDUPDATA
+		return mod_errors.EDUPDATA
 	}
 
 	(*r)[name] = &http.BasicAuth{
@@ -42,7 +42,7 @@ func (r *AuthDB) WriteToken(name string, user string, tokenBytes []byte) (err er
 func (r *AuthDB) ReadAuth(name string) (outbound transport.AuthMethod, err error) {
 	switch value, ok := (*r)[name]; {
 	case !ok:
-		return nil, l.ENOTFOUND
+		return nil, mod_errors.ENOTFOUND
 	default:
 		return value, nil
 	}

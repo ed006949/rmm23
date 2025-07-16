@@ -12,6 +12,7 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_crypto"
+	"rmm23/src/mod_errors"
 	"rmm23/src/mod_fs"
 )
 
@@ -178,7 +179,7 @@ func (r *VFSDB) WriteVFS() (err error) {
 	}
 
 	for a := range orphanList {
-		l.Z{l.E: l.EORPHANED, "name": a}.Notice()
+		l.Z{l.E: mod_errors.EORPHANED, "name": a}.Notice()
 	}
 
 	// compare and sync VFS to FS

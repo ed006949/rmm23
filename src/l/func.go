@@ -5,7 +5,7 @@ import (
 	"strings"
 )
 
-// TODO move projects to []error reporting style
+// (?) move projects to []error reporting style
 
 // func Emergency(e Z)     { log.Fatal().EmbedObject(e).Send() }
 // func Alert(e Z)         { log.Fatal().EmbedObject(e).Send() }

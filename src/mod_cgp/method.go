@@ -9,6 +9,7 @@ import (
 	"github.com/fatih/structs"
 
 	"rmm23/src/l"
+	"rmm23/src/mod_errors"
 )
 
 func (r *Token) command(payload string) (outbound []string, err error) {
@@ -36,8 +37,8 @@ func (r *Token) command(payload string) (outbound []string, err error) {
 
 	switch {
 	case response.StatusCode != 200:
-		l.Z{l.E: l.EINVALRESPONSE, l.M: response.Body}.Error()
-		return nil, l.EINVALRESPONSE
+		l.Z{l.E: mod_errors.EINVALRESPONSE, l.M: response.Body}.Error()
+		return nil, mod_errors.EINVALRESPONSE
 	}
 
 	switch _, err = buffer.ReadFrom(response.Body); {
@@ -94,7 +95,7 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 				}
 
 			default:
-				return nil, EComSetDomAdm
+				return nil, mod_errors.EComSetDomAdm
 			}
 
 		case inbound.Domain_Set_Administration != nil:
@@ -109,11 +110,11 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 				payload += inbound.Domain_Set_Administration.LISTDOMAINS.compile()
 
 			default:
-				return nil, EComSetDomSetAdm
+				return nil, mod_errors.EComSetDomSetAdm
 			}
 
 		default:
-			return nil, EComSet
+			return nil, mod_errors.EComSet
 		}
 
 		o[l.M] = "do"
@@ -124,9 +125,9 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 			o.Error()
 			return
 		case emptyResponse && outbound != nil:
-			o[l.E] = l.EINVALRESPONSE
+			o[l.E] = mod_errors.EINVALRESPONSE
 			o.Warning()
-			return outbound, l.EINVALRESPONSE
+			return outbound, mod_errors.EINVALRESPONSE
 		default:
 			o[l.M] = "done"
 			o.Informational()
@@ -134,7 +135,7 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 		}
 
 	default:
-		return nil, ECom
+		return nil, mod_errors.ECom
 	}
 }
 

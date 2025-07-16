@@ -2,6 +2,8 @@ package mod_bools
 
 import (
 	"strings"
+
+	"rmm23/src/mod_errors"
 )
 
 func StripIfBool1[E any](inbound E, flag bool) (outbound E) {
@@ -16,7 +18,7 @@ func StripIfBool1[E any](inbound E, flag bool) (outbound E) {
 func Parse(inbound string) (bool, error) {
 	switch {
 	case len(inbound) == 0:
-		return false, ENODATA
+		return false, mod_errors.ENODATA
 	}
 	inbound = strings.ToLower(inbound)
 
@@ -26,7 +28,7 @@ func Parse(inbound string) (bool, error) {
 	case "0", "f", "n", "false", "no", "off":
 		return false, nil
 	default:
-		return false, EINVAL
+		return false, mod_errors.EINVAL
 	}
 }
 func FormatBool(inbound bool) string {

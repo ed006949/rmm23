@@ -7,6 +7,7 @@ import (
 	"github.com/go-ldap/ldap/v3"
 
 	"rmm23/src/l"
+	"rmm23/src/mod_errors"
 )
 
 // portions taken from "github.com/go-ldap/ldap/v3"
@@ -36,7 +37,7 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 	)
 	switch {
 	case vo != reflect.Ptr:
-		return ENotPtr
+		return mod_errors.ENotPtr
 	}
 
 	var (
@@ -44,7 +45,7 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 	)
 	switch {
 	case sv.Kind() != reflect.Struct:
-		return ENotStruct
+		return mod_errors.ENotStruct
 	}
 
 	for n := 0; n < st.NumField(); n++ {

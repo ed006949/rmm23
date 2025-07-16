@@ -7,13 +7,13 @@ import (
 	"github.com/ProtonMail/go-crypto/openpgp/armor"
 	"github.com/ProtonMail/go-crypto/openpgp/packet"
 
-	"rmm23/src/l"
+	"rmm23/src/mod_errors"
 )
 
 func (r *SignDB) ReadSign(name string) (outbound *openpgp.Entity, err error) {
 	switch value, ok := (*r)[name]; {
 	case !ok:
-		return nil, l.ENOTFOUND
+		return nil, mod_errors.ENOTFOUND
 	default:
 		return value, nil
 	}
@@ -22,7 +22,7 @@ func (r *SignDB) ReadSign(name string) (outbound *openpgp.Entity, err error) {
 func (r *SignDB) WriteSign(name string, data []byte, passphrase []byte) (err error) {
 	switch _, ok := (*r)[name]; {
 	case ok:
-		return l.EDUPDATA
+		return mod_errors.EDUPDATA
 	}
 
 	var (

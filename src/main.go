@@ -9,6 +9,7 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_db"
+	"rmm23/src/mod_errors"
 	"rmm23/src/mod_vfs"
 )
 
@@ -35,7 +36,7 @@ func main() {
 	)
 
 	switch err = xmlConfig.load(); {
-	case errors.Is(err, l.ENOCONF):
+	case errors.Is(err, mod_errors.ENOCONF):
 		flag.PrintDefaults()
 		l.Z{l.E: err}.Critical()
 	case err != nil:

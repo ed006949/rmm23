@@ -8,6 +8,7 @@ import (
 	"github.com/avfs/avfs/vfs/memfs"
 
 	"rmm23/src/l"
+	"rmm23/src/mod_errors"
 	"rmm23/src/mod_vfs"
 )
 
@@ -53,7 +54,7 @@ func (r *xmlConf) load() (err error) {
 		}
 
 	default:
-		return l.ENOCONF
+		return mod_errors.ENOCONF
 	}
 
 	return

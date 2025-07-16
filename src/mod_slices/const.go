@@ -5,5 +5,5 @@ const (
 	FlagSort flag = 1 << iota
 	FlagCompact
 	FlagFilterEmpty
-	FlagNormalize flag = -1
+	FlagNormalize = ^flag(0)
 )
