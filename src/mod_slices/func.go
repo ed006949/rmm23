@@ -40,10 +40,27 @@ func Join[S ~[]E, E cmp.Ordered](inbound S, sep string) string {
 		interim []string
 	)
 	for _, b := range inbound {
-		switch d := fmt.Sprint(b); {
-		case len(d) > 0:
-			interim = append(interim, d)
+		switch d := any(b).(type) {
+		case string:
+			switch f := strings.TrimSpace(d); {
+			case len(f) > 0:
+				interim = append(interim, f)
+			}
+		case fmt.Stringer:
+			switch f := strings.TrimSpace(d.String()); {
+			case len(f) > 0:
+				interim = append(interim, f)
+			}
+		default:
+			switch f := strings.TrimSpace(fmt.Sprint(d)); {
+			case len(f) > 0:
+				interim = append(interim, f)
+			}
 		}
+		// switch d := strings.TrimSpace(fmt.Sprint(b)); {
+		// case len(d) > 0:
+		// 	interim = append(interim, d)
+		// }
 	}
 	return strings.Join(interim, sep)
 }
