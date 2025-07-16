@@ -1,8 +1,10 @@
 package mod_slices
 
+// Flags
 const (
-	FlagNormalize = iota
-	FlagSort
+	FlagSort flag = 1 << iota
 	FlagCompact
 	FlagFilterEmpty
+
+	FlagNormalize flag = -1
 )

@@ -8,18 +8,6 @@ import (
 	"strings"
 )
 
-// hasFlag checks if FlagNormalize or a specified flag is set within the given flags.
-func hasFlag(flag flag, flags ...flag) bool {
-	for _, b := range flags {
-		switch b {
-		case FlagNormalize, flag:
-			return true
-		default:
-		}
-	}
-	return false
-}
-
 // Filter returns a new slice containing elements from 'inbound' that are not present in 'filter'.
 func Filter[S ~[]E, E cmp.Ordered](inbound S, filter ...E) (outbound S) {
 	var (
@@ -58,15 +46,15 @@ func Sort[S ~[]E, E cmp.Ordered](inbound S) { slices.Sort(inbound) }
 func Compact[S ~[]E, E cmp.Ordered](inbound S) (outbound S) { return slices.Compact(inbound) }
 
 // Normalize applies a series of transformations (sort, compact, filter empty) to the inbound slice based on the provided flags.
-func Normalize[S ~[]E, E cmp.Ordered](inbound S, flags ...flag) (outbound S) {
+func Normalize[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound S) {
 	switch {
-	case hasFlag(FlagSort, flags...):
+	case flag.has(FlagSort):
 		Sort(inbound)
 		fallthrough
-	case hasFlag(FlagCompact, flags...):
+	case flag.has(FlagCompact):
 		inbound = Compact(inbound)
 		fallthrough
-	case hasFlag(FlagFilterEmpty, flags...):
+	case flag.has(FlagFilterEmpty):
 		inbound = FilterEmpty(inbound)
 		// fallthrough
 	}
@@ -75,14 +63,14 @@ func Normalize[S ~[]E, E cmp.Ordered](inbound S, flags ...flag) (outbound S) {
 
 // Join concatenates the elements of the inbound slice into a single string, separated by 'sep'.
 // The slice is normalized before joining based on the provided flags.
-func Join[S ~[]E, E cmp.Ordered](inbound S, sep string, flags ...flag) (outbound string) {
-	return strings.Join(SplitToStrings(inbound, flags...), sep)
+func Join[S ~[]E, E cmp.Ordered](inbound S, sep string, flag flag) (outbound string) {
+	return strings.Join(SplitToStrings(inbound, flag), sep)
 }
 
 // SplitToStrings converts the elements of the inbound slice to their string representations.
 // The slice is normalized before conversion based on the provided flags.
-func SplitToStrings[S ~[]E, E cmp.Ordered](inbound S, flags ...flag) (outbound []string) {
-	inbound = Normalize(inbound, flags...)
+func SplitToStrings[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound []string) {
+	inbound = Normalize(inbound, flag)
 	for _, b := range inbound {
 		outbound = append(outbound, fmt.Sprint(b))
 	}
