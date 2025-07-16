@@ -2,7 +2,6 @@ package l
 
 import (
 	"flag"
-	"net/url"
 	"strings"
 )
 
@@ -55,15 +54,4 @@ func FlagIsFlagExist(name string) (outbound bool) {
 		}
 	})
 	return
-}
-
-func UrlParse(inbound string) (outbound *url.URL, err error) {
-	switch outbound, err = url.Parse(inbound); {
-	case err != nil:
-		return nil, err
-	case len(outbound.String()) == 0:
-		return nil, ENODATA
-	default:
-		return outbound, nil
-	}
 }
