@@ -42,7 +42,7 @@ func (r *AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = mod_slices.SplitToStrings(values, mod_slices.FlagNormalize)
+	*r = mod_slices.ToStrings(values, mod_slices.FlagNormalize)
 	return
 }
 
@@ -96,12 +96,12 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = mod_slices.SplitToStrings(values, mod_slices.FlagNormalize)
+	*r = mod_slices.ToStrings(values, mod_slices.FlagNormalize)
 	return
 }
 
 func (r *AttrObjectClasses) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = mod_slices.SplitToStrings(values, mod_slices.FlagNormalize)
+	*r = mod_slices.ToStrings(values, mod_slices.FlagNormalize)
 	return
 }
 

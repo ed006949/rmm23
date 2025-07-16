@@ -22,14 +22,6 @@ func Filter[S ~[]E, E cmp.Ordered](inbound S, filter ...E) (outbound S) {
 	return
 }
 
-// FilterEmpty filters out the zero value of type E from the inbound slice.
-func FilterEmpty[S ~[]E, E cmp.Ordered](inbound S) (outbound S) {
-	var (
-		a E
-	)
-	return Filter(inbound, a)
-}
-
 // Index creates a map where keys are elements from the inbound slice and values are their indices.
 func Index[S ~[]E, E cmp.Ordered, M map[E]int](inbound S) (outbound M) {
 	outbound = make(M)
@@ -44,6 +36,14 @@ func Sort[S ~[]E, E cmp.Ordered](inbound S) { slices.Sort(inbound) }
 
 // Compact removes consecutive duplicate elements from the inbound slice.
 func Compact[S ~[]E, E cmp.Ordered](inbound S) (outbound S) { return slices.Compact(inbound) }
+
+// FilterEmpty filters out the zero value of type E from the inbound slice.
+func FilterEmpty[S ~[]E, E cmp.Ordered](inbound S) (outbound S) {
+	var (
+		a E
+	)
+	return Filter(inbound, a)
+}
 
 // Normalize applies a series of transformations (sort, compact, filter empty) to the inbound slice based on the provided flags.
 func Normalize[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound S) {
@@ -64,12 +64,12 @@ func Normalize[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound S) {
 // Join concatenates the elements of the inbound slice into a single string, separated by 'sep'.
 // The slice is normalized before joining based on the provided flags.
 func Join[S ~[]E, E cmp.Ordered](inbound S, sep string, flag flag) (outbound string) {
-	return strings.Join(SplitToStrings(inbound, flag), sep)
+	return strings.Join(ToStrings(inbound, flag), sep)
 }
 
-// SplitToStrings converts the elements of the inbound slice to their string representations.
+// ToStrings converts the elements of the inbound slice to their string representations.
 // The slice is normalized before conversion based on the provided flags.
-func SplitToStrings[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound []string) {
+func ToStrings[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound []string) {
 	inbound = Normalize(inbound, flag)
 	for _, b := range inbound {
 		outbound = append(outbound, fmt.Sprint(b))
