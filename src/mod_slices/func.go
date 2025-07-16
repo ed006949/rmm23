@@ -48,34 +48,34 @@ func Normalize[S ~[]E, E cmp.Ordered](inbound S) {
 }
 
 // Join concatenates the string representation of slice elements into a single string,
-// separated by 'sep'. It handles various types by converting them to string,
-// trimming whitespace, and only including non-empty results.
-func Join[S ~[]E, E cmp.Ordered](inbound S, sep string) string {
+// separated by 'sep'. It converts each element to its string representation,
+// trims whitespace, and only includes non-empty results.
+func Join[S ~[]E, E any](inbound S, sep string) string {
 	var (
 		interim []string
 	)
 	for _, b := range inbound {
-		switch d := any(b).(type) {
-		case string:
-			switch f := strings.TrimSpace(d); {
-			case len(f) > 0:
-				interim = append(interim, f)
-			}
-		case fmt.Stringer:
-			switch f := strings.TrimSpace(d.String()); {
-			case len(f) > 0:
-				interim = append(interim, f)
-			}
-		default:
-			switch f := strings.TrimSpace(fmt.Sprint(d)); {
-			case len(f) > 0:
-				interim = append(interim, f)
-			}
-		}
-		// switch d := strings.TrimSpace(fmt.Sprint(b)); {
-		// case len(d) > 0:
-		// 	interim = append(interim, d)
+		// switch d := any(b).(type) {
+		// case string:
+		// 	switch f := strings.TrimSpace(d); {
+		// 	case len(f) > 0:
+		// 		interim = append(interim, f)
+		// 	}
+		// case fmt.Stringer:
+		// 	switch f := strings.TrimSpace(d.String()); {
+		// 	case len(f) > 0:
+		// 		interim = append(interim, f)
+		// 	}
+		// default:
+		// 	switch f := strings.TrimSpace(fmt.Sprint(d)); {
+		// 	case len(f) > 0:
+		// 		interim = append(interim, f)
+		// 	}
 		// }
+		switch d := strings.TrimSpace(fmt.Sprint(b)); {
+		case len(d) > 0:
+			interim = append(interim, d)
+		}
 	}
 	return strings.Join(interim, sep)
 }
@@ -85,4 +85,23 @@ func Join[S ~[]E, E cmp.Ordered](inbound S, sep string) string {
 func NormalizeAndJoin[S ~[]E, E cmp.Ordered](inbound S, sep string) string {
 	Normalize(inbound)
 	return Join(inbound, sep)
+}
+
+// SplitAndNormalize splits the string representation of 'inbound' by 'sep',
+// trims whitespace from the result, and then normalizes the resulting slice.
+// Normalization includes sorting and removing duplicate elements.
+func SplitAndNormalize[E any](inbound E, sep string) []string {
+	var (
+		interim = strings.Split(strings.TrimSpace(fmt.Sprint(inbound)), sep)
+	)
+	Normalize(interim)
+	return interim
+}
+
+func SplitAndNormalize[E any](inbound E, sep string) []string {
+	var (
+		interim = strings.Split(strings.TrimSpace(fmt.Sprint(inbound)), sep)
+	)
+	Normalize(interim)
+	return interim
 }
