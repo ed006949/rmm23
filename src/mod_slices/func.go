@@ -97,11 +97,3 @@ func SplitAndNormalize[E any](inbound E, sep string) []string {
 	Normalize(interim)
 	return interim
 }
-
-func SplitAndNormalize[E any](inbound E, sep string) []string {
-	var (
-		interim = strings.Split(strings.TrimSpace(fmt.Sprint(inbound)), sep)
-	)
-	Normalize(interim)
-	return interim
-}
