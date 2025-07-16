@@ -50,7 +50,7 @@ func (r *Conf) search() (err error) {
 					newErr        error
 					searchResult  *ldap.SearchResult
 					searchRequest = ldap.NewSearchRequest(
-						mod_slices.Join([]string{d.DN.String(), b.DN.String()}, ","), // Base DN
+						mod_slices.Join([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
 						ldap.ScopeBaseObject, // Scope - search entire tree
 						ldap.DerefAlways,     // Deref
 						0,                    // Size limit (0 = no limit)
@@ -73,7 +73,7 @@ func (r *Conf) search() (err error) {
 					newErr        error
 					searchResult  *ldap.SearchResult
 					searchRequest = ldap.NewSearchRequest(
-						mod_slices.Join([]string{d.DN.String(), b.DN.String()}, ","), // Base DN
+						mod_slices.Join([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
 						ldap.ScopeWholeSubtree, // Scope - search entire tree
 						ldap.DerefAlways,       // Deref
 						0,                      // Size limit (0 = no limit)
