@@ -11,24 +11,6 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-// type ConfTable struct {
-//	Domain       map[AttrDN]*ElementDomain
-//	Users        map[AttrDN]*ElementUsers
-//	Groups       map[AttrDN]*ElementGroups
-//	Hosts        map[AttrDN]*ElementHosts
-//	IPHostNumber map[netip.Prefix]struct{}
-//	ID           map[AttrIDNumber]struct{}
-// }
-
-// type ConfDomain struct {
-//    DN            AttrDN `xml:"dn,attr"`
-//    domain        *ElementDomain
-//    users         ElementUsers
-//    groups        ElementGroups
-//    hosts         ElementHosts
-//    searchResults map[string]*ldap.SearchResult
-// }
-
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 	switch err = inbound.Fetch(); {
 	case err != nil:

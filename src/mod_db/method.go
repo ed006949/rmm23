@@ -8,4 +8,5 @@ import (
 // func (e *ElementGroup) RedisearchSchema() *redisearch.Schema  { return buildRedisearchSchema(e) }
 // func (e *ElementUser) RedisearchSchema() *redisearch.Schema   { return buildRedisearchSchema(e) }
 // func (e *ElementHost) RedisearchSchema() *redisearch.Schema   { return buildRedisearchSchema(e) }
+
 func (e *Entry) RedisearchSchema() *redisearch.Schema { return buildRedisearchSchema(e) }
