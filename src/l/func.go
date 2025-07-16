@@ -47,34 +47,6 @@ func EnvName(inbound string) (outbound string) {
 	)
 }
 
-func ParseBool(inbound string) (bool, error) {
-	switch {
-	case len(inbound) == 0:
-		return false, ENODATA
-	}
-	inbound = strings.ToLower(inbound)
-
-	switch inbound {
-	case "1", "t", "y", "true", "yes", "on":
-		return true, nil
-	case "0", "f", "n", "false", "no", "off":
-		return false, nil
-	default:
-		return false, EINVAL
-	}
-}
-func FormatBool(inbound bool) string {
-	switch inbound {
-	case true:
-		return "true"
-	default:
-		return "false"
-	}
-}
-
-func StripErr(err error)                                 {}
-func StripErr1[E any](inbound E, err error) (outbound E) { return inbound }
-
 func FlagIsFlagExist(name string) (outbound bool) {
 	flag.Visit(func(fn *flag.Flag) {
 		switch {
@@ -93,14 +65,5 @@ func UrlParse(inbound string) (outbound *url.URL, err error) {
 		return nil, ENODATA
 	default:
 		return outbound, nil
-	}
-}
-
-func StripIfBool1[E any](inbound E, flag bool) (outbound E) {
-	switch {
-	case flag:
-		return inbound
-	default:
-		return
 	}
 }

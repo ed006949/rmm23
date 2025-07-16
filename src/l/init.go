@@ -5,6 +5,9 @@ import (
 	"os"
 
 	"github.com/rs/zerolog"
+
+	"rmm23/src/mod_bools"
+	"rmm23/src/mod_errors"
 )
 
 func init() {
@@ -22,7 +25,7 @@ func InitCLI() {
 	var (
 		cliName      = flag.String(Name.Name(), os.Getenv(Name.EnvName()), Name.EnvDescription())
 		cliConfig    = flag.String(Config.Name(), os.Getenv(Config.EnvName()), Config.EnvDescription())
-		cliDryRun    = flag.Bool(DryRun.Name(), StripErr1(ParseBool(os.Getenv(DryRun.EnvName()))), DryRun.EnvDescription())
+		cliDryRun    = flag.Bool(DryRun.Name(), mod_errors.StripErr1(mod_bools.Parse(os.Getenv(DryRun.EnvName()))), DryRun.EnvDescription())
 		cliMode      = flag.String(Mode.Name(), os.Getenv(Mode.EnvName()), Mode.EnvDescription())
 		cliVerbosity = flag.String(Verbosity.Name(), os.Getenv(Verbosity.EnvName()), Verbosity.EnvDescription())
 	)

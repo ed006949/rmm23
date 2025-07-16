@@ -5,7 +5,7 @@ import (
 	"net/url"
 	"strings"
 
-	"rmm23/src/l"
+	"rmm23/src/mod_bools"
 )
 
 func (r *URL) UnmarshalXMLAttr(attr xml.Attr) (err error) {
@@ -34,4 +34,4 @@ func (r *URL) CleanUser() (username string, password string) {
 	return r.CleanUsername(), r.CleanPassword()
 }
 func (r *URL) CleanUsername() (outbound string) { return r.URL.User.Username() }
-func (r *URL) CleanPassword() (outbound string) { return l.StripIfBool1(r.URL.User.Password()) }
+func (r *URL) CleanPassword() (outbound string) { return mod_bools.StripIfBool1(r.URL.User.Password()) }
