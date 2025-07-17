@@ -3,7 +3,6 @@ package mod_db
 import (
 	"context"
 	"errors"
-	"strings"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/gomodule/redigo/redis"
@@ -68,7 +67,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		doc.Set("Legacy", d.Domain.LabeledURI)
 
 		switch err = rsClient.Index([]redisearch.Document{doc}...); {
-		case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
+		case errors.Is(err, EDocExist):
 			err = nil
 		case err != nil:
 			return
@@ -91,7 +90,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", g.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
+			case errors.Is(err, EDocExist):
 				err = nil
 			case err != nil:
 				return
@@ -113,7 +112,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", u.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && errors.Is(err, EDocExist):
+			case errors.Is(err, EDocExist):
 				err = nil
 			case err != nil:
 				return
@@ -135,7 +134,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", h.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && errors.Is(err, EDocExist):
+			case errors.Is(err, EDocExist):
 				err = nil
 			case err != nil:
 				return
