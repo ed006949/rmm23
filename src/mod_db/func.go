@@ -56,6 +56,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String(), 1.0)
 		)
 		doc.Set("Type", entryTypeDomain)
+
 		doc.Set("UUID", d.Domain.UUID)
 		doc.Set("DN", d.Domain.DN)
 		doc.Set("ObjectClass", mod_slices.Join(d.Domain.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
@@ -63,8 +64,10 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		doc.Set("CreateTimestamp", d.Domain.CreateTimestamp)
 		doc.Set("ModifiersName", d.Domain.ModifiersName)
 		doc.Set("ModifyTimestamp", d.Domain.ModifyTimestamp)
+
 		doc.Set("DC", d.Domain.DC)
 		doc.Set("O", d.Domain.O)
+
 		doc.Set("Legacy", d.Domain.LabeledURI)
 
 		switch err = rsClient.Index([]redisearch.Document{doc}...); {
@@ -74,21 +77,24 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			return
 		}
 
-		for _, g := range d.Groups {
-			doc = redisearch.NewDocument("ldap:entry:"+g.UUID.String(), 1.0)
+		for _, f := range d.Groups {
+			doc = redisearch.NewDocument("ldap:entry:"+f.UUID.String(), 1.0)
 			doc.Set("Type", entryTypeGroup)
-			doc.Set("UUID", g.UUID)
-			doc.Set("DN", g.DN)
-			doc.Set("ObjectClass", mod_slices.Join(g.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
-			doc.Set("CreatorsName", g.CreatorsName)
-			doc.Set("CreateTimestamp", g.CreateTimestamp)
-			doc.Set("ModifiersName", g.ModifiersName)
-			doc.Set("ModifyTimestamp", g.ModifyTimestamp)
-			doc.Set("CN", g.CN)
-			doc.Set("Owner", mod_slices.Join(g.Owner, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
-			doc.Set("Member", mod_slices.Join(g.Member, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
-			doc.Set("GIDNumber", g.GIDNumber)
-			doc.Set("Legacy", g.LabeledURI)
+
+			doc.Set("UUID", f.UUID)
+			doc.Set("DN", f.DN)
+			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("CreatorsName", f.CreatorsName)
+			doc.Set("CreateTimestamp", f.CreateTimestamp)
+			doc.Set("ModifiersName", f.ModifiersName)
+			doc.Set("ModifyTimestamp", f.ModifyTimestamp)
+
+			doc.Set("CN", f.CN)
+			doc.Set("GIDNumber", f.GIDNumber)
+			doc.Set("Member", mod_slices.Join(f.Member, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("Owner", mod_slices.Join(f.Owner, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+
+			doc.Set("Legacy", f.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
 			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
@@ -98,19 +104,39 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			}
 		}
 
-		for _, u := range d.Users {
-			doc = redisearch.NewDocument("ldap:entry:"+u.UUID.String(), 1.0)
+		for _, f := range d.Users {
+			doc = redisearch.NewDocument("ldap:entry:"+f.UUID.String(), 1.0)
 			doc.Set("Type", entryTypeUser)
-			doc.Set("UUID", u.UUID)
-			doc.Set("DN", u.DN)
-			doc.Set("ObjectClass", mod_slices.Join(u.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
-			doc.Set("CreatorsName", u.CreatorsName)
-			doc.Set("CreateTimestamp", u.CreateTimestamp)
-			doc.Set("ModifiersName", u.ModifiersName)
-			doc.Set("ModifyTimestamp", u.ModifyTimestamp)
-			doc.Set("CN", u.CN)
-			doc.Set("GIDNumber", u.GIDNumber)
-			doc.Set("Legacy", u.LabeledURI)
+
+			doc.Set("UUID", f.UUID)
+			doc.Set("DN", f.DN)
+			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("CreatorsName", f.CreatorsName)
+			doc.Set("CreateTimestamp", f.CreateTimestamp)
+			doc.Set("ModifiersName", f.ModifiersName)
+			doc.Set("ModifyTimestamp", f.ModifyTimestamp)
+
+			doc.Set("CN", f.CN)
+			doc.Set("Description", f.Description)
+			doc.Set("DestinationIndicator", f.DestinationIndicator)
+			doc.Set("DisplayName", f.DisplayName)
+			doc.Set("GIDNumber", f.GIDNumber)
+			doc.Set("HomeDirectory", f.HomeDirectory)
+			doc.Set("IPHostNumber", f.IPHostNumber)
+			doc.Set("Mail", f.Mail)
+			// doc.Set("MemberOf", f.MemberOf)
+			doc.Set("O", f.O)
+			doc.Set("OU", f.OU)
+			doc.Set("SN", f.SN)
+			doc.Set("SSHPublicKey", f.SSHPublicKey)
+			doc.Set("TelephoneNumber", f.TelephoneNumber)
+			doc.Set("TelexNumber", f.TelexNumber)
+			doc.Set("UID", f.UID)
+			doc.Set("UIDNumber", f.UIDNumber)
+			doc.Set("UserPKCS12", f.UserPKCS12)
+			doc.Set("UserPassword", f.UserPassword)
+
+			doc.Set("Legacy", f.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
 			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
@@ -120,19 +146,28 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			}
 		}
 
-		for _, h := range d.Hosts {
-			doc = redisearch.NewDocument("ldap:entry:"+h.UUID.String(), 1.0)
+		for _, f := range d.Hosts {
+			doc = redisearch.NewDocument("ldap:entry:"+f.UUID.String(), 1.0)
 			doc.Set("Type", entryTypeHost)
-			doc.Set("UUID", h.UUID)
-			doc.Set("DN", h.DN)
-			doc.Set("ObjectClass", mod_slices.Join(h.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
-			doc.Set("CreatorsName", h.CreatorsName)
-			doc.Set("CreateTimestamp", h.CreateTimestamp)
-			doc.Set("ModifiersName", h.ModifiersName)
-			doc.Set("ModifyTimestamp", h.ModifyTimestamp)
-			doc.Set("CN", h.CN)
-			doc.Set("GIDNumber", h.GIDNumber)
-			doc.Set("Legacy", h.LabeledURI)
+
+			doc.Set("UUID", f.UUID)
+			doc.Set("DN", f.DN)
+			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("CreatorsName", f.CreatorsName)
+			doc.Set("CreateTimestamp", f.CreateTimestamp)
+			doc.Set("ModifiersName", f.ModifiersName)
+			doc.Set("ModifyTimestamp", f.ModifyTimestamp)
+
+			doc.Set("CN", f.CN)
+			doc.Set("GIDNumber", f.GIDNumber)
+			doc.Set("HomeDirectory", f.HomeDirectory)
+			// doc.Set("MemberOf", f.MemberOf)
+			doc.Set("SN", f.SN)
+			doc.Set("UID", f.UID)
+			doc.Set("UIDNumber", f.UIDNumber)
+			doc.Set("UserPKCS12", f.UserPKCS12)
+
+			doc.Set("Legacy", f.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
 			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
