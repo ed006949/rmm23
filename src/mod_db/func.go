@@ -3,10 +3,10 @@ package mod_db
 import (
 	"context"
 	"strings"
+	"time"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/gomodule/redigo/redis"
-	"github.com/google/uuid"
 
 	"rmm23/src/mod_ldap"
 	"rmm23/src/mod_slices"
@@ -30,15 +30,15 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			DialContext: func(ctx context.Context) (redis.Conn, error) {
 				return redis.DialContext(ctx, rcNetwork, rcAddress, redis.DialDatabase(rcDB))
 			},
-			// TestOnBorrow: func(c redis.Conn, t time.Time) (err error) {
-			// 	_, err = c.Do("PING")
-			// 	return err
-			// },
-			// MaxIdle:         4,
-			// MaxActive:       4,
-			// IdleTimeout:     240 * time.Second,
-			// Wait:            true,
-			// MaxConnLifetime: 0,
+			TestOnBorrow: func(c redis.Conn, t time.Time) (tErr error) {
+				_, tErr = c.Do("PING")
+				return
+			},
+			MaxIdle:         4,
+			MaxActive:       4,
+			IdleTimeout:     240 * time.Second,
+			Wait:            true,
+			MaxConnLifetime: 0,
 		}, rcName)
 		entry = Entry{}
 		_     = rsClient.Drop() // test&dev, delete old entries
@@ -74,7 +74,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		}
 
 		for _, g := range d.Groups {
-			doc = redisearch.NewDocument("ldap:entry:"+uuid.UUID(g.UUID).String(), 1.0)
+			doc = redisearch.NewDocument("ldap:entry:"+g.UUID.String(), 1.0)
 			doc.Set("Type", EntryTypeGroup)
 			doc.Set("UUID", g.UUID)
 			doc.Set("DN", g.DN)
@@ -98,7 +98,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		}
 
 		for _, u := range d.Users {
-			doc = redisearch.NewDocument("ldap:entry:"+uuid.UUID(u.UUID).String(), 1.0)
+			doc = redisearch.NewDocument("ldap:entry:"+u.UUID.String(), 1.0)
 			doc.Set("Type", EntryTypeUser)
 			doc.Set("UUID", u.UUID)
 			doc.Set("DN", u.DN)
@@ -120,7 +120,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		}
 
 		for _, h := range d.Hosts {
-			doc = redisearch.NewDocument("ldap:entry:"+uuid.UUID(h.UUID).String(), 1.0)
+			doc = redisearch.NewDocument("ldap:entry:"+h.UUID.String(), 1.0)
 			doc.Set("Type", EntryTypeHost)
 			doc.Set("UUID", h.UUID)
 			doc.Set("DN", h.DN)
