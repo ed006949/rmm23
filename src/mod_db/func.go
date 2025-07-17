@@ -2,9 +2,11 @@ package mod_db
 
 import (
 	"context"
+	"errors"
 	"strings"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
+	"github.com/gomodule/redigo/redis"
 	"github.com/google/uuid"
 
 	"rmm23/src/mod_ldap"
@@ -18,10 +20,30 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 	}
 
 	var (
-		rsClient = redisearch.NewClient("10.133.0.223:6379", "entryIdx")
-		entry    = Entry{}
-		_        = rsClient.Drop() // test&dev
-		// _        = rsClient.DropIndex(false) // don't delete old entries
+		rcAddress = "10.133.0.223:6379"
+		rcDB      = 1
+		rcNetwork = "tcp"
+		rcName    = "entryIdx"
+	)
+
+	var (
+		rsClient = redisearch.NewClientFromPool(&redis.Pool{
+			DialContext: func(ctx context.Context) (redis.Conn, error) {
+				return redis.DialContext(ctx, rcNetwork, rcAddress, redis.DialDatabase(rcDB))
+			},
+			// TestOnBorrow: func(c redis.Conn, t time.Time) (err error) {
+			// 	_, err = c.Do("PING")
+			// 	return err
+			// },
+			// MaxIdle:         4,
+			// MaxActive:       4,
+			// IdleTimeout:     240 * time.Second,
+			// Wait:            true,
+			// MaxConnLifetime: 0,
+		}, rcName)
+		entry = Entry{}
+		_     = rsClient.Drop() // test&dev, delete old entries
+		// _        = rsClient.DropIndex(false) // prod, don't delete old entries
 	)
 
 	switch err = rsClient.CreateIndex(entry.RedisearchSchema()); {
@@ -46,7 +68,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		doc.Set("Legacy", d.Domain.LabeledURI)
 
 		switch err = rsClient.Index([]redisearch.Document{doc}...); {
-		case err != nil && strings.Contains(err.Error(), "Document already exists"):
+		case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
 			err = nil
 		case err != nil:
 			return
@@ -69,7 +91,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", g.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && strings.Contains(err.Error(), "Document already exists"):
+			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
 				err = nil
 			case err != nil:
 				return
@@ -91,7 +113,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", u.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && strings.Contains(err.Error(), "Document already exists"):
+			case err != nil && errors.Is(err, EDocExist):
 				err = nil
 			case err != nil:
 				return
@@ -113,7 +135,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", h.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && strings.Contains(err.Error(), "Document already exists"):
+			case err != nil && errors.Is(err, EDocExist):
 				err = nil
 			case err != nil:
 				return
