@@ -2,7 +2,7 @@ package mod_db
 
 import (
 	"context"
-	"errors"
+	"strings"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/gomodule/redigo/redis"
@@ -20,7 +20,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 	var (
 		rcAddress = "10.133.0.223:6379"
-		rcDB      = 1
+		rcDB      = 0 // only zero for indexing
 		rcNetwork = "tcp"
 		rcName    = "entryIdx"
 	)
@@ -52,7 +52,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 	for _, d := range inbound.Domain {
 		var (
-			doc = redisearch.NewDocument("ldap:entry:"+uuid.UUID(d.Domain.UUID).String(), 1.0)
+			doc = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String(), 1.0)
 		)
 		doc.Set("Type", EntryTypeDomain)
 		doc.Set("UUID", d.Domain.UUID)
@@ -67,7 +67,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		doc.Set("Legacy", d.Domain.LabeledURI)
 
 		switch err = rsClient.Index([]redisearch.Document{doc}...); {
-		case errors.Is(err, EDocExist):
+		case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
 			err = nil
 		case err != nil:
 			return
@@ -90,7 +90,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", g.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case errors.Is(err, EDocExist):
+			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
 				err = nil
 			case err != nil:
 				return
@@ -112,7 +112,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", u.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case errors.Is(err, EDocExist):
+			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
 				err = nil
 			case err != nil:
 				return
@@ -134,7 +134,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", h.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case errors.Is(err, EDocExist):
+			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
 				err = nil
 			case err != nil:
 				return

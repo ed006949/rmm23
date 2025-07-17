@@ -5,6 +5,7 @@ import (
 	"errors"
 
 	"github.com/go-ldap/ldap/v3"
+	"github.com/google/uuid"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
@@ -289,3 +290,5 @@ func (r *AttrDNs) String() (outbound []string) {
 	}
 	return
 }
+
+func (r *AttrUUID) String() string { return uuid.UUID(*r).String() }
