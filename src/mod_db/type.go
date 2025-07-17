@@ -23,7 +23,7 @@ type Entry struct {
 	// element meta data
 	UUID            mod_ldap.AttrUUID          `ldap:"entryUUID" msgpack:"entryUUID,omitempty" json:"entryUUID,omitempty" redis:"uuid" redisearch:"text,sortable"`                     // must be unique
 	DN              mod_ldap.AttrDN            `ldap:"dn" msgpack:"dn,omitempty" json:"dn,omitempty" redis:"dn" redisearch:"text,sortable"`                                            // must be unique
-	ObjectClass     mod_ldap.AttrObjectClasses `ldap:"objectClass" msgpack:"objectClass,omitempty" json:"objectClass,omitempty" redis:"objectClass" redisearch:"text"`                 // entry type
+	ObjectClass     mod_ldap.AttrObjectClasses `ldap:"objectClass" msgpack:"objectClass,omitempty" json:"objectClass,omitempty" redis:"objectClass" redisearch:"tag"`                  // entry type
 	CreatorsName    mod_ldap.AttrDN            `ldap:"creatorsName" msgpack:"creatorsName,omitempty" json:"creatorsName,omitempty" redis:"creatorsName" redisearch:"text"`             //
 	CreateTimestamp mod_ldap.AttrTimestamp     `ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" json:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"text"` //
 	ModifiersName   mod_ldap.AttrDN            `ldap:"modifiersName" msgpack:"modifiersName,omitempty" json:"modifiersName,omitempty" redis:"modifiersName" redisearch:"text"`         //
@@ -39,19 +39,19 @@ type Entry struct {
 	HomeDirectory        mod_ldap.AttrString                `ldap:"homeDirectory" msgpack:"homeDirectory,omitempty" json:"homeDirectory,omitempty" redis:"homeDirectory" redisearch:"text"`                             //
 	IPHostNumber         mod_ldap.AttrIPHostNumbers         `ldap:"ipHostNumber" msgpack:"ipHostNumber,omitempty" json:"ipHostNumber,omitempty" redis:"ipHostNumber" redisearch:"text,sortable"`                        //
 	Mail                 mod_ldap.AttrMails                 `ldap:"mail" msgpack:"mail,omitempty" json:"mail,omitempty" redis:"mail" redisearch:"text"`                                                                 //
-	Member               mod_ldap.AttrDNs                   `ldap:"member" msgpack:"member,omitempty" json:"member,omitempty" redis:"member" redisearch:"text,sortable"`                                                //
-	MemberOf             mod_ldap.AttrDNs                   `ldap:"memberOf" msgpack:"memberOf,omitempty" json:"memberOf,omitempty" redis:"memberOf" redisearch:"text"`                                                 // ignore it, don't cache, calculate on the fly or avoid
+	Member               mod_ldap.AttrDNs                   `ldap:"member" msgpack:"member,omitempty" json:"member,omitempty" redis:"member" redisearch:"tag,sortable"`                                                 //
 	O                    mod_ldap.AttrString                `ldap:"o" msgpack:"o,omitempty" json:"o,omitempty" redis:"o" redisearch:"text"`                                                                             //
 	OU                   mod_ldap.AttrString                `ldap:"ou" msgpack:"ou,omitempty" json:"ou,omitempty" redis:"ou" redisearch:"text"`                                                                         //
-	Owner                mod_ldap.AttrDNs                   `ldap:"owner" msgpack:"owner,omitempty" json:"owner,omitempty" redis:"owner" redisearch:"text"`                                                             //
+	Owner                mod_ldap.AttrDNs                   `ldap:"owner" msgpack:"owner,omitempty" json:"owner,omitempty" redis:"owner" redisearch:"tag"`                                                              //
 	SN                   mod_ldap.AttrString                `ldap:"sn" msgpack:"sn,omitempty" json:"sn,omitempty" redis:"sn" redisearch:"text"`                                                                         //
-	SSHPublicKey         mod_ldap.AttrSSHPublicKeys         `ldap:"sshPublicKey" msgpack:"sshPublicKey,omitempty" json:"sshPublicKey,omitempty" redis:"sshPublicKey" redisearch:"text"`                                 //
+	SSHPublicKey         mod_ldap.AttrSSHPublicKeys         `ldap:"sshPublicKey" msgpack:"sshPublicKey,omitempty" json:"sshPublicKey,omitempty" redis:"sshPublicKey" redisearch:"tag"`                                  //
 	TelephoneNumber      mod_ldap.AttrStrings               `ldap:"telephoneNumber" msgpack:"telephoneNumber,omitempty" json:"telephoneNumber,omitempty" redis:"telephoneNumber" redisearch:"text"`                     //
 	TelexNumber          mod_ldap.AttrStrings               `ldap:"telexNumber" msgpack:"telexNumber,omitempty" json:"telexNumber,omitempty" redis:"telexNumber" redisearch:"text"`                                     //
 	UID                  mod_ldap.AttrID                    `ldap:"uid" msgpack:"uid,omitempty" json:"uid,omitempty" redis:"uid" redisearch:"text,sortable"`                                                            // RDN in user's context
 	UIDNumber            mod_ldap.AttrIDNumber              `ldap:"uidNumber" msgpack:"uidNumber,omitempty" json:"uidNumber,omitempty" redis:"uidNumber" redisearch:"numeric,sortable"`                                 //
-	UserPKCS12           mod_ldap.AttrUserPKCS12s           `ldap:"userPKCS12" msgpack:"userPKCS12,omitempty" json:"userPKCS12,omitempty" redis:"userPKCS12" redisearch:"text"`                                         //
+	UserPKCS12           mod_ldap.AttrUserPKCS12s           `ldap:"userPKCS12" msgpack:"userPKCS12,omitempty" json:"userPKCS12,omitempty" redis:"userPKCS12" redisearch:"tag"`                                          //
 	UserPassword         mod_ldap.AttrUserPassword          `ldap:"userPassword" msgpack:"userPassword,omitempty" json:"userPassword,omitempty" redis:"userPassword" redisearch:"text"`                                 //
+	// MemberOf             mod_ldap.AttrDNs                   `ldap:"memberOf" msgpack:"memberOf,omitempty" json:"memberOf,omitempty" redis:"memberOf" redisearch:"tag"`                                                  // ignore it, don't cache, calculate on the fly or avoid
 
 	// specific data
 	AAA string `msgpack:"host_aaa,omitempty" json:"host_aaa,omitempty" redis:"host_aaa" redisearch:"text"` // entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`
@@ -68,3 +68,8 @@ type Entry struct {
 	// specific data (space-separated KV DB stored as labelledURIs)
 	Legacy []mod_ldap.LabeledURILegacy `ldap:"labelledURI" msgpack:"-" json:"-" redis:"-" redisearch:"-"` //
 }
+
+type Domain struct{ Entry }
+type Group struct{ Entry }
+type User struct{ Entry }
+type Host struct{ Entry }

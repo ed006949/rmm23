@@ -5,6 +5,7 @@ const (
 	rediSearchTagName           = "redisearch"
 	rediSearchTagTypeIgnore     = "-"
 	rediSearchTagTypeTag        = "tag"
+	rediSearchTagTypeGeo        = "geo"
 	rediSearchTagTypeText       = "text"
 	rediSearchTagTypeNumeric    = "numeric"
 	rediSearchTagOptionSortable = "sortable"

@@ -140,6 +140,20 @@ func (r *ConfDomain) unmarshal() (err error) {
 	}
 	return
 }
+func (r Elements) unmarshal(inbound *ldap.SearchResult) (err error) {
+	for _, entry := range inbound.Entries {
+		var (
+			interim Element
+		)
+		switch newErr := UnmarshalEntry(entry, &interim); {
+		case newErr != nil:
+			err = errors.Join(err, newErr)
+			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
+		}
+		r[interim.DN] = &interim
+	}
+	return
+}
 func (r *ElementDomain) unmarshal(inbound *ldap.SearchResult) (err error) {
 	for _, entry := range inbound.Entries {
 		var (

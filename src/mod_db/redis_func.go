@@ -5,59 +5,55 @@ import (
 	"strings"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
+
+	"rmm23/src/mod_strings"
 )
 
-// buildRedisearchSchema dynamically builds a RediSearch schema from a struct's tags.
-// It uses the `redis` tag for the field name and the `redisearch` tag for the type and options.
-// Example: `redis:"user_name" redisearch:"text,sortable"`
 func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 	var (
-		schema = redisearch.NewSchema(redisearch.DefaultOptions) // Initialize a new schema with default options.
-		elem   = reflect.TypeOf(inbound).Elem()                  // Get the type of the element that the interface `inbound` points to.
+		schema = redisearch.NewSchema(redisearch.DefaultOptions)
+		elem   = reflect.TypeOf(inbound).Elem()
 	)
 
-	// Iterate over all the fields of the struct.
 	for i := 0; i < elem.NumField(); i++ {
 		var (
 			field    = elem.Field(i)
-			redisTag = field.Tag.Get(redisTagName) // Get the `redis` tag, which defines the field name in Redis.
+			redisTag = field.Tag.Get(redisTagName)
 		)
 		switch redisTag {
-		case "": // Skip fields that don't have a `redis` tag.
+		case "":
 			continue
 		}
 
 		var (
-			redisearchTag = field.Tag.Get(rediSearchTagName) // Get the `redisearch` tag, which defines the field type and options for RediSearch.
+			redisearchTag = field.Tag.Get(rediSearchTagName)
 		)
 		switch redisearchTag {
-		case "": // Skip fields that don't have a `redisearch` tag.
+		case "":
 			continue
 		}
 
-		// Parse the redisearch tag string, which is expected to be comma-separated.
 		var (
 			parts = strings.Split(redisearchTag, ",")
 		)
-		// If the tag is empty after splitting, skip this field.
+
 		switch len(parts) {
 		case 0:
 			continue
 		}
 
-		// maps to hold the parsed tag components.
 		var (
-			types    = make(map[string]bool) // e.g., "text", "numeric"
-			options  = make(map[string]bool) // e.g., "sortable"
-			unknowns = make(map[string]bool) // for any unrecognized parts
+			types    = make(map[string]bool)
+			options  = make(map[string]bool)
+			unknowns = make(map[string]bool)
 		)
-		// Categorize each part of the tag.
+
 		for _, opt := range parts {
 			var (
 				trimmedOpt = strings.TrimSpace(opt)
 			)
 			switch trimmedOpt {
-			case rediSearchTagTypeIgnore, rediSearchTagTypeText, rediSearchTagTypeNumeric:
+			case rediSearchTagTypeIgnore, rediSearchTagTypeText, rediSearchTagTypeNumeric, rediSearchTagTypeTag, rediSearchTagTypeGeo:
 				types[trimmedOpt] = true
 			case rediSearchTagOptionSortable:
 				options[trimmedOpt] = true
@@ -66,29 +62,34 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 			}
 		}
 
-		// Check for errors in the tag definition.
 		switch {
-		case len(types) > 1: // A field can only have one type.
+		case len(types) > 1:
 			panic("multiple types")
-		case len(unknowns) > 0: // The tag should not contain any unknown options.
+		case len(unknowns) > 0:
 			panic("unknown tag fields")
 		}
 
-		// Add the field to the schema based on its type.
 		switch {
-		case types[rediSearchTagTypeIgnore]: // The "-" type indicates that the field should be ignored.
-		case types[rediSearchTagTypeText], types[rediSearchTagTypeNumeric]: // Handle 'text', 'numeric' type fields.
+		case types[rediSearchTagTypeIgnore]:
+		case types[rediSearchTagTypeText]:
+			schema.AddField(redisearch.NewTextFieldOptions("$."+redisTag, redisearch.TextFieldOptions{
+				Sortable: options[rediSearchTagOptionSortable],
+			}))
+		case types[rediSearchTagTypeNumeric]:
+			schema.AddField(redisearch.NewNumericFieldOptions("$."+redisTag, redisearch.NumericFieldOptions{
+				Sortable: options[rediSearchTagOptionSortable],
+			}))
+		case types[rediSearchTagTypeTag]:
 			schema.AddField(redisearch.NewTagFieldOptions("$."+redisTag, redisearch.TagFieldOptions{
 				Sortable:  options[rediSearchTagOptionSortable],
-				Separator: '\x1f',
+				Separator: mod_strings.SliceDelimiter[0],
 			}))
-			// case types[rediSearchTagTypeNumeric]: // Handle 'numeric' type fields.
-			// 	schema.AddField(redisearch.NewNumericFieldOptions("$."+redisTag, redisearch.NumericFieldOptions{
-			// 		Sortable: options[rediSearchTagOptionSortable],
-			// 	}))
+		case types[rediSearchTagTypeGeo]:
+			schema.AddField(redisearch.NewGeoFieldOptions("$."+redisTag, redisearch.GeoFieldOptions{}))
+		default:
+			panic("unwilling to perform")
 		}
 	}
 
-	// Return the fully constructed schema.
 	return schema
 }

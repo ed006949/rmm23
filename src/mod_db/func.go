@@ -27,9 +27,10 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 	)
 
 	var (
+		// RediSearch requires DB 0 for index creation
 		rsClient = redisearch.NewClientFromPool(&redis.Pool{
 			DialContext: func(ctx context.Context) (redis.Conn, error) {
-				return redis.DialContext(ctx, rcNetwork, rcAddress, redis.DialDatabase(0 /* only zero for indexing */))
+				return redis.DialContext(ctx, rcNetwork, rcAddress, redis.DialDatabase(0))
 			},
 			TestOnBorrow: func(c redis.Conn, t time.Time) (tErr error) {
 				_, tErr = c.Do("PING")
@@ -46,7 +47,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		// _        = rsClient.DropIndex(false) // prod, don't delete old entries
 	)
 
-	switch err = rsClient.CreateIndex(entry.RedisearchSchema()); {
+	switch err = rsClient.CreateIndex(entry.redisearchSchema()); {
 	case err != nil:
 		return
 	}
@@ -78,7 +79,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		}
 
 		for _, f := range d.Groups {
-			doc = redisearch.NewDocument("ldap:entry:"+f.UUID.String(), 1.0)
+			doc = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String()+":"+f.UUID.String(), 1.0)
 			doc.Set("Type", entryTypeGroup)
 
 			doc.Set("UUID", f.UUID)
@@ -105,7 +106,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		}
 
 		for _, f := range d.Users {
-			doc = redisearch.NewDocument("ldap:entry:"+f.UUID.String(), 1.0)
+			doc = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String()+":"+f.UUID.String(), 1.0)
 			doc.Set("Type", entryTypeUser)
 
 			doc.Set("UUID", f.UUID)
@@ -147,7 +148,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		}
 
 		for _, f := range d.Hosts {
-			doc = redisearch.NewDocument("ldap:entry:"+f.UUID.String(), 1.0)
+			doc = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String()+":"+f.UUID.String(), 1.0)
 			doc.Set("Type", entryTypeHost)
 
 			doc.Set("UUID", f.UUID)
