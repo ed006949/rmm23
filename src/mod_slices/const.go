@@ -1,6 +1,6 @@
 package mod_slices
 
-// Flags
+// normalization flags
 const (
 	FlagSort flag = 1 << iota
 	FlagCompact

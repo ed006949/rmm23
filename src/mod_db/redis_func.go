@@ -77,7 +77,7 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 		// Add the field to the schema based on its type.
 		switch {
 		case types[rediSearchTagTypeIgnore]: // The "-" type indicates that the field should be ignored.
-		case types[rediSearchTagTypeText], types[rediSearchTagTypeNumeric]: // Handle 'text' type fields.
+		case types[rediSearchTagTypeText], types[rediSearchTagTypeNumeric]: // Handle 'text', 'numeric' type fields.
 			schema.AddField(redisearch.NewTagFieldOptions("$."+redisTag, redisearch.TagFieldOptions{
 				Sortable:  options[rediSearchTagOptionSortable],
 				Separator: '\x1f',

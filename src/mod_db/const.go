@@ -4,18 +4,15 @@ const (
 	redisTagName                = "redis"
 	rediSearchTagName           = "redisearch"
 	rediSearchTagTypeIgnore     = "-"
+	rediSearchTagTypeTag        = "tag"
 	rediSearchTagTypeText       = "text"
 	rediSearchTagTypeNumeric    = "numeric"
 	rediSearchTagOptionSortable = "sortable"
 )
 
 const (
-	EntryTypeDomain EntryType = iota
-	EntryTypeGroup
-	EntryTypeUser
-	EntryTypeHost
-)
-
-const (
-	sliceDelimiter = "\x1f"
+	entryTypeDomain EntryType = iota
+	entryTypeGroup
+	entryTypeUser
+	entryTypeHost
 )

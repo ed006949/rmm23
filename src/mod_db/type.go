@@ -4,8 +4,14 @@ import (
 	"net/netip"
 	"net/url"
 
+	"github.com/gomodule/redigo/redis"
+
 	"rmm23/src/mod_ldap"
 )
+
+type Conn struct {
+	conn redis.Conn
+}
 
 type EntryType int
 

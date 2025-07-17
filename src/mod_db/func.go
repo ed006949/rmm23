@@ -10,6 +10,7 @@ import (
 
 	"rmm23/src/mod_ldap"
 	"rmm23/src/mod_slices"
+	"rmm23/src/mod_strings"
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
@@ -54,10 +55,10 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		var (
 			doc = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String(), 1.0)
 		)
-		doc.Set("Type", EntryTypeDomain)
+		doc.Set("Type", entryTypeDomain)
 		doc.Set("UUID", d.Domain.UUID)
 		doc.Set("DN", d.Domain.DN)
-		doc.Set("ObjectClass", mod_slices.Join(d.Domain.ObjectClass, sliceDelimiter, mod_slices.FlagNormalize))
+		doc.Set("ObjectClass", mod_slices.Join(d.Domain.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
 		doc.Set("CreatorsName", d.Domain.CreatorsName)
 		doc.Set("CreateTimestamp", d.Domain.CreateTimestamp)
 		doc.Set("ModifiersName", d.Domain.ModifiersName)
@@ -75,17 +76,17 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 		for _, g := range d.Groups {
 			doc = redisearch.NewDocument("ldap:entry:"+g.UUID.String(), 1.0)
-			doc.Set("Type", EntryTypeGroup)
+			doc.Set("Type", entryTypeGroup)
 			doc.Set("UUID", g.UUID)
 			doc.Set("DN", g.DN)
-			doc.Set("ObjectClass", mod_slices.Join(g.ObjectClass, sliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("ObjectClass", mod_slices.Join(g.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
 			doc.Set("CreatorsName", g.CreatorsName)
 			doc.Set("CreateTimestamp", g.CreateTimestamp)
 			doc.Set("ModifiersName", g.ModifiersName)
 			doc.Set("ModifyTimestamp", g.ModifyTimestamp)
 			doc.Set("CN", g.CN)
-			doc.Set("Owner", mod_slices.Join(g.Owner, sliceDelimiter, mod_slices.FlagNormalize))
-			doc.Set("Member", mod_slices.Join(g.Member, sliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("Owner", mod_slices.Join(g.Owner, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("Member", mod_slices.Join(g.Member, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
 			doc.Set("GIDNumber", g.GIDNumber)
 			doc.Set("Legacy", g.LabeledURI)
 
@@ -99,10 +100,10 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 		for _, u := range d.Users {
 			doc = redisearch.NewDocument("ldap:entry:"+u.UUID.String(), 1.0)
-			doc.Set("Type", EntryTypeUser)
+			doc.Set("Type", entryTypeUser)
 			doc.Set("UUID", u.UUID)
 			doc.Set("DN", u.DN)
-			doc.Set("ObjectClass", mod_slices.Join(u.ObjectClass, sliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("ObjectClass", mod_slices.Join(u.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
 			doc.Set("CreatorsName", u.CreatorsName)
 			doc.Set("CreateTimestamp", u.CreateTimestamp)
 			doc.Set("ModifiersName", u.ModifiersName)
@@ -121,10 +122,10 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 		for _, h := range d.Hosts {
 			doc = redisearch.NewDocument("ldap:entry:"+h.UUID.String(), 1.0)
-			doc.Set("Type", EntryTypeHost)
+			doc.Set("Type", entryTypeHost)
 			doc.Set("UUID", h.UUID)
 			doc.Set("DN", h.DN)
-			doc.Set("ObjectClass", mod_slices.Join(h.ObjectClass, sliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("ObjectClass", mod_slices.Join(h.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
 			doc.Set("CreatorsName", h.CreatorsName)
 			doc.Set("CreateTimestamp", h.CreateTimestamp)
 			doc.Set("ModifiersName", h.ModifiersName)
