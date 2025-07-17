@@ -2,12 +2,12 @@ package mod_db
 
 import (
 	"context"
-	"strings"
 	"time"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/gomodule/redigo/redis"
 
+	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
 	"rmm23/src/mod_slices"
 	"rmm23/src/mod_strings"
@@ -21,7 +21,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 	var (
 		rcAddress = "10.133.0.223:6379"
-		rcDB      = 0 // only zero for indexing
+		// rcDB      = 0
 		rcNetwork = "tcp"
 		rcName    = "entryIdx"
 	)
@@ -29,7 +29,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 	var (
 		rsClient = redisearch.NewClientFromPool(&redis.Pool{
 			DialContext: func(ctx context.Context) (redis.Conn, error) {
-				return redis.DialContext(ctx, rcNetwork, rcAddress, redis.DialDatabase(rcDB))
+				return redis.DialContext(ctx, rcNetwork, rcAddress, redis.DialDatabase(0 /* only zero for indexing */))
 			},
 			TestOnBorrow: func(c redis.Conn, t time.Time) (tErr error) {
 				_, tErr = c.Do("PING")
@@ -71,7 +71,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		doc.Set("Legacy", d.Domain.LabeledURI)
 
 		switch err = rsClient.Index([]redisearch.Document{doc}...); {
-		case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
+		case err != nil && mod_errors.Contains(err, EDocExist):
 			err = nil
 		case err != nil:
 			return
@@ -97,7 +97,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", f.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
+			case err != nil && mod_errors.Contains(err, EDocExist):
 				err = nil
 			case err != nil:
 				return
@@ -139,7 +139,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", f.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
+			case err != nil && mod_errors.Contains(err, EDocExist):
 				err = nil
 			case err != nil:
 				return
@@ -170,7 +170,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Legacy", f.LabeledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && strings.Contains(err.Error(), EDocExist.Error()):
+			case err != nil && mod_errors.Contains(err, EDocExist):
 				err = nil
 			case err != nil:
 				return
