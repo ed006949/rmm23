@@ -20,13 +20,13 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 	var (
 		rcAddress = "10.133.0.223:6379"
+		// RediSearch requires DB 0 for index creation
 		// rcDB      = 0
 		rcNetwork = "tcp"
 		rcName    = "entryIdx"
 	)
 
 	var (
-		// RediSearch requires DB 0 for index creation
 		rsClient = redisearch.NewClientFromPool(&redis.Pool{
 			DialContext: func(ctx context.Context) (redis.Conn, error) {
 				return redis.DialContext(ctx, rcNetwork, rcAddress, redis.DialDatabase(0))
@@ -47,7 +47,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		// _        = rsClient.DropIndex(false) // prod, don't delete old entries
 	)
 
-	switch err = rsClient.CreateIndex(entry.redisearchSchema()); {
+	switch err = rsClient.CreateIndex(schema); {
 	case err != nil:
 		return
 	}
