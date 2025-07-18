@@ -106,7 +106,7 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 	return schema
 }
 
-func newDocumentFromStruct(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (outbound redisearch.Document, err error) {
+func newRedisearchDocument(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (outbound redisearch.Document, err error) {
 	var (
 		reflection = reflect.ValueOf(data)
 	)
