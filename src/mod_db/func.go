@@ -9,6 +9,7 @@ import (
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
+	"rmm23/src/mod_slices"
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
@@ -56,7 +57,13 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc redisearch.Document
 		)
 
-		switch doc, err = newRedisearchDocument(schema, "ldap:entry:"+d.Domain.UUID.String(), 1.0, d.Domain, false); {
+		switch doc, err = newRedisearchDocument(
+			schema,
+			mod_slices.Join([]string{"ldap", "entry", d.Domain.UUID.String()}, ":", mod_slices.FlagNone),
+			1.0,
+			d.Domain,
+			false,
+		); {
 		case err != nil:
 			return err
 		default:
@@ -70,7 +77,13 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		}
 
 		for _, f := range d.Groups {
-			switch doc, err = newRedisearchDocument(schema, "ldap:entry:"+f.UUID.String(), 1.0, f, false); {
+			switch doc, err = newRedisearchDocument(
+				schema,
+				mod_slices.Join([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
+				1.0,
+				f,
+				false,
+			); {
 			case err != nil:
 				return err
 			default:
@@ -84,7 +97,13 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			}
 		}
 		for _, f := range d.Users {
-			switch doc, err = newRedisearchDocument(schema, "ldap:entry:"+f.UUID.String(), 1.0, f, false); {
+			switch doc, err = newRedisearchDocument(
+				schema,
+				mod_slices.Join([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
+				1.0,
+				f,
+				false,
+			); {
 			case err != nil:
 				return err
 			default:
@@ -98,7 +117,13 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			}
 		}
 		for _, f := range d.Hosts {
-			switch doc, err = newRedisearchDocument(schema, "ldap:entry:"+f.UUID.String(), 1.0, f, false); {
+			switch doc, err = newRedisearchDocument(
+				schema,
+				mod_slices.Join([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
+				1.0,
+				f,
+				false,
+			); {
 			case err != nil:
 				return err
 			default:
