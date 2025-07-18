@@ -60,13 +60,13 @@ type ElementUsers map[AttrDN]*ElementUser
 type ElementGroups map[AttrDN]*ElementGroup
 
 type Element struct {
-	UUID            AttrUUID          `ldap:"entryUUID"`       //
-	DN              AttrDN            `ldap:"dn"`              //
-	ObjectClass     AttrObjectClasses `ldap:"objectClass"`     //
-	CreatorsName    AttrDN            `ldap:"creatorsName"`    //
-	CreateTimestamp AttrTimestamp     `ldap:"createTimestamp"` //
-	ModifiersName   AttrDN            `ldap:"modifiersName"`   //
-	ModifyTimestamp AttrTimestamp     `ldap:"modifyTimestamp"` //
+	UUID            AttrUUID          `ldap:"entryUUID" msgpack:"entryUUID,omitempty" json:"entryUUID,omitempty" redis:"uuid" redisearch:"text,sortable"`                     // must be unique
+	DN              AttrDN            `ldap:"dn" msgpack:"dn,omitempty" json:"dn,omitempty" redis:"dn" redisearch:"text,sortable"`                                            // must be unique
+	ObjectClass     AttrObjectClasses `ldap:"objectClass" msgpack:"objectClass,omitempty" json:"objectClass,omitempty" redis:"objectClass" redisearch:"tag"`                  // entry type
+	CreatorsName    AttrDN            `ldap:"creatorsName" msgpack:"creatorsName,omitempty" json:"creatorsName,omitempty" redis:"creatorsName" redisearch:"text"`             //
+	CreateTimestamp AttrTimestamp     `ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" json:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"text"` //
+	ModifiersName   AttrDN            `ldap:"modifiersName" msgpack:"modifiersName,omitempty" json:"modifiersName,omitempty" redis:"modifiersName" redisearch:"text"`         //
+	ModifyTimestamp AttrTimestamp     `ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" json:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"text"` //
 
 	CN                   AttrString                `ldap:"cn,omitempty"`                   //
 	DC                   AttrString                `ldap:"dc,omitempty"`                   //
@@ -91,21 +91,22 @@ type Element struct {
 	UserPKCS12           AttrUserPKCS12s           `ldap:"userPKCS12,omitempty"`           //
 	UserPassword         AttrUserPassword          `ldap:"userPassword,omitempty"`         //
 
-	LabeledURI AttrLabeledURIs `ldap:"labeledURI,omitempty"` //
+	LabeledURI AttrLabeledURIs `ldap:"labeledURI" msgpack:"labeledURI,omitempty" json:"labeledURI,omitempty" redis:"labeledURI" redisearch:"text"` //
 }
 
 type ElementDomain struct {
-	UUID            AttrUUID          `ldap:"entryUUID"`
-	DN              AttrDN            `ldap:"dn"`
-	ObjectClass     AttrObjectClasses `ldap:"objectClass"`
-	CreatorsName    AttrDN            `ldap:"creatorsName"`
-	CreateTimestamp AttrTimestamp     `ldap:"createTimestamp"`
-	ModifiersName   AttrDN            `ldap:"modifiersName"`
-	ModifyTimestamp AttrTimestamp     `ldap:"modifyTimestamp"`
-	LabeledURI      AttrLabeledURIs   `ldap:"labeledURI"`
+	UUID            AttrUUID          `ldap:"entryUUID" msgpack:"entryUUID,omitempty" json:"entryUUID,omitempty" redis:"uuid" redisearch:"text,sortable"`                     // must be unique
+	DN              AttrDN            `ldap:"dn" msgpack:"dn,omitempty" json:"dn,omitempty" redis:"dn" redisearch:"text,sortable"`                                            // must be unique
+	ObjectClass     AttrObjectClasses `ldap:"objectClass" msgpack:"objectClass,omitempty" json:"objectClass,omitempty" redis:"objectClass" redisearch:"tag"`                  // entry type
+	CreatorsName    AttrDN            `ldap:"creatorsName" msgpack:"creatorsName,omitempty" json:"creatorsName,omitempty" redis:"creatorsName" redisearch:"text"`             //
+	CreateTimestamp AttrTimestamp     `ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" json:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"text"` //
+	ModifiersName   AttrDN            `ldap:"modifiersName" msgpack:"modifiersName,omitempty" json:"modifiersName,omitempty" redis:"modifiersName" redisearch:"text"`         //
+	ModifyTimestamp AttrTimestamp     `ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" json:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"text"` //
 
-	DC AttrString `ldap:"dc"`
-	O  AttrString `ldap:"o"`
+	DC AttrString `ldap:"dc" msgpack:"dc,omitempty" json:"dc,omitempty" redis:"dc" redisearch:"text,sortable"` //
+	O  AttrString `ldap:"o" msgpack:"o,omitempty" json:"o,omitempty" redis:"o" redisearch:"text,sortable"`     //
+
+	LabeledURI AttrLabeledURIs `ldap:"labeledURI" msgpack:"labeledURI,omitempty" json:"labeledURI,omitempty" redis:"labeledURI" redisearch:"text"` //
 }
 type ElementUser struct {
 	UUID            AttrUUID          `ldap:"entryUUID"`
@@ -115,7 +116,6 @@ type ElementUser struct {
 	CreateTimestamp AttrTimestamp     `ldap:"createTimestamp"`
 	ModifiersName   AttrDN            `ldap:"modifiersName"`
 	ModifyTimestamp AttrTimestamp     `ldap:"modifyTimestamp"`
-	LabeledURI      AttrLabeledURIs   `ldap:"labeledURI"`
 
 	CN                   AttrString                `ldap:"cn"`
 	Description          AttrString                `ldap:"description"`
@@ -136,6 +136,8 @@ type ElementUser struct {
 	UIDNumber            AttrIDNumber              `ldap:"uidNumber"`
 	UserPKCS12           AttrUserPKCS12s           `ldap:"userPKCS12"`
 	UserPassword         AttrUserPassword          `ldap:"userPassword"`
+
+	LabeledURI AttrLabeledURIs `ldap:"labeledURI" msgpack:"labeledURI,omitempty" json:"labeledURI,omitempty" redis:"labeledURI" redisearch:"text"` //
 }
 type ElementGroup struct {
 	UUID            AttrUUID          `ldap:"entryUUID"`
@@ -145,12 +147,13 @@ type ElementGroup struct {
 	CreateTimestamp AttrTimestamp     `ldap:"createTimestamp"`
 	ModifiersName   AttrDN            `ldap:"modifiersName"`
 	ModifyTimestamp AttrTimestamp     `ldap:"modifyTimestamp"`
-	LabeledURI      AttrLabeledURIs   `ldap:"labeledURI"`
 
 	CN        AttrString   `ldap:"cn"`
 	GIDNumber AttrIDNumber `ldap:"gidNumber"`
 	Member    AttrDNs      `ldap:"member"`
 	Owner     AttrDNs      `ldap:"owner"`
+
+	LabeledURI AttrLabeledURIs `ldap:"labeledURI" msgpack:"labeledURI,omitempty" json:"labeledURI,omitempty" redis:"labeledURI" redisearch:"text"` //
 }
 type ElementHost struct {
 	UUID            AttrUUID          `ldap:"entryUUID"`
@@ -160,7 +163,6 @@ type ElementHost struct {
 	CreateTimestamp AttrTimestamp     `ldap:"createTimestamp"`
 	ModifiersName   AttrDN            `ldap:"modifiersName"`
 	ModifyTimestamp AttrTimestamp     `ldap:"modifyTimestamp"`
-	LabeledURI      AttrLabeledURIs   `ldap:"labeledURI"`
 
 	CN            AttrString      `ldap:"cn"`
 	GIDNumber     AttrIDNumber    `ldap:"gidNumber"`
@@ -170,6 +172,8 @@ type ElementHost struct {
 	UID           AttrID          `ldap:"uid"`
 	UIDNumber     AttrIDNumber    `ldap:"uidNumber"`
 	UserPKCS12    AttrUserPKCS12s `ldap:"userPKCS12"`
+
+	LabeledURI AttrLabeledURIs `ldap:"labeledURI" msgpack:"labeledURI,omitempty" json:"labeledURI,omitempty" redis:"labeledURI" redisearch:"text"` //
 }
 
 // type AttrDN *ldap.DN //

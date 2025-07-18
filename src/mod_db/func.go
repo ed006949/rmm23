@@ -73,7 +73,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 		doc.Set("Legacy", d.Domain.LabeledURI)
 
-		switch doc2, err = newDocumentFromStruct(schema, "ldap:entry:"+d.Domain.UUID.String(), 1.0, d, false); {
+		switch doc2, err = newDocumentFromStruct(schema, "ldap:entry:"+d.Domain.UUID.String(), 1.0, d.Domain, false); {
 		case err != nil:
 			return err
 		default:

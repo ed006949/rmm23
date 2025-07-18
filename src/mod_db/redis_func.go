@@ -108,14 +108,30 @@ func newDocumentFromStruct(schema *redisearch.Schema, docID string, score float3
 		return redisearch.Document{}, fmt.Errorf("data must be a struct or a pointer to a struct, got %T", data)
 	}
 
-	// Iterate over schema fields to find corresponding struct fields
-	for _, schemaField := range schema.Fields {
-		// Extract the actual struct field name from the schema field name
-		// The schema field names are prefixed with "$."
-		structFieldName := strings.TrimPrefix(schemaField.Name, "$.")
-		structField := val.FieldByName(structFieldName)
-		if !structField.IsValid() || !structField.CanInterface() {
-			// Field not found in struct or not exportable, skip
+	// Iterate over struct fields to find corresponding schema fields
+	for i := 0; i < val.NumField(); i++ {
+		structField := val.Field(i)
+		typeField := val.Type().Field(i)
+
+		redisTag := typeField.Tag.Get(redisTagName)
+		if redisTag == "" {
+			continue // Skip fields without a redis tag
+		}
+
+		// Construct the schema field name as it would be in the schema
+		schemaFieldName := "$." + redisTag
+
+		// Find the corresponding schema field
+		var schemaField *redisearch.Field
+		for _, sf := range schema.Fields {
+			if sf.Name == schemaFieldName {
+				schemaField = sf
+				break
+			}
+		}
+
+		if schemaField == nil || !structField.CanInterface() {
+			// Schema field not found or struct field not exportable, skip
 			continue
 		}
 
