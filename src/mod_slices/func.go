@@ -76,3 +76,7 @@ func ToStrings[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound []string) 
 	}
 	return
 }
+
+func Split(inbound string, sep string, flag flag) (outbound []string) {
+	return Normalize(strings.Split(inbound, sep), flag)
+}

@@ -1,7 +1,8 @@
 package mod_errors
 
 const (
-	EORPHANED errorNumber = iota
+	EUnwilling errorNumber = iota
+	EORPHANED
 	EDUPDATA
 	EEXIST
 	ENOTFOUND
@@ -15,6 +16,7 @@ const (
 	ENoConn
 	ENotStruct
 	ENotPtr
+	ENotStructOrPtrStruct
 	EUnknownType
 	EParse
 	EX509ParsePrivKey
@@ -30,9 +32,12 @@ const (
 	EComSet
 	EComSetDomAdm
 	EComSetDomSetAdm
+	ETagMultiType
+	ETagUnknown
 )
 
 var errorDescription = [...]string{
+	EUnwilling:                 "unwilling to perform",
 	EORPHANED:                  "orphaned entry",
 	EDUPDATA:                   "duplicate data",
 	EEXIST:                     "already exists",
@@ -47,6 +52,7 @@ var errorDescription = [...]string{
 	ENoConn:                    "no connection",
 	ENotStruct:                 "not a struct",
 	ENotPtr:                    "not a pointer",
+	ENotStructOrPtrStruct:      "not a struct or a pointer to a struct",
 	EUnknownType:               "unknown type",
 	EParse:                     "parse error",
 	EX509ParsePrivKey:          "x509: failed to parse private key",
@@ -62,4 +68,6 @@ var errorDescription = [...]string{
 	EComSet:                    "unknown command set",
 	EComSetDomAdm:              "unknown Domain Administration command",
 	EComSetDomSetAdm:           "unknown Domain Set Administration command",
+	ETagMultiType:              "multiple types",
+	ETagUnknown:                "unknown tag",
 }

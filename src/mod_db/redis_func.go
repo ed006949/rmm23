@@ -8,39 +8,49 @@ import (
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/vmihailenco/msgpack/v5" // MsgPack library for payload
 
+	"rmm23/src/mod_errors"
+	"rmm23/src/mod_slices"
 	"rmm23/src/mod_strings"
 )
 
 func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 	var (
-		schema = redisearch.NewSchema(redisearch.DefaultOptions)
-		elem   = reflect.TypeOf(inbound).Elem()
+		schema     = redisearch.NewSchema(redisearch.DefaultOptions)
+		reflection = reflect.TypeOf(inbound)
 	)
 
-	for i := 0; i < elem.NumField(); i++ {
+	switch {
+	case reflection.Kind() == reflect.Ptr:
+		reflection = reflection.Elem()
+	}
+	switch {
+	case reflection.Kind() != reflect.Struct:
+		panic(mod_errors.ENotStructOrPtrStruct)
+	}
+
+	for i := 0; i < reflection.NumField(); i++ {
 		var (
-			field    = elem.Field(i)
+			field    = reflection.Field(i)
 			redisTag = field.Tag.Get(redisTagName)
 		)
-		switch redisTag {
-		case "":
+		switch {
+		case len(redisTag) == 0:
 			continue
 		}
 
 		var (
 			redisearchTag = field.Tag.Get(rediSearchTagName)
 		)
-		switch redisearchTag {
-		case "":
+		switch {
+		case len(redisearchTag) == 0:
 			continue
 		}
 
 		var (
-			parts = strings.Split(redisearchTag, ",")
+			parts = mod_slices.Split(redisearchTag, mod_strings.TagSeparator, mod_slices.FlagNormalize)
 		)
-
-		switch len(parts) {
-		case 0:
+		switch {
+		case len(parts) == 0:
 			continue
 		}
 
@@ -66,82 +76,84 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 
 		switch {
 		case len(types) > 1:
-			panic("multiple types")
+			panic(mod_errors.ETagMultiType.Error())
 		case len(unknowns) > 0:
-			panic("unknown tag fields")
+			panic(mod_errors.ETagUnknown.Error())
 		}
 
 		switch {
 		case types[rediSearchTagTypeIgnore]:
 		case types[rediSearchTagTypeText]:
-			schema.AddField(redisearch.NewTextFieldOptions("$."+redisTag, redisearch.TextFieldOptions{
+			schema.AddField(redisearch.NewTextFieldOptions(redisTag, redisearch.TextFieldOptions{
 				Sortable: options[rediSearchTagOptionSortable],
 			}))
 		case types[rediSearchTagTypeNumeric]:
-			schema.AddField(redisearch.NewNumericFieldOptions("$."+redisTag, redisearch.NumericFieldOptions{
+			schema.AddField(redisearch.NewNumericFieldOptions(redisTag, redisearch.NumericFieldOptions{
 				Sortable: options[rediSearchTagOptionSortable],
 			}))
 		case types[rediSearchTagTypeTag]:
-			schema.AddField(redisearch.NewTagFieldOptions("$."+redisTag, redisearch.TagFieldOptions{
+			schema.AddField(redisearch.NewTagFieldOptions(redisTag, redisearch.TagFieldOptions{
 				Sortable:  options[rediSearchTagOptionSortable],
-				Separator: mod_strings.SliceDelimiter[0],
+				Separator: mod_strings.SliceSeparator[0],
 			}))
 		case types[rediSearchTagTypeGeo]:
-			schema.AddField(redisearch.NewGeoFieldOptions("$."+redisTag, redisearch.GeoFieldOptions{}))
+			schema.AddField(redisearch.NewGeoFieldOptions(redisTag, redisearch.GeoFieldOptions{}))
 		default:
-			panic("unwilling to perform")
+			panic(mod_errors.EUnwilling.Error())
 		}
 	}
 
 	return schema
 }
 
-func newDocumentFromStruct(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (redisearch.Document, error) {
+func newDocumentFromStruct(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (outbound redisearch.Document, err error) {
 	doc := redisearch.NewDocument(docID, score)
-	val := reflect.ValueOf(data)
+	reflection := reflect.ValueOf(data)
 
-	// Ensure data is a pointer to a struct, and get the underlying struct value
-	if val.Kind() == reflect.Ptr {
-		val = val.Elem()
+	switch {
+	case reflection.Kind() == reflect.Ptr:
+		reflection = reflection.Elem()
 	}
-	if val.Kind() != reflect.Struct {
-		return redisearch.Document{}, fmt.Errorf("data must be a struct or a pointer to a struct, got %T", data)
+	switch {
+	case reflection.Kind() != reflect.Struct:
+		return redisearch.Document{}, mod_errors.ENotStructOrPtrStruct
 	}
 
 	// Iterate over struct fields to find corresponding schema fields
-	for i := 0; i < val.NumField(); i++ {
-		structField := val.Field(i)
-		typeField := val.Type().Field(i)
-
-		redisTag := typeField.Tag.Get(redisTagName)
-		if redisTag == "" {
-			continue // Skip fields without a redis tag
+	for i := 0; i < reflection.NumField(); i++ {
+		var (
+			structField = reflection.Field(i)
+			typeField   = reflection.Type().Field(i)
+			redisTag    = typeField.Tag.Get(redisTagName)
+		)
+		switch {
+		case len(redisTag) == 0:
+			continue
 		}
 
-		// Construct the schema field name as it would be in the schema
-		schemaFieldName := "$." + redisTag
-
-		// Find the corresponding schema field
-		var schemaField *redisearch.Field
+		var (
+			schemaField *redisearch.Field
+		)
 		for _, sf := range schema.Fields {
-			if sf.Name == schemaFieldName {
+			switch {
+			case sf.Name == redisTag:
 				schemaField = &sf
 				break
 			}
 		}
 
-		if schemaField == nil || !structField.CanInterface() {
-			// Schema field not found or struct field not exportable, skip
+		switch {
+		case schemaField == nil || !structField.CanInterface():
 			continue
 		}
 
-		var fieldValue interface{}
+		var (
+			fieldValue interface{}
+		)
 		switch schemaField.Type {
 		case redisearch.TagField, redisearch.TextField:
-			// For text and tag fields, convert any type to string
 			fieldValue = fmt.Sprintf("%v", structField.Interface())
 		case redisearch.NumericField:
-			// Handle numeric types (int, float, bool to float64)
 			switch structField.Kind() {
 			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 				fieldValue = float64(structField.Int())
@@ -149,31 +161,31 @@ func newDocumentFromStruct(schema *redisearch.Schema, docID string, score float3
 				fieldValue = float64(structField.Uint())
 			case reflect.Float32, reflect.Float64:
 				fieldValue = structField.Float()
-			case reflect.Bool: // Convert bool to 0.0 or 1.0 for numeric
-				if structField.Bool() {
+			case reflect.Bool:
+				switch {
+				case structField.Bool():
 					fieldValue = 1.0
-				} else {
+				default:
 					fieldValue = 0.0
 				}
 			default:
-				// Fallback for other numeric-like types, try to convert to string
-				// RediSearch might handle string-to-numeric conversion if valid
 				fieldValue = fmt.Sprintf("%v", structField.Interface())
 			}
-		// Add cases for other RediSearch field types (Geo, etc.) if needed
 		default:
-			// Default to string conversion for unsupported types
 			fieldValue = fmt.Sprintf("%v", structField.Interface())
 		}
 
 		doc.Set(schemaField.Name, fieldValue)
 	}
 
-	// Handle payload if requested
-	if includePayload {
-		encodedPayload, err := msgpack.Marshal(data)
-		if err != nil {
-			return redisearch.Document{}, fmt.Errorf("failed to marshal payload: %w", err)
+	switch {
+	case includePayload:
+		var (
+			encodedPayload []byte
+		)
+		switch encodedPayload, err = msgpack.Marshal(data); {
+		case err != nil:
+			return redisearch.Document{}, err
 		}
 		doc.SetPayload(encodedPayload)
 	}

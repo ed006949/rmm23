@@ -62,7 +62,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 		doc.Set("UUID", d.Domain.UUID)
 		doc.Set("DN", d.Domain.DN)
-		doc.Set("ObjectClass", mod_slices.Join(d.Domain.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+		doc.Set("ObjectClass", mod_slices.Join(d.Domain.ObjectClass, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
 		doc.Set("CreatorsName", d.Domain.CreatorsName)
 		doc.Set("CreateTimestamp", d.Domain.CreateTimestamp)
 		doc.Set("ModifiersName", d.Domain.ModifiersName)
@@ -98,7 +98,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 			doc.Set("UUID", f.UUID)
 			doc.Set("DN", f.DN)
-			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
 			doc.Set("CreatorsName", f.CreatorsName)
 			doc.Set("CreateTimestamp", f.CreateTimestamp)
 			doc.Set("ModifiersName", f.ModifiersName)
@@ -106,8 +106,8 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 			doc.Set("CN", f.CN)
 			doc.Set("GIDNumber", f.GIDNumber)
-			doc.Set("Member", mod_slices.Join(f.Member, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
-			doc.Set("Owner", mod_slices.Join(f.Owner, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("Member", mod_slices.Join(f.Member, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
+			doc.Set("Owner", mod_slices.Join(f.Owner, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
 
 			doc.Set("Legacy", f.LabeledURI)
 
@@ -125,7 +125,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 			doc.Set("UUID", f.UUID)
 			doc.Set("DN", f.DN)
-			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
 			doc.Set("CreatorsName", f.CreatorsName)
 			doc.Set("CreateTimestamp", f.CreateTimestamp)
 			doc.Set("ModifiersName", f.ModifiersName)
@@ -167,7 +167,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 			doc.Set("UUID", f.UUID)
 			doc.Set("DN", f.DN)
-			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceDelimiter, mod_slices.FlagNormalize))
+			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
 			doc.Set("CreatorsName", f.CreatorsName)
 			doc.Set("CreateTimestamp", f.CreateTimestamp)
 			doc.Set("ModifiersName", f.ModifiersName)

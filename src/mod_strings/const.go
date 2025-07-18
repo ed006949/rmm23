@@ -1,5 +1,7 @@
 package mod_strings
 
 const (
-	SliceDelimiter = "\x1f"
+	SliceSeparator = "\x1f"
+	JSONPathHeader = "$."
+	TagSeparator   = ","
 )
