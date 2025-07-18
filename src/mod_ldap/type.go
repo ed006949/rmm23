@@ -88,7 +88,7 @@ type Element struct {
 	UserPKCS12           AttrUserPKCS12s           `ldap:"userPKCS12" msgpack:"userPKCS12,omitempty" json:"userPKCS12,omitempty" redis:"userPKCS12" redisearch:"tag"`                                          //
 	UserPassword         AttrUserPassword          `ldap:"userPassword" msgpack:"userPassword,omitempty" json:"userPassword,omitempty" redis:"userPassword" redisearch:"text"`                                 //
 
-	LabelledURI AttrLabeledURIs `ldap:"labelledURI" msgpack:"labelledURI,omitempty" json:"labelledURI,omitempty" redis:"labelledURI" redisearch:"tag"` //
+	LabeledURI AttrLabeledURIs `ldap:"labeledURI" msgpack:"labeledURI,omitempty" json:"labeledURI,omitempty" redis:"labeledURI" redisearch:"tag"` //
 }
 
 // type AttrDN *ldap.DN //
@@ -146,7 +146,7 @@ type LabeledURI struct {
 	OpenVPN     []mod_net.OpenVPN     `xml:"OpenVPN,omitempty"`
 	CiscoVPN    []mod_net.CiscoVPN    `xml:"CiscoVPN,omitempty"`
 	InterimHost []mod_net.InterimHost `xml:"InterimHost,omitempty"`
-	Legacy      []LabeledURILegacy    `xml:"LabelledURI,omitempty"`
+	Legacy      []LabeledURILegacy    `xml:"LabeledURI,omitempty"`
 }
 type LabeledURILegacy struct {
 	Key   string `xml:"key,attr,omitempty"`

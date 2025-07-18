@@ -195,7 +195,7 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 				r.data.OpenVPN = append(r.data.OpenVPN, data.OpenVPN...)
 				r.data.CiscoVPN = append(r.data.CiscoVPN, data.CiscoVPN...)
 				r.data.InterimHost = append(r.data.InterimHost, data.InterimHost...)
-				r.data.LabelledURI = append(r.data.LabelledURI, data.LabelledURI...)
+				r.data.LabeledURI = append(r.data.LabeledURI, data.LabeledURI...)
 			}
 			continue
 		}
@@ -213,13 +213,13 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 			case r.data == nil:
 				r.data = &LabeledURI{}
 			}
-			r.data.LabelledURI = append(r.data.LabelledURI, LabeledURILegacy{Key: legacy[0], Value: ""})
+			r.data.LabeledURI = append(r.data.LabeledURI, LabeledURILegacy{Key: legacy[0], Value: ""})
 		case 2:
 			switch {
 			case r.data == nil:
 				r.data = &LabeledURI{}
 			}
-			r.data.LabelledURI = append(r.data.LabelledURI, LabeledURILegacy{Key: legacy[0], Value: legacy[1]})
+			r.data.LabeledURI = append(r.data.LabeledURI, LabeledURILegacy{Key: legacy[0], Value: legacy[1]})
 		}
 	}
 

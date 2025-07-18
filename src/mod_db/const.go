@@ -12,7 +12,8 @@ const (
 )
 
 const (
-	entryTypeDomain EntryType = iota
+	entryTypeEmpty EntryType = iota
+	entryTypeDomain
 	entryTypeGroup
 	entryTypeUser
 	entryTypeHost
