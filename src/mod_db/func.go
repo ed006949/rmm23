@@ -69,7 +69,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		default:
 			doc.Set("type", entryTypeDomain)
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && mod_errors.Contains(err, EDocExist):
+			case mod_errors.Contains(err, EDocExist):
 				err = nil
 			case err != nil:
 				return err
@@ -89,7 +89,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			default:
 				doc.Set("type", entryTypeGroup)
 				switch err = rsClient.Index([]redisearch.Document{doc}...); {
-				case err != nil && mod_errors.Contains(err, EDocExist):
+				case mod_errors.Contains(err, EDocExist):
 					err = nil
 				case err != nil:
 					return err
@@ -109,7 +109,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			default:
 				doc.Set("type", entryTypeUser)
 				switch err = rsClient.Index([]redisearch.Document{doc}...); {
-				case err != nil && mod_errors.Contains(err, EDocExist):
+				case mod_errors.Contains(err, EDocExist):
 					err = nil
 				case err != nil:
 					return err
@@ -129,7 +129,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			default:
 				doc.Set("type", entryTypeHost)
 				switch err = rsClient.Index([]redisearch.Document{doc}...); {
-				case err != nil && mod_errors.Contains(err, EDocExist):
+				case mod_errors.Contains(err, EDocExist):
 					err = nil
 				case err != nil:
 					return err
