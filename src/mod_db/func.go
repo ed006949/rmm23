@@ -42,8 +42,9 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			Wait:            true,
 			MaxConnLifetime: 0,
 		}, rcName)
-		entry = Entry{}
-		_     = rsClient.Drop() // test&dev, delete old entries
+		entry  = Entry{}
+		schema = entry.redisearchSchema()
+		_      = rsClient.Drop() // test&dev, delete old entries
 		// _        = rsClient.DropIndex(false) // prod, don't delete old entries
 	)
 
@@ -54,7 +55,8 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 	for _, d := range inbound.Domain {
 		var (
-			doc = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String(), 1.0)
+			doc  = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String(), 1.0)
+			doc2 redisearch.Document
 		)
 		doc.Set("Type", entryTypeDomain)
 
@@ -70,6 +72,18 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		doc.Set("O", d.Domain.O)
 
 		doc.Set("Legacy", d.Domain.LabeledURI)
+
+		switch doc2, err = newDocumentFromStruct(schema, "ldap:entry:"+d.Domain.UUID.String(), 1.0, d, false); {
+		case err != nil:
+			return err
+		default:
+			switch err = rsClient.Index([]redisearch.Document{doc2}...); {
+			case err != nil && mod_errors.Contains(err, EDocExist):
+				err = nil
+			case err != nil:
+				return err
+			}
+		}
 
 		switch err = rsClient.Index([]redisearch.Document{doc}...); {
 		case err != nil && mod_errors.Contains(err, EDocExist):

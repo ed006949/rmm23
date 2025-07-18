@@ -96,18 +96,16 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 	return schema
 }
 
-func newDocumentFromStruct(docID string, score float32, data interface{}, includePayload bool) (*redisearch.Document, error) {
+func newDocumentFromStruct(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (redisearch.Document, error) {
 	doc := redisearch.NewDocument(docID, score)
 	val := reflect.ValueOf(data)
-
-	schema := buildRedisearchSchema(data)
 
 	// Ensure data is a pointer to a struct, and get the underlying struct value
 	if val.Kind() == reflect.Ptr {
 		val = val.Elem()
 	}
 	if val.Kind() != reflect.Struct {
-		return nil, fmt.Errorf("data must be a struct or a pointer to a struct, got %T", data)
+		return redisearch.Document{}, fmt.Errorf("data must be a struct or a pointer to a struct, got %T", data)
 	}
 
 	// Iterate over schema fields to find corresponding struct fields
@@ -159,10 +157,10 @@ func newDocumentFromStruct(docID string, score float32, data interface{}, includ
 	if includePayload {
 		encodedPayload, err := msgpack.Marshal(data)
 		if err != nil {
-			return nil, fmt.Errorf("failed to marshal payload: %w", err)
+			return redisearch.Document{}, fmt.Errorf("failed to marshal payload: %w", err)
 		}
 		doc.SetPayload(encodedPayload)
 	}
 
-	return &doc, nil
+	return doc, nil
 }
