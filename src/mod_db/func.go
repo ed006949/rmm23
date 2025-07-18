@@ -9,8 +9,6 @@ import (
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
-	"rmm23/src/mod_slices"
-	"rmm23/src/mod_strings"
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
@@ -55,30 +53,15 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 
 	for _, d := range inbound.Domain {
 		var (
-			doc  = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String(), 1.0)
-			doc2 redisearch.Document
+			doc redisearch.Document
 		)
-		doc.Set("Type", entryTypeDomain)
 
-		doc.Set("UUID", d.Domain.UUID)
-		doc.Set("DN", d.Domain.DN)
-		doc.Set("ObjectClass", mod_slices.Join(d.Domain.ObjectClass, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
-		doc.Set("CreatorsName", d.Domain.CreatorsName)
-		doc.Set("CreateTimestamp", d.Domain.CreateTimestamp)
-		doc.Set("ModifiersName", d.Domain.ModifiersName)
-		doc.Set("ModifyTimestamp", d.Domain.ModifyTimestamp)
-
-		doc.Set("DC", d.Domain.DC)
-		doc.Set("O", d.Domain.O)
-
-		doc.Set("LabelledURI", d.Domain.LabelledURI)
-
-		switch doc2, err = newRedisearchDocument(schema, "ldap:entry:"+d.Domain.UUID.String(), 1.0, d.Domain, false); {
+		switch doc, err = newRedisearchDocument(schema, "ldap:entry:"+d.Domain.UUID.String(), 1.0, d.Domain, false); {
 		case err != nil:
 			return err
 		default:
-			doc2.Set("Type", entryTypeDomain)
-			switch err = rsClient.Index([]redisearch.Document{doc2}...); {
+			doc.Set("type", entryTypeDomain)
+			switch err = rsClient.Index([]redisearch.Document{doc}...); {
 			case err != nil && mod_errors.Contains(err, EDocExist):
 				err = nil
 			case err != nil:
@@ -86,113 +69,48 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			}
 		}
 
-		switch err = rsClient.Index([]redisearch.Document{doc}...); {
-		case err != nil && mod_errors.Contains(err, EDocExist):
-			err = nil
-		case err != nil:
-			return
-		}
-
 		for _, f := range d.Groups {
-			doc = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String()+":"+f.UUID.String(), 1.0)
-			doc.Set("Type", entryTypeGroup)
-
-			doc.Set("UUID", f.UUID)
-			doc.Set("DN", f.DN)
-			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
-			doc.Set("CreatorsName", f.CreatorsName)
-			doc.Set("CreateTimestamp", f.CreateTimestamp)
-			doc.Set("ModifiersName", f.ModifiersName)
-			doc.Set("ModifyTimestamp", f.ModifyTimestamp)
-
-			doc.Set("CN", f.CN)
-			doc.Set("GIDNumber", f.GIDNumber)
-			doc.Set("Member", mod_slices.Join(f.Member, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
-			doc.Set("Owner", mod_slices.Join(f.Owner, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
-
-			doc.Set("LabelledURI", f.LabelledURI)
-
-			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && mod_errors.Contains(err, EDocExist):
-				err = nil
+			switch doc, err = newRedisearchDocument(schema, "ldap:entry:"+f.UUID.String(), 1.0, f, false); {
 			case err != nil:
-				return
+				return err
+			default:
+				doc.Set("type", entryTypeGroup)
+				switch err = rsClient.Index([]redisearch.Document{doc}...); {
+				case err != nil && mod_errors.Contains(err, EDocExist):
+					err = nil
+				case err != nil:
+					return err
+				}
 			}
 		}
-
 		for _, f := range d.Users {
-			doc = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String()+":"+f.UUID.String(), 1.0)
-			doc.Set("Type", entryTypeUser)
-
-			doc.Set("UUID", f.UUID)
-			doc.Set("DN", f.DN)
-			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
-			doc.Set("CreatorsName", f.CreatorsName)
-			doc.Set("CreateTimestamp", f.CreateTimestamp)
-			doc.Set("ModifiersName", f.ModifiersName)
-			doc.Set("ModifyTimestamp", f.ModifyTimestamp)
-
-			doc.Set("CN", f.CN)
-			doc.Set("Description", f.Description)
-			doc.Set("DestinationIndicator", f.DestinationIndicator)
-			doc.Set("DisplayName", f.DisplayName)
-			doc.Set("GIDNumber", f.GIDNumber)
-			doc.Set("HomeDirectory", f.HomeDirectory)
-			doc.Set("IPHostNumber", f.IPHostNumber)
-			doc.Set("Mail", f.Mail)
-			// doc.Set("MemberOf", f.MemberOf)
-			doc.Set("O", f.O)
-			doc.Set("OU", f.OU)
-			doc.Set("SN", f.SN)
-			doc.Set("SSHPublicKey", f.SSHPublicKey)
-			doc.Set("TelephoneNumber", f.TelephoneNumber)
-			doc.Set("TelexNumber", f.TelexNumber)
-			doc.Set("UID", f.UID)
-			doc.Set("UIDNumber", f.UIDNumber)
-			doc.Set("UserPKCS12", f.UserPKCS12)
-			doc.Set("UserPassword", f.UserPassword)
-
-			doc.Set("LabelledURI", f.LabelledURI)
-
-			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && mod_errors.Contains(err, EDocExist):
-				err = nil
+			switch doc, err = newRedisearchDocument(schema, "ldap:entry:"+f.UUID.String(), 1.0, f, false); {
 			case err != nil:
-				return
+				return err
+			default:
+				doc.Set("type", entryTypeUser)
+				switch err = rsClient.Index([]redisearch.Document{doc}...); {
+				case err != nil && mod_errors.Contains(err, EDocExist):
+					err = nil
+				case err != nil:
+					return err
+				}
 			}
 		}
-
 		for _, f := range d.Hosts {
-			doc = redisearch.NewDocument("ldap:entry:"+d.Domain.UUID.String()+":"+f.UUID.String(), 1.0)
-			doc.Set("Type", entryTypeHost)
-
-			doc.Set("UUID", f.UUID)
-			doc.Set("DN", f.DN)
-			doc.Set("ObjectClass", mod_slices.Join(f.ObjectClass, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
-			doc.Set("CreatorsName", f.CreatorsName)
-			doc.Set("CreateTimestamp", f.CreateTimestamp)
-			doc.Set("ModifiersName", f.ModifiersName)
-			doc.Set("ModifyTimestamp", f.ModifyTimestamp)
-
-			doc.Set("CN", f.CN)
-			doc.Set("GIDNumber", f.GIDNumber)
-			doc.Set("HomeDirectory", f.HomeDirectory)
-			// doc.Set("MemberOf", f.MemberOf)
-			doc.Set("SN", f.SN)
-			doc.Set("UID", f.UID)
-			doc.Set("UIDNumber", f.UIDNumber)
-			doc.Set("UserPKCS12", f.UserPKCS12)
-
-			doc.Set("LabelledURI", f.LabelledURI)
-
-			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case err != nil && mod_errors.Contains(err, EDocExist):
-				err = nil
+			switch doc, err = newRedisearchDocument(schema, "ldap:entry:"+f.UUID.String(), 1.0, f, false); {
 			case err != nil:
-				return
+				return err
+			default:
+				doc.Set("type", entryTypeHost)
+				switch err = rsClient.Index([]redisearch.Document{doc}...); {
+				case err != nil && mod_errors.Contains(err, EDocExist):
+					err = nil
+				case err != nil:
+					return err
+				}
 			}
 		}
-
 	}
 
 	return nil

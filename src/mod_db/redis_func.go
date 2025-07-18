@@ -148,6 +148,10 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 		switch {
 		case schemaField == nil || !structField.CanInterface():
 			continue
+		case structField.Kind() == reflect.Ptr && structField.IsNil():
+			continue
+		case structField.IsZero():
+			continue
 		}
 
 		var (
