@@ -125,7 +125,7 @@ func newDocumentFromStruct(schema *redisearch.Schema, docID string, score float3
 		var schemaField *redisearch.Field
 		for _, sf := range schema.Fields {
 			if sf.Name == schemaFieldName {
-				schemaField = sf
+				schemaField = &sf
 				break
 			}
 		}
