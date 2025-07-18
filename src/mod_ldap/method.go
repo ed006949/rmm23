@@ -114,29 +114,43 @@ func (r *Conf) parse() (err error) {
 
 // UnmarshalEntry
 func (r *ConfDomain) unmarshal() (err error) {
-	r.Domain = &ElementDomain{}
+	r.Domain = &Element{}
 	switch newErr := r.Domain.unmarshal(r.searchResults["domain"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Domain", "DN": r.DN}.Warning()
 	}
-	r.Hosts = make(ElementHosts)
+	r.Hosts = make(Elements)
 	switch newErr := r.Hosts.unmarshal(r.searchResults["hosts"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Hosts", "DN": r.DN}.Warning()
 	}
-	r.Users = make(ElementUsers)
+	r.Users = make(Elements)
 	switch newErr := r.Users.unmarshal(r.searchResults["users"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Users", "DN": r.DN}.Warning()
 	}
-	r.Groups = make(ElementGroups)
+	r.Groups = make(Elements)
 	switch newErr := r.Groups.unmarshal(r.searchResults["groups"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Groups", "DN": r.DN}.Warning()
+	}
+	return
+}
+func (r *Element) unmarshal(inbound *ldap.SearchResult) (err error) {
+	for _, entry := range inbound.Entries {
+		var (
+			interim Element
+		)
+		switch newErr := UnmarshalEntry(entry, &interim); {
+		case newErr != nil:
+			err = errors.Join(err, newErr)
+			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
+		}
+		*r = interim
 	}
 	return
 }
@@ -151,107 +165,6 @@ func (r Elements) unmarshal(inbound *ldap.SearchResult) (err error) {
 			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
 		}
 		r[interim.DN] = &interim
-	}
-	return
-}
-func (r *ElementDomain) unmarshal(inbound *ldap.SearchResult) (err error) {
-	for _, entry := range inbound.Entries {
-		var (
-			interim ElementDomain
-		)
-		switch newErr := UnmarshalEntry(entry, &interim); {
-		case newErr != nil:
-			err = errors.Join(err, newErr)
-			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
-		}
-		*r = interim
-	}
-	return
-}
-func (r ElementHosts) unmarshal(inbound *ldap.SearchResult) (err error) {
-	for _, entry := range inbound.Entries {
-		var (
-			interim ElementHost
-		)
-		switch newErr := UnmarshalEntry(entry, &interim); {
-		case newErr != nil:
-			err = errors.Join(err, newErr)
-			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
-		}
-		r[interim.DN] = &interim
-	}
-	return
-}
-func (r ElementUsers) unmarshal(inbound *ldap.SearchResult) (err error) {
-	for _, entry := range inbound.Entries {
-		var (
-			interim ElementUser
-		)
-		switch newErr := UnmarshalEntry(entry, &interim); {
-		case newErr != nil:
-			err = errors.Join(err, newErr)
-			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
-		}
-		r[interim.DN] = &interim
-	}
-	return
-}
-func (r ElementGroups) unmarshal(inbound *ldap.SearchResult) (err error) {
-	for _, entry := range inbound.Entries {
-		var (
-			interim ElementGroup
-		)
-		switch newErr := UnmarshalEntry(entry, &interim); {
-		case newErr != nil:
-			err = errors.Join(err, newErr)
-			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
-		}
-		r[interim.DN] = &interim
-	}
-	return
-}
-
-// find if exist
-
-func (r *Conf) FindUser(inbound AttrDN) (outbound *ElementUser) {
-	for _, b := range r.Domain {
-		switch value, ok := b.Users[inbound]; {
-		case ok:
-			return value
-		}
-	}
-	return
-}
-func (r *Conf) FindGroup(inbound AttrDN) (outbound *ElementGroup) {
-	for _, b := range r.Domain {
-		switch value, ok := b.Groups[inbound]; {
-		case ok:
-			return value
-		}
-	}
-	return
-}
-func (r *Conf) FindHost(inbound AttrDN) (outbound *ElementHost) {
-	for _, b := range r.Domain {
-		switch value, ok := b.Hosts[inbound]; {
-		case ok:
-			return value
-		}
-	}
-	return
-}
-
-// check if exist
-
-// func (r *Conf) IsUser(inbound AttrDN) (outbound bool)  { return r.FindUser(inbound) != nil }
-// func (r *Conf) IsGroup(inbound AttrDN) (outbound bool) { return r.FindGroup(inbound) != nil }
-// func (r *Conf) IsHost(inbound AttrDN) (outbound bool)  { return r.FindHost(inbound) != nil }
-
-func (r *Conf) AddUser(inbound *ElementUser) (err error) {
-	switch {
-	case r.FindUser(inbound.DN) != nil:
-		l.Z{l.E: mod_errors.EEXIST, "DN": inbound.DN}.Warning()
-		return mod_errors.EEXIST
 	}
 	return
 }

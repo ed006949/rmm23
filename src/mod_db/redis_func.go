@@ -107,9 +107,9 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 }
 
 func newDocumentFromStruct(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (outbound redisearch.Document, err error) {
-	doc := redisearch.NewDocument(docID, score)
-	reflection := reflect.ValueOf(data)
-
+	var (
+		reflection = reflect.ValueOf(data)
+	)
 	switch {
 	case reflection.Kind() == reflect.Ptr:
 		reflection = reflection.Elem()
@@ -119,6 +119,9 @@ func newDocumentFromStruct(schema *redisearch.Schema, docID string, score float3
 		return redisearch.Document{}, mod_errors.ENotStructOrPtrStruct
 	}
 
+	var (
+		doc = redisearch.NewDocument(docID, score)
+	)
 	// Iterate over struct fields to find corresponding schema fields
 	for i := 0; i < reflection.NumField(); i++ {
 		var (

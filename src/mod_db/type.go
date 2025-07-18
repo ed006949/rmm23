@@ -66,7 +66,7 @@ type Entry struct {
 	HostListen      netip.Addr `msgpack:"host_listen,omitempty" json:"host_listen,omitempty" redis:"host_listen" redisearch:"text,sortable"`             //
 
 	// specific data (space-separated KV DB stored as labelledURIs)
-	Legacy []mod_ldap.LabeledURILegacy `ldap:"labelledURI" msgpack:"-" json:"-" redis:"-" redisearch:"-"` //
+	LabelledURI mod_ldap.AttrLabeledURIs `ldap:"labelledURI" msgpack:"labelledURI,omitempty" json:"labelledURI,omitempty" redis:"labelledURI" redisearch:"tag"` //
 }
 
 type Domain struct{ Entry }

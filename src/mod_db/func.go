@@ -71,12 +71,13 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		doc.Set("DC", d.Domain.DC)
 		doc.Set("O", d.Domain.O)
 
-		doc.Set("Legacy", d.Domain.LabeledURI)
+		doc.Set("LabelledURI", d.Domain.LabelledURI)
 
 		switch doc2, err = newDocumentFromStruct(schema, "ldap:entry:"+d.Domain.UUID.String(), 1.0, d.Domain, false); {
 		case err != nil:
 			return err
 		default:
+			doc2.Set("Type", entryTypeDomain)
 			switch err = rsClient.Index([]redisearch.Document{doc2}...); {
 			case err != nil && mod_errors.Contains(err, EDocExist):
 				err = nil
@@ -109,7 +110,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("Member", mod_slices.Join(f.Member, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
 			doc.Set("Owner", mod_slices.Join(f.Owner, mod_strings.SliceSeparator, mod_slices.FlagNormalize))
 
-			doc.Set("Legacy", f.LabeledURI)
+			doc.Set("LabelledURI", f.LabelledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
 			case err != nil && mod_errors.Contains(err, EDocExist):
@@ -151,7 +152,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("UserPKCS12", f.UserPKCS12)
 			doc.Set("UserPassword", f.UserPassword)
 
-			doc.Set("Legacy", f.LabeledURI)
+			doc.Set("LabelledURI", f.LabelledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
 			case err != nil && mod_errors.Contains(err, EDocExist):
@@ -182,7 +183,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			doc.Set("UIDNumber", f.UIDNumber)
 			doc.Set("UserPKCS12", f.UserPKCS12)
 
-			doc.Set("Legacy", f.LabeledURI)
+			doc.Set("LabelledURI", f.LabelledURI)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
 			case err != nil && mod_errors.Contains(err, EDocExist):
