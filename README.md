@@ -146,42 +146,37 @@ Welcome to the Remote Monitoring and Management (episode 23).
 	- [ ] go templates
 	- [ ] JSON
 	- [x] XML
-	- [ ] LDAP
+	- [ ] LDAP:
+		- [x] load from LDAP
+		- [ ] mirror changes to LDAP
 - [ ] daemon
 	- [ ] API
 	- [ ] frontend
-	- [ ] cluster
+	- [ ] (?) cluster
 		- [ ] slave
 			- [ ] w/ caching (?)
 			- [ ] readonly slave
 		- [ ] multimaster
 - [ ] DB
-	- [ ] use in-memory DB (`go-memdb`) for `alpha` stage
-		- [ ] load data from `LDAP` store in `go-memdb`
-		- [ ] parse data
-		- [ ] use data
-		- [ ] write changes to `LDAP`
-	- [ ] use `go-redis` for `beta` and later stages
-		- [ ] use `redisearch-go` for DB-schema
-		- [ ] rework DB i/o
-		- [ ] use `LDAP` as an auth-frontend only
-	- [ ] rework:
-		- [ ] storage: SQL/NoSQL
-		- [ ] sync: NoSQL (diff)
-		- [ ] implement MQTT (?)
-		- [ ] built-in LDAP (?)
-			- [ ] frontend
-				- [ ] OpenLDAP
-				- [ ] MS AD
+	- [x] redis as DB backend instead of memory
+		- [x] db0: main db with `rediSearch` for indexing
+		- [ ] db1: config
+		- [ ] db2: `MQTT`
+	- [ ] auth front-ends:
+		- [ ] (?) built-in
+		- [ ] `LDAP`
+			- [ ] OpenLDAP
+			- [ ] MS AD
 - [ ] ACL
 	- [ ] sanitize/normalize
 	- [ ] weigh/prioritize
 	- [ ] summarize/optimize
 - [ ] PKI
-	- [ ] key-cert validator
-	- [ ] issuer-cert validator
+	- [ ] sanitize/validate
+		- [ ] key-cert validator
+		- [ ] issuer-cert validator
 	- [ ] implement ACME
-- [ ] implement `protobuf`
+- [ ] ~~implement `protobuf`~~
 
 ## Internal DB Structure
 
@@ -287,8 +282,26 @@ TODO
 
 ## requirements
 
+### build
+
+* [Go][URL_Go]
+* [Redis][URL_Redigo]
+* [RediSearch][URL_redisearch-go]
+
 ### run
 
-* [RediSearch][URL_RediSearch]
+* [Redis][URL_Redis] server with modules:
+	* [RediSearch][URL_RediSearch]
+	* [~~RedisJSON~~][URL_RedisJSON]
+
+[URL_Redis]: https://github.com/redis/redis
 
 [URL_RediSearch]: https://github.com/RediSearch/RediSearch
+
+[URL_RedisJSON]: https://github.com/RedisJSON/RedisJSON
+
+[URL_Go]: https://golang.org/
+
+[URL_redisearch-go]: https://github.com/RediSearch/redisearch-go
+
+[URL_redigo]: https://github.com/gomodule/redigo
