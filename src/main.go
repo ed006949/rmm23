@@ -14,7 +14,6 @@ import (
 )
 
 func main() {
-	l.Name.Set("rmm23")
 	l.CLI.Set()
 
 	l.Z{l.M: "main", "daemon": l.Name.String(), "commit": l.GitCommit.String()}.Informational()

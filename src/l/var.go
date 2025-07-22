@@ -2,10 +2,11 @@ package l
 
 var (
 	gitCommit string
+	gitName   string
 )
 var (
 	control = &ControlType{
-		Name:      "",
+		Name:      nameValue(gitName),
 		Config:    "",
 		DryRun:    DoDryRun,
 		Mode:      Init,
