@@ -25,7 +25,6 @@ func (r *xmlConf) load() (err error) {
 			}),
 		}
 	)
-	l.InitCLI()
 
 	switch {
 	case len(l.Config.String()) != 0: //

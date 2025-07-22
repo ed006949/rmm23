@@ -14,8 +14,6 @@ import (
 )
 
 func main() {
-	l.CLI.Set()
-
 	l.Z{l.M: "main", "daemon": l.Name.String(), "commit": l.GitCommit.String()}.Informational()
 	defer l.Z{l.M: "exit", "daemon": l.Name.String()}.Informational()
 
