@@ -64,7 +64,6 @@ func main() {
 //			}),
 //		}
 //	)
-//	l.InitCLI()
 //
 //	switch {
 //	case len(l.Config.String()) != 0: //
