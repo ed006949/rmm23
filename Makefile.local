@@ -6,8 +6,8 @@ PACKAGE		:=	${ORIGIN}/${NAME}
 
 TARGET		:=	${NAME}
 
-COMMAND_LINE	:=	--config="./etc/${NAME}.xml" --dry-run
-#COMMAND_LINE	:=	--config="./etc/${NAME}.xml"
+COMMAND_LINE	:=	--config="./etc/${NAME}.json" --dry-run true
+#COMMAND_LINE	:=	--config="./etc/${NAME}.json"
 
 GITIGNORE_URL	:=	https://www.toptal.com/developers/gitignore/api/go,linux,macos,windows,jetbrains,jetbrains+all,jetbrains+iml,visualstudiocode,xcode,xcodeinjection
 
