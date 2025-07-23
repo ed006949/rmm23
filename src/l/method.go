@@ -32,9 +32,11 @@ func (r Z) MarshalZerologObject(e *zerolog.Event) {
 	}
 
 	switch {
-	case Run.dryRun:
-		e.Bool(daemonFlagName[daemonDryRun], Run.dryRun)
+	case Run.DryRunValue():
+		e.Bool(Run.dryRunName(), Run.DryRunValue())
 	}
+
+	e.Str("daemon", Run.NameValue())
 }
 
 func (r Z) Emergency()     { log.Fatal().EmbedObject(r).Send() } // rfc3164 ----
@@ -60,17 +62,22 @@ func (r *runType) verbositySet(inbound zerolog.Level) {
 	})
 }
 
-func (r *runType) verbositySetString(inbound string) (err error) {
+func (r *runType) configSetString(inbound string) (err error){
+	Run.config = inbound
+
+	return
+}
+func (r *runType) dbSetString(inbound string) (err error){
 	var (
-		interim zerolog.Level
+		interim *url.URL
 	)
 
-	switch interim, err = zerolog.ParseLevel(inbound); {
+	switch interim, err = url.Parse(inbound); {
 	case err != nil:
-		return
+		return err
 	}
 
-	Run.verbositySet(interim)
+	Run.db = interim
 
 	return
 }
@@ -116,22 +123,17 @@ func (r *runType) nodeSetString(inbound string) (err error){
 
 	return
 }
-func (r *runType) dbSetString(inbound string) (err error){
+func (r *runType) verbositySetString(inbound string) (err error) {
 	var (
-		interim *url.URL
+		interim zerolog.Level
 	)
 
-	switch interim, err = url.Parse(inbound); {
+	switch interim, err = zerolog.ParseLevel(inbound); {
 	case err != nil:
-		return err
+		return
 	}
 
-	Run.db = interim
-
-	return
-}
-func (r *runType) configSetString(inbound string) (err error){
-	Run.config = inbound
+	Run.verbositySet(interim)
 
 	return
 }
@@ -149,7 +151,9 @@ func (r *runType) ConfigUnmarshal(inbound any) (err error) {
 	return json.Unmarshal(content, inbound)
 }
 
+func (r *runType) BuildTimeValue() (outbound string)  { return r.time.String() }
+func (r *runType) CommitHashValue() (outbound string) { return r.commit }
 func (r *runType) DryRunValue() (outbound bool)       { return r.dryRun }
 func (r *runType) NameValue() (outbound string)       { return r.name }
-func (r *runType) CommitHashValue() (outbound string) { return r.commit }
-func (r *runType) BuildTimeValue() (outbound string)  { return r.time.String() }
+
+func (r *runType) dryRunName() (outbound string) { return daemonFlagName[daemonDryRun]  }

@@ -9,8 +9,8 @@ import (
 func main() {
 	l.Initialize()
 
-	l.Z{l.M: "main", "daemon": l.Run.NameValue(), "commit": l.Run.CommitHashValue(), "built": l.Run.BuildTimeValue()}.Informational()
-	defer l.Z{l.M: "exit", "daemon": l.Run.NameValue()}.Informational()
+	l.Z{l.M: "main", "commit": l.Run.CommitHashValue(), "built": l.Run.BuildTimeValue()}.Informational()
+	defer l.Z{l.M: "exit"}.Informational()
 
 	switch err := l.Run.ConfigUnmarshal(config); {
 	case err != nil:
