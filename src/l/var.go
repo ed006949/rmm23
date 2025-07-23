@@ -2,6 +2,7 @@ package l
 
 import (
 	"net/url"
+	"os"
 	"strconv"
 	"time"
 
@@ -14,50 +15,16 @@ import (
 var (
 	buildName      string                       // to be set by builder
 	buildVerbosity = zerolog.InfoLevel.String() // defaults
-	buildDryRun    = DoDryRun.String()          // defaults
-	buildMode      = Init.String()              // defaults
+	buildDryRun    = "true"                     // defaults
+	buildMode      = "0"                        // defaults
 	buildNode      = "0"                        // defaults
 	buildDB        = "redis://localhost:6379"   // defaults
 	buildConfig    = buildName + ".json"        // defaults
 	buildTime      string                       // to be set by builder
 	buildCommit    string                       // to be set by builder
 )
-
 var (
-	control = &DaemonConfig{
-		Name:      "",
-		Verbosity: 0,
-		DryRun:    DoDryRun,
-		Mode:      0,
-		Node:      0,
-		DB:        &url.URL{},
-		Config:    "",
-		build: buildType{
-			name:      buildName,
-			verbosity: buildVerbosity,
-			dryRun:    buildDryRun,
-			mode:      buildMode,
-			node:      buildNode,
-			db:        buildDB,
-			config:    buildConfig,
-			time:      buildTime,
-			commit:    buildCommit,
-		},
-	}
-	run = runType{
-		name:      buildName,
-		verbosity: mod_errors.PanicErr1(zerolog.ParseLevel(buildVerbosity)),
-		dryRun:    mod_errors.PanicErr1(mod_bools.Parse(buildDryRun)),
-		mode:      mod_errors.PanicErr1(strconv.Atoi(buildMode)),
-		node:      mod_errors.PanicErr1(strconv.Atoi(buildNode)),
-		db:        mod_errors.PanicErr1(url.Parse(buildDB)),
-		config:    buildConfig,
-		time:      mod_errors.StripErr1(time.Parse(time.RFC3339, buildTime)),
-		commit:    buildCommit,
-	}
-)
-var (
-	daemonParamDescription = map[int]string{
+	daemonFlagName = map[int]string{
 		daemonName:      "name",
 		daemonVerbosity: "verbosity",
 		daemonDryRun:    "dry-run",
@@ -90,18 +57,70 @@ var (
 		daemonTime:      "build time (" + daemonEnvName[daemonTime] + ")",
 		daemonCommit:    "commit hash (" + daemonEnvName[daemonCommit] + ")",
 	}
-)
-var (
-	dryRunDescription = map[dryRunValue]string{
-		NoDryRun: "false",
-		DoDryRun: "true",
+	daemonEnvDefined = map[int]string{
+		daemonName:      os.Getenv(daemonEnvName[daemonName]),
+		daemonVerbosity: os.Getenv(daemonEnvName[daemonVerbosity]),
+		daemonDryRun:    os.Getenv(daemonEnvName[daemonDryRun]),
+		daemonMode:      os.Getenv(daemonEnvName[daemonMode]),
+		daemonNode:      os.Getenv(daemonEnvName[daemonNode]),
+		daemonDB:        os.Getenv(daemonEnvName[daemonDB]),
+		daemonConfig:    os.Getenv(daemonEnvName[daemonConfig]),
+		daemonTime:      os.Getenv(daemonEnvName[daemonTime]),
+		daemonCommit:    os.Getenv(daemonEnvName[daemonCommit]),
 	}
 )
 var (
-	modeDescription = map[modeValue]string{
-		Init:   "init",
-		Deploy: "deploy",
-		CLI:    "cli",
-		Daemon: "daemon",
+	Run = runType{
+		name: buildName,
+		verbosity: func() zerolog.Level {
+			switch value := daemonEnvDefined[daemonVerbosity]; {
+			case len(value) != 0:
+				return mod_errors.PanicErr1(zerolog.ParseLevel(value))
+			default:
+				return mod_errors.PanicErr1(zerolog.ParseLevel(buildVerbosity))
+			}
+		}(),
+		dryRun: func() bool {
+			switch value := daemonEnvDefined[daemonDryRun]; {
+			case len(value) != 0:
+				return mod_errors.PanicErr1(mod_bools.Parse(value))
+			default:
+				return mod_errors.PanicErr1(mod_bools.Parse(buildDryRun))
+			}
+		}(),
+		mode: func() int {
+			switch value := daemonEnvDefined[daemonMode]; {
+			case len(value) != 0:
+				return mod_errors.PanicErr1(strconv.Atoi(value))
+			default:
+				return mod_errors.PanicErr1(strconv.Atoi(buildMode))
+			}
+		}(),
+		node: func() int {
+			switch value := daemonEnvDefined[daemonNode]; {
+			case len(value) != 0:
+				return mod_errors.PanicErr1(strconv.Atoi(value))
+			default:
+				return mod_errors.PanicErr1(strconv.Atoi(buildNode))
+			}
+		}(),
+		db: func() *url.URL {
+			switch value := daemonEnvDefined[daemonDB]; {
+			case len(value) != 0:
+				return mod_errors.PanicErr1(url.Parse(value))
+			default:
+				return mod_errors.PanicErr1(url.Parse(buildDB))
+			}
+		}(),
+		config: buildConfig,
+		time: func() time.Time {
+			switch value := daemonEnvDefined[daemonTime]; {
+			case len(value) != 0:
+				return mod_errors.StripErr1(time.Parse(time.RFC3339, value))
+			default:
+				return mod_errors.StripErr1(time.Parse(time.RFC3339, buildTime))
+			}
+		}(),
+		commit: buildCommit,
 	}
 )

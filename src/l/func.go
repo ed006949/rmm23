@@ -19,17 +19,12 @@ import (
 // func Disabled(e Z)      {}
 
 func envName(inbound int) (outbound string) {
-	switch inbound {
-	case daemonName:
-		return strings.ReplaceAll(strings.ToUpper(string(run.name)), "-", "_")
-	default:
-		return strings.ReplaceAll(
-			strings.ToUpper(
-				string(run.name)+"_"+daemonParamDescription[inbound]),
-			"-",
-			"_",
-		)
-	}
+	return strings.ReplaceAll(
+		strings.ToUpper(
+			string(buildName)+"_"+daemonFlagName[inbound]),
+		"-",
+		"_",
+	)
 }
 
 func FlagIsFlagExist(name string) (outbound bool) {
