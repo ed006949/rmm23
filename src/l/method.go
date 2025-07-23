@@ -1,6 +1,7 @@
 package l
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"fmt"
 	"os"
@@ -213,6 +214,117 @@ func (r *verbosityLevel) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 		return interimErr
 	default:
 		*r = verbosityLevel(interim)
+		switch {
+		case !FlagIsFlagExist(Verbosity.Name()):
+			Verbosity.Set(*r)
+		}
+		return
+	}
+}
+
+func (r *nameValue) UnmarshalJSON(inbound []byte) (err error) {
+	var interim string
+	if err = json.Unmarshal(inbound, &interim); err != nil {
+		return
+	}
+
+	switch {
+	case len(interim) == 0:
+		*r = Name.Value()
+		return
+	}
+	*r = nameValue(interim)
+
+	switch {
+	case !FlagIsFlagExist(Name.Name()):
+		Name.Set(*r)
+	}
+	return
+}
+
+func (r *configValue) UnmarshalJSON(inbound []byte) (err error) {
+	var interim string
+	if err = json.Unmarshal(inbound, &interim); err != nil {
+		return
+	}
+
+	switch {
+	case len(interim) == 0:
+		*r = Config.Value()
+		return
+	}
+	*r = configValue(interim)
+
+	switch {
+	case !FlagIsFlagExist(Config.Name()):
+		Config.Set(*r)
+	}
+	return
+}
+
+func (r *dryRunFlag) UnmarshalJSON(inbound []byte) (err error) {
+	var interim string
+	if err = json.Unmarshal(inbound, &interim); err != nil {
+		return
+	}
+
+	interim = strings.ToLower(interim)
+
+	switch interim {
+	case "1", "t", "y", "true", "yes", "on":
+		*r = true
+	case "0", "f", "n", "false", "no", "off":
+		*r = false
+	default:
+		*r = DryRun.Value()
+		return mod_errors.EINVAL
+	}
+
+	switch {
+	case !FlagIsFlagExist(DryRun.Name()):
+		DryRun.Set(*r)
+	}
+	return
+}
+
+func (r *modeValue) UnmarshalJSON(inbound []byte) (err error) {
+	var interim string
+	if err = json.Unmarshal(inbound, &interim); err != nil {
+		return
+	}
+
+	interim = strings.ToLower(interim)
+
+	for a, b := range modeDescription {
+		switch {
+		case interim == b:
+			*r = a
+			switch {
+			case !FlagIsFlagExist(Mode.Name()):
+				Mode.Set(*r)
+			}
+			return
+		}
+	}
+
+	*r = Mode.Value()
+	return mod_errors.EINVAL
+}
+
+func (r *verbosityLevel) UnmarshalJSON(inbound []byte) (err error) {
+	var interim string
+	if err = json.Unmarshal(inbound, &interim); err != nil {
+		return
+	}
+
+	interim = strings.ToLower(interim)
+
+	switch level, levelErr := zerolog.ParseLevel(interim); {
+	case levelErr != nil:
+		*r = Verbosity.Value()
+		return levelErr
+	default:
+		*r = verbosityLevel(level)
 		switch {
 		case !FlagIsFlagExist(Verbosity.Name()):
 			Verbosity.Set(*r)

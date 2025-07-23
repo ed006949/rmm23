@@ -32,12 +32,13 @@ type Conf struct {
 }
 
 type DaemonConfig struct {
-	Name      string  `json:"name"`
-	Verbosity string  `json:"verbosity"`
-	DryRun    bool    `json:"dry-run"`
-	Node      int     `json:"node"`
-	DB        url.URL `json:"db"`
-	GitCommit string  `json:"-"`
+	Name      string         `json:"name"`
+	Verbosity string         `json:"verbosity"`
+	DryRun    bool           `json:"dry-run"`
+	Node      int            `json:"node"`
+	DB        url.URL        `json:"db"`
+	GitCommit gitCommitValue `json:"-"`
+	Config    configValue    `json:"-"`
 }
 
 type LDAPConfig struct {
@@ -60,7 +61,7 @@ type LDAPDomain struct {
 type ControlType struct {
 	Name      nameValue      `xml:"name,attr,omitempty" json:"name,omitempty"`
 	Config    configValue    `xml:"config,attr,omitempty" json:"config,omitempty"`
-	DryRun    dryRunFlag     `xml:"dry-run,attr,omitempty" json:"dryrun,omitempty"`
+	DryRun    dryRunFlag     `xml:"dry-run,attr,omitempty" json:"dry-run,omitempty"`
 	Mode      modeValue      `xml:"mode,attr,omitempty" json:"mode,omitempty"`
 	Verbosity verbosityLevel `xml:"verbosity,attr,omitempty" json:"verbosity,omitempty"`
 	GitCommit gitCommitValue `xml:"-" json:"-"`
