@@ -2,6 +2,7 @@ package l
 
 import (
 	"net/url"
+	"time"
 
 	"github.com/rs/zerolog"
 )
@@ -12,57 +13,53 @@ type nameType string
 type configType string
 type dryRunType string
 type modeType string
+type nodeType string
+type dbType string
 type verbosityType string
 type gitCommitType string
 
 type nameValue string
 type configValue string
-type dryRunFlag bool
+type dryRunValue bool
 type modeValue int
-type verbosityLevel zerolog.Level
-type gitCommitValue string
-
-type ConfigRoot struct {
-	Conf Conf `json:"conf"`
-}
-
-type Conf struct {
-	Daemon DaemonConfig `json:"daemon"`
-	Ldap   LDAPConfig   `json:"ldap"`
-}
+type nodeValue int
+type verbosityValue zerolog.Level
+type commitValue string
 
 type DaemonConfig struct {
-	Name      string         `json:"name"`
-	Verbosity string         `json:"verbosity"`
-	DryRun    bool           `json:"dry-run"`
-	Node      int            `json:"node"`
-	DB        url.URL        `json:"db"`
-	GitCommit gitCommitValue `json:"-"`
-	Config    configValue    `json:"-"`
+	Name      nameValue      `env:"name,omitempty" json:"name,omitempty"`           //
+	Verbosity verbosityValue `env:"verbosity,omitempty" json:"verbosity,omitempty"` //
+	DryRun    dryRunValue    `env:"dry-run,omitempty" json:"dry-run,omitempty"`     //
+	Mode      modeValue      `env:"mode,omitempty" json:"mode,omitempty"`           //
+	Node      nodeValue      `env:"node,omitempty" json:"node,omitempty"`           //
+	DB        *url.URL       `env:"db,omitempty" json:"db,omitempty"`               //
+	Config    configValue    `env:"config,omitempty" json:"-"`                      //
+	run       runType        //
+	build     buildType      //
 }
 
-type LDAPConfig struct {
-	URL      string        `json:"url"`
-	Settings []LDAPSetting `json:"settings"`
-	Domain   []LDAPDomain  `json:"domain"`
+// run represents operational settings
+type runType struct {
+	name      string        //
+	verbosity zerolog.Level //
+	dryRun    bool          //
+	mode      int           //
+	node      int           //
+	db        *url.URL      //
+	config    string        //
+	time      time.Time     //
+	commit    string        //
 }
 
-type LDAPSetting struct {
-	Type   string `json:"type"`
-	Dn     string `json:"dn"`
-	Cn     string `json:"cn"`
-	Filter string `json:"filter"`
-}
-
-type LDAPDomain struct {
-	Dn string `json:"dn"`
-}
-
-type ControlType struct {
-	Name      nameValue      `xml:"name,attr,omitempty" json:"name,omitempty"`
-	Config    configValue    `xml:"config,attr,omitempty" json:"config,omitempty"`
-	DryRun    dryRunFlag     `xml:"dry-run,attr,omitempty" json:"dry-run,omitempty"`
-	Mode      modeValue      `xml:"mode,attr,omitempty" json:"mode,omitempty"`
-	Verbosity verbosityLevel `xml:"verbosity,attr,omitempty" json:"verbosity,omitempty"`
-	GitCommit gitCommitValue `xml:"-" json:"-"`
+// buildType represents buildType-time settings
+type buildType struct {
+	name      string //
+	verbosity string //
+	dryRun    string //
+	mode      string //
+	node      string //
+	db        string //
+	config    string //
+	time      string //
+	commit    string //
 }

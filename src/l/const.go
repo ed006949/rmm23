@@ -16,11 +16,11 @@ const (
 	DryRun    dryRunType    = "dry-run"
 	Mode      modeType      = "mode"
 	Verbosity verbosityType = "verbosity"
-	GitCommit gitCommitType = "gitCommit"
+	GitCommit gitCommitType = "buildCommit"
 )
 const (
-	NoDryRun dryRunFlag = false
-	DoDryRun dryRunFlag = true
+	NoDryRun dryRunValue = false
+	DoDryRun dryRunValue = true
 )
 const (
 	Init modeValue = iota
@@ -29,16 +29,27 @@ const (
 	Daemon
 )
 const (
-	Emergency     = verbosityLevel(zerolog.FatalLevel)
-	Alert         = verbosityLevel(zerolog.FatalLevel)
-	Critical      = verbosityLevel(zerolog.FatalLevel)
-	Error         = verbosityLevel(zerolog.ErrorLevel)
-	Warning       = verbosityLevel(zerolog.WarnLevel)
-	Notice        = verbosityLevel(zerolog.InfoLevel)
-	Informational = verbosityLevel(zerolog.InfoLevel)
-	Debug         = verbosityLevel(zerolog.DebugLevel)
-	Trace         = verbosityLevel(zerolog.TraceLevel)
-	Panic         = verbosityLevel(zerolog.PanicLevel)
-	Quiet         = verbosityLevel(zerolog.NoLevel)
-	Disabled      = verbosityLevel(zerolog.Disabled)
+	Emergency     = verbosityValue(zerolog.FatalLevel)
+	Alert         = verbosityValue(zerolog.FatalLevel)
+	Critical      = verbosityValue(zerolog.FatalLevel)
+	Error         = verbosityValue(zerolog.ErrorLevel)
+	Warning       = verbosityValue(zerolog.WarnLevel)
+	Notice        = verbosityValue(zerolog.InfoLevel)
+	Informational = verbosityValue(zerolog.InfoLevel)
+	Debug         = verbosityValue(zerolog.DebugLevel)
+	Trace         = verbosityValue(zerolog.TraceLevel)
+	Panic         = verbosityValue(zerolog.PanicLevel)
+	Quiet         = verbosityValue(zerolog.NoLevel)
+	Disabled      = verbosityValue(zerolog.Disabled)
+)
+const (
+	daemonName = iota
+	daemonVerbosity
+	daemonDryRun
+	daemonMode
+	daemonNode
+	daemonDB
+	daemonConfig
+	daemonTime
+	daemonCommit
 )

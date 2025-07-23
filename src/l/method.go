@@ -2,7 +2,6 @@ package l
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"fmt"
 	"os"
 	"strings"
@@ -10,8 +9,6 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-
-	"rmm23/src/mod_errors"
 )
 
 func (r Z) MarshalZerologObject(e *zerolog.Event) {
@@ -30,11 +27,11 @@ func (r Z) MarshalZerologObject(e *zerolog.Event) {
 			e.Str(a, value.String())
 		case configValue:
 			e.Str(a, value.String())
-		case dryRunFlag:
+		case dryRunValue:
 			e.Bool(a, value.Flag())
 		case modeValue:
 			e.Str(a, value.String())
-		case verbosityLevel:
+		case verbosityValue:
 			e.Str(a, value.String())
 		case error:
 			e.AnErr(a, value)
@@ -71,9 +68,9 @@ func (r Z) Disabled()      {}                                    // specific ---
 
 func (r nameValue) Set()      { control.set(Name, r) }      // Package predefined Flag hook
 func (r configValue) Set()    { control.set(Config, r) }    // Package predefined Flag hook
-func (r dryRunFlag) Set()     { control.set(DryRun, r) }    // Package predefined Flag hook
+func (r dryRunValue) Set()    { control.set(DryRun, r) }    // Package predefined Flag hook
 func (r modeValue) Set()      { control.set(Mode, r) }      // Package predefined Flag hook
-func (r verbosityLevel) Set() { control.set(Verbosity, r) } // Package predefined Flag hook
+func (r verbosityValue) Set() { control.set(Verbosity, r) } // Package predefined Flag hook
 
 func (nameType) Set(inbound any)      { control.set(Name, inbound) }      // Package Flag hook
 func (configType) Set(inbound any)    { control.set(Config, inbound) }    // Package Flag hook
@@ -90,16 +87,16 @@ func (gitCommitType) Name() string { return string(GitCommit) } // Package Flag 
 
 func (nameType) Value() nameValue           { return control.Name }      // Package Flag Value
 func (configType) Value() configValue       { return control.Config }    // Package Flag Value
-func (dryRunType) Value() dryRunFlag        { return control.DryRun }    // Package Flag Value
+func (dryRunType) Value() dryRunValue       { return control.DryRun }    // Package Flag Value
 func (modeType) Value() modeValue           { return control.Mode }      // Package Flag Value
-func (verbosityType) Value() verbosityLevel { return control.Verbosity } // Package Flag Value
-func (gitCommitType) Value() gitCommitValue { return control.GitCommit } // Package Flag Value
+func (verbosityType) Value() verbosityValue { return control.Verbosity } // Package Flag Value
+func (gitCommitType) Value() commitValue    { return control.Commit }    // Package Flag Value
 
-func (r nameType) EnvName() string      { return EnvName(r.Name()) } // Package Flag Env Name
-func (r configType) EnvName() string    { return EnvName(r.Name()) } // Package Flag Env Name
-func (r dryRunType) EnvName() string    { return EnvName(r.Name()) } // Package Flag Env Name
-func (r modeType) EnvName() string      { return EnvName(r.Name()) } // Package Flag Env Name
-func (r verbosityType) EnvName() string { return EnvName(r.Name()) } // Package Flag Env Name
+func (r nameType) EnvName() string      { return envName(r.Name()) } // Package Flag Env Name
+func (r configType) EnvName() string    { return envName(r.Name()) } // Package Flag Env Name
+func (r dryRunType) EnvName() string    { return envName(r.Name()) } // Package Flag Env Name
+func (r modeType) EnvName() string      { return envName(r.Name()) } // Package Flag Env Name
+func (r verbosityType) EnvName() string { return envName(r.Name()) } // Package Flag Env Name
 
 func (r nameType) EnvDescription() string      { return envDescription(r) }
 func (r configType) EnvDescription() string    { return envDescription(r) }
@@ -116,231 +113,16 @@ func (r modeType) String() string            { return r.Value().String() } // Pa
 func (r verbosityType) String() string       { return r.Value().String() } // Package Flag String Value
 func (r gitCommitType) String() string       { return r.Value().String() } // Package Flag String Value
 
-func (r dryRunFlag) Flag() bool               { return bool(r) }                   // Package Flag flag
-func (r verbosityLevel) Level() zerolog.Level { return zerolog.Level(r) }          // Package Flag level
+func (r dryRunValue) Flag() bool              { return bool(r) }                   // Package Flag flag
+func (r verbosityValue) Level() zerolog.Level { return zerolog.Level(r) }          // Package Flag level
 func (r nameValue) String() string            { return string(r) }                 // Package Flag description
 func (r configValue) String() string          { return string(r) }                 // Package Flag description
-func (r dryRunFlag) String() string           { return dryRunDescription[r] }      // Package Flag description
+func (r dryRunValue) String() string          { return dryRunDescription[r] }      // Package Flag description
 func (r modeValue) String() string            { return modeDescription[r] }        // Package Flag description
-func (r verbosityLevel) String() string       { return zerolog.Level(r).String() } // Package Flag description
-func (r gitCommitValue) String() string       { return string(r) }                 // Package Flag description
+func (r verbosityValue) String() string       { return zerolog.Level(r).String() } // Package Flag description
+func (r commitValue) String() string          { return string(r) }                 // Package Flag description
 
-func (r *nameValue) UnmarshalXMLAttr(attr xml.Attr) (err error) {
-	switch {
-	case len(attr.Value) == 0:
-		*r = Name.Value()
-		return
-	}
-	*r = nameValue(attr.Value)
-
-	switch {
-	case !FlagIsFlagExist(Name.Name()):
-		Name.Set(*r)
-	}
-	return
-}
-func (r *configValue) UnmarshalXMLAttr(attr xml.Attr) (err error) {
-	switch {
-	case len(attr.Value) == 0:
-		*r = Config.Value()
-		return
-	}
-	*r = configValue(attr.Value)
-
-	switch {
-	case !FlagIsFlagExist(Config.Name()):
-		Config.Set(*r)
-	}
-	return
-}
-func (r *dryRunFlag) UnmarshalXMLAttr(attr xml.Attr) (err error) {
-	switch {
-	case len(attr.Value) == 0:
-		*r = DryRun.Value()
-		return
-	}
-	attr.Value = strings.ToLower(attr.Value)
-
-	switch attr.Value {
-	case "1", "t", "y", "true", "yes", "on":
-		*r = true
-	case "0", "f", "n", "false", "no", "off":
-		*r = false
-	default:
-		*r = DryRun.Value()
-		return mod_errors.EINVAL
-	}
-
-	switch {
-	case !FlagIsFlagExist(DryRun.Name()):
-		DryRun.Set(*r)
-	}
-	return
-}
-func (r *modeValue) UnmarshalXMLAttr(attr xml.Attr) (err error) {
-	switch {
-	case len(attr.Value) == 0:
-		*r = Mode.Value()
-		return
-	}
-	attr.Value = strings.ToLower(attr.Value)
-
-	for a, b := range modeDescription {
-		switch {
-		case attr.Value == b:
-			*r = a
-			switch {
-			case !FlagIsFlagExist(Mode.Name()):
-				Mode.Set(*r)
-			}
-			return
-		}
-	}
-
-	*r = Mode.Value()
-	return mod_errors.EINVAL
-}
-func (r *verbosityLevel) UnmarshalXMLAttr(attr xml.Attr) (err error) {
-	switch {
-	case len(attr.Value) == 0:
-		*r = Verbosity.Value()
-		return
-	}
-	attr.Value = strings.ToLower(attr.Value)
-
-	switch interim, interimErr := zerolog.ParseLevel(attr.Value); {
-	case interimErr != nil:
-		*r = Verbosity.Value()
-		return interimErr
-	default:
-		*r = verbosityLevel(interim)
-		switch {
-		case !FlagIsFlagExist(Verbosity.Name()):
-			Verbosity.Set(*r)
-		}
-		return
-	}
-}
-
-func (r *nameValue) UnmarshalJSON(inbound []byte) (err error) {
-	var interim string
-	if err = json.Unmarshal(inbound, &interim); err != nil {
-		return
-	}
-
-	switch {
-	case len(interim) == 0:
-		*r = Name.Value()
-		return
-	}
-	*r = nameValue(interim)
-
-	switch {
-	case !FlagIsFlagExist(Name.Name()):
-		Name.Set(*r)
-	}
-	return
-}
-
-func (r *configValue) UnmarshalJSON(inbound []byte) (err error) {
-	var interim string
-	if err = json.Unmarshal(inbound, &interim); err != nil {
-		return
-	}
-
-	switch {
-	case len(interim) == 0:
-		*r = Config.Value()
-		return
-	}
-	*r = configValue(interim)
-
-	switch {
-	case !FlagIsFlagExist(Config.Name()):
-		Config.Set(*r)
-	}
-	return
-}
-
-func (r *dryRunFlag) UnmarshalJSON(inbound []byte) (err error) {
-	var interim string
-	if err = json.Unmarshal(inbound, &interim); err != nil {
-		return
-	}
-
-	interim = strings.ToLower(interim)
-
-	switch interim {
-	case "1", "t", "y", "true", "yes", "on":
-		*r = true
-	case "0", "f", "n", "false", "no", "off":
-		*r = false
-	default:
-		*r = DryRun.Value()
-		return mod_errors.EINVAL
-	}
-
-	switch {
-	case !FlagIsFlagExist(DryRun.Name()):
-		DryRun.Set(*r)
-	}
-	return
-}
-
-func (r *modeValue) UnmarshalJSON(inbound []byte) (err error) {
-	var interim string
-	if err = json.Unmarshal(inbound, &interim); err != nil {
-		return
-	}
-
-	interim = strings.ToLower(interim)
-
-	for a, b := range modeDescription {
-		switch {
-		case interim == b:
-			*r = a
-			switch {
-			case !FlagIsFlagExist(Mode.Name()):
-				Mode.Set(*r)
-			}
-			return
-		}
-	}
-
-	*r = Mode.Value()
-	return mod_errors.EINVAL
-}
-
-func (r *verbosityLevel) UnmarshalJSON(inbound []byte) (err error) {
-	var interim string
-	if err = json.Unmarshal(inbound, &interim); err != nil {
-		return
-	}
-
-	interim = strings.ToLower(interim)
-
-	switch level, levelErr := zerolog.ParseLevel(interim); {
-	case levelErr != nil:
-		*r = Verbosity.Value()
-		return levelErr
-	default:
-		*r = verbosityLevel(level)
-		switch {
-		case !FlagIsFlagExist(Verbosity.Name()):
-			Verbosity.Set(*r)
-		}
-		return
-	}
-}
-
-func (r *verbosityLevel) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
-	return xml.Attr{
-		Name:  name,
-		Value: r.String(),
-	}, nil
-}
-
-func (r *ControlType) set(inboundKey any, inboundValue any) {
+func (r *DaemonConfig) set(inboundKey any, inboundValue any) {
 	switch inboundKey.(type) {
 	case nameType:
 		switch value := inboundValue.(type) {
@@ -368,10 +150,10 @@ func (r *ControlType) set(inboundKey any, inboundValue any) {
 
 	case dryRunType:
 		switch value := inboundValue.(type) {
-		case dryRunFlag:
+		case dryRunValue:
 			r.DryRun = value
 		case bool:
-			r.DryRun = dryRunFlag(value)
+			r.DryRun = dryRunValue(value)
 
 		case string:
 			switch {
@@ -411,13 +193,13 @@ func (r *ControlType) set(inboundKey any, inboundValue any) {
 
 	case verbosityType:
 		switch value := inboundValue.(type) {
-		case verbosityLevel:
+		case verbosityValue:
 			r.Verbosity = value
 		case int8:
-			r.Verbosity = verbosityLevel(value)
+			r.Verbosity = verbosityValue(value)
 
 		case zerolog.Level:
-			r.Verbosity = verbosityLevel(value)
+			r.Verbosity = verbosityValue(value)
 
 		case string:
 			switch {
@@ -429,7 +211,7 @@ func (r *ControlType) set(inboundKey any, inboundValue any) {
 			case err != nil:
 				return
 			default:
-				r.Verbosity = verbosityLevel(interim)
+				r.Verbosity = verbosityValue(interim)
 			}
 		}
 
@@ -443,3 +225,9 @@ func (r *ControlType) set(inboundKey any, inboundValue any) {
 
 	}
 }
+
+func (r *nameValue) UnmarshalJSON(inbound []byte) (err error)      { return json.Unmarshal(inbound, r) }
+func (r *configValue) UnmarshalJSON(inbound []byte) (err error)    { return json.Unmarshal(inbound, r) }
+func (r *dryRunValue) UnmarshalJSON(inbound []byte) (err error)    { return json.Unmarshal(inbound, r) }
+func (r *modeValue) UnmarshalJSON(inbound []byte) (err error)      { return json.Unmarshal(inbound, r) }
+func (r *verbosityValue) UnmarshalJSON(inbound []byte) (err error) { return json.Unmarshal(inbound, r) }

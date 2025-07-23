@@ -9,8 +9,8 @@ all:	build
 all:	status
 
 build:
-	go build -ldflags="-s -w -X ${NAME}/src/l.gitCommit=${GIT_COMMIT} -X ${NAME}/src/l.gitName=${NAME}" -trimpath -o "./bin/${NAME}" ./src/*.go
-	GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w -X ${NAME}/src/l.gitCommit=${GIT_COMMIT} -X ${NAME}/src/l.gitName=${NAME}" -trimpath -o "./bin/${NAME}-freebsd-amd64" ./src/*.go
+	go build -ldflags="-s -w -X ${NAME}/src/l.buildName=${NAME} -X ${NAME}/src/l.buildTime=${DATE} -X ${NAME}/src/l.buildCommit=${GIT_COMMIT}" -trimpath -o "./bin/${NAME}" ./src/*.go
+	GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w -X ${NAME}/src/l.buildName=${NAME} -X ${NAME}/src/l.buildTime=${DATE} -X ${NAME}/src/l.buildCommit=${GIT_COMMIT}" -trimpath -o "./bin/${NAME}-freebsd-amd64" ./src/*.go
 
 clean:
 	-gh auth logout

@@ -5,8 +5,6 @@ import (
 	"strings"
 )
 
-// (?) move projects to []error reporting style
-
 // func Emergency(e Z)     { log.Fatal().EmbedObject(e).Send() }
 // func Alert(e Z)         { log.Fatal().EmbedObject(e).Send() }
 // func Critical(e Z)      { log.Fatal().EmbedObject(e).Send() }
@@ -20,30 +18,18 @@ import (
 // func Quiet(e Z)         {}
 // func Disabled(e Z)      {}
 
-func envDescription(inbound any) (outbound string) {
-	switch value := inbound.(type) {
-	case nameType:
-		return "daemon name (" + value.EnvName() + ")"
-	case configType:
-		return "config file (" + value.EnvName() + ")"
-	case dryRunType:
-		return "dry-run flag, overrides config (" + value.EnvName() + ")"
-	case verbosityType:
-		return "verbosity level, overrides config (" + value.EnvName() + ")"
-	case modeType:
-		return "operational mode (" + value.EnvName() + ")"
+func envName(inbound int) (outbound string) {
+	switch inbound {
+	case daemonName:
+		return strings.ReplaceAll(strings.ToUpper(string(run.name)), "-", "_")
 	default:
-		return
+		return strings.ReplaceAll(
+			strings.ToUpper(
+				string(run.name)+"_"+daemonParamDescription[inbound]),
+			"-",
+			"_",
+		)
 	}
-}
-
-func EnvName(inbound string) (outbound string) {
-	return strings.ReplaceAll(
-		strings.ToUpper(
-			Name.String()+"_"+inbound),
-		"-",
-		"_",
-	)
 }
 
 func FlagIsFlagExist(name string) (outbound bool) {
