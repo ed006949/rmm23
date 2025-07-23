@@ -12,8 +12,6 @@ func Initialize() {
 
 	Run.verbositySet(Run.verbosity)
 
-	// flag.Func(daemonEnvName[daemonName], daemonEnvDescription[daemonName], Run.nameSetString)
-
 	flag.Func(daemonFlagName[daemonVerbosity], daemonEnvDescription[daemonVerbosity], Run.verbositySetString)
 	flag.Func(daemonFlagName[daemonDryRun], daemonEnvDescription[daemonDryRun], Run.dryRunSetString)
 	flag.Func(daemonFlagName[daemonMode], daemonEnvDescription[daemonMode], Run.modeSetString)

@@ -25,29 +25,29 @@ var (
 )
 var (
 	daemonFlagName = map[int]string{
-		daemonName:      "name",
+		// daemonName:      "name",
 		daemonVerbosity: "verbosity",
 		daemonDryRun:    "dry-run",
 		daemonMode:      "mode",
 		daemonNode:      "node",
 		daemonDB:        "db",
 		daemonConfig:    "config",
-		daemonTime:      "time",
-		daemonCommit:    "commit",
+		// daemonTime:      "time",
+		// daemonCommit:    "commit",
 	}
 	daemonEnvName = map[int]string{
-		daemonName:      envName(daemonName),
+		// daemonName:      envName(daemonName),
 		daemonVerbosity: envName(daemonVerbosity),
 		daemonDryRun:    envName(daemonDryRun),
 		daemonMode:      envName(daemonMode),
 		daemonNode:      envName(daemonNode),
 		daemonDB:        envName(daemonDB),
 		daemonConfig:    envName(daemonConfig),
-		daemonTime:      envName(daemonTime),
-		daemonCommit:    envName(daemonCommit),
+		// daemonTime:      envName(daemonTime),
+		// daemonCommit:    envName(daemonCommit),
 	}
 	daemonEnvDescription = map[int]string{
-		daemonName:      "daemon name (" + daemonEnvName[daemonName] + "=\"" + daemonEnvDefined[daemonName] + "\")",
+		// daemonName:      "daemon name (" + daemonEnvName[daemonName] + "=\"" + daemonEnvDefined[daemonName] + "\")",
 		daemonVerbosity: "verbosity level (" + daemonEnvName[daemonVerbosity] + "=\"" + daemonEnvDefined[daemonVerbosity] + "\")",
 		daemonDryRun:    "dry-run flag (" + daemonEnvName[daemonDryRun] + "=\"" + daemonEnvDefined[daemonDryRun] + "\")",
 		daemonMode:      "operational mode (" + daemonEnvName[daemonMode] + "=\"" + daemonEnvDefined[daemonMode] + "\")",
@@ -56,19 +56,19 @@ var (
 			"\"redis://username:password@redis-host:6379\"\n" +
 			"\"redis-sentinel://username:password@redis-sentinel-host1:6379,redis-sentinel-host2:6379\"",
 		daemonConfig: "config file (" + daemonEnvName[daemonConfig] + "=\"" + daemonEnvDefined[daemonConfig] + "\")",
-		daemonTime:   "build time (" + daemonEnvName[daemonTime] + "=\"" + daemonEnvDefined[daemonTime] + "\")",
-		daemonCommit: "commit hash (" + daemonEnvName[daemonCommit] + "=\"" + daemonEnvDefined[daemonCommit] + "\")",
+		// daemonTime:   "build time (" + daemonEnvName[daemonTime] + "=\"" + daemonEnvDefined[daemonTime] + "\")",
+		// daemonCommit: "commit hash (" + daemonEnvName[daemonCommit] + "=\"" + daemonEnvDefined[daemonCommit] + "\")",
 	}
 	daemonEnvDefined = map[int]string{
-		daemonName:      os.Getenv(daemonEnvName[daemonName]),
+		// daemonName:      os.Getenv(daemonEnvName[daemonName]),
 		daemonVerbosity: os.Getenv(daemonEnvName[daemonVerbosity]),
 		daemonDryRun:    os.Getenv(daemonEnvName[daemonDryRun]),
 		daemonMode:      os.Getenv(daemonEnvName[daemonMode]),
 		daemonNode:      os.Getenv(daemonEnvName[daemonNode]),
 		daemonDB:        os.Getenv(daemonEnvName[daemonDB]),
 		daemonConfig:    os.Getenv(daemonEnvName[daemonConfig]),
-		daemonTime:      os.Getenv(daemonEnvName[daemonTime]),
-		daemonCommit:    os.Getenv(daemonEnvName[daemonCommit]),
+		// daemonTime:      os.Getenv(daemonEnvName[daemonTime]),
+		// daemonCommit:    os.Getenv(daemonEnvName[daemonCommit]),
 	}
 )
 var (
