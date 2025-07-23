@@ -1,6 +1,7 @@
 package l
 
 import (
+	"fmt"
 	"os"
 	"time"
 
@@ -50,9 +51,9 @@ func (r *runType) Time() (outbound string)   { return r.time.String() }
 func (r *runType) SetVerbosity(inbound zerolog.Level) {
 	r.verbosity = inbound
 	log.Logger = log.Level(r.verbosity).With().Timestamp().Caller().Logger().Output(zerolog.ConsoleWriter{
-		Out:        os.Stderr,
-		NoColor:    false,
-		TimeFormat: time.RFC3339,
-		// FormatFieldValue: func(i interface{}) string { return fmt.Sprintf("\"%s\"", i) },
+		Out:              os.Stderr,
+		NoColor:          false,
+		TimeFormat:       time.RFC3339,
+		FormatFieldValue: func(i interface{}) string { return fmt.Sprintf("\"%s\"", i) },
 	})
 }
