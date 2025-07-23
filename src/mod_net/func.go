@@ -8,7 +8,7 @@ import (
 	"rmm23/src/mod_errors"
 )
 
-func LookupMX(names []string) (outbound []string) {
+func LookupMX(names []string) (outbound []string, errs mod_errors.Errs) {
 	for _, name := range names {
 		var (
 			interim, err = net.LookupMX(name)
@@ -20,7 +20,7 @@ func LookupMX(names []string) (outbound []string) {
 		case errDetail != nil && errDetail.IsNotFound:
 			continue
 		case err != nil:
-			// l.Z{l.E: err, l.M: "MX", "name": name}.Warning()
+			errs = append(errs, err)
 			continue
 		}
 		for _, b := range interim {
@@ -36,7 +36,6 @@ func UrlParse(inbound string) (outbound *url.URL, err error) {
 		return nil, err
 	case len(outbound.String()) == 0:
 		return nil, mod_errors.ENODATA
-	default:
-		return outbound, nil
 	}
+	return
 }
