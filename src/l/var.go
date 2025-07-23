@@ -115,7 +115,7 @@ var (
 			}
 		}(),
 		config: buildConfig,
-		time: time.Unix(0, mod_errors.StripErr1(strconv.ParseInt(buildTime, 10, 64))),
+		time: time.Unix(mod_errors.StripErr1(strconv.ParseInt(buildTime, 10, 64)),0),
 		commit: buildCommit,
 	}
 )
