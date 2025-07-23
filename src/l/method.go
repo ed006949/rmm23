@@ -45,6 +45,7 @@ func (r Z) Panic()         { log.Panic().EmbedObject(r).Send() } // specific +
 func (r Z) Quiet()         {}                                    // specific ----
 func (r Z) Disabled()      {}                                    // specific ----
 
+func (r *runType) DryRun() (outbound bool)   { return r.dryRun }
 func (r *runType) Name() (outbound string)   { return r.name }
 func (r *runType) Commit() (outbound string) { return r.commit }
 func (r *runType) Time() (outbound string)   { return r.time.String() }
