@@ -52,7 +52,7 @@ var (
 		daemonDryRun:    "dry-run flag (" + daemonEnvName[daemonDryRun] + "=\"" + daemonEnvDefined[daemonDryRun] + "\")",
 		daemonMode:      "operational mode (" + daemonEnvName[daemonMode] + "=\"" + daemonEnvDefined[daemonMode] + "\")",
 		daemonNode:      "node (" + daemonEnvName[daemonNode] + "=\"" + daemonEnvDefined[daemonNode] + "\")",
-		daemonDB: "db url (" + daemonEnvName[daemonDB] + "=\"" + mod_errors.StripErr1(url.Parse(daemonEnvDefined[daemonDB])).String() + "\")\n" +
+		daemonDB: "db url (" + daemonEnvName[daemonDB] + "=\"" + mod_errors.StripErr1(url.Parse(daemonEnvDefined[daemonDB])).Redacted() + "\")\n" +
 			"\"redis://username:password@redis-host:6379\"\n" +
 			"\"redis-sentinel://username:password@redis-sentinel-host1:6379,redis-sentinel-host2:6379\"",
 		daemonConfig: "config file (" + daemonEnvName[daemonConfig] + "=\"" + daemonEnvDefined[daemonConfig] + "\")",
