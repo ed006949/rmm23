@@ -2,7 +2,6 @@ package l
 
 import (
 	"encoding/json"
-	"fmt"
 	"net/url"
 	"os"
 	"strconv"
@@ -55,19 +54,19 @@ func (r Z) Disabled()      {}                                    // specific ---
 func (r *runType) verbositySet(inbound zerolog.Level) {
 	r.verbosity = inbound
 	log.Logger = log.Level(r.verbosity).With().Timestamp().Caller().Logger().Output(zerolog.ConsoleWriter{
-		Out:              os.Stderr,
-		NoColor:          false,
-		TimeFormat:       time.RFC3339,
-		FormatFieldValue: func(i interface{}) string { return fmt.Sprintf("\"%s\"", i) },
+		Out:        os.Stderr,
+		NoColor:    false,
+		TimeFormat: time.RFC3339,
+		// FormatFieldValue: func(i interface{}) string { return fmt.Sprintf("\"%s\"", i) },
 	})
 }
 
-func (r *runType) configSetString(inbound string) (err error){
+func (r *runType) configSetString(inbound string) (err error) {
 	Run.config = inbound
 
 	return
 }
-func (r *runType) dbSetString(inbound string) (err error){
+func (r *runType) dbSetString(inbound string) (err error) {
 	var (
 		interim *url.URL
 	)
@@ -91,11 +90,11 @@ func (r *runType) dryRunSetString(inbound string) (err error) {
 		return
 	}
 
-	r.dryRun=interim
+	r.dryRun = interim
 
 	return
 }
-func (r *runType) modeSetString(inbound string) (err error){
+func (r *runType) modeSetString(inbound string) (err error) {
 	var (
 		interim int
 	)
@@ -109,7 +108,7 @@ func (r *runType) modeSetString(inbound string) (err error){
 
 	return
 }
-func (r *runType) nodeSetString(inbound string) (err error){
+func (r *runType) nodeSetString(inbound string) (err error) {
 	var (
 		interim int
 	)
@@ -156,4 +155,4 @@ func (r *runType) CommitHashValue() (outbound string) { return r.commit }
 func (r *runType) DryRunValue() (outbound bool)       { return r.dryRun }
 func (r *runType) NameValue() (outbound string)       { return r.name }
 
-func (r *runType) dryRunName() (outbound string) { return daemonFlagName[daemonDryRun]  }
+func (r *runType) dryRunName() (outbound string) { return daemonFlagName[daemonDryRun] }
