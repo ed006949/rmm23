@@ -19,7 +19,7 @@ type DaemonConfig struct {
 	DB        *mod_net.URL  `json:"db,omitempty"`        //
 }
 
-// runType represents operational settings
+// runType represents operational settings.
 type runType struct {
 	name      string        //
 	verbosity zerolog.Level //
