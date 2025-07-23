@@ -59,10 +59,12 @@ func (r *runType) UnmarshalConfig(inbound any) (err error) {
 	var (
 		content []byte
 	)
+
 	switch content, err = os.ReadFile(r.config); {
 	case err != nil:
 		return
 	}
+
 	return json.Unmarshal(content, inbound)
 }
 
