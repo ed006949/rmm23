@@ -47,15 +47,17 @@ var (
 		daemonCommit:    envName(daemonCommit),
 	}
 	daemonEnvDescription = map[int]string{
-		daemonName:      "daemon name (" + daemonEnvName[daemonName]+"=\""+daemonEnvDefined[daemonName] + "\")",
+		daemonName:      "daemon name (" + daemonEnvName[daemonName] + "=\"" + daemonEnvDefined[daemonName] + "\")",
 		daemonVerbosity: "verbosity level (" + daemonEnvName[daemonVerbosity] + "=\"" + daemonEnvDefined[daemonVerbosity] + "\")",
 		daemonDryRun:    "dry-run flag (" + daemonEnvName[daemonDryRun] + "=\"" + daemonEnvDefined[daemonDryRun] + "\")",
 		daemonMode:      "operational mode (" + daemonEnvName[daemonMode] + "=\"" + daemonEnvDefined[daemonMode] + "\")",
 		daemonNode:      "node (" + daemonEnvName[daemonNode] + "=\"" + daemonEnvDefined[daemonNode] + "\")",
-		daemonDB:        "db url (" + daemonEnvName[daemonDB] + "=\"" + daemonEnvDefined[daemonDB] + "\")",
-		daemonConfig:    "config file (" + daemonEnvName[daemonConfig] + "=\"" + daemonEnvDefined[daemonConfig] + "\")",
-		daemonTime:      "build time (" + daemonEnvName[daemonTime] + "=\"" + daemonEnvDefined[daemonTime] + "\")",
-		daemonCommit:    "commit hash (" + daemonEnvName[daemonCommit] + "=\"" + daemonEnvDefined[daemonCommit] + "\")",
+		daemonDB: "db url (" + daemonEnvName[daemonDB] + "=\"" + mod_errors.StripErr1(url.Parse(daemonEnvDefined[daemonDB])).String() + "\")\n" +
+			"\"redis://username:password@redis-host:6379\"\n" +
+			"\"redis-sentinel://username:password@redis-sentinel-host1:6379,redis-sentinel-host2:6379\"",
+		daemonConfig: "config file (" + daemonEnvName[daemonConfig] + "=\"" + daemonEnvDefined[daemonConfig] + "\")",
+		daemonTime:   "build time (" + daemonEnvName[daemonTime] + "=\"" + daemonEnvDefined[daemonTime] + "\")",
+		daemonCommit: "commit hash (" + daemonEnvName[daemonCommit] + "=\"" + daemonEnvDefined[daemonCommit] + "\")",
 	}
 	daemonEnvDefined = map[int]string{
 		daemonName:      os.Getenv(daemonEnvName[daemonName]),

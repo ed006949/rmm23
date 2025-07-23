@@ -60,7 +60,7 @@ release: commit
 	gh release create v${VERSION} --generate-notes --latest=true
 
 run:
-	go run -ldflags="-s -w" -trimpath ./... ${COMMAND_LINE}
+	go run -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath ./... ${COMMAND_LINE}
 
 status:
 	git status
