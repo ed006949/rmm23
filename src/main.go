@@ -7,10 +7,10 @@ import (
 )
 
 func main() {
-	l.Z{l.M: "main", "daemon": l.Run.Name(), "commit": l.Run.CommitHash()}.Informational()
-	defer l.Z{l.M: "exit", "daemon": l.Run.Name()}.Informational()
+	l.Z{l.M: "main", "daemon": l.Run.NameValue(), "commit": l.Run.CommitHashValue(), "built": l.Run.BuildTimeValue()}.Informational()
+	defer l.Z{l.M: "exit", "daemon": l.Run.NameValue()}.Informational()
 
-	switch err := l.Run.UnmarshalConfig(config); {
+	switch err := l.Run.ConfigUnmarshal(config); {
 	case err != nil:
 		panic(err)
 	}

@@ -13,7 +13,7 @@ import (
 func init() {
 	// l.log function call nesting depth is 1
 	zerolog.CallerSkipFrameCount = zerolog.CallerSkipFrameCount + 1
-	Run.SetVerbosity(Run.verbosity)
+	Run.verbositySet(Run.verbosity)
 
 	// flag.Func(daemonEnvName[daemonName], daemonEnvDescription[daemonName], func(inbound string) (err error) { return nil })
 
@@ -25,7 +25,7 @@ func init() {
 		case err != nil:
 			return err
 		}
-		Run.SetVerbosity(interim)
+		Run.verbositySet(interim)
 		return
 	})
 	flag.Func(daemonFlagName[daemonDryRun], daemonEnvDescription[daemonDryRun], func(inbound string) (err error) {

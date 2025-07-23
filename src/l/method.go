@@ -46,7 +46,7 @@ func (r Z) Panic()         { log.Panic().EmbedObject(r).Send() } // specific +
 func (r Z) Quiet()         {}                                    // specific ----
 func (r Z) Disabled()      {}                                    // specific ----
 
-func (r *runType) SetVerbosity(inbound zerolog.Level) {
+func (r *runType) verbositySet(inbound zerolog.Level) {
 	r.verbosity = inbound
 	log.Logger = log.Level(r.verbosity).With().Timestamp().Caller().Logger().Output(zerolog.ConsoleWriter{
 		Out:              os.Stderr,
@@ -55,7 +55,7 @@ func (r *runType) SetVerbosity(inbound zerolog.Level) {
 		FormatFieldValue: func(i interface{}) string { return fmt.Sprintf("\"%s\"", i) },
 	})
 }
-func (r *runType) UnmarshalConfig(inbound any) (err error) {
+func (r *runType) ConfigUnmarshal(inbound any) (err error) {
 	var (
 		content []byte
 	)
@@ -68,7 +68,7 @@ func (r *runType) UnmarshalConfig(inbound any) (err error) {
 	return json.Unmarshal(content, inbound)
 }
 
-func (r *runType) DryRun() (outbound bool)       { return r.dryRun }
-func (r *runType) Name() (outbound string)       { return r.name }
-func (r *runType) CommitHash() (outbound string) { return r.commit }
-func (r *runType) BuildTime() (outbound string)  { return r.time.String() }
+func (r *runType) DryRunValue() (outbound bool)  { return r.dryRun }
+func (r *runType) NameValue() (outbound string)       { return r.name }
+func (r *runType) CommitHashValue() (outbound string) { return r.commit }
+func (r *runType) BuildTimeValue() (outbound string)  { return r.time.String() }

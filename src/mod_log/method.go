@@ -41,7 +41,7 @@ func (r Object) MarshalZerologObject(e *zerolog.Event) {
 	}
 
 	switch {
-	// case l.DryRun.Flag():
-	// 	e.Bool(l.DryRun.Name(), l.DryRun.Flag())
+	// case l.DryRunValue.Flag():
+	// 	e.Bool(l.DryRunValue.Name(), l.DryRunValue.Flag())
 	}
 }
