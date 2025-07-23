@@ -2,80 +2,24 @@ package l
 
 import (
 	"flag"
-	"net/url"
-	"strconv"
 
 	"github.com/rs/zerolog"
-
-	"rmm23/src/mod_bools"
 )
 
-func init() {
+func Initialize() {
 	// l.log function call nesting depth is 1
 	zerolog.CallerSkipFrameCount = zerolog.CallerSkipFrameCount + 1
+
 	Run.verbositySet(Run.verbosity)
 
-	// flag.Func(daemonEnvName[daemonName], daemonEnvDescription[daemonName], func(inbound string) (err error) { return nil })
+	// flag.Func(daemonEnvName[daemonName], daemonEnvDescription[daemonName], Run.nameSetString)
 
-	flag.Func(daemonFlagName[daemonVerbosity], daemonEnvDescription[daemonVerbosity], func(inbound string) (err error) {
-		var (
-			interim zerolog.Level
-		)
-		switch interim, err = zerolog.ParseLevel(inbound); {
-		case err != nil:
-			return err
-		}
-		Run.verbositySet(interim)
-		return
-	})
-	flag.Func(daemonFlagName[daemonDryRun], daemonEnvDescription[daemonDryRun], func(inbound string) (err error) {
-		var (
-			interim bool
-		)
-		switch interim, err = mod_bools.Parse(inbound); {
-		case err != nil:
-			return err
-		}
-		Run.dryRun = interim
-		return
-	})
-	flag.Func(daemonFlagName[daemonMode], daemonEnvDescription[daemonMode], func(inbound string) (err error) {
-		var (
-			interim int
-		)
-		switch interim, err = strconv.Atoi(inbound); {
-		case err != nil:
-			return err
-		}
-		Run.mode = interim
-		return
-	})
-	flag.Func(daemonFlagName[daemonNode], daemonEnvDescription[daemonNode], func(inbound string) (err error) {
-		var (
-			interim int
-		)
-		switch interim, err = strconv.Atoi(inbound); {
-		case err != nil:
-			return err
-		}
-		Run.node = interim
-		return
-	})
-	flag.Func(daemonFlagName[daemonDB], daemonEnvDescription[daemonDB], func(inbound string) (err error) {
-		var (
-			interim *url.URL
-		)
-		switch interim, err = url.Parse(inbound); {
-		case err != nil:
-			return err
-		}
-		Run.db = interim
-		return
-	})
-	flag.Func(daemonFlagName[daemonConfig], daemonEnvDescription[daemonConfig], func(inbound string) (err error) {
-		Run.config = inbound
-		return
-	})
+	flag.Func(daemonFlagName[daemonVerbosity], daemonEnvDescription[daemonVerbosity], Run.verbositySetString)
+	flag.Func(daemonFlagName[daemonDryRun], daemonEnvDescription[daemonDryRun], Run.dryRunSetString)
+	flag.Func(daemonFlagName[daemonMode], daemonEnvDescription[daemonMode], Run.modeSetString)
+	flag.Func(daemonFlagName[daemonNode], daemonEnvDescription[daemonNode], Run.nodeSetString)
+	flag.Func(daemonFlagName[daemonDB], daemonEnvDescription[daemonDB], Run.dbSetString)
+	flag.Func(daemonFlagName[daemonConfig], daemonEnvDescription[daemonConfig], Run.configSetString)
 
 	flag.Parse()
 }
