@@ -115,14 +115,7 @@ var (
 			}
 		}(),
 		config: buildConfig,
-		time: func() time.Time {
-			switch value := daemonEnvDefined[daemonTime]; {
-			case len(value) != 0:
-				return mod_errors.StripErr1(time.Parse(time.RFC3339, value))
-			default:
-				return mod_errors.StripErr1(time.Parse(time.RFC3339, buildTime))
-			}
-		}(),
+		time: time.Unix(0, mod_errors.StripErr1(strconv.ParseInt(buildTime, 10, 64))),
 		commit: buildCommit,
 	}
 )

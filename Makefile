@@ -1,4 +1,4 @@
-DATE		=	`date`
+DATE		=	`date +%s`
 GIT_STATUS	=	`git status --short`
 GIT_COMMIT	=	`git rev-parse --short HEAD`
 
