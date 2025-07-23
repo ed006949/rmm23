@@ -1,6 +1,9 @@
 package l
 
 import (
+	"os"
+	"time"
+
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 )
@@ -44,3 +47,12 @@ func (r Z) Disabled()      {}                                    // specific ---
 func (r *runType) Name() (outbound string)   { return r.name }
 func (r *runType) Commit() (outbound string) { return r.commit }
 func (r *runType) Time() (outbound string)   { return r.time.String() }
+func (r *runType) SetVerbosity(inbound zerolog.Level) {
+	r.verbosity = inbound
+	log.Logger = log.Level(r.verbosity).With().Timestamp().Caller().Logger().Output(zerolog.ConsoleWriter{
+		Out:        os.Stderr,
+		NoColor:    false,
+		TimeFormat: time.RFC3339,
+		// FormatFieldValue: func(i interface{}) string { return fmt.Sprintf("\"%s\"", i) },
+	})
+}
