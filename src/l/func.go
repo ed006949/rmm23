@@ -1,7 +1,6 @@
 package l
 
 import (
-	"flag"
 	"strings"
 )
 
@@ -25,14 +24,4 @@ func envName(inbound int) (outbound string) {
 		"-",
 		"_",
 	)
-}
-
-func FlagIsFlagExist(name string) (outbound bool) {
-	flag.Visit(func(fn *flag.Flag) {
-		switch {
-		case fn.Name == name:
-			outbound = true
-		}
-	})
-	return
 }

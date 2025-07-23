@@ -1,10 +1,7 @@
 package main
 
 import (
-	"encoding/xml"
-
 	"rmm23/src/l"
-	"rmm23/src/mod_ldap"
 )
 
 type ConfigRoot struct {
@@ -31,10 +28,4 @@ type LDAPSetting struct {
 
 type LDAPDomain struct {
 	DN string `json:"dn"`
-}
-
-type xmlConf struct {
-	XMLName xml.Name        `xml:"conf"`
-	Daemon  *l.DaemonConfig `xml:"daemon,omitempty"`
-	LDAP    *mod_ldap.Conf  `xml:"ldap,omitempty"`
 }

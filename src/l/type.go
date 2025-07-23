@@ -5,6 +5,8 @@ import (
 	"time"
 
 	"github.com/rs/zerolog"
+
+	"rmm23/src/mod_net"
 )
 
 type Z map[string]interface{}
@@ -14,7 +16,7 @@ type DaemonConfig struct {
 	DryRun    bool          `json:"dry-run,omitempty"`   //
 	Mode      int           `json:"mode,omitempty"`      //
 	Node      int           `json:"node,omitempty"`      //
-	DB        *url.URL      `json:"db,omitempty"`        //
+	DB        *mod_net.URL  `json:"db,omitempty"`        //
 }
 
 // runType represents operational settings

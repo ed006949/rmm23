@@ -5,7 +5,6 @@ import (
 	"net"
 	"net/url"
 
-	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 )
 
@@ -21,7 +20,7 @@ func LookupMX(names []string) (outbound []string) {
 		case errDetail != nil && errDetail.IsNotFound:
 			continue
 		case err != nil:
-			l.Z{l.E: err, l.M: "MX", "name": name}.Warning()
+			// l.Z{l.E: err, l.M: "MX", "name": name}.Warning()
 			continue
 		}
 		for _, b := range interim {

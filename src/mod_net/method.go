@@ -1,6 +1,7 @@
 package mod_net
 
 import (
+	"encoding/json"
 	"encoding/xml"
 	"net/url"
 	"strings"
@@ -23,11 +24,26 @@ func (r *URL) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 }
 
 func (r *URL) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
-	return xml.Attr{
-		Name:  name,
-		Value: r.String(),
-	}, nil
+	return xml.Attr{Name: name, Value: r.String()}, nil
 }
+
+func (r *URL) UnmarshalJSON(inbound []byte) (err error) {
+	var (
+		interim    string
+		interimURL *url.URL
+	)
+	switch err = json.Unmarshal(inbound, &interim); {
+	case err != nil:
+		return
+	}
+	switch interimURL, err = url.Parse(interim); {
+	case err != nil:
+		return
+	}
+	*r = URL{URL: interimURL}
+	return
+}
+func (r *URL) MarshalJSON() ([]byte, error) { return json.Marshal(r.String()) }
 
 func (r *URL) CleanPath() (outbound string) { return strings.TrimPrefix(r.URL.Path, "/") }
 func (r *URL) CleanUser() (username string, password string) {

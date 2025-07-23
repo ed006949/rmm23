@@ -1,12 +1,19 @@
 package main
 
 import (
+	"os"
+
 	"rmm23/src/l"
 )
 
 func main() {
-	l.Z{l.M: "main", "daemon": l.Run.Name(), "commit": l.Run.Commit()}.Informational()
+	l.Z{l.M: "main", "daemon": l.Run.Name(), "commit": l.Run.CommitHash()}.Informational()
 	defer l.Z{l.M: "exit", "daemon": l.Run.Name()}.Informational()
+
+	switch err := l.Run.UnmarshalConfig(config); {
+	case err != nil:
+		panic(err)
+	}
 
 	// var (
 	// 	err       error
@@ -41,4 +48,5 @@ func main() {
 	// case err != nil:
 	// 	l.Z{l.E: err}.Critical()
 	// }
+	os.Exit(1)
 }
