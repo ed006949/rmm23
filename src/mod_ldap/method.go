@@ -17,6 +17,7 @@ func (r *Conf) Fetch() (err error) {
 	case err != nil:
 		return
 	}
+
 	defer func() {
 		_ = r.close()
 	}()
@@ -31,6 +32,7 @@ func (r *Conf) Fetch() (err error) {
 	case err != nil:
 		return
 	}
+
 	switch err = r.parse(); {
 	case err != nil:
 		return
@@ -45,6 +47,7 @@ func (r *Conf) search() (err error) {
 		case b.searchResults == nil:
 			b.searchResults = make(map[string]*ldap.SearchResult)
 		}
+
 		for _, d := range r.Settings {
 			switch d.Type {
 			case "domain":
@@ -63,11 +66,13 @@ func (r *Conf) search() (err error) {
 						nil,                  // Controls
 					)
 				)
+
 				switch searchResult, newErr = r.conn.Search(searchRequest); {
 				case newErr != nil:
 					err = errors.Join(err, newErr)
 					l.Z{l.E: err, l.M: "LDAP Search", "DN": searchRequest.BaseDN}.Warning()
 				}
+
 				b.searchResults[d.Type] = searchResult
 
 			case "hosts", "users", "groups":
@@ -114,32 +119,41 @@ func (r *Conf) parse() (err error) {
 	return
 }
 
-// UnmarshalEntry
+// Unmarshalling.
+
 func (r *ConfDomain) unmarshal() (err error) {
 	r.Domain = &Element{}
+
 	switch newErr := r.Domain.unmarshal(r.searchResults["domain"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Domain", "DN": r.DN}.Warning()
 	}
+
 	r.Hosts = make(Elements)
+
 	switch newErr := r.Hosts.unmarshal(r.searchResults["hosts"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Hosts", "DN": r.DN}.Warning()
 	}
+
 	r.Users = make(Elements)
+
 	switch newErr := r.Users.unmarshal(r.searchResults["users"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Users", "DN": r.DN}.Warning()
 	}
+
 	r.Groups = make(Elements)
+
 	switch newErr := r.Groups.unmarshal(r.searchResults["groups"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Groups", "DN": r.DN}.Warning()
 	}
+
 	return
 }
 func (r *Element) unmarshal(inbound *ldap.SearchResult) (err error) {
@@ -147,13 +161,16 @@ func (r *Element) unmarshal(inbound *ldap.SearchResult) (err error) {
 		var (
 			interim Element
 		)
+
 		switch newErr := UnmarshalEntry(entry, &interim); {
 		case newErr != nil:
 			err = errors.Join(err, newErr)
 			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
 		}
+
 		*r = interim
 	}
+
 	return
 }
 func (r Elements) unmarshal(inbound *ldap.SearchResult) (err error) {
@@ -161,19 +178,24 @@ func (r Elements) unmarshal(inbound *ldap.SearchResult) (err error) {
 		var (
 			interim Element
 		)
+
 		switch newErr := UnmarshalEntry(entry, &interim); {
 		case newErr != nil:
 			err = errors.Join(err, newErr)
 			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
 		}
+
 		r[interim.DN] = &interim
 	}
+
 	return
 }
 
-// conn
+// connection handling.
+
 func (r *Conf) connect() (err error) {
 	r.conn, err = ldap.DialURL(r.URL.String())
+
 	return
 }
 func (r *Conf) bind() (err error) {
@@ -196,27 +218,32 @@ func (r *Conf) close() (err error) {
 	case r.conn == nil:
 		return mod_errors.ENoConn
 	}
+
 	return r.conn.Close()
 }
 
-// XML
+// XMLs.
+
 func (r *AttrDN) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 	switch _, err = ldap.ParseDN(attr.Value); {
 	case err == nil:
 		*r = AttrDN(attr.Value)
 	}
+
 	return
 }
 func (r *AttrDN) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
 	return xml.Attr{Name: name, Value: r.String()}, nil
 }
 
-// String
+// Strings.
+
 func (r *AttrDN) String() string { return string(*r) }
 func (r *AttrDNs) String() (outbound []string) {
 	for _, b := range *r {
 		outbound = append(outbound, b.String())
 	}
+
 	return
 }
 
