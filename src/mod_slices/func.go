@@ -52,9 +52,7 @@ func FilterEmpty[S ~[]E, E cmp.Ordered](inbound S) (outbound S) {
 // Normalize applies a series of transformations (sort, compact, filter empty) to the inbound slice based on the provided flags.
 func Normalize[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound S) {
 	switch {
-	case flag.has(FlagTrimSpace):
-		// panic(mod_errors.EUnwilling)
-
+	case flag.has(FlagTrimSpace): // panic(mod_errors.EUnwilling)
 		fallthrough
 	case flag.has(FlagFilterEmpty):
 		inbound = FilterEmpty(inbound)
@@ -77,7 +75,11 @@ func Join[S ~[]E, E cmp.Ordered](inbound S, sep string, flag flag) (outbound str
 	return strings.Join(ToStrings(inbound, flag), sep)
 }
 
-func TrimSpace(inbound []string) (outbound []string) {
+func JoinStrings(inbound []string, sep string, flag flag) (outbound string) {
+	return strings.Join(StringsNormalize(inbound, flag), sep)
+}
+
+func TrimStrings(inbound []string) (outbound []string) {
 	for _, b := range inbound {
 		outbound = append(outbound, strings.TrimSpace(b))
 	}
@@ -97,14 +99,14 @@ func ToStrings[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound []string) 
 	return
 }
 
-func Split(inbound string, sep string, flag flag) (outbound []string) {
+func SplitString(inbound string, sep string, flag flag) (outbound []string) {
 	return StringsNormalize(strings.Split(inbound, sep), flag)
 }
 
 func StringsNormalize(inbound []string, flag flag) (outbound []string) {
 	switch {
 	case flag.has(FlagTrimSpace):
-		inbound = TrimSpace(inbound)
+		inbound = TrimStrings(inbound)
 
 		fallthrough
 	case flag.has(FlagFilterEmpty):

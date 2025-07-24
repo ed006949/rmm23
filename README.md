@@ -16,6 +16,9 @@ Welcome to the Remote Monitoring and Management (episode 23).
 		* Developers must define an array of expected error severity levels; if this array is not provided (empty or nil), the default error level will be applied.
 	- [ ] Or stop rambling and revise error handling methods.
 - [ ] local chain verification @src/mod_crypto/method.go
+- [ ] built-in AAA frontends:
+	- [ ] `LDAP`
+	- [ ] `Radius`
 
 ## Notes
 
@@ -49,7 +52,7 @@ Welcome to the Remote Monitoring and Management (episode 23).
 		* generate new `UUID` if it already exists
 			* `UUID` must be static for same account:
 				* xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx
-				* | same value for all _ | _ DN hash |
+				* | _same_value_for_all_ || _DN_hash_ |
 				* hash `DN` to `UUID`'s `node` field
 	* `ipHostNumber`
 	* `dn`

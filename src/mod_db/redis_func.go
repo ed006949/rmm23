@@ -3,7 +3,6 @@ package mod_db
 import (
 	"fmt"
 	"reflect"
-	"strings"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/vmihailenco/msgpack/v5" // MsgPack library for payload
@@ -50,7 +49,7 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 		}
 
 		var (
-			parts = mod_slices.Split(redisearchTag, mod_strings.TagSeparator, mod_slices.FlagNormalize)
+			parts = mod_slices.SplitString(redisearchTag, mod_strings.TagSeparator, mod_slices.FlagNormalize)
 		)
 
 		switch {
@@ -65,25 +64,21 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 		)
 
 		for _, opt := range parts {
-			var (
-				trimmedOpt = strings.TrimSpace(opt)
-			)
-
-			switch trimmedOpt {
+			switch opt {
 			case rediSearchTagTypeIgnore, rediSearchTagTypeText, rediSearchTagTypeNumeric, rediSearchTagTypeTag, rediSearchTagTypeGeo:
-				types[trimmedOpt] = true
+				types[opt] = true
 			case rediSearchTagOptionSortable:
-				options[trimmedOpt] = true
+				options[opt] = true
 			default:
-				unknowns[trimmedOpt] = true
+				unknowns[opt] = true
 			}
 		}
 
 		switch {
 		case len(types) > 1:
-			panic(mod_errors.ETagMultiType.Error())
+			panic(mod_errors.ETagMultiType)
 		case len(unknowns) > 0:
-			panic(mod_errors.ETagUnknown.Error())
+			panic(mod_errors.ETagUnknown)
 		}
 
 		switch {
@@ -104,7 +99,7 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 		case types[rediSearchTagTypeGeo]:
 			schema.AddField(redisearch.NewGeoFieldOptions(redisTag, redisearch.GeoFieldOptions{}))
 		default:
-			panic(mod_errors.EUnwilling.Error())
+			panic(mod_errors.EUnwilling)
 		}
 	}
 
@@ -129,7 +124,7 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 	var (
 		doc = redisearch.NewDocument(docID, score)
 	)
-	// Iterate over struct fields to find corresponding schema fields
+
 	for i := 0; i < reflection.NumField(); i++ {
 		var (
 			structField = reflection.Field(i)

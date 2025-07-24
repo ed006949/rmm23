@@ -26,7 +26,7 @@ func redisNetwork(inbound *url.URL) (outbound string, err error) {
 }
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mod_net.URL) (err error) {
-	switch err = inbound.Fetch(); {
+	switch err = inbound.Search(); {
 	case err != nil:
 		return
 	}
@@ -38,6 +38,20 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mo
 		rcNetwork string
 		rcName    = "entryIdx"
 	)
+
+	// var (
+	// 	searchRequest = ldap.NewSearchRequest(
+	// 		mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
+	// 		ldap.ScopeBaseObject, // Scope - search entire tree
+	// 		ldap.DerefAlways,     // Deref
+	// 		0,                    // Size limit (0 = no limit)
+	// 		0,                    // Time limit (0 = no limit)
+	// 		false,                // Types only
+	// 		d.Filter,             // Filter - all objects
+	// 		[]string{"*", "+"},   // Attributes - all user and operational attributes
+	// 		nil,                  // Controls
+	// 	)
+	// )
 
 	switch rcNetwork, err = redisNetwork(outbound.URL); {
 	case err != nil:
@@ -78,7 +92,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mo
 
 		switch doc, err = newRedisearchDocument(
 			schema,
-			mod_slices.Join([]string{"ldap", "entry", d.Domain.UUID.String()}, ":", mod_slices.FlagNone),
+			mod_slices.JoinStrings([]string{"ldap", "entry", d.Domain.UUID.String()}, ":", mod_slices.FlagNone),
 			1.0,
 			d.Domain,
 			false,
@@ -98,7 +112,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mo
 		for _, f := range d.Groups {
 			switch doc, err = newRedisearchDocument(
 				schema,
-				mod_slices.Join([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
+				mod_slices.JoinStrings([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
 				1.0,
 				f,
 				false,
@@ -119,7 +133,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mo
 		for _, f := range d.Users {
 			switch doc, err = newRedisearchDocument(
 				schema,
-				mod_slices.Join([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
+				mod_slices.JoinStrings([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
 				1.0,
 				f,
 				false,
@@ -140,7 +154,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mo
 		for _, f := range d.Hosts {
 			switch doc, err = newRedisearchDocument(
 				schema,
-				mod_slices.Join([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
+				mod_slices.JoinStrings([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
 				1.0,
 				f,
 				false,

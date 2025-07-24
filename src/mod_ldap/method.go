@@ -40,7 +40,7 @@ func (r *LDAPConfig) Fetch() (err error) {
 	return
 }
 
-func (r *LDAPConfig) Search() (outbound []*ldap.SearchResult, err error) {
+func (r *LDAPConfig) Search() (err error) {
 	switch err = r.connect(); {
 	case err != nil:
 		return
@@ -78,7 +78,7 @@ func (r *LDAPConfig) search() (err error) {
 					newErr        error
 					searchResult  *ldap.SearchResult
 					searchRequest = ldap.NewSearchRequest(
-						mod_slices.Join([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
+						mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
 						ldap.ScopeBaseObject, // Scope - search entire tree
 						ldap.DerefAlways,     // Deref
 						0,                    // Size limit (0 = no limit)
@@ -93,7 +93,6 @@ func (r *LDAPConfig) search() (err error) {
 				switch searchResult, newErr = r.conn.Search(searchRequest); {
 				case newErr != nil:
 					err = errors.Join(err, newErr)
-					l.Z{l.E: err, l.M: "LDAP Search", "DN": searchRequest.BaseDN}.Warning()
 				}
 
 				b.searchResults[d.Type] = searchResult
@@ -103,7 +102,7 @@ func (r *LDAPConfig) search() (err error) {
 					newErr        error
 					searchResult  *ldap.SearchResult
 					searchRequest = ldap.NewSearchRequest(
-						mod_slices.Join([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
+						mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
 						ldap.ScopeWholeSubtree, // Scope - search entire tree
 						ldap.DerefAlways,       // Deref
 						0,                      // Size limit (0 = no limit)
@@ -118,7 +117,6 @@ func (r *LDAPConfig) search() (err error) {
 				switch searchResult, newErr = r.conn.Search(searchRequest); {
 				case newErr != nil:
 					err = errors.Join(err, newErr)
-					l.Z{l.E: err, l.M: "LDAP Search", "DN": searchRequest.BaseDN}.Warning()
 				}
 
 				b.searchResults[d.Type] = searchResult

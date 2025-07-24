@@ -21,11 +21,9 @@ type entries struct {
 
 type LDAPConfig struct {
 	URL      *mod_net.URL  `json:"url"`
-	Settings []LDAPSetting `json:"settings"`
-	Domains  []LDAPDomain  `json:"domain"`
+	Settings []*LDAPSetting `json:"settings"`
+	Domains  []*LDAPDomain  `json:"domain"`
 	conn     *ldap.Conn
-
-	searchResults map[string]*ldap.SearchResult
 }
 
 type LDAPSetting struct {
@@ -33,8 +31,6 @@ type LDAPSetting struct {
 	DN     AttrDN `json:"dn"`
 	CN     string `json:"cn"`
 	Filter string `json:"filter"`
-
-	searchResults map[string]*ldap.SearchResult
 }
 
 type LDAPDomain struct {
