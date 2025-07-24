@@ -93,7 +93,7 @@ func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 	var (
-		elements = 2
+		elements = 2 // to honor the lint.mnd()
 	)
 
 	for _, value := range values {
@@ -109,7 +109,7 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 		}
 	}
 
-	return nil
+	return
 }
 
 func (r *AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
