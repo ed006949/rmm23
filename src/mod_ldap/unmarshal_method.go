@@ -15,7 +15,7 @@ import (
 	"rmm23/src/mod_ssh"
 )
 
-// call `Normalize` in each method instead of from `UnmarshalEntry` in hope that some time `go-ldap` will implement custom unmarshal methods.
+// call `Normalize` from each method instead of from `UnmarshalEntry` in hope that sometime `go-ldap` will implement custom marshal/unmarshal mechanics.
 // according to `LDAP` spec, output is not ordered.
 
 func (r *AttrDN) UnmarshalLDAPAttr(values []string) (err error) {
