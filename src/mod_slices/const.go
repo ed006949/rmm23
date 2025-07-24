@@ -2,8 +2,8 @@ package mod_slices
 
 // normalization flags.
 const (
-	FlagNone flag = 0
-	FlagSort flag = 1 << iota
+	FlagNone flagType = 0
+	FlagSort flagType = 1 << iota
 	FlagCompact
 	FlagFilterEmpty
 	FlagTrimSpace
