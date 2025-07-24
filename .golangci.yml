@@ -5,8 +5,8 @@ linters:
     - unused
     - nakedret
     - lll
-    - depguard
     - wsl
+    - depguard
   enable  :
     - tagalign
     - wsl_v5

@@ -19,6 +19,35 @@ type entries struct {
 	entry map[AttrDN]*ldap.Entry
 }
 
+type LDAPConfig struct {
+	URL      *mod_net.URL  `json:"url"`
+	Settings []LDAPSetting `json:"settings"`
+	Domains  []LDAPDomain  `json:"domain"`
+	conn     *ldap.Conn
+
+	searchResults map[string]*ldap.SearchResult
+}
+
+type LDAPSetting struct {
+	Type   string `json:"type"`
+	DN     AttrDN `json:"dn"`
+	CN     string `json:"cn"`
+	Filter string `json:"filter"`
+
+	searchResults map[string]*ldap.SearchResult
+}
+
+type LDAPDomain struct {
+	DN AttrDN `json:"dn"`
+
+	Domain *Element
+	Users  Elements
+	Groups Elements
+	Hosts  Elements
+
+	searchResults map[string]*ldap.SearchResult
+}
+
 type Conf struct {
 	URL      *mod_net.URL    `xml:"url,attr"`
 	Settings []*ConfSettings `xml:"settings"`

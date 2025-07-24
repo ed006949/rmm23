@@ -12,7 +12,7 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-func (r *Conf) Fetch() (err error) {
+func (r *LDAPConfig) Fetch() (err error) {
 	switch err = r.connect(); {
 	case err != nil:
 		return
@@ -41,8 +41,8 @@ func (r *Conf) Fetch() (err error) {
 	return
 }
 
-func (r *Conf) search() (err error) {
-	for _, b := range r.Domain {
+func (r *LDAPConfig) search() (err error) {
+	for _, b := range r.Domains {
 		switch b.searchResults {
 		case nil:
 			b.searchResults = make(map[string]*ldap.SearchResult)
@@ -105,8 +105,8 @@ func (r *Conf) search() (err error) {
 
 	return
 }
-func (r *Conf) parse() (err error) {
-	for _, b := range r.Domain {
+func (r *LDAPConfig) parse() (err error) {
+	for _, b := range r.Domains {
 		switch newErr := b.unmarshal(); {
 		case newErr != nil:
 			err = errors.Join(err, newErr)
@@ -119,7 +119,7 @@ func (r *Conf) parse() (err error) {
 
 // Unmarshalling.
 
-func (r *ConfDomain) unmarshal() (err error) {
+func (r *LDAPDomain) unmarshal() (err error) {
 	r.Domain = &Element{}
 
 	switch newErr := r.Domain.unmarshal(r.searchResults["domain"]); {
@@ -191,12 +191,12 @@ func (r Elements) unmarshal(inbound *ldap.SearchResult) (err error) {
 
 // connection handling.
 
-func (r *Conf) connect() (err error) {
+func (r *LDAPConfig) connect() (err error) {
 	r.conn, err = ldap.DialURL(r.URL.String())
 
 	return
 }
-func (r *Conf) bind() (err error) {
+func (r *LDAPConfig) bind() (err error) {
 	switch r.conn {
 	case nil:
 		return mod_errors.ENoConn
@@ -210,7 +210,7 @@ func (r *Conf) bind() (err error) {
 
 	return
 }
-func (r *Conf) close() (err error) {
+func (r *LDAPConfig) close() (err error) {
 	switch r.conn {
 	case nil:
 		return mod_errors.ENoConn

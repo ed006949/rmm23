@@ -2,6 +2,7 @@ package mod_db
 
 import (
 	"context"
+	"net/url"
 	"time"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
@@ -12,35 +13,51 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
+func redisNetwork(inbound *url.URL) (outbound string, err error) {
+	switch outbound = inbound.Scheme; outbound {
+	case "redis", "redis-sentinel":
+		return "tcp", nil
+	case "file":
+		return "unix", nil
+	default:
+		return outbound, mod_errors.EUnknownScheme
+	}
+}
+
+func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig) (err error) {
 	switch err = inbound.Fetch(); {
 	case err != nil:
 		return
 	}
 
 	var (
-		rcAddress = "10.133.0.223:6379"
 		// RediSearch requires DB 0 for index creation
 		// rcDB      = 0
-		rcNetwork = "tcp"
+
+		rcNetwork string
 		rcName    = "entryIdx"
 	)
+
+	switch rcNetwork, err = redisNetwork(inbound.URL.URL); {
+	case err != nil:
+		return
+	}
 
 	var (
 		rsClient = redisearch.NewClientFromPool(&redis.Pool{
 			DialContext: func(ctx context.Context) (redis.Conn, error) {
-				return redis.DialContext(ctx, rcNetwork, rcAddress, redis.DialDatabase(0))
+				return redis.DialContext(ctx, rcNetwork, inbound.URL.Host, redis.DialDatabase(0))
 			},
 			TestOnBorrow: func(c redis.Conn, t time.Time) (tErr error) {
-				_, tErr = c.Do("PING")
+				_, tErr = c.Do(_PING)
 
 				return
 			},
-			MaxIdle:         4,
-			MaxActive:       4,
-			IdleTimeout:     240 * time.Second,
-			Wait:            true,
-			MaxConnLifetime: 0,
+			MaxIdle:         connMaxIdle,
+			MaxActive:       connMaxActive,
+			IdleTimeout:     connIdleTimeout,
+			Wait:            connWait,
+			MaxConnLifetime: connMaxConnLifetime,
 		}, rcName)
 		entry  = Entry{}
 		schema = entry.redisearchSchema()
@@ -53,7 +70,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 		return
 	}
 
-	for _, d := range inbound.Domain {
+	for _, d := range inbound.Domains {
 		var (
 			doc redisearch.Document
 		)

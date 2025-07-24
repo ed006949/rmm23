@@ -40,6 +40,7 @@ const (
 	ETagMultiType
 	ETagUnknown
 
+	EUnknownScheme
 	EDocExist
 )
 
@@ -77,5 +78,6 @@ var errorDescription = [...]string{
 	EComSetDomSetAdm:           "unknown Domain Set Administration command",
 	ETagMultiType:              "multiple types",
 	ETagUnknown:                "unknown tag",
-	EDocExist: "Document already exists",
+	EUnknownScheme:             "unknown scheme",
+	EDocExist:                  "Document already exists",
 }

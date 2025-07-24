@@ -56,11 +56,9 @@ func (r *AuthDB) ReadAuth(name string) (outbound transport.AuthMethod, err error
 	}
 }
 
+// checkPrivateKey
+// We don't need to parse the public key for TLS, but we so do anyway to check that it looks sane and matches the private key.
 func (r *Certificate) checkPrivateKey() (err error) {
-	// TODO complete local chain verification
-	// We don't need to parse the public key for TLS, but we so do anyway
-	// to check that it looks sane and matches the private key.
-
 	switch pub := r.Certificates[0].PublicKey.(type) {
 	case *rsa.PublicKey:
 		return r.checkPrivateKeyRSA(pub)

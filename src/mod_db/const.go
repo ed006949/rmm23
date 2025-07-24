@@ -1,5 +1,9 @@
 package mod_db
 
+import (
+	"time"
+)
+
 const (
 	redisTagName                = "redis"
 	rediSearchTagName           = "redisearch"
@@ -17,4 +21,15 @@ const (
 	entryTypeGroup
 	entryTypeUser
 	entryTypeHost
+)
+
+const (
+	_PING = "PING"
+)
+const (
+	connMaxIdle         = 4
+	connMaxActive       = 4
+	connIdleTimeout     = 240 * time.Second
+	connWait            = true
+	connMaxConnLifetime = 0
 )
