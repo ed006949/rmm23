@@ -25,6 +25,24 @@ func redisNetwork(inbound *url.URL) (outbound string, err error) {
 	}
 }
 
+// func (r Elements) unmarshal(inbound *ldap.SearchResult) (err error) {
+// 	for _, entry := range inbound.Entries {
+// 		var (
+// 			interim Element
+// 		)
+//
+// 		switch newErr := UnmarshalEntry(entry, &interim); {
+// 		case newErr != nil:
+// 			err = errors.Join(err, newErr)
+// 			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": entry.DN}.Warning()
+// 		}
+//
+// 		r[interim.DN] = &interim
+// 	}
+//
+// 	return
+// }
+
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mod_net.URL) (err error) {
 	switch err = inbound.Search(); {
 	case err != nil:

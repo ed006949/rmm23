@@ -1,6 +1,7 @@
 package mod_ldap
 
 import (
+	"errors"
 	"reflect"
 	"strings"
 
@@ -33,6 +34,23 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 	}
 
 	return opts[0], flag
+}
+
+func UnmarshalResult[S ~[]E, E any] (inbound *ldap.SearchResult, r S) (err error) {
+	for _, entry := range inbound.Entries {
+		var (
+			interim E
+		)
+
+		switch newErr := UnmarshalEntry(entry, &interim); {
+		case newErr != nil:
+			err = errors.Join(err, newErr)
+		}
+
+		r = append(r, interim)
+	}
+
+	return
 }
 
 func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {

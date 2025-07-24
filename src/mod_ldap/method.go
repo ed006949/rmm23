@@ -131,14 +131,11 @@ func (r *LDAPConfig) parse() (err error) {
 		switch newErr := b.unmarshal(); {
 		case newErr != nil:
 			err = errors.Join(err, newErr)
-			l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": b.DN, "URL": r.URL.Redacted()}.Warning()
 		}
 	}
 
 	return
 }
-
-// Unmarshalling.
 
 func (r *LDAPDomain) unmarshal() (err error) {
 	r.Domain = &Element{}
@@ -210,14 +207,17 @@ func (r Elements) unmarshal(inbound *ldap.SearchResult) (err error) {
 	return
 }
 
+func (r *AttrDN) String() string   { return string(*r) }
+func (r *AttrUUID) String() string { return uuid.UUID(*r).String() }
+
 func (r *LDAPConfig) connect() (err error) {
 	r.conn, err = ldap.DialURL(r.URL.String())
 
 	return
 }
 func (r *LDAPConfig) bind() (err error) {
-	switch r.conn {
-	case nil:
+	switch {
+	case r.conn == nil:
 		return mod_errors.ENoConn
 	}
 
@@ -231,20 +231,10 @@ func (r *LDAPConfig) bind() (err error) {
 	return
 }
 func (r *LDAPConfig) close() (err error) {
-	switch r.conn {
-	case nil:
+	switch {
+	case r.conn == nil:
 		return mod_errors.ENoConn
 	}
 
 	return r.conn.Close()
 }
-
-func (r *AttrDN) String() string { return string(*r) }
-func (r *AttrDNs) String() (outbound []string) {
-	for _, b := range *r {
-		outbound = append(outbound, b.String())
-	}
-
-	return
-}
-func (r *AttrUUID) String() string { return uuid.UUID(*r).String() }
