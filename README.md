@@ -14,6 +14,7 @@ Welcome to the Remote Monitoring and Management (episode 23).
 		* The calling function uses the returned severity level to determine subsequent actions.
 		* A default error level can be specified for unexpected errors during function calls.
 		* Developers must define an array of expected error severity levels; if this array is not provided (empty or nil), the default error level will be applied.
+	- [ ] Or stop rambling and revise error handling methods.
 
 ## Notes
 

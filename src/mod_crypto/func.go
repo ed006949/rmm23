@@ -66,7 +66,7 @@ func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate
 			switch {
 			case keyDERBlock == nil:
 				return
-			case keyDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(keyDERBlock.Type, " "+_PRIVATE_KEY):
+			case keyDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(keyDERBlock.Type, __PRIVATE_KEY):
 				outbound.PrivateKeyDER = keyDERBlock.Bytes
 				outbound.PrivateKeyRawPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.PrivateKeyDER))
 			}
@@ -155,7 +155,7 @@ func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
 				case len(outbound.CertificatesDER) > 1:
 					outbound.CertificateCAChainDER = append(outbound.CertificateCAChainDER, interimDERBlock.Bytes...)
 				}
-			case interimDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(interimDERBlock.Type, " "+_PRIVATE_KEY):
+			case interimDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(interimDERBlock.Type, __PRIVATE_KEY):
 				outbound.PrivateKeyDER = interimDERBlock.Bytes
 				outbound.PrivateKeyRawPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.PrivateKeyDER))
 			}
