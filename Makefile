@@ -13,7 +13,7 @@ build:
 	go build -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}" ./src/*.go
 	GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}-freebsd-amd64" ./src/*.go
 
-clean:
+clean-clean-clean-clean:
 	-gh auth logout
 	-go clean -i -r -x -cache -testcache -modcache -fuzzcache
 	-rm -v go.mod
@@ -133,7 +133,7 @@ endif
 # new repo init
 # > make init-init-init-init
 #
-init-init-init-init:	clean
+init-init-init-init:	clean-clean-clean-clean
 	-gh auth logout
 	gh auth login --with-token < ~/.git_token
 	-gh repo delete ${NAME} --yes
