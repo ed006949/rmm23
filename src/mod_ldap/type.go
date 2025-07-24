@@ -120,7 +120,7 @@ type attrTelephoneNumbers []string                     //
 type attrTelexNumbers []string                         //
 type attrUID string                                    //
 type attrUIDNumber uint64                              //
-type AttrUserPKCS12s map[AttrDN]mod_crypto.Certificate // any type of cert-key pairs list TODO implement seamless migration from any to P12
+type AttrUserPKCS12s map[AttrDN]mod_crypto.Certificate // any type of cert-key pairs list (transcoding may apply)
 type AttrUserPassword string                           //
 
 type AttrDNs []AttrDN           //
