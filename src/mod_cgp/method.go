@@ -33,11 +33,13 @@ func (r *Token) command(payload string) (outbound []string, err error) {
 	case err != nil:
 		return nil, err
 	}
+
 	defer func() { _ = response.Body.Close() }()
 
 	switch {
 	case response.StatusCode != 200:
 		l.Z{l.E: mod_errors.EINVALRESPONSE, l.M: response.Body}.Error()
+
 		return nil, mod_errors.EINVALRESPONSE
 	}
 
@@ -52,6 +54,7 @@ func (r *Token) command(payload string) (outbound []string, err error) {
 			case len(d) == 0:
 				continue
 			}
+
 			outbound = append(outbound, d)
 		}
 	}
@@ -59,7 +62,7 @@ func (r *Token) command(payload string) (outbound []string, err error) {
 	return
 }
 
-// Command will execute only first command found
+// Command will execute only first command found.
 func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 	var (
 		o             = make(l.Z)
@@ -75,7 +78,6 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 
 		switch {
 		case inbound.Domain_Administration != nil:
-
 			switch {
 			case inbound.Domain_Administration.GETDOMAINALIASES != nil:
 				o["command"] = "GETDOMAINALIASES"
@@ -99,7 +101,6 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 			}
 
 		case inbound.Domain_Set_Administration != nil:
-
 			switch {
 			case inbound.Domain_Set_Administration.MAINDOMAINNAME != nil:
 				o["command"] = "MAINDOMAINNAME"
@@ -119,18 +120,22 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 
 		o[l.M] = "do"
 		o.Debug()
+
 		switch outbound, err = r.command(payload); {
 		case err != nil:
 			o[l.E] = err
 			o.Error()
+
 			return
 		case emptyResponse && outbound != nil:
 			o[l.E] = mod_errors.EINVALRESPONSE
 			o.Warning()
+
 			return outbound, mod_errors.EINVALRESPONSE
 		default:
 			o[l.M] = "done"
 			o.Informational()
+
 			return
 		}
 
@@ -142,11 +147,14 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 func (r *Command_Dictionary) compile() (outbound string) {
 	outbound += "{"
 	outbound += " "
+
 	for a, b := range structs.Map(r) {
 		outbound += a
+
 		switch {
 		case len(b.(string)) > 0:
 			outbound += "="
+
 			switch a {
 			case "CAChain", "PrivateSecureKey", "SecureCertificate":
 				outbound += "["
@@ -156,35 +164,24 @@ func (r *Command_Dictionary) compile() (outbound string) {
 				outbound += b.(string)
 			}
 		}
+
 		outbound += ";"
 		outbound += " "
 	}
+
 	outbound += " "
 	outbound += "}"
+
 	return
 }
 
 func (r *UPDATEDOMAINSETTINGS) compile() (outbound string) {
-	outbound += "UPDATEDOMAINSETTINGS"
-	outbound += " "
-	outbound += r.DomainName
-	outbound += " "
-	outbound += r.NewSettings.compile()
-	return
+	return outbound + "UPDATEDOMAINSETTINGS" + " " + r.DomainName + " " + r.NewSettings.compile()
 }
 
 func (r *GETDOMAINALIASES) compile() (outbound string) {
-	outbound += "GETDOMAINALIASES"
-	outbound += " "
-	outbound += r.DomainName
-	return
+	return outbound + "GETDOMAINALIASES" + " " + r.DomainName
 }
 
-func (r *MAINDOMAINNAME) compile() (outbound string) {
-	outbound += "MAINDOMAINNAME"
-	return
-}
-func (r *LISTDOMAINS) compile() (outbound string) {
-	outbound += "LISTDOMAINS"
-	return
-}
+func (r *MAINDOMAINNAME) compile() (outbound string) { return outbound + "MAINDOMAINNAME" }
+func (r *LISTDOMAINS) compile() (outbound string)    { return outbound + "LISTDOMAINS" }

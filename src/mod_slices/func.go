@@ -13,12 +13,14 @@ func Filter[S ~[]E, E cmp.Ordered](inbound S, filter ...E) (outbound S) {
 	var (
 		filters = Index(filter)
 	)
+
 	for _, b := range inbound {
 		switch _, ok := filters[b]; {
 		case !ok:
 			outbound = append(outbound, b)
 		}
 	}
+
 	return
 }
 
@@ -28,6 +30,7 @@ func Index[S ~[]E, E cmp.Ordered, M map[E]int](inbound S) (outbound M) {
 	for a, b := range inbound {
 		outbound[b] = a
 	}
+
 	return
 }
 
@@ -42,6 +45,7 @@ func FilterEmpty[S ~[]E, E cmp.Ordered](inbound S) (outbound S) {
 	var (
 		a E
 	)
+
 	return Filter(inbound, a)
 }
 
@@ -50,14 +54,16 @@ func Normalize[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound S) {
 	switch {
 	case flag.has(FlagSort):
 		Sort(inbound)
+
 		fallthrough
 	case flag.has(FlagCompact):
 		inbound = Compact(inbound)
+
 		fallthrough
 	case flag.has(FlagFilterEmpty):
 		inbound = FilterEmpty(inbound)
-		// fallthrough
 	}
+
 	return inbound
 }
 
@@ -74,6 +80,7 @@ func ToStrings[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound []string) 
 	for _, b := range inbound {
 		outbound = append(outbound, fmt.Sprint(b))
 	}
+
 	return
 }
 

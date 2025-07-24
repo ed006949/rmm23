@@ -33,6 +33,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			},
 			TestOnBorrow: func(c redis.Conn, t time.Time) (tErr error) {
 				_, tErr = c.Do("PING")
+
 				return
 			},
 			MaxIdle:         4,
@@ -68,6 +69,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 			return err
 		default:
 			doc.Set("type", entryTypeDomain)
+
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
 			case mod_errors.Contains(err, EDocExist):
 				err = nil
@@ -88,6 +90,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 				return err
 			default:
 				doc.Set("type", entryTypeGroup)
+
 				switch err = rsClient.Index([]redisearch.Document{doc}...); {
 				case mod_errors.Contains(err, EDocExist):
 					err = nil
@@ -96,6 +99,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 				}
 			}
 		}
+
 		for _, f := range d.Users {
 			switch doc, err = newRedisearchDocument(
 				schema,
@@ -108,6 +112,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 				return err
 			default:
 				doc.Set("type", entryTypeUser)
+
 				switch err = rsClient.Index([]redisearch.Document{doc}...); {
 				case mod_errors.Contains(err, EDocExist):
 					err = nil
@@ -116,6 +121,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 				}
 			}
 		}
+
 		for _, f := range d.Hosts {
 			switch doc, err = newRedisearchDocument(
 				schema,
@@ -128,6 +134,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf) (err error) {
 				return err
 			default:
 				doc.Set("type", entryTypeHost)
+
 				switch err = rsClient.Index([]redisearch.Document{doc}...); {
 				case mod_errors.Contains(err, EDocExist):
 					err = nil

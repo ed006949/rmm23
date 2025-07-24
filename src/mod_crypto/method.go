@@ -17,11 +17,13 @@ func (r *AuthDB) WriteSSH(name string, user string, pemBytes []byte, password st
 	var (
 		sshPublicKeys *ssh.PublicKeys
 	)
+
 	switch sshPublicKeys, err = ssh.NewPublicKeys(user, pemBytes, password); {
 	case err != nil:
 		return
 	default:
 		(*r)[name] = sshPublicKeys
+
 		return
 	}
 }
@@ -36,6 +38,7 @@ func (r *AuthDB) WriteToken(name string, user string, tokenBytes []byte) (err er
 		Username: user,
 		Password: string(tokenBytes),
 	}
+
 	return
 }
 

@@ -23,6 +23,7 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 	case reflection.Kind() == reflect.Ptr:
 		reflection = reflection.Elem()
 	}
+
 	switch {
 	case reflection.Kind() != reflect.Struct:
 		panic(mod_errors.ENotStructOrPtrStruct)
@@ -33,6 +34,7 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 			field    = reflection.Field(i)
 			redisTag = field.Tag.Get(redisTagName)
 		)
+
 		switch {
 		case len(redisTag) == 0:
 			continue
@@ -41,6 +43,7 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 		var (
 			redisearchTag = field.Tag.Get(rediSearchTagName)
 		)
+
 		switch {
 		case len(redisearchTag) == 0:
 			continue
@@ -49,6 +52,7 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 		var (
 			parts = mod_slices.Split(redisearchTag, mod_strings.TagSeparator, mod_slices.FlagNormalize)
 		)
+
 		switch {
 		case len(parts) == 0:
 			continue
@@ -64,6 +68,7 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 			var (
 				trimmedOpt = strings.TrimSpace(opt)
 			)
+
 			switch trimmedOpt {
 			case rediSearchTagTypeIgnore, rediSearchTagTypeText, rediSearchTagTypeNumeric, rediSearchTagTypeTag, rediSearchTagTypeGeo:
 				types[trimmedOpt] = true
@@ -110,10 +115,12 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 	var (
 		reflection = reflect.ValueOf(data)
 	)
+
 	switch {
 	case reflection.Kind() == reflect.Ptr:
 		reflection = reflection.Elem()
 	}
+
 	switch {
 	case reflection.Kind() != reflect.Struct:
 		return redisearch.Document{}, mod_errors.ENotStructOrPtrStruct
@@ -129,6 +136,7 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 			typeField   = reflection.Type().Field(i)
 			redisTag    = typeField.Tag.Get(redisTagName)
 		)
+
 		switch {
 		case len(redisTag) == 0:
 			continue
@@ -137,10 +145,12 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 		var (
 			schemaField *redisearch.Field
 		)
+
 		for _, sf := range schema.Fields {
 			switch {
 			case sf.Name == redisTag:
 				schemaField = &sf
+
 				break
 			}
 		}
@@ -157,6 +167,7 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 		var (
 			fieldValue interface{}
 		)
+
 		switch schemaField.Type {
 		case redisearch.TagField, redisearch.TextField:
 			fieldValue = fmt.Sprintf("%v", structField.Interface())
@@ -190,10 +201,12 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 		var (
 			encodedPayload []byte
 		)
+
 		switch encodedPayload, err = msgpack.Marshal(data); {
 		case err != nil:
 			return redisearch.Document{}, err
 		}
+
 		doc.SetPayload(encodedPayload)
 	}
 

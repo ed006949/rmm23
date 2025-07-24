@@ -31,6 +31,7 @@ func Parse(inbound string) (bool, error) {
 		return false, mod_errors.EINVAL
 	}
 }
+
 func FormatBool(inbound bool) string {
 	switch inbound {
 	case true:

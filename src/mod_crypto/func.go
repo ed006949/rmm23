@@ -25,6 +25,7 @@ func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate
 		keyDERBlock  *pem.Block
 		interimCert  *x509.Certificate
 	)
+
 	outbound = new(Certificate)
 
 	func() {
@@ -51,10 +52,12 @@ func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate
 			}
 		}
 	}()
+
 	switch {
 	case len(outbound.CertificatesDER) == 0:
 		return nil, mod_errors.EPEMNoDataCert
 	}
+
 	outbound.CertificateCAChainRawPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.CertificateCAChainDER))
 
 	func() {
@@ -70,6 +73,7 @@ func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate
 			}
 		}
 	}()
+
 	switch {
 	case len(outbound.PrivateKeyDER) == 0:
 		return nil, mod_errors.EPEMNoDataKey
@@ -149,6 +153,7 @@ func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
 	var (
 		interimCert *x509.Certificate
 	)
+
 	outbound = new(Certificate)
 
 	func() {
@@ -156,7 +161,9 @@ func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
 			var (
 				interimDERBlock *pem.Block
 			)
+
 			interimDERBlock, PEMBlock = pem.Decode(PEMBlock)
+
 			switch {
 			case interimDERBlock == nil:
 				return
@@ -180,6 +187,7 @@ func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
 			}
 		}
 	}()
+
 	switch {
 	case len(outbound.CertificatesDER) == 0:
 		return nil, mod_errors.EPEMNoDataCert

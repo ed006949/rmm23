@@ -99,12 +99,10 @@ func (r *Conf) search() (err error) {
 				}
 
 				b.searchResults[d.Type] = searchResult
-
-			default:
-				// 		WTF
 			}
 		}
 	}
+
 	return
 }
 func (r *Conf) parse() (err error) {
@@ -207,8 +205,7 @@ func (r *Conf) bind() (err error) {
 	switch err = r.conn.Bind(r.URL.CleanUsername(), r.URL.CleanPassword()); {
 	case err != nil:
 		return
-	case len(r.URL.CleanUsername()) == 0:
-		// return EAnonymousBind
+	case len(r.URL.CleanUsername()) == 0: // return EAnonymousBind
 	}
 
 	return

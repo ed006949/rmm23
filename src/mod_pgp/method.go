@@ -29,19 +29,23 @@ func (r *SignDB) WriteSign(name string, data []byte, passphrase []byte) (err err
 		armorBlock    *armor.Block
 		openpgpEntity *openpgp.Entity
 	)
+
 	switch armorBlock, err = armor.Decode(bytes.NewReader(data)); {
 	case err != nil:
 		return
 	}
+
 	switch openpgpEntity, err = openpgp.ReadEntity(packet.NewReader(armorBlock.Body)); {
 	case err != nil:
 		return
 	}
+
 	switch err = openpgpEntity.DecryptPrivateKeys(passphrase); {
 	case err != nil:
 		return
 	}
 
 	(*r)[name] = openpgpEntity
+
 	return
 }

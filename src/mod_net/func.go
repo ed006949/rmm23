@@ -23,10 +23,12 @@ func LookupMX(names []string) (outbound []string, errs mod_errors.Errs) {
 			errs = append(errs, err)
 			continue
 		}
+
 		for _, b := range interim {
 			outbound = append(outbound, b.Host)
 		}
 	}
+
 	return
 }
 
@@ -37,5 +39,6 @@ func UrlParse(inbound string) (outbound *url.URL, err error) {
 	case len(outbound.String()) == 0:
 		return nil, mod_errors.ENODATA
 	}
+
 	return
 }

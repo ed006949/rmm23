@@ -26,6 +26,7 @@ func Symlink(oldname string, newname string) (err error) {
 			isLink     bool
 			fsFileinfo fs.FileInfo
 		)
+
 		switch fsFileinfo, err = os.Lstat(newname); {
 		case err != nil:
 			return

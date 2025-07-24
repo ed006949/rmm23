@@ -16,6 +16,7 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 	var (
 		val, ok = f.Tag.Lookup(ldapTagName)
 	)
+
 	switch {
 	case !ok:
 		return f.Name, false
@@ -24,10 +25,12 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 	var (
 		opts = strings.Split(val, ",")
 	)
+
 	switch {
 	case len(opts) == 2:
 		flag = opts[1] == ldapTagOptionOmitEmpty
 	}
+
 	return opts[0], flag
 }
 
@@ -35,6 +38,7 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 	var (
 		vo = reflect.ValueOf(i).Kind()
 	)
+
 	switch {
 	case vo != reflect.Ptr:
 		return mod_errors.ENotPtr
@@ -43,6 +47,7 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 	var (
 		sv, st = reflect.ValueOf(i).Elem(), reflect.TypeOf(i).Elem()
 	)
+
 	switch {
 	case sv.Kind() != reflect.Struct:
 		return mod_errors.ENotStruct
@@ -68,13 +73,16 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 			case err != nil:
 				return
 			}
+
 			fv.SetString(e.DN)
+
 			continue
 		}
 
 		var (
 			values = e.GetAttributeValues(fieldTag)
 		)
+
 		switch {
 		case len(values) == 0:
 			continue
@@ -87,33 +95,39 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 				var (
 					ptrVal = reflect.MakeMap(reflect.TypeOf(fieldType))
 				)
+
 				switch unmarshaler, ok := ptrVal.Interface().(LDAPAttributeUnmarshaler); {
 				case ok:
 					switch err = unmarshaler.UnmarshalLDAPAttr(values); {
 					case err != nil:
 						l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": e.DN}.Warning()
 						err = nil
+
 						continue
 					}
+
 					fv.Set(ptrVal)
 				}
 			default:
 				var (
 					ptrVal = reflect.New(reflect.TypeOf(fieldType))
 				)
+
 				switch unmarshaler, ok := ptrVal.Interface().(LDAPAttributeUnmarshaler); {
 				case ok:
 					switch err = unmarshaler.UnmarshalLDAPAttr(values); {
 					case err != nil:
 						l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": e.DN}.Warning()
 						err = nil
+
 						continue
 					}
+
 					fv.Set(ptrVal.Elem())
 				}
 			}
-
 		}
 	}
+
 	return
 }

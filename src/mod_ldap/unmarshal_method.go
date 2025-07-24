@@ -19,11 +19,14 @@ func (r *AttrDN) UnmarshalLDAPAttr(values []string) (err error) {
 	var (
 		value *ldap.DN
 	)
+
 	switch value, err = ldap.ParseDN(values[0]); {
 	case err != nil:
 		return
 	}
+
 	*r = AttrDN(value.String())
+
 	return
 }
 
@@ -32,22 +35,27 @@ func (r *AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim AttrDN
 		)
+
 		switch err = interim.UnmarshalLDAPAttr([]string{value}); {
 		case err != nil:
 			return
 		}
+
 		*r = append(*r, interim)
 	}
+
 	return
 }
 
 func (r *AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error) {
 	*r = mod_slices.ToStrings(values, mod_slices.FlagNormalize)
+
 	return
 }
 
 func (r *AttrID) UnmarshalLDAPAttr(values []string) (err error) {
 	*r = AttrID(values[0])
+
 	return
 }
 
@@ -55,11 +63,14 @@ func (r *AttrIDNumber) UnmarshalLDAPAttr(values []string) (err error) {
 	var (
 		value uint64
 	)
+
 	switch value, err = strconv.ParseUint(values[0], 0, 0); {
 	case err != nil:
 		return
 	}
+
 	*r = AttrIDNumber(value)
+
 	return
 }
 
@@ -68,12 +79,15 @@ func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim netip.Prefix
 		)
+
 		switch interim, err = netip.ParsePrefix(value); {
 		case err == nil:
 			(*r)[interim] = struct{}{}
+
 			return
 		}
 	}
+
 	return nil
 }
 
@@ -82,9 +96,8 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim = strings.SplitN(value, " ", 2)
 		)
+
 		switch len(interim) {
-		case 0:
-			continue
 		case 1:
 			*r = append(*r, LabeledURILegacy{Key: interim[0]})
 		case 2:
@@ -97,11 +110,13 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 
 func (r *AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
 	*r = mod_slices.ToStrings(values, mod_slices.FlagNormalize)
+
 	return
 }
 
 func (r *AttrObjectClasses) UnmarshalLDAPAttr(values []string) (err error) {
 	*r = mod_slices.ToStrings(values, mod_slices.FlagNormalize)
+
 	return
 }
 
@@ -109,6 +124,7 @@ func (r *AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range values {
 		(*r)[value] = mod_ssh.PublicKey(value)
 	}
+
 	return
 }
 
@@ -118,8 +134,10 @@ func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
 		case len(interim) > 0:
 			*r = AttrString(interim)
 		}
+
 		return // return only first value
 	}
+
 	return
 }
 
@@ -130,6 +148,7 @@ func (r *AttrStrings) UnmarshalLDAPAttr(values []string) (err error) {
 			*r = append(*r, AttrString(interim))
 		}
 	}
+
 	return
 }
 
@@ -137,16 +156,20 @@ func (r *AttrTimestamp) UnmarshalLDAPAttr(values []string) (err error) {
 	var (
 		value time.Time
 	)
+
 	switch value, err = ber.ParseGeneralizedTime([]byte(values[0])); {
 	case err != nil:
 		return
 	}
+
 	*r = AttrTimestamp(value)
+
 	return
 }
 
 func (r *AttrUserPassword) UnmarshalLDAPAttr(values []string) (err error) {
 	*r = AttrUserPassword(values[0])
+
 	return
 }
 
@@ -155,12 +178,15 @@ func (r *AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim *mod_crypto.Certificate
 		)
+
 		switch interim, err = mod_crypto.ParsePEM([]byte(value)); {
 		case err != nil:
 			continue
 		}
+
 		(*r)[AttrDN(interim.Certificates[0].Subject.String())] = *interim
 	}
+
 	return
 }
 
@@ -168,11 +194,14 @@ func (r *AttrUUID) UnmarshalLDAPAttr(values []string) (err error) {
 	var (
 		value uuid.UUID
 	)
+
 	switch value, err = uuid.Parse(values[0]); {
 	case err != nil:
 		return
 	}
+
 	*r = AttrUUID(value)
+
 	return
 }
 

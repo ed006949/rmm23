@@ -21,6 +21,7 @@ func (r *GitDB) Load(path string, auth transport.AuthMethod, signKey *openpgp.En
 	case err != nil:
 		return
 	}
+
 	switch r.Worktree, err = r.Repository.Worktree(); {
 	case err != nil:
 		return
@@ -42,9 +43,11 @@ func (r *GitDB) Load(path string, auth transport.AuthMethod, signKey *openpgp.En
 						Email: b.UserId.Email,
 						When:  time.Now(), // wtf????
 					}
+
 					break
 				}
 			}
+
 			return
 		}(),
 		SignKey: signKey,
@@ -56,6 +59,7 @@ func (r *GitDB) Load(path string, auth transport.AuthMethod, signKey *openpgp.En
 		Progress: os.Stderr, // FIXME why so quiet?
 		Atomic:   true,
 	}
+
 	return
 }
 
@@ -89,6 +93,7 @@ func (r *GitDB) Commit(msg string) (err error) {
 	case err != nil:
 		return
 	}
+
 	l.Z{"repo": r.Path, "plumbingHash": plumbingHash.String()}.Informational()
 
 	switch {
@@ -100,6 +105,7 @@ func (r *GitDB) Commit(msg string) (err error) {
 	case err != nil:
 		return
 	}
+
 	l.Z{"repo": r.Path, "plumbingHash": plumbingHash.String()}.Informational()
 
 	switch err = r.Repository.Push(r.PushOptions); {

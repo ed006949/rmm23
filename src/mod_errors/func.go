@@ -12,6 +12,7 @@ func PanicErr1[E any](inbound E, err error) (outbound E) {
 	case err != nil:
 		panic(err)
 	}
+
 	return inbound
 }
 

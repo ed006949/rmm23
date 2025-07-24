@@ -20,6 +20,7 @@ func (r *VFSDB) MustReadlink(name string) string {
 	switch outbound, err := r.VFS.Readlink(name); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
+
 		return ""
 	default:
 		return outbound
@@ -58,6 +59,7 @@ func (r *VFSDB) CopyFromFS(name string) (err error) {
 				return err
 			default: // 													already exists
 				l.Z{l.E: fs.ErrExist, "dirEntry": name, l.M: "skip entry"}.Warning()
+
 				return nil
 			}
 
@@ -245,10 +247,12 @@ func (r *VFSDB) CopyFileFromFS(name string) (err error) {
 	case err != nil:
 		return
 	}
+
 	switch err = r.VFS.WriteFile(name, data, avfs.DefaultFilePerm); {
 	case err != nil:
 		return
 	}
+
 	return
 }
 func (r *VFSDB) CopyFileToFS(name string) (err error) {
@@ -260,10 +264,12 @@ func (r *VFSDB) CopyFileToFS(name string) (err error) {
 	case err != nil:
 		return
 	}
+
 	switch err = os.WriteFile(name, data, avfs.DefaultFilePerm); {
 	case err != nil:
 		return
 	}
+
 	return
 }
 func (r *VFSDB) CompareAndCopyFileToFS(name string) (err error) {
@@ -276,6 +282,7 @@ func (r *VFSDB) CompareAndCopyFileToFS(name string) (err error) {
 	case err != nil:
 		return
 	}
+
 	switch dataFS, err = os.ReadFile(name); {
 	case errors.Is(err, fs.ErrNotExist):
 	case err != nil:
@@ -297,18 +304,22 @@ func (r *VFSDB) LoadX509KeyPair(chain string, key string) (outbound *mod_crypto.
 		chainData []byte
 		keyData   []byte
 	)
+
 	switch chainData, err = r.VFS.ReadFile(chain); {
 	case err != nil:
 		return
 	}
+
 	switch keyData, err = r.VFS.ReadFile(key); {
 	case err != nil:
 		return
 	}
+
 	switch outbound, err = mod_crypto.X509KeyPair(chainData, keyData); {
 	case err != nil:
 		return nil, err
 	}
+
 	return
 }
 
@@ -316,9 +327,11 @@ func (r *VFSDB) LoadIniMapTo(v any, source string) (err error) {
 	var (
 		data []byte
 	)
+
 	switch data, err = r.VFS.ReadFile(source); {
 	case err != nil:
 		return
 	}
+
 	return ini.MapTo(&v, &data)
 }
