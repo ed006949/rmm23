@@ -1,7 +1,6 @@
 package mod_ldap
 
 import (
-	"encoding/xml"
 	"errors"
 
 	"github.com/go-ldap/ldap/v3"
@@ -34,6 +33,30 @@ func (r *LDAPConfig) Fetch() (err error) {
 	}
 
 	switch err = r.parse(); {
+	case err != nil:
+		return
+	}
+
+	return
+}
+
+func (r *LDAPConfig) Search() (outbound []*ldap.SearchResult, err error) {
+	switch err = r.connect(); {
+	case err != nil:
+		return
+	}
+
+	defer func() {
+		_ = r.close()
+	}()
+
+	switch err = r.bind(); {
+	case errors.Is(err, mod_errors.EAnonymousBind):
+	case err != nil:
+		return
+	}
+
+	switch err = r.search(); {
 	case err != nil:
 		return
 	}
@@ -189,8 +212,6 @@ func (r Elements) unmarshal(inbound *ldap.SearchResult) (err error) {
 	return
 }
 
-// connection handling.
-
 func (r *LDAPConfig) connect() (err error) {
 	r.conn, err = ldap.DialURL(r.URL.String())
 
@@ -205,7 +226,8 @@ func (r *LDAPConfig) bind() (err error) {
 	switch err = r.conn.Bind(r.URL.CleanUsername(), r.URL.CleanPassword()); {
 	case err != nil:
 		return
-	case len(r.URL.CleanUsername()) == 0: // return EAnonymousBind
+	case len(r.URL.CleanUsername()) == 0:
+		return mod_errors.EAnonymousBind
 	}
 
 	return
@@ -219,22 +241,6 @@ func (r *LDAPConfig) close() (err error) {
 	return r.conn.Close()
 }
 
-// XMLs.
-
-func (r *AttrDN) UnmarshalXMLAttr(attr xml.Attr) (err error) {
-	switch _, err = ldap.ParseDN(attr.Value); err {
-	case nil:
-		*r = AttrDN(attr.Value)
-	}
-
-	return
-}
-func (r *AttrDN) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
-	return xml.Attr{Name: name, Value: r.String()}, nil
-}
-
-// Strings.
-
 func (r *AttrDN) String() string { return string(*r) }
 func (r *AttrDNs) String() (outbound []string) {
 	for _, b := range *r {
@@ -243,5 +249,4 @@ func (r *AttrDNs) String() (outbound []string) {
 
 	return
 }
-
 func (r *AttrUUID) String() string { return uuid.UUID(*r).String() }

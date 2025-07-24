@@ -132,7 +132,7 @@ type attrDisplayName string                            //
 type attrEntryUUID uuid.UUID                           //
 type attrGIDNumber uint64                              //
 type attrHomeDirectory string                          //
-type AttrIPHostNumbers map[netip.Prefix]struct{}       //
+type AttrIPHostNumbers []netip.Prefix       //
 type AttrLabeledURIs []LabeledURILegacy                // custom schema alternative TO DO implement custom schemas
 type AttrMails []string                                //
 type attrMembers []AttrDN                              //

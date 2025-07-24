@@ -76,10 +76,28 @@ func Join[S ~[]E, E cmp.Ordered](inbound S, sep string, flag flag) (outbound str
 // ToStrings converts the elements of the inbound slice to their string representations.
 // The slice is normalized before conversion based on the provided flags.
 func ToStrings[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound []string) {
-	inbound = Normalize(inbound, flag)
-	for _, b := range inbound {
-		outbound = append(outbound, fmt.Sprint(b))
+	var (
+		converter func(in E) (out string)
+	)
+
+	switch {
+	case flag.has(FlagTrimSpace):
+		converter = func(in E) (out string) {
+			return strings.TrimSpace(fmt.Sprint(in))
+		}
+	default:
+		converter = func(in E) (out string) {
+			return fmt.Sprint(in)
+		}
 	}
+
+	// inbound = Normalize(inbound, flag)
+
+	for _, b := range inbound {
+		outbound = append(outbound, converter(b))
+	}
+
+	outbound = Normalize(outbound, flag)
 
 	return
 }

@@ -16,32 +16,36 @@ import (
 )
 
 func (r *AttrDN) UnmarshalLDAPAttr(values []string) (err error) {
-	var (
-		value *ldap.DN
-	)
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+		var (
+			interim *ldap.DN
+		)
 
-	switch value, err = ldap.ParseDN(values[0]); {
-	case err != nil:
+		switch interim, err = ldap.ParseDN(value); {
+		case err != nil:
+			continue
+		}
+
+		*r = AttrDN(interim.String())
+
 		return
 	}
-
-	*r = AttrDN(value.String())
 
 	return
 }
 
 func (r *AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range values {
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
 		var (
-			interim AttrDN
+			interim *ldap.DN
 		)
 
-		switch err = interim.UnmarshalLDAPAttr([]string{value}); {
+		switch interim, err = ldap.ParseDN(value); {
 		case err != nil:
-			return
+			continue
 		}
 
-		*r = append(*r, interim)
+		*r = append(*r, AttrDN(interim.String()))
 	}
 
 	return
@@ -54,45 +58,53 @@ func (r *AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err erro
 }
 
 func (r *AttrID) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = AttrID(values[0])
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+		*r = AttrID(value)
+
+		return // return only first value
+	}
 
 	return
 }
 
 func (r *AttrIDNumber) UnmarshalLDAPAttr(values []string) (err error) {
-	var (
-		value uint64
-	)
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+		var (
+			interim uint64
+		)
 
-	switch value, err = strconv.ParseUint(values[0], 0, 0); {
-	case err != nil:
-		return
+		switch interim, err = strconv.ParseUint(value, 0, 0); {
+		case err != nil:
+			continue
+		}
+
+		*r = AttrIDNumber(interim)
+
+		return // return only first value
 	}
-
-	*r = AttrIDNumber(value)
 
 	return
 }
 
 func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range values {
+	for _, value := range mod_slices.Normalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim netip.Prefix
 		)
 
-		switch interim, err = netip.ParsePrefix(value); err {
-		case nil:
-			(*r)[interim] = struct{}{}
-
-			return
+		switch interim, err = netip.ParsePrefix(value); {
+		case err != nil:
+			continue
 		}
+
+		*r = append(*r, interim)
 	}
 
 	return nil
 }
 
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range values {
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
 		var (
 			interim = strings.SplitN(value, " ", mod_slices.KVElements)
 		)
@@ -121,7 +133,7 @@ func (r *AttrObjectClasses) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range values {
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
 		(*r)[value] = mod_ssh.PublicKey(value)
 	}
 
@@ -129,11 +141,8 @@ func (r *AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range values {
-		switch interim := strings.TrimSpace(value); {
-		case len(interim) > 0:
-			*r = AttrString(interim)
-		}
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+		*r = AttrString(value)
 
 		return // return only first value
 	}
@@ -142,39 +151,44 @@ func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrStrings) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range values {
-		switch interim := strings.TrimSpace(value); {
-		case len(interim) > 0:
-			*r = append(*r, AttrString(interim))
-		}
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+		*r = append(*r, AttrString(value))
 	}
 
 	return
 }
 
 func (r *AttrTimestamp) UnmarshalLDAPAttr(values []string) (err error) {
-	var (
-		value time.Time
-	)
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+		var (
+			interim time.Time
+		)
 
-	switch value, err = ber.ParseGeneralizedTime([]byte(values[0])); {
-	case err != nil:
-		return
+		switch interim, err = ber.ParseGeneralizedTime([]byte(value)); {
+		case err != nil:
+			continue
+		}
+
+		*r = AttrTimestamp(interim)
+
+		return // return only first value
 	}
-
-	*r = AttrTimestamp(value)
 
 	return
 }
 
 func (r *AttrUserPassword) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = AttrUserPassword(values[0])
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+		*r = AttrUserPassword(value)
+
+		return // return only first value
+	}
 
 	return
 }
 
 func (r *AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range values {
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
 		var (
 			interim *mod_crypto.Certificate
 		)
@@ -191,16 +205,20 @@ func (r *AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrUUID) UnmarshalLDAPAttr(values []string) (err error) {
-	var (
-		value uuid.UUID
-	)
+	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+		var (
+			interim uuid.UUID
+		)
 
-	switch value, err = uuid.Parse(values[0]); {
-	case err != nil:
-		return
+		switch interim, err = uuid.Parse(value); {
+		case err != nil:
+			continue
+		}
+
+		*r = AttrUUID(interim)
+
+		return // return only first value
 	}
-
-	*r = AttrUUID(value)
 
 	return
 }
