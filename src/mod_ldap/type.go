@@ -49,9 +49,9 @@ type LDAPDomain struct {
 }
 
 type Conf struct {
-	URL      *mod_net.URL    `xml:"url,attr"`
-	Settings []*ConfSettings `xml:"settings"`
-	Domain   []*ConfDomain   `xml:"domain"`
+	URL      *mod_net.URL
+	Settings []*ConfSettings
+	Domain   []*ConfDomain
 
 	// schema map[string]*schema
 	conn *ldap.Conn
@@ -59,13 +59,13 @@ type Conf struct {
 	Table *ConfTable
 }
 type ConfSettings struct {
-	Type   string `xml:"type,attr"`
-	DN     AttrDN `xml:"dn,attr"`
-	CN     string `xml:"cn,attr"`
-	Filter string `xml:"filter,attr"`
+	Type   string
+	DN     AttrDN
+	CN     string
+	Filter string
 }
 type ConfDomain struct {
-	DN AttrDN `xml:"dn,attr"`
+	DN AttrDN
 
 	Domain *Element
 	Users  Elements
@@ -162,22 +162,22 @@ type AttrTimestamp time.Time    //
 type AttrUUID uuid.UUID         //
 
 type LabeledURI struct {
-	// XMLName     xml.Name             `xml:"luri"`
-	Type        string     `xml:"type,attr,omitempty"` // `(provider|interim|openvpn|ciscovpn)`
-	ASN         uint32     `xml:"asn,attr,omitempty"`
-	UpstreamASN uint32     `xml:"upstream_asn,attr,omitempty"`
-	HostASN     uint32     `xml:"host_asn,attr,omitempty"`
-	URL         url.URL    `xml:"url,attr,omitempty"`
-	Listen      netip.Addr `xml:"listen,attr,omitempty"`
-	ACL         string     `xml:"acl,attr,omitempty"`
-	AAA         string     `xml:"aaa,attr,omitempty"`
+	// XMLName     xml.Name
+	Type        string      // `(provider|interim|openvpn|ciscovpn)`
+	ASN         uint32
+	UpstreamASN uint32
+	HostASN     uint32
+	URL         url.URL
+	Listen      netip.Addr
+	ACL         string
+	AAA         string
 
-	OpenVPN     []mod_net.OpenVPN     `xml:"OpenVPN,omitempty"`
-	CiscoVPN    []mod_net.CiscoVPN    `xml:"CiscoVPN,omitempty"`
-	InterimHost []mod_net.InterimHost `xml:"InterimHost,omitempty"`
-	Legacy      []LabeledURILegacy    `xml:"LabeledURI,omitempty"`
+	OpenVPN     []mod_net.OpenVPN
+	CiscoVPN    []mod_net.CiscoVPN
+	InterimHost []mod_net.InterimHost
+	Legacy      []LabeledURILegacy
 }
 type LabeledURILegacy struct {
-	Key   string `xml:"key,attr,omitempty"`
-	Value string `xml:"value,attr,omitempty"`
+	Key   string
+	Value string
 }

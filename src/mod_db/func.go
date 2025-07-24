@@ -162,5 +162,5 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig) (err error) 
 		}
 	}
 
-	return nil
+	return
 }
