@@ -103,6 +103,7 @@ func (r *VFSDB) CopyFromFS(name string) (err error) {
 				case err != nil:
 					return
 				}
+
 				switch err = r.CopyFileFromFS(name); {
 				case err != nil:
 					return
@@ -159,10 +160,12 @@ func (r *VFSDB) WriteVFS() (err error) {
 				case err != nil:
 					return
 				}
+
 				switch linkFS, err = os.Readlink(name); {
 				case err != nil:
 					return
 				}
+
 				switch {
 				case linkVFS != linkFS:
 					orphanList[name] = struct{}{}

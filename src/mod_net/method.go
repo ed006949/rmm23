@@ -44,15 +44,15 @@ func (r *URL) UnmarshalJSON(inbound []byte) (err error) {
 		return
 	}
 
-	*r = URL{URL: interimURL}
+	*r = URL{interimURL}
 
 	return
 }
 func (r *URL) MarshalJSON() ([]byte, error) { return json.Marshal(r.String()) }
 
-func (r *URL) CleanPath() (outbound string) { return strings.TrimPrefix(r.URL.Path, "/") }
+func (r *URL) CleanPath() (outbound string) { return strings.TrimPrefix(r.Path, "/") }
 func (r *URL) CleanUser() (username string, password string) {
 	return r.CleanUsername(), r.CleanPassword()
 }
-func (r *URL) CleanUsername() (outbound string) { return r.URL.User.Username() }
-func (r *URL) CleanPassword() (outbound string) { return mod_bools.StripIfBool1(r.URL.User.Password()) }
+func (r *URL) CleanUsername() (outbound string) { return r.User.Username() }
+func (r *URL) CleanPassword() (outbound string) { return mod_bools.StripIfBool1(r.User.Password()) }

@@ -147,8 +147,8 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 		)
 
 		for _, sf := range schema.Fields {
-			switch {
-			case sf.Name == redisTag:
+			switch sf.Name {
+			case redisTag:
 				schemaField = &sf
 
 				break

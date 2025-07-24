@@ -20,6 +20,7 @@ func Parse(inbound string) (bool, error) {
 	case len(inbound) == 0:
 		return false, mod_errors.ENODATA
 	}
+
 	inbound = strings.ToLower(inbound)
 
 	switch inbound {

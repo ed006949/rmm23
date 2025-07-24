@@ -29,7 +29,7 @@ func (r *GitDB) Load(path string, auth transport.AuthMethod, signKey *openpgp.En
 
 	r.PullOptions = &git.PullOptions{
 		Auth:     auth,
-		Progress: os.Stderr, // FIXME why so quiet?
+		Progress: os.Stderr, // why so quiet?
 	}
 	r.CommitOptions = &git.CommitOptions{
 		All:               true,
@@ -56,7 +56,7 @@ func (r *GitDB) Load(path string, auth transport.AuthMethod, signKey *openpgp.En
 	}
 	r.PushOptions = &git.PushOptions{
 		Auth:     auth,
-		Progress: os.Stderr, // FIXME why so quiet?
+		Progress: os.Stderr, // why so quiet?
 		Atomic:   true,
 	}
 

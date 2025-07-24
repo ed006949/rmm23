@@ -2,6 +2,8 @@ package mod_log
 
 import (
 	"github.com/rs/zerolog"
+
+	"rmm23/src/l"
 )
 
 func (r Object) MarshalZerologObject(e *zerolog.Event) {
@@ -15,7 +17,6 @@ func (r Object) MarshalZerologObject(e *zerolog.Event) {
 		// 	// 	a = zerolog.TypeFieldName
 		// }
 
-		switch value := b.(type) {
 		// case nameValue:
 		// e.Str(a, value.String())
 		// case configValue:
@@ -26,6 +27,7 @@ func (r Object) MarshalZerologObject(e *zerolog.Event) {
 		// e.Str(a, value.String())
 		// case verbosityLevel:
 		// e.Str(a, value.String())
+		switch value := b.(type) {
 		case error:
 			e.AnErr(a, value)
 		case []error:
@@ -41,7 +43,7 @@ func (r Object) MarshalZerologObject(e *zerolog.Event) {
 	}
 
 	switch {
-	// case l.DryRunValue.Flag():
-	// 	e.Bool(l.DryRunValue.Name(), l.DryRunValue.Flag())
+	case l.Run.DryRunValue():
+		e.Bool(l.Run.DryRunName(), l.Run.DryRunValue())
 	}
 }

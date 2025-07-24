@@ -126,13 +126,13 @@ func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate
 	return
 }
 func ParsePrivateKey(der []byte) (key crypto.PrivateKey, err error) {
-	switch key, err = x509.ParsePKCS1PrivateKey(der); {
-	case err == nil:
+	switch key, err = x509.ParsePKCS1PrivateKey(der); err {
+	case nil:
 		return
 	}
 
-	switch key, err = x509.ParsePKCS8PrivateKey(der); {
-	case err == nil:
+	switch key, err = x509.ParsePKCS8PrivateKey(der); err {
+	case nil:
 		switch value := key.(type) {
 		case *rsa.PrivateKey, *ecdsa.PrivateKey, ed25519.PrivateKey:
 			return value, nil
@@ -141,8 +141,8 @@ func ParsePrivateKey(der []byte) (key crypto.PrivateKey, err error) {
 		}
 	}
 
-	switch key, err = x509.ParseECPrivateKey(der); {
-	case err == nil:
+	switch key, err = x509.ParseECPrivateKey(der); err {
+	case nil:
 		return
 	}
 

@@ -37,7 +37,7 @@ func (r *Token) command(payload string) (outbound []string, err error) {
 	defer func() { _ = response.Body.Close() }()
 
 	switch {
-	case response.StatusCode != 200:
+	case response.StatusCode != http.StatusOK:
 		l.Z{l.E: mod_errors.EINVALRESPONSE, l.M: response.Body}.Error()
 
 		return nil, mod_errors.EINVALRESPONSE
@@ -79,16 +79,16 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 		switch {
 		case inbound.Domain_Administration != nil:
 			switch {
-			case inbound.Domain_Administration.GETDOMAINALIASES != nil:
+			case inbound.GETDOMAINALIASES != nil:
 				o["command"] = "GETDOMAINALIASES"
-				o["domain"] = inbound.Domain_Administration.GETDOMAINALIASES.DomainName
-				payload += inbound.Domain_Administration.GETDOMAINALIASES.compile()
+				o["domain"] = inbound.GETDOMAINALIASES.DomainName
+				payload += inbound.GETDOMAINALIASES.compile()
 
-			case inbound.Domain_Administration.UPDATEDOMAINSETTINGS != nil:
+			case inbound.UPDATEDOMAINSETTINGS != nil:
 				o["command"] = "UPDATEDOMAINSETTINGS"
-				o["domain"] = inbound.Domain_Administration.UPDATEDOMAINSETTINGS.DomainName
+				o["domain"] = inbound.UPDATEDOMAINSETTINGS.DomainName
 				emptyResponse = true
-				payload += inbound.Domain_Administration.UPDATEDOMAINSETTINGS.compile()
+				payload += inbound.UPDATEDOMAINSETTINGS.compile()
 
 				switch {
 				case l.Run.DryRunValue():
@@ -102,13 +102,13 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 
 		case inbound.Domain_Set_Administration != nil:
 			switch {
-			case inbound.Domain_Set_Administration.MAINDOMAINNAME != nil:
+			case inbound.MAINDOMAINNAME != nil:
 				o["command"] = "MAINDOMAINNAME"
-				payload += inbound.Domain_Set_Administration.MAINDOMAINNAME.compile()
+				payload += inbound.MAINDOMAINNAME.compile()
 
-			case inbound.Domain_Set_Administration.LISTDOMAINS != nil:
+			case inbound.LISTDOMAINS != nil:
 				o["command"] = "LISTDOMAINS"
-				payload += inbound.Domain_Set_Administration.LISTDOMAINS.compile()
+				payload += inbound.LISTDOMAINS.compile()
 
 			default:
 				return nil, mod_errors.EComSetDomSetAdm

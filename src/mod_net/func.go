@@ -21,6 +21,7 @@ func LookupMX(names []string) (outbound []string, errs mod_errors.Errs) {
 			continue
 		case err != nil:
 			errs = append(errs, err)
+
 			continue
 		}
 

@@ -14,7 +14,7 @@ func main() {
 
 	var (
 		config = new(ConfigRoot)
-		err error
+		err    error
 	)
 
 	switch err = l.Run.ConfigUnmarshal(config); {

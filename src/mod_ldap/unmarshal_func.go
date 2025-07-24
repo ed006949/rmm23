@@ -67,8 +67,8 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 		fieldTag, _ := readTag(ft)
 
 		// Fill the field with the distinguishedName if the tag key is `dn`
-		switch {
-		case fieldTag == "dn":
+		switch fieldTag {
+		case "dn":
 			switch _, err = ldap.ParseDN(e.DN); {
 			case err != nil:
 				return

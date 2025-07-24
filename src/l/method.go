@@ -32,7 +32,7 @@ func (r Z) MarshalZerologObject(e *zerolog.Event) {
 
 	switch {
 	case Run.DryRunValue():
-		e.Bool(Run.dryRunName(), Run.DryRunValue())
+		e.Bool(Run.DryRunName(), Run.DryRunValue())
 	}
 
 	e.Str("daemon", Run.NameValue())
@@ -155,4 +155,4 @@ func (r *runType) CommitHashValue() (outbound string) { return r.commit }
 func (r *runType) DryRunValue() (outbound bool)       { return r.dryRun }
 func (r *runType) NameValue() (outbound string)       { return r.name }
 
-func (r *runType) dryRunName() (outbound string) { return daemonFlagName[daemonDryRun] }
+func (r *runType) DryRunName() (outbound string) { return daemonFlagName[daemonDryRun] }

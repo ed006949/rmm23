@@ -43,8 +43,8 @@ func (r *Conf) Fetch() (err error) {
 
 func (r *Conf) search() (err error) {
 	for _, b := range r.Domain {
-		switch {
-		case b.searchResults == nil:
+		switch b.searchResults {
+		case nil:
 			b.searchResults = make(map[string]*ldap.SearchResult)
 		}
 
@@ -197,8 +197,8 @@ func (r *Conf) connect() (err error) {
 	return
 }
 func (r *Conf) bind() (err error) {
-	switch {
-	case r.conn == nil:
+	switch r.conn {
+	case nil:
 		return mod_errors.ENoConn
 	}
 
@@ -211,8 +211,8 @@ func (r *Conf) bind() (err error) {
 	return
 }
 func (r *Conf) close() (err error) {
-	switch {
-	case r.conn == nil:
+	switch r.conn {
+	case nil:
 		return mod_errors.ENoConn
 	}
 
@@ -222,8 +222,8 @@ func (r *Conf) close() (err error) {
 // XMLs.
 
 func (r *AttrDN) UnmarshalXMLAttr(attr xml.Attr) (err error) {
-	switch _, err = ldap.ParseDN(attr.Value); {
-	case err == nil:
+	switch _, err = ldap.ParseDN(attr.Value); err {
+	case nil:
 		*r = AttrDN(attr.Value)
 	}
 

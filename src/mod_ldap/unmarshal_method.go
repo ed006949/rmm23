@@ -80,8 +80,8 @@ func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 			interim netip.Prefix
 		)
 
-		switch interim, err = netip.ParsePrefix(value); {
-		case err == nil:
+		switch interim, err = netip.ParsePrefix(value); err {
+		case nil:
 			(*r)[interim] = struct{}{}
 
 			return
