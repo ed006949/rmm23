@@ -87,3 +87,25 @@ func ToStrings[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound []string) 
 func Split(inbound string, sep string, flag flag) (outbound []string) {
 	return Normalize(strings.Split(inbound, sep), flag)
 }
+
+func Convert2KV[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound []kv, err error) {
+	var (
+		values   = ToStrings(inbound, flag)
+		elements = 2
+	)
+
+	for _, value := range values {
+		var (
+			interim = strings.SplitN(value, " ", elements)
+		)
+
+		switch len(interim) {
+		case 1:
+			outbound = append(outbound, kv{Key: interim[0]})
+		case elements:
+			outbound = append(outbound, kv{Key: interim[0], Value: interim[1]})
+		}
+	}
+
+	return
+}

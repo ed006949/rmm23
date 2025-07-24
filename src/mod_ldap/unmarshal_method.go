@@ -92,17 +92,12 @@ func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range values {
-		var (
-			interim = strings.SplitN(value, " ", 2)
-		)
+	var (
+		interim, _ = mod_slices.Convert2KV(values, mod_slices.FlagNone)
+	)
 
-		switch len(interim) {
-		case 1:
-			*r = append(*r, LabeledURILegacy{Key: interim[0]})
-		case 2:
-			*r = append(*r, LabeledURILegacy{Key: interim[0], Value: interim[1]})
-		}
+	for _, b := range interim {
+		*r = append(*r, LabeledURILegacy{Key: b.Key, Value: b.Value})
 	}
 
 	return nil
