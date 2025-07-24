@@ -4,6 +4,7 @@ GIT_COMMIT	=	`git rev-parse --short HEAD`
 
 all:	commit
 all:	vet
+all:	lint
 all:	race
 all:	build
 all:	status
@@ -50,6 +51,9 @@ init:
 
 install:
 	@echo ${NAME} ${PACKAGE} ${TARGET} ${DATE} ${GIT_STATUS}
+
+lint:
+	golangci-lint run ./...
 
 race:
 	go run -race ./... ${COMMAND_LINE}

@@ -86,11 +86,13 @@ func (r *Conf) search() (err error) {
 						nil,                    // Controls
 					)
 				)
+
 				switch searchResult, newErr = r.conn.Search(searchRequest); {
 				case newErr != nil:
 					err = errors.Join(err, newErr)
 					l.Z{l.E: err, l.M: "LDAP Search", "DN": searchRequest.BaseDN}.Warning()
 				}
+
 				b.searchResults[d.Type] = searchResult
 
 			default:
