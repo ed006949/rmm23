@@ -1,9 +1,5 @@
-version         : "2"
-linters-settings:
-  unused:
-    check-exported: false
-
-linters         :
+version: "2"
+linters:
   default : fast
   disable :
     - unused
