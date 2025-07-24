@@ -12,7 +12,12 @@ func main() {
 	l.Z{l.M: "main", "commit": l.Run.CommitHashValue(), "built": l.Run.BuildTimeValue()}.Informational()
 	defer l.Z{l.M: "exit"}.Informational()
 
-	switch err := l.Run.ConfigUnmarshal(config); {
+	var (
+		config = new(ConfigRoot)
+		err error
+	)
+
+	switch err = l.Run.ConfigUnmarshal(config); {
 	case err != nil:
 		panic(err)
 	}

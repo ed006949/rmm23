@@ -6,5 +6,4 @@ import (
 
 var (
 	ctx    = context.Background()
-	config = new(ConfigRoot)
 )

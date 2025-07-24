@@ -14,11 +14,14 @@ const (
 	EINVALRESPONSE
 	EAnonymousBind
 	ENoConn
+
 	ENotStruct
 	ENotPtr
 	ENotStructOrPtrStruct
+
 	EUnknownType
 	EParse
+
 	EX509ParsePrivKey
 	EPEMNoDataKey
 	EPEMNoDataCert
@@ -28,12 +31,16 @@ const (
 	EPrivKeySize
 	ETypeMismatchPrivKeyPubKey
 	EMismatchPrivKeyPubKey
+
 	ECom
 	EComSet
 	EComSetDomAdm
 	EComSetDomSetAdm
+
 	ETagMultiType
 	ETagUnknown
+
+	EDocExist
 )
 
 var errorDescription = [...]string{
@@ -70,4 +77,5 @@ var errorDescription = [...]string{
 	EComSetDomSetAdm:           "unknown Domain Set Administration command",
 	ETagMultiType:              "multiple types",
 	ETagUnknown:                "unknown tag",
+	EDocExist: "Document already exists",
 }
