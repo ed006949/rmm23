@@ -40,7 +40,7 @@ func main() {
 		l.Z{l.E: err}.Critical()
 	}
 
-	switch err = mod_db.CopyLDAP2DB(ctx, &config.Conf.LDAP); {
+	switch err = mod_db.CopyLDAP2DB(ctx, config.Conf.LDAP, config.Conf.Daemon.DB); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}

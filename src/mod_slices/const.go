@@ -8,3 +8,7 @@ const (
 	FlagFilterEmpty
 	FlagNormalize = ^flag(FlagNone)
 )
+
+const (
+	KVElements = 2 // to honor the lint.mnd()
+)

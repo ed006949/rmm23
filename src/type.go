@@ -11,5 +11,5 @@ type ConfigRoot struct {
 
 type Conf struct {
 	Daemon l.DaemonConfig `json:"daemon"`
-	LDAP   mod_ldap.LDAPConfig     `json:"ldap"`
+	LDAP   *mod_ldap.LDAPConfig     `json:"ldap"`
 }

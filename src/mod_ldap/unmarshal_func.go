@@ -8,6 +8,7 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
+	"rmm23/src/mod_slices"
 )
 
 // portions taken from "github.com/go-ldap/ldap/v3"
@@ -27,7 +28,7 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 	)
 
 	switch {
-	case len(opts) == 2:
+	case len(opts) == mod_slices.KVElements:
 		flag = opts[1] == ldapTagOptionOmitEmpty
 	}
 

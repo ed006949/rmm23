@@ -10,6 +10,7 @@ import (
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
+	"rmm23/src/mod_net"
 	"rmm23/src/mod_slices"
 )
 
@@ -24,7 +25,7 @@ func redisNetwork(inbound *url.URL) (outbound string, err error) {
 	}
 }
 
-func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig) (err error) {
+func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mod_net.URL) (err error) {
 	switch err = inbound.Fetch(); {
 	case err != nil:
 		return
@@ -38,7 +39,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig) (err error) 
 		rcName    = "entryIdx"
 	)
 
-	switch rcNetwork, err = redisNetwork(inbound.URL.URL); {
+	switch rcNetwork, err = redisNetwork(outbound.URL); {
 	case err != nil:
 		return
 	}
@@ -46,7 +47,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig) (err error) 
 	var (
 		rsClient = redisearch.NewClientFromPool(&redis.Pool{
 			DialContext: func(ctx context.Context) (redis.Conn, error) {
-				return redis.DialContext(ctx, rcNetwork, inbound.URL.Host, redis.DialDatabase(0))
+				return redis.DialContext(ctx, rcNetwork, outbound.Host, redis.DialDatabase(0))
 			},
 			TestOnBorrow: func(c redis.Conn, t time.Time) (tErr error) {
 				_, tErr = c.Do(_PING)
@@ -83,15 +84,14 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig) (err error) 
 			false,
 		); {
 		case err != nil:
-			return err
+			return
 		default:
 			doc.Set("type", entryTypeDomain)
 
 			switch err = rsClient.Index([]redisearch.Document{doc}...); {
 			case mod_errors.Contains(err, mod_errors.EDocExist):
-				err = nil
 			case err != nil:
-				return err
+				return
 			}
 		}
 
@@ -104,15 +104,14 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig) (err error) 
 				false,
 			); {
 			case err != nil:
-				return err
+				return
 			default:
 				doc.Set("type", entryTypeGroup)
 
 				switch err = rsClient.Index([]redisearch.Document{doc}...); {
 				case mod_errors.Contains(err, mod_errors.EDocExist):
-					err = nil
 				case err != nil:
-					return err
+					return
 				}
 			}
 		}
@@ -126,15 +125,14 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig) (err error) 
 				false,
 			); {
 			case err != nil:
-				return err
+				return
 			default:
 				doc.Set("type", entryTypeUser)
 
 				switch err = rsClient.Index([]redisearch.Document{doc}...); {
 				case mod_errors.Contains(err, mod_errors.EDocExist):
-					err = nil
 				case err != nil:
-					return err
+					return
 				}
 			}
 		}
@@ -148,15 +146,14 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig) (err error) 
 				false,
 			); {
 			case err != nil:
-				return err
+				return
 			default:
 				doc.Set("type", entryTypeHost)
 
 				switch err = rsClient.Index([]redisearch.Document{doc}...); {
 				case mod_errors.Contains(err, mod_errors.EDocExist):
-					err = nil
 				case err != nil:
-					return err
+					return
 				}
 			}
 		}
