@@ -6,7 +6,14 @@ Welcome to the Remote Monitoring and Management (episode 23).
 
 ## TODO
 
-- [ ] implement error arrays instead of wrapped errors
+- [ ] QoD (quality of development)
+	- [ ] Implement error arrays instead of (wrapped) errors
+		* Functions return an array of errors.
+		* A dedicated checking function receives this error array.
+		* The checking function evaluates errors against predefined syslog levels, logs them, and returns the highest severity level.
+		* The calling function uses the returned severity level to determine subsequent actions.
+		* A default error level can be specified for unexpected errors during function calls.
+		* Developers must define an array of expected error severity levels; if this array is not provided (empty or nil), the default error level will be applied.
 
 ## Notes
 
