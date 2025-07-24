@@ -93,34 +93,9 @@ func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate
 		return nil, err
 	}
 
-	// TODO complete local chain verification
-	// We don't need to parse the public key for TLS, but we so do anyway
-	// to check that it looks sane and matches the private key.
-
-	switch pub := outbound.Certificates[0].PublicKey.(type) {
-	case *rsa.PublicKey:
-		switch priv, ok := outbound.PrivateKey.(*rsa.PrivateKey); {
-		case !ok:
-			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
-		case pub.N.Cmp(priv.N) != 0:
-			return nil, mod_errors.EMismatchPrivKeyPubKey
-		}
-	case *ecdsa.PublicKey:
-		switch priv, ok := outbound.PrivateKey.(*ecdsa.PrivateKey); {
-		case !ok:
-			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
-		case pub.X.Cmp(priv.X) != 0 || pub.Y.Cmp(priv.Y) != 0:
-			return nil, mod_errors.EMismatchPrivKeyPubKey
-		}
-	case ed25519.PublicKey:
-		switch priv, ok := outbound.PrivateKey.(ed25519.PrivateKey); {
-		case !ok:
-			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
-		case !bytes.Equal(priv.Public().(ed25519.PublicKey), pub):
-			return nil, mod_errors.EMismatchPrivKeyPubKey
-		}
-	default:
-		return nil, mod_errors.EUnknownPubKeyAlgo
+	switch err = outbound.checkPrivateKey(); {
+	case err != nil:
+		return nil, err
 	}
 
 	return
@@ -147,6 +122,39 @@ func ParsePrivateKey(der []byte) (key crypto.PrivateKey, err error) {
 	}
 
 	return nil, mod_errors.EX509ParsePrivKey
+}
+func (r *Certificate) checkPrivateKey() (err error) {
+	// TODO complete local chain verification
+	// We don't need to parse the public key for TLS, but we so do anyway
+	// to check that it looks sane and matches the private key.
+
+	switch pub := r.Certificates[0].PublicKey.(type) {
+	case *rsa.PublicKey:
+		switch priv, ok := r.PrivateKey.(*rsa.PrivateKey); {
+		case !ok:
+			return mod_errors.ETypeMismatchPrivKeyPubKey
+		case pub.N.Cmp(priv.N) != 0:
+			return mod_errors.EMismatchPrivKeyPubKey
+		}
+	case *ecdsa.PublicKey:
+		switch priv, ok := r.PrivateKey.(*ecdsa.PrivateKey); {
+		case !ok:
+			return mod_errors.ETypeMismatchPrivKeyPubKey
+		case pub.X.Cmp(priv.X) != 0 || pub.Y.Cmp(priv.Y) != 0:
+			return mod_errors.EMismatchPrivKeyPubKey
+		}
+	case ed25519.PublicKey:
+		switch priv, ok := r.PrivateKey.(ed25519.PrivateKey); {
+		case !ok:
+			return mod_errors.ETypeMismatchPrivKeyPubKey
+		case !bytes.Equal(priv.Public().(ed25519.PublicKey), pub):
+			return mod_errors.EMismatchPrivKeyPubKey
+		}
+	default:
+		return mod_errors.EUnknownPubKeyAlgo
+	}
+
+	return
 }
 
 func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
@@ -211,34 +219,9 @@ func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
 		return nil, err
 	}
 
-	// TODO complete local chain verification
-	// We don't need to parse the public key for TLS, but we so do anyway
-	// to check that it looks sane and matches the private key.
-
-	switch pub := outbound.Certificates[0].PublicKey.(type) {
-	case *rsa.PublicKey:
-		switch priv, ok := outbound.PrivateKey.(*rsa.PrivateKey); {
-		case !ok:
-			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
-		case pub.N.Cmp(priv.N) != 0:
-			return nil, mod_errors.EMismatchPrivKeyPubKey
-		}
-	case *ecdsa.PublicKey:
-		switch priv, ok := outbound.PrivateKey.(*ecdsa.PrivateKey); {
-		case !ok:
-			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
-		case pub.X.Cmp(priv.X) != 0 || pub.Y.Cmp(priv.Y) != 0:
-			return nil, mod_errors.EMismatchPrivKeyPubKey
-		}
-	case ed25519.PublicKey:
-		switch priv, ok := outbound.PrivateKey.(ed25519.PrivateKey); {
-		case !ok:
-			return nil, mod_errors.ETypeMismatchPrivKeyPubKey
-		case !bytes.Equal(priv.Public().(ed25519.PublicKey), pub):
-			return nil, mod_errors.EMismatchPrivKeyPubKey
-		}
-	default:
-		return nil, mod_errors.EUnknownPubKeyAlgo
+	switch err = outbound.checkPrivateKey(); {
+	case err != nil:
+		return nil, err
 	}
 
 	return
