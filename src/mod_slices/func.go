@@ -52,16 +52,20 @@ func FilterEmpty[S ~[]E, E cmp.Ordered](inbound S) (outbound S) {
 // Normalize applies a series of transformations (sort, compact, filter empty) to the inbound slice based on the provided flags.
 func Normalize[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound S) {
 	switch {
+	case flag.has(FlagTrimSpace):
+		// panic(mod_errors.EUnwilling)
+
+		fallthrough
+	case flag.has(FlagFilterEmpty):
+		inbound = FilterEmpty(inbound)
+
+		fallthrough
 	case flag.has(FlagSort):
 		Sort(inbound)
 
 		fallthrough
 	case flag.has(FlagCompact):
 		inbound = Compact(inbound)
-
-		fallthrough
-	case flag.has(FlagFilterEmpty):
-		inbound = FilterEmpty(inbound)
 	}
 
 	return inbound
@@ -73,35 +77,47 @@ func Join[S ~[]E, E cmp.Ordered](inbound S, sep string, flag flag) (outbound str
 	return strings.Join(ToStrings(inbound, flag), sep)
 }
 
+func TrimSpace(inbound []string) (outbound []string) {
+	for _, b := range inbound {
+		outbound = append(outbound, strings.TrimSpace(b))
+	}
+
+	return
+}
+
 // ToStrings converts the elements of the inbound slice to their string representations.
 // The slice is normalized before conversion based on the provided flags.
 func ToStrings[S ~[]E, E cmp.Ordered](inbound S, flag flag) (outbound []string) {
-	var (
-		converter func(in E) (out string)
-	)
-
-	switch {
-	case flag.has(FlagTrimSpace):
-		converter = func(in E) (out string) {
-			return strings.TrimSpace(fmt.Sprint(in))
-		}
-	default:
-		converter = func(in E) (out string) {
-			return fmt.Sprint(in)
-		}
-	}
-
-	// inbound = Normalize(inbound, flag)
-
 	for _, b := range inbound {
-		outbound = append(outbound, converter(b))
+		outbound = append(outbound, fmt.Sprint(b))
 	}
 
-	outbound = Normalize(outbound, flag)
+	outbound = StringsNormalize(outbound, flag)
 
 	return
 }
 
 func Split(inbound string, sep string, flag flag) (outbound []string) {
-	return Normalize(strings.Split(inbound, sep), flag)
+	return StringsNormalize(strings.Split(inbound, sep), flag)
+}
+
+func StringsNormalize(inbound []string, flag flag) (outbound []string) {
+	switch {
+	case flag.has(FlagTrimSpace):
+		inbound = TrimSpace(inbound)
+
+		fallthrough
+	case flag.has(FlagFilterEmpty):
+		inbound = FilterEmpty(inbound)
+
+		fallthrough
+	case flag.has(FlagSort):
+		Sort(inbound)
+
+		fallthrough
+	case flag.has(FlagCompact):
+		inbound = Compact(inbound)
+	}
+
+	return inbound
 }

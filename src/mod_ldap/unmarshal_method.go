@@ -15,8 +15,11 @@ import (
 	"rmm23/src/mod_ssh"
 )
 
+// call `Normalize` in each method instead of from `UnmarshalEntry` in hope that some time `go-ldap` will implement custom unmarshal methods.
+// according to `LDAP` spec, output is not ordered.
+
 func (r *AttrDN) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim *ldap.DN
 		)
@@ -35,7 +38,7 @@ func (r *AttrDN) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim *ldap.DN
 		)
@@ -52,13 +55,13 @@ func (r *AttrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = mod_slices.ToStrings(values, mod_slices.FlagNormalize)
+	*r = mod_slices.StringsNormalize(values, mod_slices.FlagNormalize)
 
 	return
 }
 
 func (r *AttrID) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		*r = AttrID(value)
 
 		return // return only first value
@@ -68,7 +71,7 @@ func (r *AttrID) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrIDNumber) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim uint64
 		)
@@ -87,7 +90,7 @@ func (r *AttrIDNumber) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.Normalize(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim netip.Prefix
 		)
@@ -104,7 +107,7 @@ func (r *AttrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim = strings.SplitN(value, " ", mod_slices.KVElements)
 		)
@@ -121,19 +124,19 @@ func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrMails) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = mod_slices.ToStrings(values, mod_slices.FlagNormalize)
+	*r = mod_slices.StringsNormalize(values, mod_slices.FlagNormalize)
 
 	return
 }
 
 func (r *AttrObjectClasses) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = mod_slices.ToStrings(values, mod_slices.FlagNormalize)
+	*r = mod_slices.StringsNormalize(values, mod_slices.FlagNormalize)
 
 	return
 }
 
 func (r *AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		(*r)[value] = mod_ssh.PublicKey(value)
 	}
 
@@ -141,7 +144,7 @@ func (r *AttrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		*r = AttrString(value)
 
 		return // return only first value
@@ -151,7 +154,7 @@ func (r *AttrString) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrStrings) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		*r = append(*r, AttrString(value))
 	}
 
@@ -159,7 +162,7 @@ func (r *AttrStrings) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrTimestamp) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim time.Time
 		)
@@ -178,7 +181,7 @@ func (r *AttrTimestamp) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrUserPassword) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		*r = AttrUserPassword(value)
 
 		return // return only first value
@@ -188,7 +191,7 @@ func (r *AttrUserPassword) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim *mod_crypto.Certificate
 		)
@@ -205,7 +208,7 @@ func (r *AttrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 }
 
 func (r *AttrUUID) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.ToStrings(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim uuid.UUID
 		)
@@ -222,54 +225,3 @@ func (r *AttrUUID) UnmarshalLDAPAttr(values []string) (err error) {
 
 	return
 }
-
-/*// UnmarshalLDAPAttr for AttrLabeledURIs
-// there must be only one valid XML data or nothing
-// in other cases r.modified needs to be set, to update data in LDAP later
-func (r *AttrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range values {
-		var (
-			data LabeledURI
-		)
-		switch err = xml.Unmarshal([]byte(value), &data); {
-		case err == nil:
-			switch {
-			case r.data == nil:
-				r.data = &data
-			default:
-				// another XML data in values - append (!good)
-				r.modified = true
-				r.data.OpenVPN = append(r.data.OpenVPN, data.OpenVPN...)
-				r.data.CiscoVPN = append(r.data.CiscoVPN, data.CiscoVPN...)
-				r.data.InterimHost = append(r.data.InterimHost, data.InterimHost...)
-				r.data.LabeledURI = append(r.data.LabeledURI, data.LabeledURI...)
-			}
-			continue
-		}
-
-		// fallback to legacy key-value space-separated schema - append if any (!good)
-		r.modified = true
-		var (
-			legacy = strings.SplitN(value, " ", 2)
-		)
-		switch len(legacy) {
-		case 0:
-			continue
-		case 1:
-			switch {
-			case r.data == nil:
-				r.data = &LabeledURI{}
-			}
-			r.data.LabeledURI = append(r.data.LabeledURI, LabeledURILegacy{Key: legacy[0], Value: ""})
-		case 2:
-			switch {
-			case r.data == nil:
-				r.data = &LabeledURI{}
-			}
-			r.data.LabeledURI = append(r.data.LabeledURI, LabeledURILegacy{Key: legacy[0], Value: legacy[1]})
-		}
-	}
-
-	return nil
-}
-*/
