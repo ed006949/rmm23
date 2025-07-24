@@ -46,9 +46,14 @@ Welcome to the Remote Monitoring and Management (episode 23).
 
 * data must be unique within the entire infrastructure:
 	* UUID
+		* generate new `UUID` if it already exists
+			* `UUID` must be static for same account:
+				* xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx
+				* | same value for all _ | _ DN hash |
+				* hash `DN` to `UUID`'s `node` field
 	* `ipHostNumber`
 	* `dn`
-	* все сертификаты (`fingerprint`) и `CN` в них
+	* certificates (`fingerprint`) and certificates's `CN`
 	* `uid`
 	* `gid`
 	* ASN
@@ -60,20 +65,14 @@ Welcome to the Remote Monitoring and Management (episode 23).
 		* `uidNumber` + `gidNumber` + ASN
 
 
-* формирование файлов для создания на FS: go templates
+* static file generation:
+	* go templates
+	* backend: VFS
+	* frontend: FS
 
-* Учёт пользователей: LDAP
-	* Рассматривается возможность вести собственную БД пользователей:
-		* SQL/NoSQL для хранения дерева
-		* NoSQL для обмена diff
-		* Реализация встроенных LDAP-демонов для различных "миров":
-			* OpenLDAP
-			* MS AD
-	* Это позволит:
-		* увеличить гибкость применения
-		* упростит реализацию
-		* избавит от зависимости от сторонних LDAP-серверов
-		* ускорит обработку
+* User accounting:
+	* backend: redis DB
+	* frontend: LDAP
 
 
 * Entities:
