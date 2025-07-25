@@ -21,8 +21,8 @@ type LDAPConfig struct {
 }
 
 type LDAPSetting struct {
-	Type   string    `json:"type"`
-	DN     AttrDN    `json:"dn"`
+	Type   string          `json:"type"`
+	DN     AttrDN          `json:"dn"`
 	CN     string          `json:"cn"`
 	Scope  AttrSearchScope `json:"scope"`
 	Filter string          `json:"filter"`

@@ -147,6 +147,13 @@ func (r *runType) ConfigUnmarshal(inbound any) (err error) {
 		return
 	}
 
+	// switch err = json.Unmarshal(content, inbound); {
+	// case err != nil:
+	// 	return
+	// }
+	//
+	// return
+
 	return json.Unmarshal(content, inbound)
 }
 

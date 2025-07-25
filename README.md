@@ -316,3 +316,9 @@ TODO
 [URL_redisearch-go]: https://github.com/RediSearch/redisearch-go
 
 [URL_redigo]: https://github.com/gomodule/redigo
+
+## questions
+
+### JSON
+
+* pass string data surrounded with `"` ? 

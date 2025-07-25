@@ -102,7 +102,7 @@ func (r *LDAPConfig) close() (err error) {
 }
 
 func (d *AttrSearchScope) UnmarshalJSON(data []byte) (err error) {
-	switch value, ok := scopeIDMap[strings.TrimSpace(string(data))]; {
+	switch value, ok := scopeIDMap[strings.Trim(string(data), " \"")]; {
 	case !ok:
 		return mod_errors.EINVAL
 	default:

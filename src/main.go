@@ -32,7 +32,7 @@ func main() {
 
 	switch err = l.Run.ConfigUnmarshal(&config); {
 	case err != nil:
-		// panic(err)
+		panic(err)
 	}
 
 	switch err = vfsDB.CopyFromFS("./etc/legacy/"); {
