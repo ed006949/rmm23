@@ -7,6 +7,8 @@ linters:
     - lll
     - wsl
     - depguard
+    - cyclop #dev-stage
+    - gocognit #dev-stage
   enable  :
     - tagalign
     - wsl_v5
