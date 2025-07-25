@@ -2,7 +2,6 @@ package mod_db
 
 import (
 	"net/netip"
-	"net/url"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 
@@ -13,7 +12,7 @@ import (
 type Conf struct {
 	URL       *mod_net.URL `json:"url,omitempty"`
 	Name      string       `json:"name,omitempty"`
-	rc        *redisearch.Client
+	rsClient  *redisearch.Client
 	rcNetwork string
 }
 
@@ -61,12 +60,12 @@ type Entry struct {
 	ACL string `json:"host_acl,omitempty" msgpack:"host_acl,omitempty" redis:"host_acl" redisearch:"text"` // entry's ACL
 
 	// host specific data
-	HostType        string     `json:"host_type,omitempty"         msgpack:"host_type,omitempty"         redis:"host_type"         redisearch:"text"`             // host type `(provider|interim|openvpn|ciscovpn)`
-	HostASN         uint32     `json:"host_asn,omitempty"          msgpack:"host_asn,omitempty"          redis:"host_asn"          redisearch:"numeric,sortable"` //
-	HostUpstreamASN uint32     `json:"host_upstream_asn,omitempty" msgpack:"host_upstream_asn,omitempty" redis:"host_upstream_asn" redisearch:"numeric"`          // upstream route
-	HostHostingUUID uint32     `json:"host_hosting_uuid,omitempty" msgpack:"host_hosting_uuid,omitempty" redis:"host_hosting_uuid" redisearch:"text"`             // (?) replace with member/memberOf
-	HostURL         url.URL    `json:"host_url,omitempty"          msgpack:"host_url,omitempty"          redis:"host_url"          redisearch:"text,sortable"`    //
-	HostListen      netip.Addr `json:"host_listen,omitempty"       msgpack:"host_listen,omitempty"       redis:"host_listen"       redisearch:"text,sortable"`    //
+	HostType        string       `json:"host_type,omitempty"         msgpack:"host_type,omitempty"         redis:"host_type"         redisearch:"text"`             // host type `(provider|interim|openvpn|ciscovpn)`
+	HostASN         uint32       `json:"host_asn,omitempty"          msgpack:"host_asn,omitempty"          redis:"host_asn"          redisearch:"numeric,sortable"` //
+	HostUpstreamASN uint32       `json:"host_upstream_asn,omitempty" msgpack:"host_upstream_asn,omitempty" redis:"host_upstream_asn" redisearch:"numeric"`          // upstream route
+	HostHostingUUID uint32       `json:"host_hosting_uuid,omitempty" msgpack:"host_hosting_uuid,omitempty" redis:"host_hosting_uuid" redisearch:"text"`             // (?) replace with member/memberOf
+	HostURL         *mod_net.URL `json:"host_url,omitempty"          msgpack:"host_url,omitempty"          redis:"host_url"          redisearch:"text,sortable"`    //
+	HostListen      *netip.Addr  `json:"host_listen,omitempty"       msgpack:"host_listen,omitempty"       redis:"host_listen"       redisearch:"text,sortable"`    //
 
 	// specific data (space-separated KV DB stored as labeledURIs)
 	LabeledURI mod_ldap.AttrLabeledURIs `json:"labeledURI,omitempty" ldap:"labeledURI" msgpack:"labeledURI,omitempty" redis:"labeledURI" redisearch:"tag"` //

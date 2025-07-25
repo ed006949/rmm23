@@ -11,7 +11,7 @@ type ConfigRoot struct {
 }
 
 type Conf struct {
-	Daemon *l.DaemonConfig      `json:"daemon,omitempty"`
-	DB     *mod_db.Conf         `json:"db,omitempty"`
-	LDAP   *mod_ldap.LDAPConfig `json:"ldap,omitempty"`
+	Daemon *l.DaemonConfig `json:"daemon,omitempty"`
+	DB     *mod_db.Conf    `json:"db,omitempty"`
+	LDAP   *mod_ldap.Conf  `json:"ldap,omitempty"`
 }

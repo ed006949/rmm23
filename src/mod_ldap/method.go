@@ -11,7 +11,7 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-func (r *LDAPConfig) Search() (err error) {
+func (r *Conf) Search() (err error) {
 	switch err = r.connect(); {
 	case err != nil:
 		return
@@ -35,7 +35,7 @@ func (r *LDAPConfig) Search() (err error) {
 	return
 }
 
-func (r *LDAPConfig) search() (err error) {
+func (r *Conf) search() (err error) {
 	for _, b := range r.Domains {
 		switch {
 		case b.SearchResults == nil:
@@ -44,20 +44,21 @@ func (r *LDAPConfig) search() (err error) {
 
 		for _, d := range r.Settings {
 			var (
+				searchRequest = ldap.NewSearchRequest(
+					mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
+					d.Scope.Int(),      // Scope - search entire tree
+					ldap.DerefAlways,   // Deref
+					0,                  // Size limit (0 = no limit)
+					0,                  // Time limit (0 = no limit)
+					false,              // Types only
+					d.Filter.String(),  // Filter - all objects
+					[]string{"*", "+"}, // Attributes - all user and operational attributes
+					nil,                // Controls
+				)
 				searchResult *ldap.SearchResult
 			)
 
-			switch searchResult, err = r.conn.Search(ldap.NewSearchRequest(
-				mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
-				d.Scope.Int(),      // Scope - search entire tree
-				ldap.DerefAlways,   // Deref
-				0,                  // Size limit (0 = no limit)
-				0,                  // Time limit (0 = no limit)
-				false,              // Types only
-				d.Filter,           // Filter - all objects
-				[]string{"*", "+"}, // Attributes - all user and operational attributes
-				nil,                // Controls
-			)); {
+			switch searchResult, err = r.conn.Search(searchRequest); {
 			case err != nil:
 				return
 			}
@@ -72,12 +73,12 @@ func (r *LDAPConfig) search() (err error) {
 func (r *AttrDN) String() string   { return string(*r) }
 func (r *AttrUUID) String() string { return uuid.UUID(*r).String() }
 
-func (r *LDAPConfig) connect() (err error) {
+func (r *Conf) connect() (err error) {
 	r.conn, err = ldap.DialURL(r.URL.String())
 
 	return
 }
-func (r *LDAPConfig) bind() (err error) {
+func (r *Conf) bind() (err error) {
 	switch {
 	case r.conn == nil:
 		return mod_errors.ENoConn
@@ -92,7 +93,7 @@ func (r *LDAPConfig) bind() (err error) {
 
 	return
 }
-func (r *LDAPConfig) close() (err error) {
+func (r *Conf) close() (err error) {
 	switch {
 	case r.conn == nil:
 		return mod_errors.ENoConn
@@ -111,4 +112,5 @@ func (d *AttrSearchScope) UnmarshalJSON(data []byte) (err error) {
 		return
 	}
 }
-func (d *AttrSearchScope) Int() (outbound int) { return int(*d) }
+func (d *AttrSearchScope) Int() (outbound int)        { return int(*d) }
+func (d *AttrSearchFilter) String() (outbound string) { return string(*d) }

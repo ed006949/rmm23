@@ -2,7 +2,6 @@ package mod_ldap
 
 import (
 	"net/netip"
-	"net/url"
 	"time"
 
 	"github.com/go-ldap/ldap/v3"
@@ -13,22 +12,22 @@ import (
 	"rmm23/src/mod_ssh"
 )
 
-type LDAPConfig struct {
-	URL      *mod_net.URL   `json:"url,omitempty"`
-	Settings []*LDAPSetting `json:"settings,omitempty"`
-	Domains  []*LDAPDomain  `json:"domain,omitempty"`
+type Conf struct {
+	URL      *mod_net.URL `json:"url,omitempty"`
+	Settings []*settings  `json:"settings,omitempty"`
+	Domains  []*domain    `json:"domain,omitempty"`
 	conn     *ldap.Conn
 }
 
-type LDAPSetting struct {
-	Type   string          `json:"type,omitempty"`
-	DN     AttrDN          `json:"dn,omitempty"`
-	CN     string          `json:"cn,omitempty"`
-	Scope  AttrSearchScope `json:"scope,omitempty"`
-	Filter string          `json:"filter,omitempty"`
+type settings struct {
+	Type   string           `json:"type,omitempty"`
+	DN     AttrDN           `json:"dn,omitempty"`
+	CN     string           `json:"cn,omitempty"`
+	Scope  AttrSearchScope  `json:"scope,omitempty"`
+	Filter AttrSearchFilter `json:"filter,omitempty"`
 }
 
-type LDAPDomain struct {
+type domain struct {
 	DN AttrDN `json:"dn,omitempty"`
 
 	SearchResults map[string]*ldap.SearchResult
@@ -75,25 +74,10 @@ type AttrStrings []AttrString   //
 type AttrTimestamp time.Time    //
 type AttrUUID uuid.UUID         //
 
-type LabeledURI struct {
-	// XMLName     xml.Name
-	Type        string // `(provider|interim|openvpn|ciscovpn)`
-	ASN         uint32
-	UpstreamASN uint32
-	HostASN     uint32
-	URL         url.URL
-	Listen      netip.Addr
-	ACL         string
-	AAA         string
-
-	OpenVPN     []mod_net.OpenVPN
-	CiscoVPN    []mod_net.CiscoVPN
-	InterimHost []mod_net.InterimHost
-	Legacy      []LabeledURILegacy
-}
 type LabeledURILegacy struct {
 	Key   string
 	Value string
 }
 
 type AttrSearchScope int
+type AttrSearchFilter string

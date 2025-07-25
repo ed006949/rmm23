@@ -23,7 +23,7 @@ func (r *Conf) New() (err error) {
 		return
 	}
 
-	r.rc = redisearch.NewClientFromPool(&redis.Pool{
+	r.rsClient = redisearch.NewClientFromPool(&redis.Pool{
 		DialContext: func(ctx context.Context) (redis.Conn, error) {
 			return redis.DialContext(ctx, r.rcNetwork, r.URL.Host, redis.DialDatabase(0))
 		},
@@ -40,12 +40,12 @@ func (r *Conf) New() (err error) {
 	}, r.Name)
 
 	switch {
-	case r.rc == nil:
+	case r.rsClient == nil:
 		return mod_errors.ENoConn
 	}
 
-	// _ = r.rc.Drop() // test&dev, delete everything
-	_ = r.rc.DropIndex(false) // prod, delete index only
+	// _ = r.rsClient.Drop() // test&dev, delete everything
+	_ = r.rsClient.DropIndex(false) // prod, delete index only
 
 	return
 }

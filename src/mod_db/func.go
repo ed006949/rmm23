@@ -10,7 +10,7 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *Conf) (err error) {
+func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
 	// switch err = inbound.Search(); {
 	// case err != nil:
 	// 	return
@@ -20,6 +20,47 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *Co
 		schema = new(Entry).redisearchSchema() // predefine schema
 	)
 
+	switch err = ldap2doc(inbound, schema, docs); {
+	case err != nil:
+		return
+	}
+
+	switch err = outbound.New(); {
+	case err != nil:
+		return
+	}
+
+	var (
+		rsQuery = redisearch.NewQuery("*").SetReturnFields("uuid", "dn").Limit(0, connMaxPaging)
+	)
+
+	switch err = outbound.rsClient.CreateIndex(schema); {
+	// case mod_errors.Contains(err, mod_errors.EIndexExist):
+	case err != nil:
+		return
+	}
+
+	switch a, b, c := outbound.rsClient.Search(rsQuery); {
+	case c != nil:
+		return c
+	default:
+		a = a
+		b = b
+
+		panic(nil)
+	}
+
+	for _, doc := range docs {
+		switch err = outbound.rsClient.Index([]redisearch.Document{*doc}...); {
+		case mod_errors.Contains(err, mod_errors.EDocExist):
+		case err != nil:
+			return
+		}
+	}
+
+	return
+}
+func ldap2doc(inbound *mod_ldap.Conf, schema *redisearch.Schema, docs []*redisearch.Document) (err error) {
 	for _, b := range inbound.Domains {
 		for c, d := range b.SearchResults {
 			var (
@@ -57,39 +98,6 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *Co
 
 				docs = append(docs, doc)
 			}
-		}
-	}
-
-	switch err = outbound.New(); {
-	case err != nil:
-		return
-	}
-
-	var (
-		rsQuery = redisearch.NewQuery("*").SetReturnFields("uuid", "dn").Limit(0, connMaxPaging)
-	)
-
-	switch err = outbound.rc.CreateIndex(schema); {
-	// case mod_errors.Contains(err, mod_errors.EIndexExist):
-	case err != nil:
-		return
-	}
-
-	switch a, b, c := outbound.rc.Search(rsQuery); {
-	case c != nil:
-		return c
-	default:
-		a = a
-		b = b
-
-		panic(nil)
-	}
-
-	for _, doc := range docs {
-		switch err = outbound.rc.Index([]redisearch.Document{*doc}...); {
-		case mod_errors.Contains(err, mod_errors.EDocExist):
-		case err != nil:
-			return
 		}
 	}
 
