@@ -1,14 +1,15 @@
 package mod_db
+
 var (
-	entryTypeName = map[EntryType]string{
-		entryTypeEmpty: "",
+	entryTypeName = map[AttrType]string{
+		entryTypeEmpty:  "",
 		entryTypeDomain: "domain",
 		entryTypeGroup:  "group",
 		entryTypeUser:   "user",
 		entryTypeHost:   "host",
 	}
-	entryTypeID=map[string]EntryType{
-		entryTypeName[entryTypeEmpty]:entryTypeEmpty,
+	entryTypeID = map[string]AttrType{
+		entryTypeName[entryTypeEmpty]:  entryTypeEmpty,
 		entryTypeName[entryTypeDomain]: entryTypeDomain,
 		entryTypeName[entryTypeGroup]:  entryTypeGroup,
 		entryTypeName[entryTypeUser]:   entryTypeUser,

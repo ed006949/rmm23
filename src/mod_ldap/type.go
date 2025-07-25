@@ -13,12 +13,6 @@ import (
 	"rmm23/src/mod_ssh"
 )
 
-type entries struct {
-	url   *mod_net.URL
-	conn  *ldap.Conn
-	entry map[AttrDN]*ldap.Entry
-}
-
 type LDAPConfig struct {
 	URL      *mod_net.URL   `json:"url"`
 	Settings []*LDAPSetting `json:"settings"`
@@ -27,94 +21,17 @@ type LDAPConfig struct {
 }
 
 type LDAPSetting struct {
-	Type   string `json:"type"`
-	DN     AttrDN `json:"dn"`
-	CN     string `json:"cn"`
-	Scope scopeIDType `json:"scope"`
-	Filter string `json:"filter"`
+	Type   string    `json:"type"`
+	DN     AttrDN    `json:"dn"`
+	CN     string          `json:"cn"`
+	Scope  AttrSearchScope `json:"scope"`
+	Filter string          `json:"filter"`
 }
 
 type LDAPDomain struct {
 	DN AttrDN `json:"dn"`
 
-	Domain *Element
-	Users  Elements
-	Groups Elements
-	Hosts  Elements
-
 	SearchResults map[string]*ldap.SearchResult
-}
-
-type Conf struct {
-	URL      *mod_net.URL
-	Settings []*ConfSettings
-	Domain   []*ConfDomain
-
-	// schema map[string]*schema
-	conn *ldap.Conn
-
-	Table *ConfTable
-}
-type ConfSettings struct {
-	Type   string
-	DN     AttrDN
-	CN     string
-	Filter string
-}
-type ConfDomain struct {
-	DN AttrDN
-
-	Domain *Element
-	Users  Elements
-	Groups Elements
-	Hosts  Elements
-
-	searchResults map[string]*ldap.SearchResult
-}
-type ConfTable struct {
-	Domain       Elements
-	Users        Elements
-	Groups       Elements
-	Hosts        Elements
-	IPHostNumber map[netip.Prefix]struct{}
-	ID           map[AttrIDNumber]struct{}
-}
-
-type Elements map[AttrDN]*Element
-
-type Element struct {
-	UUID            AttrUUID          `json:"entryUUID,omitempty"       ldap:"entryUUID"       msgpack:"entryUUID,omitempty"       redis:"uuid"            redisearch:"text,sortable"` // must be unique
-	DN              AttrDN            `json:"dn,omitempty"              ldap:"dn"              msgpack:"dn,omitempty"              redis:"dn"              redisearch:"text,sortable"` // must be unique
-	ObjectClass     AttrObjectClasses `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass,omitempty"     redis:"objectClass"     redisearch:"tag"`           // entry type
-	CreatorsName    AttrDN            `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName,omitempty"    redis:"creatorsName"    redisearch:"text"`          //
-	CreateTimestamp AttrTimestamp     `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"text"`          //
-	ModifiersName   AttrDN            `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName,omitempty"   redis:"modifiersName"   redisearch:"text"`          //
-	ModifyTimestamp AttrTimestamp     `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"text"`          //
-
-	CN                   AttrString                `json:"cn,omitempty"                   ldap:"cn"                   msgpack:"cn,omitempty"                   redis:"cn"                   redisearch:"text"`             // RDN in group's context
-	DC                   AttrString                `json:"dc,omitempty"                   ldap:"dc"                   msgpack:"dc,omitempty"                   redis:"dc"                   redisearch:"text,sortable"`    //
-	Description          AttrString                `json:"description,omitempty"          ldap:"description"          msgpack:"description,omitempty"          redis:"description"          redisearch:"text"`             //
-	DestinationIndicator AttrDestinationIndicators `json:"destinationIndicator,omitempty" ldap:"destinationIndicator" msgpack:"destinationIndicator,omitempty" redis:"destinationIndicator" redisearch:"text"`             //
-	DisplayName          AttrString                `json:"displayName,omitempty"          ldap:"displayName"          msgpack:"displayName,omitempty"          redis:"displayName"          redisearch:"text,sortable"`    //
-	GIDNumber            AttrIDNumber              `json:"gidNumber,omitempty"            ldap:"gidNumber"            msgpack:"gidNumber,omitempty"            redis:"gidNumber"            redisearch:"numeric"`          // Primary GIDNumber in user's context (ignore it) and GIDNumber in group's context.
-	HomeDirectory        AttrString                `json:"homeDirectory,omitempty"        ldap:"homeDirectory"        msgpack:"homeDirectory,omitempty"        redis:"homeDirectory"        redisearch:"text"`             //
-	IPHostNumber         AttrIPHostNumbers         `json:"ipHostNumber,omitempty"         ldap:"ipHostNumber"         msgpack:"ipHostNumber,omitempty"         redis:"ipHostNumber"         redisearch:"text,sortable"`    //
-	Mail                 AttrMails                 `json:"mail,omitempty"                 ldap:"mail"                 msgpack:"mail,omitempty"                 redis:"mail"                 redisearch:"text"`             //
-	Member               AttrDNs                   `json:"member,omitempty"               ldap:"member"               msgpack:"member,omitempty"               redis:"member"               redisearch:"tag,sortable"`     //
-	MemberOf             AttrDNs                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf,omitempty"             redis:"memberOf"             redisearch:"tag"`              // ignore it, don't cache, calculate on the fly or avoid
-	O                    AttrString                `json:"o,omitempty"                    ldap:"o"                    msgpack:"o,omitempty"                    redis:"o"                    redisearch:"text"`             //
-	OU                   AttrString                `json:"ou,omitempty"                   ldap:"ou"                   msgpack:"ou,omitempty"                   redis:"ou"                   redisearch:"text"`             //
-	Owner                AttrDNs                   `json:"owner,omitempty"                ldap:"owner"                msgpack:"owner,omitempty"                redis:"owner"                redisearch:"tag"`              //
-	SN                   AttrString                `json:"sn,omitempty"                   ldap:"sn"                   msgpack:"sn,omitempty"                   redis:"sn"                   redisearch:"text"`             //
-	SSHPublicKey         AttrSSHPublicKeys         `json:"sshPublicKey,omitempty"         ldap:"sshPublicKey"         msgpack:"sshPublicKey,omitempty"         redis:"sshPublicKey"         redisearch:"tag"`              //
-	TelephoneNumber      AttrStrings               `json:"telephoneNumber,omitempty"      ldap:"telephoneNumber"      msgpack:"telephoneNumber,omitempty"      redis:"telephoneNumber"      redisearch:"text"`             //
-	TelexNumber          AttrStrings               `json:"telexNumber,omitempty"          ldap:"telexNumber"          msgpack:"telexNumber,omitempty"          redis:"telexNumber"          redisearch:"text"`             //
-	UID                  AttrID                    `json:"uid,omitempty"                  ldap:"uid"                  msgpack:"uid,omitempty"                  redis:"uid"                  redisearch:"text,sortable"`    // RDN in user's context
-	UIDNumber            AttrIDNumber              `json:"uidNumber,omitempty"            ldap:"uidNumber"            msgpack:"uidNumber,omitempty"            redis:"uidNumber"            redisearch:"numeric,sortable"` //
-	UserPKCS12           AttrUserPKCS12s           `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           msgpack:"userPKCS12,omitempty"           redis:"userPKCS12"           redisearch:"tag"`              //
-	UserPassword         AttrUserPassword          `json:"userPassword,omitempty"         ldap:"userPassword"         msgpack:"userPassword,omitempty"         redis:"userPassword"         redisearch:"text"`             //
-
-	LabeledURI AttrLabeledURIs `json:"labeledURI,omitempty" ldap:"labeledURI" msgpack:"labeledURI,omitempty" redis:"labeledURI" redisearch:"tag"` //
 }
 
 // type AttrDN *ldap.DN //
@@ -179,4 +96,4 @@ type LabeledURILegacy struct {
 	Value string
 }
 
-type scopeIDType int
+type AttrSearchScope int

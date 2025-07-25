@@ -16,7 +16,7 @@ const (
 )
 
 const (
-	entryTypeEmpty EntryType = iota
+	entryTypeEmpty AttrType = iota
 	entryTypeDomain
 	entryTypeGroup
 	entryTypeUser

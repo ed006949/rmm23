@@ -13,12 +13,13 @@ type Conn struct {
 	conn redis.Conn
 }
 
-type EntryType int
+type AttrType int
 
 // Entry is the struct that represents an LDAP-compatible entry.
 type Entry struct {
 	// element specific meta data
-	Type EntryType `json:"type,omitempty" msgpack:"type,omitempty" redis:"type" redisearch:"text"` // entry's type `(domain|group|user|host)`
+	Type   AttrType        `json:"type,omitempty"   msgpack:"type,omitempty"   redis:"type"   redisearch:"text"` // entry's type `(domain|group|user|host)`
+	BaseDN mod_ldap.AttrDN `json:"baseDN,omitempty" msgpack:"baseDN,omitempty" redis:"baseDN" redisearch:"text"`
 
 	// element meta data
 	UUID            mod_ldap.AttrUUID          `json:"entryUUID,omitempty"       ldap:"entryUUID"       msgpack:"entryUUID,omitempty"       redis:"uuid"            redisearch:"text,sortable"` // must be unique

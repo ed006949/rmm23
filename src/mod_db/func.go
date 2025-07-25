@@ -50,26 +50,59 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mo
 	}
 
 	var (
+		docs   []*redisearch.Document
+		entry  = new(Entry)
+		schema = entry.redisearchSchema()
+	)
+
+	for _, b := range inbound.Domains {
+		for c, d := range b.SearchResults {
+			var (
+				entryType AttrType
+			)
+			switch err = entryType.Parse(c); {
+			case err != nil:
+				return
+			}
+
+			for _, f := range d.Entries {
+				var (
+					doc *redisearch.Document
+				)
+
+				entry = &Entry{}
+
+				switch err = mod_ldap.UnmarshalEntry(f, entry); {
+				case err != nil:
+					return
+				}
+
+				entry.Type = entryType
+				entry.BaseDN = b.DN
+
+				switch doc, err = newRedisearchDocument(
+					schema,
+					mod_slices.JoinStrings([]string{"ldap", "entry", entry.UUID.String()}, ":", mod_slices.FlagNone),
+					1.0,
+					entry,
+					false,
+				); {
+				case err != nil:
+					return
+				}
+
+				docs = append(docs, doc)
+			}
+		}
+	}
+
+	var (
 		// RediSearch requires DB 0 for index creation
 		// rcDB      = 0
 
 		rcNetwork string
 		rcName    = "entryIdx"
 	)
-
-	// var (
-	// 	searchRequest = ldap.NewSearchRequest(
-	// 		mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
-	// 		ldap.ScopeBaseObject, // Scope - search entire tree
-	// 		ldap.DerefAlways,     // Deref
-	// 		0,                    // Size limit (0 = no limit)
-	// 		0,                    // Time limit (0 = no limit)
-	// 		false,                // Types only
-	// 		d.Filter,             // Filter - all objects
-	// 		[]string{"*", "+"},   // Attributes - all user and operational attributes
-	// 		nil,                  // Controls
-	// 	)
-	// )
 
 	switch rcNetwork, err = redisNetwork(outbound.URL); {
 	case err != nil:
@@ -92,9 +125,9 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mo
 			Wait:            connWait,
 			MaxConnLifetime: connMaxConnLifetime,
 		}, rcName)
-		entry  = Entry{}
-		schema = entry.redisearchSchema()
-		_      = rsClient.Drop() // test&dev, delete old entries
+		// entry  = Entry{}
+		// schema = entry.redisearchSchema()
+		_ = rsClient.Drop() // test&dev, delete old entries
 		// _        = rsClient.DropIndex(false) // prod, don't delete old entries
 	)
 
@@ -103,92 +136,11 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mo
 		return
 	}
 
-	for _, d := range inbound.Domains {
-		var (
-			doc redisearch.Document
-			// t = mod_ldap.UnmarshalResult(d)
-		)
-
-		switch doc, err = newRedisearchDocument(
-			schema,
-			mod_slices.JoinStrings([]string{"ldap", "entry", d.Domain.UUID.String()}, ":", mod_slices.FlagNone),
-			1.0,
-			d.Domain,
-			false,
-		); {
+	for _, doc := range docs {
+		switch err = rsClient.Index([]redisearch.Document{*doc}...); {
+		case mod_errors.Contains(err, mod_errors.EDocExist):
 		case err != nil:
 			return
-		default:
-			doc.Set("type", entryTypeDomain)
-
-			switch err = rsClient.Index([]redisearch.Document{doc}...); {
-			case mod_errors.Contains(err, mod_errors.EDocExist):
-			case err != nil:
-				return
-			}
-		}
-
-		for _, f := range d.Groups {
-			switch doc, err = newRedisearchDocument(
-				schema,
-				mod_slices.JoinStrings([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
-				1.0,
-				f,
-				false,
-			); {
-			case err != nil:
-				return
-			default:
-				doc.Set("type", entryTypeGroup)
-
-				switch err = rsClient.Index([]redisearch.Document{doc}...); {
-				case mod_errors.Contains(err, mod_errors.EDocExist):
-				case err != nil:
-					return
-				}
-			}
-		}
-
-		for _, f := range d.Users {
-			switch doc, err = newRedisearchDocument(
-				schema,
-				mod_slices.JoinStrings([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
-				1.0,
-				f,
-				false,
-			); {
-			case err != nil:
-				return
-			default:
-				doc.Set("type", entryTypeUser)
-
-				switch err = rsClient.Index([]redisearch.Document{doc}...); {
-				case mod_errors.Contains(err, mod_errors.EDocExist):
-				case err != nil:
-					return
-				}
-			}
-		}
-
-		for _, f := range d.Hosts {
-			switch doc, err = newRedisearchDocument(
-				schema,
-				mod_slices.JoinStrings([]string{"ldap", "entry", f.UUID.String()}, ":", mod_slices.FlagNone),
-				1.0,
-				f,
-				false,
-			); {
-			case err != nil:
-				return
-			default:
-				doc.Set("type", entryTypeHost)
-
-				switch err = rsClient.Index([]redisearch.Document{doc}...); {
-				case mod_errors.Contains(err, mod_errors.EDocExist):
-				case err != nil:
-					return
-				}
-			}
 		}
 	}
 

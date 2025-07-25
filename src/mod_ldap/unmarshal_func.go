@@ -51,7 +51,8 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 
 	for n := 0; n < st.NumField(); n++ {
 		var (
-			fv, ft = sv.Field(n), st.Field(n) // Holds struct field value and type
+			fv = sv.Field(n) // Holds struct field value
+			ft = st.Field(n) // Holds struct field type
 		)
 
 		switch {

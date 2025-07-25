@@ -106,7 +106,7 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 	return schema
 }
 
-func newRedisearchDocument(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (outbound redisearch.Document, err error) {
+func newRedisearchDocument(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (outbound *redisearch.Document, err error) {
 	var (
 		rv = reflect.ValueOf(data)
 	)
@@ -118,7 +118,7 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 
 	switch {
 	case rv.Kind() != reflect.Struct:
-		return redisearch.Document{}, mod_errors.ENotStructOrPtrStruct
+		return nil, mod_errors.ENotStructOrPtrStruct
 	}
 
 	var (
@@ -199,11 +199,11 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 
 		switch encodedPayload, err = msgpack.Marshal(data); {
 		case err != nil:
-			return redisearch.Document{}, err
+			return nil, err
 		}
 
 		doc.SetPayload(encodedPayload)
 	}
 
-	return doc, nil
+	return &doc, nil
 }

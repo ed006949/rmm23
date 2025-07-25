@@ -5,14 +5,14 @@ import (
 )
 
 var (
-	scopeIDMap = map[string]scopeIDType{
+	scopeIDMap = map[string]AttrSearchScope{
 		// strconv.Itoa(ldap.ScopeBaseObject):   ldap.ScopeBaseObject,
 		// strconv.Itoa(ldap.ScopeSingleLevel):  ldap.ScopeSingleLevel,
 		// strconv.Itoa(ldap.ScopeWholeSubtree): ldap.ScopeWholeSubtree,
 		// strconv.Itoa(ldap.ScopeChildren):     ldap.ScopeChildren,
-		"base":                               ldap.ScopeBaseObject,
-		"one":                                ldap.ScopeSingleLevel,
-		"sub":                                ldap.ScopeWholeSubtree,
-		"child":                              ldap.ScopeChildren,
+		"base":  ldap.ScopeBaseObject,
+		"one":   ldap.ScopeSingleLevel,
+		"sub":   ldap.ScopeWholeSubtree,
+		"child": ldap.ScopeChildren,
 	}
 )
