@@ -18,6 +18,7 @@ const (
 	ENotStruct
 	ENotPtr
 	ENotStructOrPtrStruct
+	ENotPtrOrNil
 
 	EUnknownType
 	EParse
@@ -61,6 +62,7 @@ var errorDescription = [...]string{
 	ENotStruct:                 "not a struct",
 	ENotPtr:                    "not a pointer",
 	ENotStructOrPtrStruct:      "not a struct or a pointer to a struct",
+	ENotPtrOrNil:               "not a pointer or nil",
 	EUnknownType:               "unknown type",
 	EParse:                     "parse error",
 	EX509ParsePrivKey:          "x509: failed to parse private key",

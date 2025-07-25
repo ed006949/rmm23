@@ -2,6 +2,7 @@ package mod_ldap
 
 import (
 	"errors"
+	"strings"
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
@@ -64,62 +65,41 @@ func (r *LDAPConfig) Search() (err error) {
 	return
 }
 
+func (r *LDAPConfig) Unmarshal(inbound any) (err error) {
+	return
+}
+
 func (r *LDAPConfig) search() (err error) {
 	for _, b := range r.Domains {
-		switch b.searchResults {
+		switch b.SearchResults {
 		case nil:
-			b.searchResults = make(map[string]*ldap.SearchResult)
+			b.SearchResults = make(map[string]*ldap.SearchResult)
 		}
 
 		for _, d := range r.Settings {
 			switch d.Type {
-			case "domain":
+			case "domain", "host", "user", "group":
 				var (
 					newErr        error
 					searchResult  *ldap.SearchResult
-					searchRequest = ldap.NewSearchRequest(
-						mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
-						ldap.ScopeBaseObject, // Scope - search entire tree
-						ldap.DerefAlways,     // Deref
-						0,                    // Size limit (0 = no limit)
-						0,                    // Time limit (0 = no limit)
-						false,                // Types only
-						d.Filter,             // Filter - all objects
-						[]string{"*", "+"},   // Attributes - all user and operational attributes
-						nil,                  // Controls
-					)
 				)
 
-				switch searchResult, newErr = r.conn.Search(searchRequest); {
+				switch searchResult, newErr = r.conn.Search(ldap.NewSearchRequest(
+					mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
+					d.Scope.Int(),      // Scope - search entire tree
+					ldap.DerefAlways,   // Deref
+					0,                  // Size limit (0 = no limit)
+					0,                  // Time limit (0 = no limit)
+					false,              // Types only
+					d.Filter,           // Filter - all objects
+					[]string{"*", "+"}, // Attributes - all user and operational attributes
+					nil,                // Controls
+				)); {
 				case newErr != nil:
 					err = errors.Join(err, newErr)
 				}
 
-				b.searchResults[d.Type] = searchResult
-
-			case "hosts", "users", "groups":
-				var (
-					newErr        error
-					searchResult  *ldap.SearchResult
-					searchRequest = ldap.NewSearchRequest(
-						mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
-						ldap.ScopeWholeSubtree, // Scope - search entire tree
-						ldap.DerefAlways,       // Deref
-						0,                      // Size limit (0 = no limit)
-						0,                      // Time limit (0 = no limit)
-						false,                  // Types only
-						d.Filter,               // Filter - all objects
-						[]string{"*", "+"},     // Attributes - all user and operational attributes
-						nil,                    // Controls
-					)
-				)
-
-				switch searchResult, newErr = r.conn.Search(searchRequest); {
-				case newErr != nil:
-					err = errors.Join(err, newErr)
-				}
-
-				b.searchResults[d.Type] = searchResult
+				b.SearchResults[d.Type] = searchResult
 			}
 		}
 	}
@@ -140,7 +120,7 @@ func (r *LDAPConfig) parse() (err error) {
 func (r *LDAPDomain) unmarshal() (err error) {
 	r.Domain = &Element{}
 
-	switch newErr := r.Domain.unmarshal(r.searchResults["domain"]); {
+	switch newErr := r.Domain.unmarshal(r.SearchResults["domain"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Domain", "DN": r.DN}.Warning()
@@ -148,7 +128,7 @@ func (r *LDAPDomain) unmarshal() (err error) {
 
 	r.Hosts = make(Elements)
 
-	switch newErr := r.Hosts.unmarshal(r.searchResults["hosts"]); {
+	switch newErr := r.Hosts.unmarshal(r.SearchResults["hosts"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Hosts", "DN": r.DN}.Warning()
@@ -156,7 +136,7 @@ func (r *LDAPDomain) unmarshal() (err error) {
 
 	r.Users = make(Elements)
 
-	switch newErr := r.Users.unmarshal(r.searchResults["users"]); {
+	switch newErr := r.Users.unmarshal(r.SearchResults["users"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Users", "DN": r.DN}.Warning()
@@ -164,7 +144,7 @@ func (r *LDAPDomain) unmarshal() (err error) {
 
 	r.Groups = make(Elements)
 
-	switch newErr := r.Groups.unmarshal(r.searchResults["groups"]); {
+	switch newErr := r.Groups.unmarshal(r.SearchResults["groups"]); {
 	case newErr != nil:
 		err = errors.Join(err, newErr)
 		l.Z{l.E: err, l.M: "LDAP Unmarshal Groups", "DN": r.DN}.Warning()
@@ -238,3 +218,15 @@ func (r *LDAPConfig) close() (err error) {
 
 	return r.conn.Close()
 }
+
+func (d *scopeIDType) UnmarshalJSON(data []byte) (err error) {
+	switch value, ok := scopeIDMap[strings.TrimSpace(string(data))]; {
+	case !ok:
+		return mod_errors.EINVAL
+	default:
+		*d = value
+
+		return
+	}
+}
+func (d *scopeIDType) Int() (outbound int) { return int(*d) }

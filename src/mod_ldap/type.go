@@ -20,7 +20,7 @@ type entries struct {
 }
 
 type LDAPConfig struct {
-	URL      *mod_net.URL  `json:"url"`
+	URL      *mod_net.URL   `json:"url"`
 	Settings []*LDAPSetting `json:"settings"`
 	Domains  []*LDAPDomain  `json:"domain"`
 	conn     *ldap.Conn
@@ -30,6 +30,7 @@ type LDAPSetting struct {
 	Type   string `json:"type"`
 	DN     AttrDN `json:"dn"`
 	CN     string `json:"cn"`
+	Scope scopeIDType `json:"scope"`
 	Filter string `json:"filter"`
 }
 
@@ -41,7 +42,7 @@ type LDAPDomain struct {
 	Groups Elements
 	Hosts  Elements
 
-	searchResults map[string]*ldap.SearchResult
+	SearchResults map[string]*ldap.SearchResult
 }
 
 type Conf struct {
@@ -128,7 +129,7 @@ type attrDisplayName string                            //
 type attrEntryUUID uuid.UUID                           //
 type attrGIDNumber uint64                              //
 type attrHomeDirectory string                          //
-type AttrIPHostNumbers []netip.Prefix       //
+type AttrIPHostNumbers []netip.Prefix                  //
 type AttrLabeledURIs []LabeledURILegacy                // custom schema alternative TO DO implement custom schemas
 type AttrMails []string                                //
 type attrMembers []AttrDN                              //
@@ -159,7 +160,7 @@ type AttrUUID uuid.UUID         //
 
 type LabeledURI struct {
 	// XMLName     xml.Name
-	Type        string      // `(provider|interim|openvpn|ciscovpn)`
+	Type        string // `(provider|interim|openvpn|ciscovpn)`
 	ASN         uint32
 	UpstreamASN uint32
 	HostASN     uint32
@@ -177,3 +178,5 @@ type LabeledURILegacy struct {
 	Key   string
 	Value string
 }
+
+type scopeIDType int

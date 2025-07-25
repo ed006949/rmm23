@@ -106,6 +106,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *mo
 	for _, d := range inbound.Domains {
 		var (
 			doc redisearch.Document
+			// t = mod_ldap.UnmarshalResult(d)
 		)
 
 		switch doc, err = newRedisearchDocument(

@@ -14,23 +14,23 @@ import (
 
 func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 	var (
-		schema     = redisearch.NewSchema(redisearch.DefaultOptions)
-		reflection = reflect.TypeOf(inbound)
+		schema = redisearch.NewSchema(redisearch.DefaultOptions)
+		rt     = reflect.TypeOf(inbound)
 	)
 
 	switch {
-	case reflection.Kind() == reflect.Ptr:
-		reflection = reflection.Elem()
+	case rt.Kind() == reflect.Ptr:
+		rt = rt.Elem()
 	}
 
 	switch {
-	case reflection.Kind() != reflect.Struct:
+	case rt.Kind() != reflect.Struct:
 		panic(mod_errors.ENotStructOrPtrStruct)
 	}
 
-	for i := 0; i < reflection.NumField(); i++ {
+	for i := 0; i < rt.NumField(); i++ {
 		var (
-			field    = reflection.Field(i)
+			field    = rt.Field(i)
 			redisTag = field.Tag.Get(redisTagName)
 		)
 
@@ -108,16 +108,16 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 
 func newRedisearchDocument(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (outbound redisearch.Document, err error) {
 	var (
-		reflection = reflect.ValueOf(data)
+		rv = reflect.ValueOf(data)
 	)
 
 	switch {
-	case reflection.Kind() == reflect.Ptr:
-		reflection = reflection.Elem()
+	case rv.Kind() == reflect.Ptr:
+		rv = rv.Elem()
 	}
 
 	switch {
-	case reflection.Kind() != reflect.Struct:
+	case rv.Kind() != reflect.Struct:
 		return redisearch.Document{}, mod_errors.ENotStructOrPtrStruct
 	}
 
@@ -125,10 +125,10 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 		doc = redisearch.NewDocument(docID, score)
 	)
 
-	for i := 0; i < reflection.NumField(); i++ {
+	for i := 0; i < rv.NumField(); i++ {
 		var (
-			structField = reflection.Field(i)
-			typeField   = reflection.Type().Field(i)
+			structField = rv.Field(i)
+			typeField   = rv.Type().Field(i)
 			redisTag    = typeField.Tag.Get(redisTagName)
 		)
 
