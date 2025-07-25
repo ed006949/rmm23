@@ -2,11 +2,11 @@ version: "2"
 linters:
   default : fast
   disable :
-    - unused #hm....
+    - unused #dev-stage
     - nakedret
     - lll
     - wsl #deprecated
-    - depguard
+    - depguard #dev-stage
     - cyclop #dev-stage
     - gocognit #dev-stage
     - funlen #dev-stage
