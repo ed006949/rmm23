@@ -2,10 +2,8 @@ package mod_db
 
 import (
 	"context"
-	"time"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
-	"github.com/gomodule/redigo/redis"
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
@@ -19,7 +17,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *Co
 	// }
 	var (
 		docs   []*redisearch.Document
-		schema = new(Entry).redisearchSchema()
+		schema = new(Entry).redisearchSchema() // predefine schema
 	)
 
 	for _, b := range inbound.Domains {
@@ -62,50 +60,24 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *Co
 		}
 	}
 
-	var (
-		// RediSearch requires DB 0 for index creation
-		// rcDB      = 0
-
-		rcNetwork string
-		rcName    = "entryIdx"
-	)
-
-	switch rcNetwork, err = outbound.URL.RedisNetwork(); {
+	switch err = outbound.New(); {
 	case err != nil:
 		return
+	case outbound.rc == nil:
+		return mod_errors.ENoConn
 	}
 
 	var (
-		rsClient = redisearch.NewClientFromPool(&redis.Pool{
-			DialContext: func(ctx context.Context) (redis.Conn, error) {
-				return redis.DialContext(ctx, rcNetwork, outbound.URL.Host, redis.DialDatabase(0))
-			},
-			TestOnBorrow: func(c redis.Conn, t time.Time) (tErr error) {
-				_, tErr = c.Do(_PING)
-
-				return
-			},
-			MaxIdle:         connMaxIdle,
-			MaxActive:       connMaxActive,
-			IdleTimeout:     connIdleTimeout,
-			Wait:            connWait,
-			MaxConnLifetime: connMaxConnLifetime,
-		}, rcName)
-		// entry  = Entry{}
-		// schema = entry.redisearchSchema()
-		// _ = rsClient.Drop() // test&dev, delete old entries
-		_ = rsClient.DropIndex(false) // prod, don't delete old entries
-
-		rsQuery = redisearch.NewQuery("*").SetReturnFields("uuid", "dn").Limit(0, 1000000)
+		rsQuery = redisearch.NewQuery("*").SetReturnFields("uuid", "dn").Limit(0, connMaxPaging)
 	)
 
-	switch err = rsClient.CreateIndex(schema); {
+	switch err = outbound.rc.CreateIndex(schema); {
 	// case mod_errors.Contains(err, mod_errors.EIndexExist):
 	case err != nil:
 		return
 	}
 
-	switch a, b, c := rsClient.Search(rsQuery); {
+	switch a, b, c := outbound.rc.Search(rsQuery); {
 	case c != nil:
 		return c
 	default:
@@ -116,7 +88,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *Co
 	}
 
 	for _, doc := range docs {
-		switch err = rsClient.Index([]redisearch.Document{*doc}...); {
+		switch err = outbound.rc.Index([]redisearch.Document{*doc}...); {
 		case mod_errors.Contains(err, mod_errors.EDocExist):
 		case err != nil:
 			return

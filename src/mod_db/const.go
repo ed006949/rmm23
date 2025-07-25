@@ -32,6 +32,7 @@ const (
 	connIdleTimeout     = 240 * time.Second
 	connWait            = true
 	connMaxConnLifetime = 0
+	connMaxPaging       = 1000000
 )
 
 const (

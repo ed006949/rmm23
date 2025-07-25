@@ -4,15 +4,17 @@ import (
 	"net/netip"
 	"net/url"
 
-	"github.com/gomodule/redigo/redis"
+	"github.com/RediSearch/redisearch-go/redisearch"
 
 	"rmm23/src/mod_ldap"
 	"rmm23/src/mod_net"
 )
 
 type Conf struct {
-	URL  *mod_net.URL `json:"url,omitempty"`
-	conn *redis.Conn
+	URL       *mod_net.URL `json:"url,omitempty"`
+	Name      string       `json:"name,omitempty"`
+	rc        *redisearch.Client
+	rcNetwork string
 }
 
 // Entry is the struct that represents an LDAP-compatible entry.
