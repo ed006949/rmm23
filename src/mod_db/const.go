@@ -33,3 +33,7 @@ const (
 	connWait            = true
 	connMaxConnLifetime = 0
 )
+
+const (
+	entryDocIDHeader = "ldap:entry"
+)

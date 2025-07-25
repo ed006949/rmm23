@@ -7,13 +7,13 @@ import (
 	"github.com/gomodule/redigo/redis"
 
 	"rmm23/src/mod_ldap"
+	"rmm23/src/mod_net"
 )
 
-type Conn struct {
-	conn redis.Conn
+type Conf struct {
+	URL  *mod_net.URL `json:"url,omitempty"`
+	conn *redis.Conn
 }
-
-type AttrType int
 
 // Entry is the struct that represents an LDAP-compatible entry.
 type Entry struct {
@@ -70,7 +70,4 @@ type Entry struct {
 	LabeledURI mod_ldap.AttrLabeledURIs `json:"labeledURI,omitempty" ldap:"labeledURI" msgpack:"labeledURI,omitempty" redis:"labeledURI" redisearch:"tag"` //
 }
 
-type Domain struct{ Entry }
-type Group struct{ Entry }
-type User struct{ Entry }
-type Host struct{ Entry }
+type AttrType int

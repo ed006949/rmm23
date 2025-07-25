@@ -14,22 +14,22 @@ import (
 )
 
 type LDAPConfig struct {
-	URL      *mod_net.URL   `json:"url"`
-	Settings []*LDAPSetting `json:"settings"`
-	Domains  []*LDAPDomain  `json:"domain"`
+	URL      *mod_net.URL   `json:"url,omitempty"`
+	Settings []*LDAPSetting `json:"settings,omitempty"`
+	Domains  []*LDAPDomain  `json:"domain,omitempty"`
 	conn     *ldap.Conn
 }
 
 type LDAPSetting struct {
-	Type   string          `json:"type"`
-	DN     AttrDN          `json:"dn"`
-	CN     string          `json:"cn"`
-	Scope  AttrSearchScope `json:"scope"`
-	Filter string          `json:"filter"`
+	Type   string          `json:"type,omitempty"`
+	DN     AttrDN          `json:"dn,omitempty"`
+	CN     string          `json:"cn,omitempty"`
+	Scope  AttrSearchScope `json:"scope,omitempty"`
+	Filter string          `json:"filter,omitempty"`
 }
 
 type LDAPDomain struct {
-	DN AttrDN `json:"dn"`
+	DN AttrDN `json:"dn,omitempty"`
 
 	SearchResults map[string]*ldap.SearchResult
 }

@@ -43,6 +43,7 @@ const (
 
 	EUnknownScheme
 	EDocExist
+	EIndexExist
 )
 
 var errorDescription = [...]string{
@@ -82,4 +83,5 @@ var errorDescription = [...]string{
 	ETagUnknown:                "unknown tag",
 	EUnknownScheme:             "unknown scheme",
 	EDocExist:                  "Document already exists",
+	EIndexExist:                "Index already exists",
 }

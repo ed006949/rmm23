@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"rmm23/src/mod_bools"
+	"rmm23/src/mod_errors"
 )
 
 func (r *URL) UnmarshalXMLAttr(attr xml.Attr) (err error) {
@@ -56,3 +57,14 @@ func (r *URL) CleanUser() (username string, password string) {
 }
 func (r *URL) CleanUsername() (outbound string) { return r.User.Username() }
 func (r *URL) CleanPassword() (outbound string) { return mod_bools.StripIfBool1(r.User.Password()) }
+
+func (r *URL) RedisNetwork() (outbound string, err error) {
+	switch outbound = r.Scheme; outbound {
+	case "redis", "redis-sentinel":
+		return "tcp", nil
+	case "file":
+		return "unix", nil
+	default:
+		return outbound, mod_errors.EUnknownScheme
+	}
+}
