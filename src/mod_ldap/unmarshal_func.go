@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 
-	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_slices"
 )
@@ -35,35 +34,9 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 	return opts[0], flag
 }
 
-func UnmarshalResult[S ~[]E, E any](inbound *ldap.SearchResult, outbound S) (err error) {
-	switch err = l.CheckPtr(inbound); {
-	case err != nil:
-		return
-	}
-
-	for _, entry := range inbound.Entries {
-		var (
-			interim E
-		)
-
-		switch err = UnmarshalEntry(entry, &interim); {
-		case err != nil:
-			return
-		}
-
-		outbound = append(outbound, interim)
-	}
-
-	return
-}
-
 func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
-	var (
-		vo = reflect.ValueOf(i).Kind()
-	)
-
 	switch {
-	case vo != reflect.Ptr:
+	case reflect.ValueOf(i).Kind() != reflect.Ptr:
 		return mod_errors.ENotPtr
 	}
 
@@ -82,12 +55,14 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 		)
 
 		switch {
-		case ft.PkgPath != "": // skip unexported fields
+		case len(ft.PkgPath) != 0: // skip unexported fields
 			continue
 		}
 
 		// omitempty can be safely discarded, as it's not needed when unmarshalling
-		fieldTag, _ := readTag(ft)
+		var (
+			fieldTag, _ = readTag(ft)
+		)
 
 		// Fill the field with the distinguishedName if the tag key is `dn`
 		switch fieldTag {
@@ -123,10 +98,11 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 				case ok:
 					switch err = unmarshaler.UnmarshalLDAPAttr(values); {
 					case err != nil:
-						l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": e.DN}.Warning()
-						err = nil
-
-						continue
+						return
+						// l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": e.DN}.Warning()
+						// err = nil
+						//
+						// continue
 					}
 
 					fv.Set(ptrVal)
@@ -140,10 +116,11 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 				case ok:
 					switch err = unmarshaler.UnmarshalLDAPAttr(values); {
 					case err != nil:
-						l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": e.DN}.Warning()
-						err = nil
-
-						continue
+						return
+						// l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": e.DN}.Warning()
+						// err = nil
+						//
+						// continue
 					}
 
 					fv.Set(ptrVal.Elem())
