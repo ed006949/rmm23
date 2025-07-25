@@ -63,8 +63,6 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.LDAPConfig, outbound *Co
 	switch err = outbound.New(); {
 	case err != nil:
 		return
-	case outbound.rc == nil:
-		return mod_errors.ENoConn
 	}
 
 	var (

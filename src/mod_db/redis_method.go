@@ -6,6 +6,8 @@ import (
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/gomodule/redigo/redis"
+
+	"rmm23/src/mod_errors"
 )
 
 // func (e *ElementDomain) redisearchSchema() *redisearch.Schema { return buildRedisearchSchema(e) }
@@ -36,6 +38,12 @@ func (r *Conf) New() (err error) {
 		Wait:            connWait,
 		MaxConnLifetime: connMaxConnLifetime,
 	}, r.Name)
+
+	switch {
+	case r.rc == nil:
+		return mod_errors.ENoConn
+	}
+
 	// _ = r.rc.Drop() // test&dev, delete everything
 	_ = r.rc.DropIndex(false) // prod, delete index only
 
