@@ -6,7 +6,7 @@ import (
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/go-ldap/ldap/v3"
-	"github.com/vmihailenco/msgpack/v5" // MsgPack library for payload
+	"github.com/vmihailenco/msgpack/v5"
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
@@ -209,10 +209,11 @@ func getLDAPDocs(inbound *mod_ldap.Conf, schema *redisearch.Schema) (outbound []
 				}
 
 				fnEntry.BaseDN = mod_ldap.AttrDN(fnBaseDN)
+				fnEntry.Status = entryStatusLoaded
 
 				switch fnDoc, fnErr = newRedisearchDocument(
 					schema,
-					mod_slices.JoinStrings([]string{entryDocIDHeader, fnEntry.UUID.String()}, ":", mod_slices.FlagNone),
+					fnEntry.UUID.Entry(),
 					1.0,
 					fnEntry,
 					false,

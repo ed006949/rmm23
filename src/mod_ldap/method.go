@@ -98,6 +98,9 @@ func (r *Conf) close() (err error) {
 func (r *AttrDN) String() string { return string(*r) }
 
 func (r *AttrUUID) String() string { return uuid.UUID(*r).String() }
+func (r *AttrUUID) Entry() string {
+	return mod_slices.JoinStrings([]string{"ldap", "entry", r.String()}, ":", mod_slices.FlagNone)
+}
 
 func (d *AttrSearchScope) UnmarshalJSON(data []byte) (err error) {
 	switch value, ok := scopeIDMap[strings.Trim(string(data), " \"")]; {

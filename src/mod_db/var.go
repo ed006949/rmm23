@@ -16,3 +16,7 @@ var (
 		entryTypeName[entryTypeHost]:   entryTypeHost,
 	}
 )
+
+// var (
+// 	docFieldName = map[string]string{}
+// )

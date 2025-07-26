@@ -41,11 +41,18 @@ const (
 )
 
 const (
-	entryStatusUnknown entryStatusType = iota
+	entryStatusUnknown AttrEntryStatus = iota
 	entryStatusLoaded
 	entryStatusCreated
 	entryStatusUpdated
 	entryStatusDeleted
 	entryStatusInvalid
 	entryStatusReady = math.MaxInt
+)
+
+const (
+	_type   = "type"
+	_baseDN = "baseDN"
+	_uuid   = "uuid"
+	_dn     = "dn"
 )

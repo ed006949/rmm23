@@ -20,10 +20,10 @@ type Conf struct {
 type Entry struct {
 	// element specific meta data
 	Type   AttrType        `json:"type,omitempty"   msgpack:"type,omitempty"   redis:"type"   redisearch:"text"` // entry's type `(domain|group|user|host)`
-	BaseDN mod_ldap.AttrDN `json:"baseDN,omitempty" msgpack:"baseDN,omitempty" redis:"baseDN" redisearch:"text"`
+	BaseDN mod_ldap.AttrDN `json:"baseDN,omitempty" msgpack:"baseDN,omitempty" redis:"baseDN" redisearch:"text"` //
 
 	// element meta data
-	UUID            mod_ldap.AttrUUID          `json:"entryUUID,omitempty"       ldap:"entryUUID"       msgpack:"entryUUID,omitempty"       redis:"uuid"            redisearch:"text,sortable"` // must be unique
+	UUID            mod_ldap.AttrUUID          `json:"uuid,omitempty"       ldap:"entryUUID"       msgpack:"uuid,omitempty"       redis:"uuid"            redisearch:"text,sortable"`           // must be unique
 	DN              mod_ldap.AttrDN            `json:"dn,omitempty"              ldap:"dn"              msgpack:"dn,omitempty"              redis:"dn"              redisearch:"text,sortable"` // must be unique
 	ObjectClass     mod_ldap.AttrObjectClasses `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass,omitempty"     redis:"objectClass"     redisearch:"tag"`           // entry type
 	CreatorsName    mod_ldap.AttrDN            `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName,omitempty"    redis:"creatorsName"    redisearch:"text"`          //
@@ -67,12 +67,12 @@ type Entry struct {
 	HostURL         *mod_net.URL `json:"host_url,omitempty"          msgpack:"host_url,omitempty"          redis:"host_url"          redisearch:"text,sortable"`    //
 	HostListen      *netip.Addr  `json:"host_listen,omitempty"       msgpack:"host_listen,omitempty"       redis:"host_listen"       redisearch:"text,sortable"`    //
 
-	// specific data (space-separated KV DB stored as labeledURIs)
+	// specific data (space-separated KV DB stored as labeledURI)
 	LabeledURI mod_ldap.AttrLabeledURIs `json:"labeledURI,omitempty" ldap:"labeledURI" msgpack:"labeledURI,omitempty" redis:"labeledURI" redisearch:"tag"` //
 
 	// service
-	status entryStatusType
+	Status AttrEntryStatus `json:"status,omitempty" msgpack:"status,omitempty" redis:"status" redisearch:"text,sortable"` //
 }
 
 type AttrType int
-type entryStatusType int
+type AttrEntryStatus int
