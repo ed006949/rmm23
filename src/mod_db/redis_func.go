@@ -3,6 +3,7 @@ package mod_db
 import (
 	"fmt"
 	"reflect"
+	"strings"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/go-ldap/ldap/v3"
@@ -235,4 +236,27 @@ func getLDAPDocs(inbound *mod_ldap.Conf, schema *redisearch.Schema) (outbound []
 	}
 
 	return
+}
+
+func createQuery(inbound ...any) (outbound string) {
+	return escapeQuery(mod_slices.Join(inbound, ":", mod_slices.FlagNone))
+}
+
+// escapeQuery escapes special characters in a string for Redisearch queries.
+// It adds a backslash before any character that has special meaning in Redisearch query syntax.
+func escapeQuery(inbound any) (outbound string) {
+	var (
+		interim strings.Builder
+	)
+
+	for _, b := range fmt.Sprint(inbound) {
+		switch b {
+		case ',', '.', '<', '>', '{', '}', '[', ']', '"', '\'', ':', ';', '!', '@', '#', '$', '%', '^', '&', '*', '-', '+', '=', '~', '|':
+			interim.WriteRune('\\') // Add escape character
+		}
+
+		interim.WriteRune(b) // Add the character itself
+	}
+
+	return interim.String()
 }

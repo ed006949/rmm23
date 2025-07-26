@@ -19,11 +19,12 @@ type Conf struct {
 // Entry is the struct that represents an LDAP-compatible entry.
 type Entry struct {
 	// element specific meta data
-	Type   AttrType        `json:"type,omitempty"   msgpack:"type,omitempty"   redis:"type"   redisearch:"text"` // entry's type `(domain|group|user|host)`
-	BaseDN mod_ldap.AttrDN `json:"baseDN,omitempty" msgpack:"baseDN,omitempty" redis:"baseDN" redisearch:"text"` //
+	Type   AttrEntryType   `json:"type,omitempty"   msgpack:"type,omitempty"   redis:"type"   redisearch:"text"`          // entry's type `(domain|group|user|host)`
+	Status AttrEntryStatus `json:"status,omitempty" msgpack:"status,omitempty" redis:"status" redisearch:"text,sortable"` //
+	BaseDN mod_ldap.AttrDN `json:"baseDN,omitempty" msgpack:"baseDN,omitempty" redis:"baseDN" redisearch:"text"`          //
 
 	// element meta data
-	UUID            mod_ldap.AttrUUID          `json:"uuid,omitempty"       ldap:"entryUUID"       msgpack:"uuid,omitempty"       redis:"uuid"            redisearch:"text,sortable"`           // must be unique
+	UUID            mod_ldap.AttrUUID          `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid,omitempty"            redis:"uuid"            redisearch:"text,sortable"` // must be unique
 	DN              mod_ldap.AttrDN            `json:"dn,omitempty"              ldap:"dn"              msgpack:"dn,omitempty"              redis:"dn"              redisearch:"text,sortable"` // must be unique
 	ObjectClass     mod_ldap.AttrObjectClasses `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass,omitempty"     redis:"objectClass"     redisearch:"tag"`           // entry type
 	CreatorsName    mod_ldap.AttrDN            `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName,omitempty"    redis:"creatorsName"    redisearch:"text"`          //
@@ -53,7 +54,7 @@ type Entry struct {
 	UIDNumber            mod_ldap.AttrIDNumber              `json:"uidNumber,omitempty"            ldap:"uidNumber"            msgpack:"uidNumber,omitempty"            redis:"uidNumber"            redisearch:"numeric,sortable"` //
 	UserPKCS12           mod_ldap.AttrUserPKCS12s           `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           msgpack:"userPKCS12,omitempty"           redis:"userPKCS12"           redisearch:"tag"`              //
 	UserPassword         mod_ldap.AttrUserPassword          `json:"userPassword,omitempty"         ldap:"userPassword"         msgpack:"userPassword,omitempty"         redis:"userPassword"         redisearch:"text"`             //
-	MemberOf             mod_ldap.AttrDNs                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf,omitempty"             redis:"memberOf"             redisearch:"tag"`              // ignore it, don't cache, calculate on the fly or avoid
+	// MemberOf             mod_ldap.AttrDNs                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf,omitempty"             redis:"memberOf"             redisearch:"tag"`              // ignore it, don't cache, calculate on the fly or avoid
 
 	// specific data
 	AAA string `json:"host_aaa,omitempty" msgpack:"host_aaa,omitempty" redis:"host_aaa" redisearch:"text"` // entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`
@@ -69,10 +70,8 @@ type Entry struct {
 
 	// specific data (space-separated KV DB stored as labeledURI)
 	LabeledURI mod_ldap.AttrLabeledURIs `json:"labeledURI,omitempty" ldap:"labeledURI" msgpack:"labeledURI,omitempty" redis:"labeledURI" redisearch:"tag"` //
-
-	// service
-	Status AttrEntryStatus `json:"status,omitempty" msgpack:"status,omitempty" redis:"status" redisearch:"text,sortable"` //
 }
 
-type AttrType int
+type AttrEntryType int
 type AttrEntryStatus int
+type entryFieldName string

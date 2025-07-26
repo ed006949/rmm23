@@ -2,7 +2,6 @@ package mod_db
 
 import (
 	"context"
-	"fmt"
 	"time"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
@@ -54,14 +53,14 @@ func (r *Conf) dial() (err error) {
 	return
 }
 
-func (r *Conf) isExist(inbound mod_ldap.AttrUUID) (outbound *redisearch.Document, err error) {
-	return r.rsClient.Get(inbound.Entry())
+func (r *Conf) getDoc(inbound string) (outbound *redisearch.Document, err error) {
+	return r.rsClient.Get(inbound)
 }
 
-func (r *Conf) isExistKV(key string, value string) (outbound *redisearch.Document, err error) {
-	var (
-		query = redisearch.NewQuery(fmt.Sprintf("%s:\"%s\"", key, value)).Limit(0, connMaxPaging)
-	)
-	_, _, _ = r.rsClient.Search(query)
-	return
+func (r *Conf) getDocByUUID(inbound mod_ldap.AttrUUID) (outbound *redisearch.Document, err error) {
+	return r.getDoc(inbound.Entry())
+}
+
+func (r *Conf) getDocsByKV(key entryFieldName, value any) (outbound []redisearch.Document, count int, err error) {
+	return r.rsClient.Search(redisearch.NewQuery(createQuery(key, value)).Limit(0, connMaxPaging))
 }

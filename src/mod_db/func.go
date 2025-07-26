@@ -2,8 +2,6 @@ package mod_db
 
 import (
 	"context"
-	"errors"
-	"fmt"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 
@@ -13,10 +11,10 @@ import (
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
 	var (
-		docs       []*redisearch.Document
-		schema     *redisearch.Schema
-		rdocs      []redisearch.Document
-		rdocscount int
+		docs   []*redisearch.Document
+		schema *redisearch.Schema
+		// rdocs      []redisearch.Document
+		// rdocscount int
 	)
 
 	// predefine schema
@@ -35,31 +33,56 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		return
 	}
 
-	var (
-		rsQuery = redisearch.NewQuery("*").SetReturnFields("uuid", "dn").Limit(0, connMaxPaging)
-	)
-
 	switch err = outbound.rsClient.CreateIndex(schema); {
 	case mod_errors.Contains(err, mod_errors.EIndexExist):
 	case err != nil:
 		return
 	}
 
-	switch rdocs, rdocscount, err = outbound.rsClient.Search(rsQuery); {
-	case err != nil:
-		return
-	case rdocscount >= connMaxPaging:
-		return errors.New("max paging limit reached")
-	}
-
-	fmt.Printf("%v", len(rdocs))
-
 	for _, doc := range docs {
-		switch err = outbound.rsClient.Index([]redisearch.Document{*doc}...); {
-		case mod_errors.Contains(err, mod_errors.EDocExist):
-		case err != nil:
-			return
+		var (
+			tDoc  *redisearch.Document
+			count int
+		)
+
+		switch tDoc, err = outbound.getDoc(doc.Id); {
+		case err != nil: // error
+			return err
+		case tDoc == nil: // not found
+			switch err = outbound.rsClient.Index([]redisearch.Document{*doc}...); {
+			case mod_errors.Contains(err, mod_errors.EDocExist):
+				return
+			case err != nil:
+				return
+			}
+		default: // found
+			switch _, count, err = outbound.getDocsByKV(_dn, doc.Properties[_dn.String()]); {
+			case err != nil:
+				return
+			case count > 0:
+				return mod_errors.EUnwilling
+			}
+			// fmt.Print(tDoc)
 		}
+
+		// switch err = outbound.rsClient.Index([]redisearch.Document{*doc}...); {
+		// case mod_errors.Contains(err, mod_errors.EDocExist):
+		// 	var (
+		// 		count int
+		// 	)
+		//
+		// 	switch _, count, err = outbound.getDocsByKV(_dn, doc.Properties[_dn.String()]); {
+		// 	case err != nil:
+		// 		return
+		// 	case count > 0:
+		// 		return mod_errors.EUnwilling
+		// 	}
+		// //
+		//
+		// //
+		// case err != nil:
+		// 	return
+		// }
 	}
 
 	return

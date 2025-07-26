@@ -4,7 +4,7 @@ import (
 	"rmm23/src/mod_errors"
 )
 
-func (r *AttrType) Parse(inbound string) (err error) {
+func (r *AttrEntryType) Parse(inbound string) (err error) {
 	switch value, ok := entryTypeID[inbound]; {
 	case !ok:
 		return mod_errors.EUnknownType
@@ -14,3 +14,4 @@ func (r *AttrType) Parse(inbound string) (err error) {
 		return
 	}
 }
+func (r entryFieldName) String() (outbound string) { return string(r) }
