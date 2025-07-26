@@ -38,6 +38,7 @@ const (
 	EComSetDomAdm
 	EComSetDomSetAdm
 
+	ETagNoType
 	ETagMultiType
 	ETagUnknown
 
@@ -79,6 +80,7 @@ var errorDescription = [...]string{
 	EComSet:                    "unknown command set",
 	EComSetDomAdm:              "unknown Domain Administration command",
 	EComSetDomSetAdm:           "unknown Domain Set Administration command",
+	ETagNoType:                 "no type",
 	ETagMultiType:              "multiple types",
 	ETagUnknown:                "unknown tag",
 	EUnknownScheme:             "unknown scheme",

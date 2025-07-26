@@ -26,21 +26,12 @@ func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, er
 
 	for i := 0; i < rt.NumField(); i++ {
 		var (
-			field    = rt.Field(i)
-			redisTag = field.Tag.Get(redisTagName)
+			field                   = rt.Field(i)
+			redisTag, redisearchTag = field.Tag.Get(redisTagName), field.Tag.Get(rediSearchTagName)
 		)
 
 		switch {
-		case len(redisTag) == 0:
-			continue
-		}
-
-		var (
-			redisearchTag = field.Tag.Get(rediSearchTagName)
-		)
-
-		switch {
-		case len(redisearchTag) == 0:
+		case len(redisTag) == 0 || len(redisearchTag) == 0:
 			continue
 		}
 
@@ -54,9 +45,7 @@ func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, er
 		}
 
 		var (
-			types    = make(map[string]bool)
-			options  = make(map[string]bool)
-			unknowns = make(map[string]bool)
+			types, options, unknowns = make(map[string]bool), make(map[string]bool), make(map[string]bool)
 		)
 
 		for _, opt := range parts {
@@ -71,6 +60,8 @@ func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, er
 		}
 
 		switch {
+		case len(types) == 0:
+			return nil, mod_errors.ETagNoType
 		case len(types) > 1:
 			return nil, mod_errors.ETagMultiType
 		case len(unknowns) > 0:
@@ -118,9 +109,7 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 
 	for i := 0; i < rv.NumField(); i++ {
 		var (
-			structField = rv.Field(i)
-			typeField   = rv.Type().Field(i)
-			redisTag    = typeField.Tag.Get(redisTagName)
+			redisTag = rv.Type().Field(i).Tag.Get(redisTagName)
 		)
 
 		switch {
@@ -129,6 +118,7 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 		}
 
 		var (
+			structField = rv.Field(i)
 			schemaField *redisearch.Field
 		)
 
@@ -150,38 +140,18 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 			continue
 		}
 
-		var (
-			fieldValue interface{}
-		)
-
-		switch schemaField.Type {
-		case redisearch.TagField, redisearch.TextField:
-			fieldValue = fmt.Sprintf("%v", structField.Interface())
-		case redisearch.NumericField:
-			switch structField.Kind() {
-			case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-				fieldValue = float64(structField.Int())
-			case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-				fieldValue = float64(structField.Uint())
-			case reflect.Float32, reflect.Float64:
-				fieldValue = structField.Float()
-			case reflect.Bool:
-				switch {
-				case structField.Bool():
-					fieldValue = 1.0
-				default:
-					fieldValue = 0.0
-				}
-			default:
-				fieldValue = fmt.Sprintf("%v", structField.Interface())
-			}
-		default:
-			fieldValue = fmt.Sprintf("%v", structField.Interface())
-		}
-
-		doc.Set(schemaField.Name, fieldValue)
+		doc.Set(schemaField.Name, getFieldValue(schemaField, &structField))
 	}
 
+	switch err = setPayload(&doc, data, includePayload); {
+	case err != nil:
+		return
+	}
+
+	return &doc, nil
+}
+
+func setPayload(doc *redisearch.Document, data interface{}, includePayload bool) (err error) {
 	switch {
 	case includePayload:
 		var (
@@ -190,11 +160,40 @@ func newRedisearchDocument(schema *redisearch.Schema, docID string, score float3
 
 		switch encodedPayload, err = msgpack.Marshal(data); {
 		case err != nil:
-			return nil, err
+			return
 		}
 
 		doc.SetPayload(encodedPayload)
 	}
 
-	return &doc, nil
+	return
+}
+
+func getFieldValue(schemaField *redisearch.Field, structField *reflect.Value) (fieldValue any) {
+	switch schemaField.Type {
+	case redisearch.TagField, redisearch.TextField:
+		fieldValue = fmt.Sprintf("%v", structField.Interface())
+	case redisearch.NumericField:
+		switch structField.Kind() {
+		case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+			fieldValue = float64(structField.Int())
+		case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+			fieldValue = float64(structField.Uint())
+		case reflect.Float32, reflect.Float64:
+			fieldValue = structField.Float()
+		case reflect.Bool:
+			switch {
+			case structField.Bool():
+				fieldValue = 1.0
+			default:
+				fieldValue = 0.0
+			}
+		default:
+			fieldValue = fmt.Sprintf("%v", structField.Interface())
+		}
+	default:
+		fieldValue = fmt.Sprintf("%v", structField.Interface())
+	}
+
+	return
 }
