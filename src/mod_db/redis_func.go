@@ -26,27 +26,16 @@ func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, er
 
 	for i := 0; i < rt.NumField(); i++ {
 		var (
-			field                   = rt.Field(i)
-			redisTag, redisearchTag = field.Tag.Get(redisTagName), field.Tag.Get(rediSearchTagName)
-		)
-
-		switch {
-		case len(redisTag) == 0 || len(redisearchTag) == 0:
-			continue
-		}
-
-		var (
-			parts = mod_slices.SplitString(redisearchTag, mod_strings.TagSeparator, mod_slices.FlagNormalize)
-		)
-
-		switch {
-		case len(parts) == 0:
-			continue
-		}
-
-		var (
+			field                    = rt.Field(i)
+			redisTag, redisearchTag  = field.Tag.Get(redisTagName), field.Tag.Get(rediSearchTagName)
+			parts                    = mod_slices.SplitString(redisearchTag, mod_strings.TagSeparator, mod_slices.FlagNormalize)
 			types, options, unknowns = make(map[string]bool), make(map[string]bool), make(map[string]bool)
 		)
+
+		switch {
+		case len(redisTag) == 0 || len(redisearchTag) == 0 || len(parts) == 0:
+			continue
+		}
 
 		for _, opt := range parts {
 			switch opt {

@@ -70,7 +70,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		return
 	}
 
-	switch err = outbound.New(); {
+	switch err = outbound.Dial(); {
 	case err != nil:
 		return
 	}

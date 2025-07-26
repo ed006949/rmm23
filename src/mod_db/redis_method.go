@@ -19,7 +19,7 @@ func (e *Entry) redisearchSchema() (outbound *redisearch.Schema, err error) {
 	return buildRedisearchSchema(e)
 }
 
-func (r *Conf) New() (err error) {
+func (r *Conf) Dial() (err error) {
 	switch r.rcNetwork, err = r.URL.RedisNetwork(); {
 	case err != nil:
 		return
