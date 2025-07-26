@@ -212,7 +212,7 @@ func getLDAPDocs(inbound *mod_ldap.Conf, schema *redisearch.Schema) (outbound []
 
 				fnEntry.BaseDN = mod_ldap.AttrDN(fnBaseDN)
 				fnEntry.Status = entryStatusLoaded
-				fnEntry.UUID = mod_ldap.AttrUUID(uuid.NewSHA1(uuid.Nil, []byte(fmt.Sprint(fnDoc.Properties[_dn.String()])))) // generate new `UUID`
+				fnEntry.UUID = mod_ldap.AttrUUID(uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))) // generate new `DN`-based `UUID`
 
 				switch fnDoc, fnErr = newRedisearchDocument(
 					schema,
