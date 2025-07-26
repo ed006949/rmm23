@@ -2,10 +2,10 @@ package mod_db
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 
+	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
 )
@@ -42,11 +42,11 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	}
 
 	for _, doc := range docs {
-		switch err = outbound.rsClient.Index([]redisearch.Document{*doc}...); {
-		case mod_errors.Contains(err, mod_errors.EDocExist):
-			fmt.Print(doc.Id, "\n")
-		case err != nil:
-			return
+		switch swErr := outbound.rsClient.Index([]redisearch.Document{*doc}...); {
+		case mod_errors.Contains(swErr, mod_errors.EDocExist):
+			l.Z{l.E: mod_errors.EDocExist, l.M: doc.Properties[_dn.String()]}.Warning()
+		case swErr != nil:
+			return swErr
 		}
 	}
 
