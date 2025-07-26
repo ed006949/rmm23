@@ -14,8 +14,6 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	var (
 		docs   []*redisearch.Document
 		schema *redisearch.Schema
-		// rdocs      []redisearch.Document
-		// rdocscount int
 	)
 
 	// predefine schema
@@ -34,7 +32,10 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		return
 	}
 
-	switch err = outbound.rsClient.CreateIndex(schema); {
+	switch err = outbound.rsClient.CreateIndexWithIndexDefinition(
+		schema,
+		redisearch.NewIndexDefinition().AddPrefix("ldap:entry:"),
+	); {
 	case mod_errors.Contains(err, mod_errors.EIndexExist):
 	case err != nil:
 		return

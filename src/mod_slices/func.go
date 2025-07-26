@@ -120,6 +120,7 @@ func StringsNormalize(inbound []string, flag flagType) (outbound []string) {
 
 	switch {
 	case flag.has(FlagSort):
+		Sort(inbound)
 	}
 
 	switch {
