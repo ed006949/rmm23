@@ -8,24 +8,20 @@ import (
 	"github.com/vmihailenco/msgpack/v5" // MsgPack library for payload
 
 	"rmm23/src/mod_errors"
+	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_slices"
 	"rmm23/src/mod_strings"
 )
 
-func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
+func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, err error) {
 	var (
 		schema = redisearch.NewSchema(redisearch.DefaultOptions)
-		rt     = reflect.TypeOf(inbound)
+		rt     reflect.Type
 	)
 
-	switch {
-	case rt.Kind() == reflect.Ptr:
-		rt = rt.Elem()
-	}
-
-	switch {
-	case rt.Kind() != reflect.Struct:
-		panic(mod_errors.ENotStructOrPtrStruct)
+	switch rt, err = mod_reflect.GetStructRT(inbound); {
+	case err != nil:
+		return
 	}
 
 	for i := 0; i < rt.NumField(); i++ {
@@ -76,9 +72,9 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 
 		switch {
 		case len(types) > 1:
-			panic(mod_errors.ETagMultiType)
+			return nil, mod_errors.ETagMultiType
 		case len(unknowns) > 0:
-			panic(mod_errors.ETagUnknown)
+			return nil, mod_errors.ETagUnknown
 		}
 
 		switch {
@@ -99,26 +95,21 @@ func buildRedisearchSchema(inbound interface{}) *redisearch.Schema {
 		case types[rediSearchTagTypeGeo]:
 			schema.AddField(redisearch.NewGeoFieldOptions(redisTag, redisearch.GeoFieldOptions{}))
 		default:
-			panic(mod_errors.EUnwilling)
+			return nil, mod_errors.EUnwilling
 		}
 	}
 
-	return schema
+	return schema, nil
 }
 
 func newRedisearchDocument(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (outbound *redisearch.Document, err error) {
 	var (
-		rv = reflect.ValueOf(data)
+		rv reflect.Value
 	)
 
-	switch {
-	case rv.Kind() == reflect.Ptr:
-		rv = rv.Elem()
-	}
-
-	switch {
-	case rv.Kind() != reflect.Struct:
-		return nil, mod_errors.ENotStructOrPtrStruct
+	switch rv, err = mod_reflect.GetStructRV(data); {
+	case err != nil:
+		return
 	}
 
 	var (

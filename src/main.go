@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/avfs/avfs"
 	"github.com/avfs/avfs/vfs/memfs"
 
@@ -32,7 +34,7 @@ func main() {
 
 	switch err = l.Run.ConfigUnmarshal(&config); {
 	case err != nil:
-		panic(err)
+		os.Exit(1)
 	}
 
 	switch err = vfsDB.CopyFromFS("./etc/legacy/"); {

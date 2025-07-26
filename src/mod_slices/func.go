@@ -51,12 +51,10 @@ func FilterEmpty[S ~[]E, E cmp.Ordered](inbound S) (outbound S) {
 
 // Normalize applies a series of transformations (sort, compact, filter empty) to the inbound slice based on the provided flags.
 func Normalize[S ~[]E, E cmp.Ordered](inbound S, flag flagType) (outbound S) {
-	switch {
-	case flag.has(FlagTrimSpace):
-		// panic(mod_errors.EUnwilling)
-		// inbound = TrimStrings(inbound)
-	}
-
+	// switch {
+	// case flag.has(FlagTrimSpace):
+	// 	// inbound = TrimStrings(inbound)
+	// }
 	switch {
 	case flag.has(FlagFilterEmpty):
 		inbound = FilterEmpty(inbound)

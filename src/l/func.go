@@ -1,10 +1,7 @@
 package l
 
 import (
-	"reflect"
 	"strings"
-
-	"rmm23/src/mod_errors"
 )
 
 // func Emergency(e Z)     { log.Fatal().EmbedObject(e).Send() }
@@ -29,18 +26,4 @@ func envName(inbound int) (outbound string) {
 		"-",
 		"_",
 	)
-}
-
-// CheckPtr verifies if the given 'pointer' is a non-nil pointer.
-// It returns an error if 'pointer' is not a pointer or is nil.
-func CheckPtr(inbound any) (err error) {
-	var (
-		rv = reflect.ValueOf(inbound)
-	)
-	switch {
-	case rv.Kind() != reflect.Pointer || rv.IsNil():
-		return mod_errors.ENotPtrOrNil
-	}
-
-	return
 }

@@ -2,6 +2,7 @@ package mod_db
 
 import (
 	"context"
+	"os"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 
@@ -11,16 +12,23 @@ import (
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
-	// switch err = inbound.Search(); {
-	// case err != nil:
-	// 	return
-	// }
+	switch err = inbound.Search(); {
+	case err != nil:
+		return
+	}
+
 	var (
 		docs   []*redisearch.Document
-		schema = new(Entry).redisearchSchema() // predefine schema
+		schema *redisearch.Schema
 	)
 
-	switch err = ldap2doc(inbound, schema, docs); {
+	// predefine schema
+	switch schema, err = new(Entry).redisearchSchema(); {
+	case err != nil:
+		return
+	}
+
+	switch err = ldap2rs(inbound, schema, docs); {
 	case err != nil:
 		return
 	}
@@ -47,7 +55,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		a = a
 		b = b
 
-		panic(nil)
+		os.Exit(1)
 	}
 
 	for _, doc := range docs {
@@ -60,7 +68,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 
 	return
 }
-func ldap2doc(inbound *mod_ldap.Conf, schema *redisearch.Schema, docs []*redisearch.Document) (err error) {
+func ldap2rs(inbound *mod_ldap.Conf, schema *redisearch.Schema, docs []*redisearch.Document) (err error) {
 	for _, b := range inbound.Domains {
 		for c, d := range b.SearchResults {
 			var (

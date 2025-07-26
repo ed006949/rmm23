@@ -15,7 +15,9 @@ import (
 // func (e *ElementUser) redisearchSchema() *redisearch.Schema   { return buildRedisearchSchema(e) }
 // func (e *ElementHost) redisearchSchema() *redisearch.Schema   { return buildRedisearchSchema(e) }
 
-func (e *Entry) redisearchSchema() *redisearch.Schema { return buildRedisearchSchema(e) }
+func (e *Entry) redisearchSchema() (outbound *redisearch.Schema, err error) {
+	return buildRedisearchSchema(e)
+}
 
 func (r *Conf) New() (err error) {
 	switch r.rcNetwork, err = r.URL.RedisNetwork(); {

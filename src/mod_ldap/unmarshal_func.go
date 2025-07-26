@@ -6,47 +6,21 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 
-	"rmm23/src/mod_errors"
+	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_slices"
 )
 
 // portions taken from "github.com/go-ldap/ldap/v3"
 
-func readTag(f reflect.StructField) (options string, flag bool) {
-	var (
-		val, ok = f.Tag.Lookup(ldapTagName)
-	)
-
-	switch {
-	case !ok:
-		return f.Name, false
-	}
-
-	var (
-		opts = strings.Split(val, ",")
-	)
-
-	switch {
-	case len(opts) == mod_slices.KVElements:
-		flag = opts[1] == ldapTagOptionOmitEmpty
-	}
-
-	return opts[0], flag
-}
-
 func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
-	switch {
-	case reflect.ValueOf(i).Kind() != reflect.Ptr:
-		return mod_errors.ENotPtr
-	}
-
 	var (
-		sv, st = reflect.ValueOf(i).Elem(), reflect.TypeOf(i).Elem()
+		sv reflect.Value
+		st reflect.Type
 	)
 
-	switch {
-	case sv.Kind() != reflect.Struct:
-		return mod_errors.ENotStruct
+	switch sv, st, err = mod_reflect.GetStructSVST(i); {
+	case err != nil:
+		return
 	}
 
 	for n := 0; n < st.NumField(); n++ {
@@ -131,4 +105,26 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 	}
 
 	return
+}
+
+func readTag(f reflect.StructField) (options string, flag bool) {
+	var (
+		val, ok = f.Tag.Lookup(ldapTagName)
+	)
+
+	switch {
+	case !ok:
+		return f.Name, false
+	}
+
+	var (
+		opts = strings.Split(val, ",")
+	)
+
+	switch {
+	case len(opts) == mod_slices.KVElements:
+		flag = opts[1] == ldapTagOptionOmitEmpty
+	}
+
+	return opts[0], flag
 }
