@@ -11,7 +11,7 @@ import (
 )
 
 func (r *Conf) SearchFn(fn func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error)) (err error) {
-	switch err = r.Dial(); {
+	switch err = r.dial(); {
 	case err != nil:
 		return
 	}
@@ -53,7 +53,7 @@ func (r *Conf) SearchFn(fn func(fnBaseDN string, fnSearchResultType string, fnSe
 	return
 }
 
-func (r *Conf) Dial() (err error) {
+func (r *Conf) dial() (err error) {
 	switch err = r.connect(); {
 	case err != nil:
 		return

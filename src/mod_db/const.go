@@ -1,6 +1,7 @@
 package mod_db
 
 import (
+	"math"
 	"time"
 )
 
@@ -36,5 +37,15 @@ const (
 )
 
 const (
-	entryDocIDHeader = "ldap:entry"
+	entryDocIDHeader = "ldap" + ":" + "entry"
+)
+
+const (
+	entryStatusUnknown entryStatusType = iota
+	entryStatusLoaded
+	entryStatusCreated
+	entryStatusUpdated
+	entryStatusDeleted
+	entryStatusInvalid
+	entryStatusReady = math.MaxInt
 )

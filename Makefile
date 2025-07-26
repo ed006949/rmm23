@@ -53,7 +53,7 @@ install:
 	@echo ${NAME} ${PACKAGE} ${TARGET} ${DATE} ${GIT_STATUS}
 
 lint:
-	golangci-lint run ./...
+	golangci-lint run ./... --fix
 
 race:
 	go run -race ./... ${COMMAND_LINE}

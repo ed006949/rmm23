@@ -5,9 +5,11 @@ import (
 	"reflect"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
+	"github.com/go-ldap/ldap/v3"
 	"github.com/vmihailenco/msgpack/v5" // MsgPack library for payload
 
 	"rmm23/src/mod_errors"
+	"rmm23/src/mod_ldap"
 	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_slices"
 	"rmm23/src/mod_strings"
@@ -182,6 +184,53 @@ func getFieldValue(schemaField *redisearch.Field, structField *reflect.Value) (f
 		}
 	default:
 		fieldValue = fmt.Sprintf("%v", structField.Interface())
+	}
+
+	return
+}
+
+func getLDAPDocs(inbound *mod_ldap.Conf, schema *redisearch.Schema) (outbound []*redisearch.Document, err error) {
+	var (
+		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
+			for _, fnB := range fnSearchResult.Entries {
+				var (
+					fnDoc   *redisearch.Document
+					fnEntry = new(Entry)
+				)
+
+				switch fnErr = mod_ldap.UnmarshalEntry(fnB, fnEntry); {
+				case fnErr != nil:
+					return
+				}
+
+				switch fnErr = fnEntry.Type.Parse(fnSearchResultType); {
+				case fnErr != nil:
+					return
+				}
+
+				fnEntry.BaseDN = mod_ldap.AttrDN(fnBaseDN)
+
+				switch fnDoc, fnErr = newRedisearchDocument(
+					schema,
+					mod_slices.JoinStrings([]string{entryDocIDHeader, fnEntry.UUID.String()}, ":", mod_slices.FlagNone),
+					1.0,
+					fnEntry,
+					false,
+				); {
+				case fnErr != nil:
+					return
+				}
+
+				outbound = append(outbound, fnDoc)
+			}
+
+			return
+		}
+	)
+
+	switch err = inbound.SearchFn(ldap2doc); {
+	case err != nil:
+		return
 	}
 
 	return
