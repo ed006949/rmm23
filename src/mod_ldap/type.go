@@ -30,7 +30,7 @@ type settings struct {
 type domain struct {
 	DN AttrDN `json:"dn,omitempty"`
 
-	SearchResults map[string]*ldap.SearchResult
+	// SearchResults map[string]*ldap.SearchResult
 }
 
 // type AttrDN *ldap.DN //

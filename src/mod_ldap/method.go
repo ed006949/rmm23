@@ -1,7 +1,6 @@
 package mod_ldap
 
 import (
-	"errors"
 	"strings"
 
 	"github.com/go-ldap/ldap/v3"
@@ -11,8 +10,8 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-func (r *Conf) Search() (err error) {
-	switch err = r.connect(); {
+func (r *Conf) SearchFn(fn func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error)) (err error) {
+	switch err = r.Dial(); {
 	case err != nil:
 		return
 	}
@@ -21,31 +20,12 @@ func (r *Conf) Search() (err error) {
 		_ = r.close()
 	}()
 
-	switch err = r.bind(); {
-	case errors.Is(err, mod_errors.EAnonymousBind):
-	case err != nil:
-		return
-	}
-
-	switch err = r.search(); {
-	case err != nil:
-		return
-	}
-
-	return
-}
-
-func (r *Conf) search() (err error) {
 	for _, b := range r.Domains {
-		switch {
-		case b.SearchResults == nil:
-			b.SearchResults = make(map[string]*ldap.SearchResult)
-		}
-
 		for _, d := range r.Settings {
 			var (
+				baseDN        = mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty)
 				searchRequest = ldap.NewSearchRequest(
-					mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty), // Base DN
+					baseDN,             // Base DN
 					d.Scope.Int(),      // Scope - search entire tree
 					ldap.DerefAlways,   // Deref
 					0,                  // Size limit (0 = no limit)
@@ -63,16 +43,29 @@ func (r *Conf) search() (err error) {
 				return
 			}
 
-			b.SearchResults[d.Type] = searchResult
+			switch err = fn(baseDN, d.Type, searchResult); {
+			case err != nil:
+				return
+			}
 		}
 	}
 
 	return
 }
 
-func (r *AttrDN) String() string   { return string(*r) }
-func (r *AttrUUID) String() string { return uuid.UUID(*r).String() }
+func (r *Conf) Dial() (err error) {
+	switch err = r.connect(); {
+	case err != nil:
+		return
+	}
 
+	switch err = r.bind(); {
+	case err != nil:
+		return
+	}
+
+	return
+}
 func (r *Conf) connect() (err error) {
 	r.conn, err = ldap.DialURL(r.URL.String())
 
@@ -101,6 +94,10 @@ func (r *Conf) close() (err error) {
 
 	return r.conn.Close()
 }
+
+func (r *AttrDN) String() string { return string(*r) }
+
+func (r *AttrUUID) String() string { return uuid.UUID(*r).String() }
 
 func (d *AttrSearchScope) UnmarshalJSON(data []byte) (err error) {
 	switch value, ok := scopeIDMap[strings.Trim(string(data), " \"")]; {

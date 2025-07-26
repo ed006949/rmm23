@@ -2,9 +2,11 @@ package mod_db
 
 import (
 	"context"
-	"os"
+	"errors"
+	"fmt"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
+	"github.com/go-ldap/ldap/v3"
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
@@ -12,14 +14,11 @@ import (
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
-	switch err = inbound.Search(); {
-	case err != nil:
-		return
-	}
-
 	var (
-		docs   []*redisearch.Document
-		schema *redisearch.Schema
+		docs       []*redisearch.Document
+		schema     *redisearch.Schema
+		rdocs      []redisearch.Document
+		rdocscount int
 	)
 
 	// predefine schema
@@ -28,7 +27,45 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		return
 	}
 
-	switch err = ldap2rs(inbound, schema, docs); {
+	var (
+		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
+			for _, fnB := range fnSearchResult.Entries {
+				var (
+					fnDoc   *redisearch.Document
+					fnEntry = new(Entry)
+				)
+
+				switch fnErr = mod_ldap.UnmarshalEntry(fnB, fnEntry); {
+				case fnErr != nil:
+					return
+				}
+
+				switch fnErr = fnEntry.Type.Parse(fnSearchResultType); {
+				case fnErr != nil:
+					return
+				}
+
+				fnEntry.BaseDN = mod_ldap.AttrDN(fnBaseDN)
+
+				switch fnDoc, fnErr = newRedisearchDocument(
+					schema,
+					mod_slices.JoinStrings([]string{entryDocIDHeader, fnEntry.UUID.String()}, ":", mod_slices.FlagNone),
+					1.0,
+					fnEntry,
+					false,
+				); {
+				case fnErr != nil:
+					return
+				}
+
+				docs = append(docs, fnDoc)
+			}
+
+			return
+		}
+	)
+
+	switch err = inbound.SearchFn(ldap2doc); {
 	case err != nil:
 		return
 	}
@@ -43,69 +80,25 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	)
 
 	switch err = outbound.rsClient.CreateIndex(schema); {
-	// case mod_errors.Contains(err, mod_errors.EIndexExist):
+	case mod_errors.Contains(err, mod_errors.EIndexExist):
 	case err != nil:
 		return
 	}
 
-	switch a, b, c := outbound.rsClient.Search(rsQuery); {
-	case c != nil:
-		return c
-	default:
-		a = a
-		b = b
-
-		os.Exit(1)
+	switch rdocs, rdocscount, err = outbound.rsClient.Search(rsQuery); {
+	case err != nil:
+		return
+	case rdocscount >= connMaxPaging:
+		return errors.New("max paging limit reached")
 	}
+
+	fmt.Printf("%v", len(rdocs))
 
 	for _, doc := range docs {
 		switch err = outbound.rsClient.Index([]redisearch.Document{*doc}...); {
 		case mod_errors.Contains(err, mod_errors.EDocExist):
 		case err != nil:
 			return
-		}
-	}
-
-	return
-}
-func ldap2rs(inbound *mod_ldap.Conf, schema *redisearch.Schema, docs []*redisearch.Document) (err error) {
-	for _, b := range inbound.Domains {
-		for c, d := range b.SearchResults {
-			var (
-				entryType AttrType
-			)
-			switch err = entryType.Parse(c); {
-			case err != nil:
-				return
-			}
-
-			for _, f := range d.Entries {
-				var (
-					doc   *redisearch.Document
-					entry = new(Entry)
-				)
-
-				switch err = mod_ldap.UnmarshalEntry(f, entry); {
-				case err != nil:
-					return
-				}
-
-				entry.Type = entryType
-				entry.BaseDN = b.DN
-
-				switch doc, err = newRedisearchDocument(
-					schema,
-					mod_slices.JoinStrings([]string{entryDocIDHeader, entry.UUID.String()}, ":", mod_slices.FlagNone),
-					1.0,
-					entry,
-					false,
-				); {
-				case err != nil:
-					return
-				}
-
-				docs = append(docs, doc)
-			}
 		}
 	}
 

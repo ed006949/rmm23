@@ -6,7 +6,7 @@ import (
 	"rmm23/src/mod_errors"
 )
 
-func GetStructRV(inbound any) (outbound reflect.Value, err error) {
+func GetStructRV(inbound any) (outboundRV reflect.Value, err error) {
 	var (
 		rv = reflect.ValueOf(inbound)
 	)
@@ -18,13 +18,13 @@ func GetStructRV(inbound any) (outbound reflect.Value, err error) {
 
 	switch {
 	case rv.Kind() != reflect.Struct:
-		return outbound, mod_errors.ENotStructOrPtrStruct
+		return outboundRV, mod_errors.ENotStructOrPtrStruct
 	}
 
 	return rv, nil
 }
 
-func GetStructRT(inbound any) (outbound reflect.Type, err error) {
+func GetStructRT(inbound any) (outboundRT reflect.Type, err error) {
 	var (
 		rt = reflect.TypeOf(inbound)
 	)
@@ -35,7 +35,7 @@ func GetStructRT(inbound any) (outbound reflect.Type, err error) {
 
 	switch {
 	case rt.Kind() != reflect.Struct:
-		return outbound, mod_errors.ENotStructOrPtrStruct
+		return outboundRT, mod_errors.ENotStructOrPtrStruct
 	}
 
 	return rt, nil
