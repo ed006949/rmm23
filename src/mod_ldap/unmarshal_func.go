@@ -10,8 +10,6 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-// portions taken from "github.com/go-ldap/ldap/v3"
-
 func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 	var (
 		sv reflect.Value
@@ -74,10 +72,6 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 					switch err = unmarshaler.UnmarshalLDAPAttr(values); {
 					case err != nil:
 						return
-						// l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": e.DN}.Warning()
-						// err = nil
-						//
-						// continue
 					}
 
 					fv.Set(ptrVal)
@@ -92,10 +86,6 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 					switch err = unmarshaler.UnmarshalLDAPAttr(values); {
 					case err != nil:
 						return
-						// l.Z{l.E: err, l.M: "LDAP Unmarshal", "DN": e.DN}.Warning()
-						// err = nil
-						//
-						// continue
 					}
 
 					fv.Set(ptrVal.Elem())
@@ -118,6 +108,7 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 	}
 
 	var (
+		// opts = mod_slices.SplitString(val, mod_strings.TagSeparator, mod_slices.FlagNormalize)
 		opts = strings.Split(val, ",")
 	)
 
