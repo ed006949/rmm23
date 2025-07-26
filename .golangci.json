@@ -4,13 +4,12 @@
     "default" : "fast",
     "disable" : [
       "unused",
-      "nakedret",
       "lll",
       "wsl",
-      "depguard",
       "cyclop",
       "gocognit",
-      "funlen"
+      "funlen",
+      "nakedret"
     ],
     "enable"  : [
       "tagalign",
@@ -20,7 +19,10 @@
       "depguard": {
         "rules": {
           "main": {
-            "list-mode": "lax"
+            "list-mode": "lax",
+            "allow"    : [
+              "**"
+            ]
           }
         }
       },
