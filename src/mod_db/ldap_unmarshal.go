@@ -1,4 +1,4 @@
-package mod_ldap
+package mod_db
 
 import (
 	"net/netip"

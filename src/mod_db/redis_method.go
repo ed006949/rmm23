@@ -6,9 +6,6 @@ import (
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/gomodule/redigo/redis"
-
-	"rmm23/src/mod_errors"
-	"rmm23/src/mod_ldap"
 )
 
 // func (e *ElementDomain) redisearchSchema() *redisearch.Schema { return buildRedisearchSchema(e) }
@@ -42,13 +39,8 @@ func (r *Conf) dial() (err error) {
 		MaxConnLifetime: connMaxConnLifetime,
 	}, r.Name)
 
-	switch {
-	case r.rsClient == nil:
-		return mod_errors.ENoConn
-	}
-
-	// _ = r.rsClient.Drop()           // test&dev, delete everything
-	_ = r.rsClient.DropIndex(false) // prod, delete index only
+	// _ = r.rsClient.Drop()           // test&dev
+	_ = r.rsClient.DropIndex(false) // prod
 
 	return
 }
@@ -57,7 +49,7 @@ func (r *Conf) getDoc(inbound string) (outbound *redisearch.Document, err error)
 	return r.rsClient.Get(inbound)
 }
 
-func (r *Conf) getDocByUUID(inbound mod_ldap.AttrUUID) (outbound *redisearch.Document, err error) {
+func (r *Conf) getDocByUUID(inbound AttrUUID) (outbound *redisearch.Document, err error) {
 	return r.getDoc(inbound.Entry())
 }
 

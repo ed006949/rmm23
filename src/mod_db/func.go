@@ -32,19 +32,23 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		return
 	}
 
-	switch err = outbound.rsClient.CreateIndexWithIndexDefinition(
+	switch swErr := outbound.rsClient.CreateIndexWithIndexDefinition(
 		schema,
-		redisearch.NewIndexDefinition().AddPrefix("ldap:entry:"),
+		redisearch.NewIndexDefinition().AddPrefix(entryDocIDHeader),
 	); {
-	case mod_errors.Contains(err, mod_errors.EIndexExist):
-	case err != nil:
-		return
+	case mod_errors.Contains(swErr, mod_errors.EIndexExist):
+		var (
+			index, _ = outbound.rsClient.Info()
+		)
+		l.Z{l.E: mod_errors.EIndexExist, l.M: index.Name}.Notice()
+	case swErr != nil:
+		return swErr
 	}
 
 	for _, doc := range docs {
 		switch swErr := outbound.rsClient.Index([]redisearch.Document{*doc}...); {
 		case mod_errors.Contains(swErr, mod_errors.EDocExist):
-			l.Z{l.E: mod_errors.EDocExist, l.M: doc.Properties[_dn.String()]}.Warning()
+			l.Z{l.E: mod_errors.EDocExist, l.M: doc.Properties[_dn.String()]}.Notice()
 		case swErr != nil:
 			return swErr
 		}

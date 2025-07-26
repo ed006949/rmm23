@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/go-ldap/ldap/v3"
-	"github.com/google/uuid"
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_slices"
@@ -23,7 +22,7 @@ func (r *Conf) SearchFn(fn func(fnBaseDN string, fnSearchResultType string, fnSe
 	for _, b := range r.Domains {
 		for _, d := range r.Settings {
 			var (
-				baseDN        = mod_slices.JoinStrings([]string{d.DN.String(), b.DN.String()}, ",", mod_slices.FlagFilterEmpty)
+				baseDN        = mod_slices.JoinStrings([]string{d.DN, b.DN}, ",", mod_slices.FlagFilterEmpty)
 				searchRequest = ldap.NewSearchRequest(
 					baseDN,             // Base DN
 					d.Scope.Int(),      // Scope - search entire tree
@@ -93,13 +92,6 @@ func (r *Conf) close() (err error) {
 	}
 
 	return r.conn.Close()
-}
-
-func (r *AttrDN) String() string { return string(*r) }
-
-func (r *AttrUUID) String() string { return uuid.UUID(*r).String() }
-func (r *AttrUUID) Entry() string {
-	return mod_slices.JoinStrings([]string{"ldap", "entry", r.String()}, ":", mod_slices.FlagNone)
 }
 
 func (d *AttrSearchScope) UnmarshalJSON(data []byte) (err error) {

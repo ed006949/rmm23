@@ -37,7 +37,7 @@ const (
 )
 
 const (
-	entryDocIDHeader = "ldap" + ":" + "entry"
+	entryDocIDHeader = "ldap" + ":" + "entry" + ":"
 )
 
 const (
