@@ -47,7 +47,7 @@ func (r *Conf) dial() (err error) {
 		return mod_errors.ENoConn
 	}
 
-	// _ = r.rsClient.Drop() // test&dev, delete everything
+	_ = r.rsClient.Drop()           // test&dev, delete everything
 	_ = r.rsClient.DropIndex(false) // prod, delete index only
 
 	return

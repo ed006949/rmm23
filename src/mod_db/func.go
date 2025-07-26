@@ -2,8 +2,10 @@ package mod_db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
+	"github.com/google/uuid"
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
@@ -41,48 +43,40 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 
 	for _, doc := range docs {
 		var (
-			tDoc  *redisearch.Document
-			count int
+			idDoc *redisearch.Document
 		)
 
-		switch tDoc, err = outbound.getDoc(doc.Id); {
+		switch idDoc, err = outbound.getDoc(doc.Id); {
 		case err != nil: // error
 			return err
-		case tDoc == nil: // not found
-			switch err = outbound.rsClient.Index([]redisearch.Document{*doc}...); {
-			case mod_errors.Contains(err, mod_errors.EDocExist):
-				return
-			case err != nil:
-				return
-			}
-		default: // found
+		case idDoc != nil: // Document already exist, hash new `UUID` from `DN`
+			var (
+				count int
+			)
+
 			switch _, count, err = outbound.getDocsByKV(_dn, doc.Properties[_dn.String()]); {
-			case err != nil:
+			case err != nil: // error
 				return
-			case count > 0:
+			case count == 0: // same `DN` not exist, hash new `UUID` from `DN`
+				var (
+					newUUID = mod_ldap.AttrUUID(uuid.NewSHA1(uuid.Nil, []byte(fmt.Sprint(doc.Properties[_dn.String()]))))
+				)
+
+				doc.Id = newUUID.Entry()
+				doc.Set(_uuid.String(), newUUID)
+			case count == 1: // same `DN` exist, skip
+				continue
+			case count > 1: // multiple 'DN' exist
 				return mod_errors.EUnwilling
 			}
-			// fmt.Print(tDoc)
 		}
 
-		// switch err = outbound.rsClient.Index([]redisearch.Document{*doc}...); {
-		// case mod_errors.Contains(err, mod_errors.EDocExist):
-		// 	var (
-		// 		count int
-		// 	)
-		//
-		// 	switch _, count, err = outbound.getDocsByKV(_dn, doc.Properties[_dn.String()]); {
-		// 	case err != nil:
-		// 		return
-		// 	case count > 0:
-		// 		return mod_errors.EUnwilling
-		// 	}
-		// //
-		//
-		// //
-		// case err != nil:
-		// 	return
-		// }
+		switch err = outbound.rsClient.Index([]redisearch.Document{*doc}...); {
+		case mod_errors.Contains(err, mod_errors.EDocExist):
+			fmt.Print(doc.Id, "\n")
+		case err != nil:
+			return
+		}
 	}
 
 	return
