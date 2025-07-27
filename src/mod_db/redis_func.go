@@ -162,7 +162,22 @@ func setPayload(doc *redisearch.Document, data interface{}, includePayload bool)
 
 func getFieldValue(schemaField *redisearch.Field, structField *reflect.Value) (fieldValue any) {
 	switch schemaField.Type {
-	case redisearch.TagField, redisearch.TextField:
+	case redisearch.TagField:
+		switch structField.Kind() {
+		case reflect.Slice, reflect.Array:
+			var (
+				elements []string
+			)
+			for i := 0; i < structField.Len(); i++ {
+				elements = append(elements, fmt.Sprintf("%v", structField.Index(i).Interface()))
+			}
+
+			fieldValue = mod_slices.Join(elements, string(sliceSeparator), mod_slices.FlagNormalize)
+			// fieldValue = strings.Join(elements, string(sliceSeparator))
+		default:
+			fieldValue = fmt.Sprintf("%v", structField.Interface())
+		}
+	case redisearch.TextField:
 		fieldValue = fmt.Sprintf("%v", structField.Interface())
 	case redisearch.NumericField:
 		switch structField.Kind() {
