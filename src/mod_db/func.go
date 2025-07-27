@@ -64,6 +64,16 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		fmt.Printf("%v\n", b)
 	default:
 		fmt.Printf("%v\n", a)
+
+		var (
+			e entry
+		)
+		switch err = unmarshalRedisearchDoc(&a[0], &e); {
+		case err != nil:
+			return
+		}
+
+		fmt.Printf("%v\n", e)
 	}
 
 	switch a, b, c := outbound.getDocsByKV(_uidNumber, strconv.Itoa(1000)+" "+strconv.Itoa(100000)); {

@@ -1,11 +1,8 @@
 package mod_db
 
 import (
-	"encoding/json"
 	"fmt"
 	"reflect"
-	"strconv"
-	"strings"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/vmihailenco/msgpack/v5"
@@ -74,6 +71,7 @@ func setStructFieldValue(fieldValue reflect.Value, propValue interface{}, target
 		return fmt.Errorf("cannot set unexported field '%s'", fieldValue.Type().Name())
 	}
 
+	// Handle pointer types
 	switch targetType.Kind() {
 	case reflect.Ptr:
 		switch {
@@ -85,105 +83,11 @@ func setStructFieldValue(fieldValue reflect.Value, propValue interface{}, target
 		targetType = targetType.Elem()
 	}
 
-	switch targetType.Kind() {
-	case reflect.String:
-		switch s, ok := propValue.(string); {
-		case ok:
-			fieldValue.SetString(s)
-		default:
-			return fmt.Errorf("expected string for field type '%s', got %T", targetType.Kind(), propValue)
-		}
-
-	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		switch f, ok := propValue.(float64); {
-		case ok:
-			fieldValue.SetInt(int64(f))
-		default:
-			return fmt.Errorf("expected numeric (float64) for field type '%s', got %T", targetType.Kind(), propValue)
-		}
-
-	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		switch f, ok := propValue.(float64); {
-		case ok:
-			fieldValue.SetUint(uint64(f))
-		default:
-			return fmt.Errorf("expected numeric (float64) for field type '%s', got %T", targetType.Kind(), propValue)
-		}
-
-	case reflect.Float32, reflect.Float64:
-		switch f, ok := propValue.(float64); {
-		case ok:
-			fieldValue.SetFloat(f)
-		default:
-			return fmt.Errorf("expected float64 for field type '%s', got %T", targetType.Kind(), propValue)
-		}
-
-	case reflect.Bool:
-		switch {
-		case propValue == nil:
-			return fmt.Errorf("expected bool, string, or numeric for field type '%s', got nil", targetType.Kind())
-		case reflect.TypeOf(propValue).Kind() == reflect.Bool:
-			fieldValue.SetBool(propValue.(bool))
-		case reflect.TypeOf(propValue).Kind() == reflect.String:
-			var (
-				parsedBool bool
-			)
-			switch parsedBool, err = strconv.ParseBool(propValue.(string)); {
-			case err != nil:
-				return fmt.Errorf("failed to parse bool string '%s': %w", propValue.(string), err)
-			default:
-				fieldValue.SetBool(parsedBool)
-			}
-		case reflect.TypeOf(propValue).Kind() == reflect.Float64:
-			fieldValue.SetBool(propValue.(float64) != 0.0)
-		default:
-			return fmt.Errorf("expected bool, string, or numeric for field type '%s', got %T", targetType.Kind(), propValue)
-		}
-
-	case reflect.Slice, reflect.Array:
-		switch s, ok := propValue.(string); {
-		case ok:
-			var (
-				elements      = strings.Split(s, string(sliceSeparator))
-				sliceElemType = targetType.Elem()
-				newSlice      = reflect.MakeSlice(targetType, len(elements), len(elements))
-			)
-			for i, elemStr := range elements {
-				var (
-					elemVal = reflect.New(sliceElemType).Elem()
-				)
-				switch err = setStructFieldValue(elemVal, elemStr, sliceElemType); {
-				case err != nil:
-					return fmt.Errorf("failed to unmarshal slice element %d ('%s') for field type '%s': %w", i, elemStr, targetType.Kind(), err)
-				default:
-					newSlice.Index(i).Set(elemVal)
-				}
-			}
-
-			fieldValue.Set(newSlice)
-		default:
-			return fmt.Errorf("expected string for slice/array field type '%s', got %T", targetType.Kind(), propValue)
-		}
-
-	case reflect.Map:
-		switch s, ok := propValue.(string); {
-		case ok:
-			var (
-				newMap = reflect.MakeMap(targetType)
-			)
-			switch err = json.Unmarshal([]byte(s), newMap.Addr().Interface()); {
-			case err != nil:
-				return fmt.Errorf("failed to unmarshal JSON string to map for field type '%s': %w", targetType.Kind(), err)
-			default:
-				fieldValue.Set(newMap)
-			}
-		default:
-			return fmt.Errorf("expected string for map field type '%s', got %T", targetType.Kind(), propValue)
-		}
-
+	// Check for RedisUnmarshaler interface
+	switch unmarshaler, ok := fieldValue.Addr().Interface().(RedisUnmarshaler); {
+	case ok:
+		return unmarshaler.UnmarshalRedis(propValue)
 	default:
-		return fmt.Errorf("unsupported target field type for unmarshaling: %s (field value type %T)", targetType.Kind(), propValue)
+		return fmt.Errorf("field type %s does not implement RedisUnmarshaler interface", targetType.Kind())
 	}
-
-	return nil
 }
