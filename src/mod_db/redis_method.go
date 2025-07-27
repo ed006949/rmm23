@@ -6,6 +6,8 @@ import (
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/gomodule/redigo/redis"
+
+	"rmm23/src/mod_errors"
 )
 
 // func (e *ElementDomain) redisearchSchema() *redisearch.Schema { return buildRedisearchSchema(e) }
@@ -13,7 +15,7 @@ import (
 // func (e *ElementUser) redisearchSchema() *redisearch.Schema   { return buildRedisearchSchema(e) }
 // func (e *ElementHost) redisearchSchema() *redisearch.Schema   { return buildRedisearchSchema(e) }
 
-func (r *entry) redisearchSchema() (outbound *redisearch.Schema, err error) {
+func (r *entry) redisearchSchema() (schema *redisearch.Schema, schemaMap schemaMapType, err error) {
 	return buildRedisearchSchema(r)
 }
 
@@ -39,8 +41,38 @@ func (r *Conf) dial() (err error) {
 		MaxConnLifetime: connMaxConnLifetime,
 	}, r.Name)
 
-	// _ = r.rsClient.Drop()           // test&dev
-	_ = r.rsClient.DropIndex(false) // prod
+	return
+}
+
+func (r *Conf) createIndex() (err error) {
+	var (
+		indexInfo *redisearch.IndexInfo
+	)
+
+	// define indexDefinition
+	r.indexDefinition = redisearch.NewIndexDefinition().AddPrefix(entryDocIDHeader)
+
+	_ = r.rsClient.Drop()
+	_ = r.rsClient.DropIndex(true)
+	// _ = outbound.rsClient.DropIndex(false)
+	switch swErr := r.rsClient.CreateIndexWithIndexDefinition(r.schema, r.indexDefinition); {
+	case mod_errors.Contains(swErr, mod_errors.EIndexExist):
+	case swErr != nil:
+		return swErr
+	}
+
+	// wait for index to complete
+	switch indexInfo, err = r.rsClient.Info(); {
+	case err != nil:
+		return
+	}
+
+	for indexInfo.IsIndexing {
+		switch indexInfo, err = r.rsClient.Info(); {
+		case err != nil:
+			return
+		}
+	}
 
 	return
 }
@@ -53,6 +85,23 @@ func (r *Conf) getDocByUUID(inbound attrUUID) (outbound *redisearch.Document, er
 	return r.getDoc(inbound.Entry())
 }
 
-func (r *Conf) getDocsByKV(key entryFieldName, value any) (outbound []redisearch.Document, count int, err error) {
-	return r.rsClient.Search(redisearch.NewQuery(createQuery(key, value)).Limit(0, connMaxPaging))
+func (r *Conf) getDocsByKV(key entryFieldName, value string) (outbound []redisearch.Document, count int, err error) {
+	var (
+		interim string
+	)
+
+	switch r.schemaMap[key] {
+	case redisearch.TextField:
+		interim = "@" + key.String() + ":" + escapeQueryValue(value) + ""
+	case redisearch.NumericField:
+		interim = "@" + key.String() + ":[" + escapeQueryValue(value) + "]"
+	case redisearch.GeoField:
+		interim = "@" + key.String() + ":[" + escapeQueryValue(value) + "]"
+	case redisearch.TagField:
+		interim = "@" + key.String() + ":{" + escapeQueryValue(value) + "}"
+	default:
+		return nil, 0, mod_errors.EUnwilling
+	}
+
+	return r.rsClient.Search(redisearch.NewQuery(interim).SetInFields(key.String()).Limit(0, connMaxPaging))
 }

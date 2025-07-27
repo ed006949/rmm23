@@ -1,7 +1,6 @@
 package mod_db
 
 import (
-	"fmt"
 	"reflect"
 	"strings"
 
@@ -15,16 +14,17 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, err error) {
+func buildRedisearchSchema(inbound interface{}) (schema *redisearch.Schema, schemaMap schemaMapType, err error) {
 	var (
-		schema = redisearch.NewSchema(redisearch.DefaultOptions)
-		rt     reflect.Type
+		rt reflect.Type
 	)
 
 	switch rt, err = mod_reflect.GetStructRT(inbound); {
 	case err != nil:
 		return
 	}
+
+	schema = redisearch.NewSchema(redisearch.DefaultOptions)
 
 	for i := 0; i < rt.NumField(); i++ {
 		var (
@@ -52,11 +52,11 @@ func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, er
 
 		switch {
 		case len(types) == 0:
-			return nil, mod_errors.ETagNoType
+			return nil, nil, mod_errors.ETagNoType
 		case len(types) > 1:
-			return nil, mod_errors.ETagMultiType
+			return nil, nil, mod_errors.ETagMultiType
 		case len(unknowns) > 0:
-			return nil, mod_errors.ETagUnknown
+			return nil, nil, mod_errors.ETagUnknown
 		}
 
 		switch {
@@ -77,11 +77,16 @@ func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, er
 		case types[rediSearchTagTypeGeo]:
 			schema.AddField(redisearch.NewGeoFieldOptions(redisTag, redisearch.GeoFieldOptions{}))
 		default:
-			return nil, mod_errors.EUnwilling
+			return nil, nil, mod_errors.EUnwilling
 		}
 	}
 
-	return schema, nil
+	schemaMap = make(schemaMapType)
+	for _, b := range schema.Fields {
+		schemaMap[entryFieldName(b.Name)] = b.Type
+	}
+
+	return
 }
 
 func getLDAPDocs(inbound *mod_ldap.Conf, schema *redisearch.Schema) (outbound []*redisearch.Document, err error) {
@@ -133,25 +138,20 @@ func getLDAPDocs(inbound *mod_ldap.Conf, schema *redisearch.Schema) (outbound []
 	return
 }
 
-func createQuery(inbound ...any) (outbound string) {
-	return escapeQuery(mod_slices.Join(inbound, ":", mod_slices.FlagNone))
-}
-
-// escapeQuery escapes special characters in a string for Redisearch queries.
-// It adds a backslash before any character that has special meaning in Redisearch query syntax.
-func escapeQuery(inbound any) (outbound string) {
-	var (
-		interim strings.Builder
+func escapeQueryValue(inbound string) string {
+	replacer := strings.NewReplacer(
+		"=", "\\=",
+		",", "\\,",
+		"(", "\\(",
+		")", "\\)",
+		"{", "\\{",
+		"}", "\\}",
+		"[", "\\[",
+		"]", "\\]",
+		"\"", "\\\"",
+		"'", "\\'",
+		"~", "\\~",
 	)
 
-	for _, b := range fmt.Sprint(inbound) {
-		switch b {
-		case ',', '.', '<', '>', '{', '}', '[', ']', '"', '\'', ':', ';', '!', '@', '#', '$', '%', '^', '&', '*', '-', '+', '=', '~', '|':
-			interim.WriteRune('\\') // Add escape character
-		}
-
-		interim.WriteRune(b) // Add the character itself
-	}
-
-	return interim.String()
+	return replacer.Replace(inbound)
 }

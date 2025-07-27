@@ -14,4 +14,5 @@ func (r *attrEntryType) Parse(inbound string) (err error) {
 		return
 	}
 }
-func (r entryFieldName) String() (outbound string) { return string(r) }
+func (r *entryFieldName) String() (outbound string) { return string(*r) }
+func (r *attrEntryType) String() (outbound string)  { return entryTypeName[*r] }
