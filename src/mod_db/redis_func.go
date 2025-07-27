@@ -14,7 +14,6 @@ import (
 	"rmm23/src/mod_ldap"
 	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_slices"
-	"rmm23/src/mod_strings"
 )
 
 func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, err error) {
@@ -32,7 +31,7 @@ func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, er
 		var (
 			field                    = rt.Field(i)
 			redisTag, redisearchTag  = field.Tag.Get(redisTagName), field.Tag.Get(rediSearchTagName)
-			parts                    = mod_slices.SplitString(redisearchTag, mod_strings.TagSeparator, mod_slices.FlagNormalize)
+			parts                    = mod_slices.SplitString(redisearchTag, tagSeparator, mod_slices.FlagNormalize)
 			types, options, unknowns = make(map[string]bool), make(map[string]bool), make(map[string]bool)
 		)
 
@@ -74,7 +73,7 @@ func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, er
 		case types[rediSearchTagTypeTag]:
 			schema.AddField(redisearch.NewTagFieldOptions(redisTag, redisearch.TagFieldOptions{
 				Sortable:  options[rediSearchTagOptionSortable],
-				Separator: mod_strings.SliceSeparator[0],
+				Separator: sliceSeparator,
 			}))
 		case types[rediSearchTagTypeGeo]:
 			schema.AddField(redisearch.NewGeoFieldOptions(redisTag, redisearch.GeoFieldOptions{}))
@@ -210,9 +209,9 @@ func getLDAPDocs(inbound *mod_ldap.Conf, schema *redisearch.Schema) (outbound []
 					return
 				}
 
-				fnEntry.BaseDN = AttrDN(fnBaseDN)
+				fnEntry.BaseDN = attrDN(fnBaseDN)
 				fnEntry.Status = entryStatusLoaded
-				fnEntry.UUID = AttrUUID(uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))) // generate new `DN`-based `UUID`
+				fnEntry.UUID = attrUUID(uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))) // generate new `DN`-based `UUID`
 
 				switch fnDoc, fnErr = newRedisearchDocument(
 					schema,

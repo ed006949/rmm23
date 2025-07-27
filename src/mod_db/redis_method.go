@@ -49,7 +49,7 @@ func (r *Conf) getDoc(inbound string) (outbound *redisearch.Document, err error)
 	return r.rsClient.Get(inbound)
 }
 
-func (r *Conf) getDocByUUID(inbound AttrUUID) (outbound *redisearch.Document, err error) {
+func (r *Conf) getDocByUUID(inbound attrUUID) (outbound *redisearch.Document, err error) {
 	return r.getDoc(inbound.Entry())
 }
 

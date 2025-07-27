@@ -4,7 +4,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (r *AttrDN) String() string { return string(*r) }
+func (r *attrDN) String() string { return string(*r) }
 
-func (r *AttrUUID) String() string { return uuid.UUID(*r).String() }
-func (r *AttrUUID) Entry() string  { return entryDocIDHeader + r.String() }
+func (r *attrUUID) String() string { return uuid.UUID(*r).String() }
+func (r *attrUUID) Entry() string  { return entryDocIDHeader + r.String() }

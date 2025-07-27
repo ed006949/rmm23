@@ -6,6 +6,12 @@ import (
 )
 
 const (
+	sliceSeparator byte = 0x1f
+	jsonPathHeader      = "$."
+	tagSeparator        = ","
+)
+
+const (
 	redisTagName                = "redis"
 	rediSearchTagName           = "redisearch"
 	rediSearchTagTypeIgnore     = "-"
@@ -37,7 +43,11 @@ const (
 )
 
 const (
-	entryDocIDHeader = "ldap" + ":" + "entry" + ":"
+	_ldap  = "ldap"
+	_entry = "entry"
+)
+const (
+	entryDocIDHeader = _ldap + ":" + _entry + ":"
 )
 
 const (

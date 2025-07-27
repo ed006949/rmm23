@@ -12,47 +12,42 @@ import (
 
 type attrCN string                                     //
 type attrCreateTimestamp time.Time                     //
-type attrCreatorsName AttrDN                           //
-type AttrDN string                                     //
+type attrCreatorsName attrDN                           //
+type attrDN string                                     //
+type attrDNs []attrDN                                  //
 type attrDescription string                            //
-type AttrDestinationIndicators []string                // interim host list
+type attrDestinationIndicators []string                // interim host list
 type attrDisplayName string                            //
 type attrEntryUUID uuid.UUID                           //
 type attrGIDNumber uint64                              //
 type attrHomeDirectory string                          //
-type AttrIPHostNumbers []netip.Prefix                  //
-type AttrLabeledURIs []LabeledURILegacy                // custom schema alternative TO DO implement custom schemas
-type AttrMails []string                                //
-type attrMembers []AttrDN                              //
-type attrMembersOf []AttrDN                            //
-type attrModifiersName AttrDN                          //
+type attrID string                                     //
+type attrIDNumber uint64                               //
+type attrIPHostNumbers []netip.Prefix                  //
+type attrLabeledURIs []labeledURILegacy                // custom schema alternative TO DO implement custom schemas
+type attrMails []string                                //
+type attrMembers []attrDN                              //
+type attrMembersOf []attrDN                            //
+type attrModifiersName attrDN                          //
 type attrModifyTimestamp time.Time                     //
 type attrO string                                      //
 type attrOU string                                     //
 type attrObjectClasses []string                        //
-type attrOwners []AttrDN                               //
+type attrOwners []attrDN                               //
 type attrSN string                                     //
-type AttrSSHPublicKeys map[string]mod_ssh.PublicKey    //
+type attrSSHPublicKeys map[string]mod_ssh.PublicKey    //
+type attrString string                                 //
+type attrStrings []attrString                          //
 type attrTelephoneNumbers []string                     //
 type attrTelexNumbers []string                         //
+type attrTimestamp time.Time                           //
 type attrUID string                                    //
 type attrUIDNumber uint64                              //
-type AttrUserPKCS12s map[AttrDN]mod_crypto.Certificate // any type of cert-key pairs list (transcoding may apply)
-type AttrUserPassword string                           //
+type attrUUID uuid.UUID                                //
+type attrUserPKCS12s map[attrDN]mod_crypto.Certificate // any type of cert-key pairs list (transcoding may apply)
+type attrUserPassword string                           //
 
-type AttrDNs []AttrDN           //
-type AttrObjectClasses []string //
-type AttrID string              //
-type AttrIDNumber uint64        //
-type AttrString string          //
-type AttrStrings []AttrString   //
-type AttrTimestamp time.Time    //
-type AttrUUID uuid.UUID         //
-
-type LabeledURILegacy struct {
+type labeledURILegacy struct {
 	Key   string
 	Value string
 }
-
-type AttrSearchScope int
-type AttrSearchFilter string
