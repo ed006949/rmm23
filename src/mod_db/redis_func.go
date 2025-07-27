@@ -7,7 +7,6 @@ import (
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/go-ldap/ldap/v3"
-	"github.com/google/uuid"
 	"github.com/vmihailenco/msgpack/v5"
 
 	"rmm23/src/mod_errors"
@@ -211,7 +210,7 @@ func getLDAPDocs(inbound *mod_ldap.Conf, schema *redisearch.Schema) (outbound []
 
 				fnEntry.BaseDN = attrDN(fnBaseDN)
 				fnEntry.Status = entryStatusLoaded
-				fnEntry.UUID = attrUUID(uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))) // generate new `DN`-based `UUID`
+				fnEntry.newUUID()
 
 				switch fnDoc, fnErr = newRedisearchDocument(
 					schema,

@@ -63,11 +63,6 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 		// Fill the field with the distinguishedName if the tag key is `dn`
 		switch fieldTag {
 		case "dn":
-			switch _, err = ldap.ParseDN(e.DN); {
-			case err != nil:
-				return
-			}
-
 			fv.SetString(e.DN)
 
 			continue
@@ -84,10 +79,10 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 
 		switch fieldType := fv.Interface().(type) {
 		default:
-			switch reflect.TypeOf(fieldType).Kind() {
+			switch rt := reflect.TypeOf(fieldType); rt.Kind() {
 			case reflect.Map:
 				var (
-					ptrVal = reflect.MakeMap(reflect.TypeOf(fieldType))
+					ptrVal = reflect.MakeMap(rt)
 				)
 
 				switch unmarshaler, ok := ptrVal.Interface().(LDAPAttributeUnmarshaler); {
@@ -101,7 +96,7 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 				}
 			default:
 				var (
-					ptrVal = reflect.New(reflect.TypeOf(fieldType))
+					ptrVal = reflect.New(rt)
 				)
 
 				switch unmarshaler, ok := ptrVal.Interface().(LDAPAttributeUnmarshaler); {
