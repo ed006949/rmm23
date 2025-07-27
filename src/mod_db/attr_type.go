@@ -10,6 +10,9 @@ import (
 	"rmm23/src/mod_ssh"
 )
 
+type attrEntryType int
+type attrEntryStatus int
+
 type attrCN string                                     //
 type attrCreateTimestamp time.Time                     //
 type attrCreatorsName attrDN                           //

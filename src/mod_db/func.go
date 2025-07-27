@@ -17,7 +17,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	)
 
 	// predefine schema
-	switch schema, err = new(Entry).redisearchSchema(); {
+	switch schema, err = new(entry).redisearchSchema(); {
 	case err != nil:
 		return
 	}
@@ -40,7 +40,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		var (
 			index, _ = outbound.rsClient.Info()
 		)
-		l.Z{l.E: mod_errors.EIndexExist, l.M: index.Name}.Notice()
+		l.Z{l.E: swErr, l.M: index.Name}.Notice()
 	case swErr != nil:
 		return swErr
 	}
@@ -48,7 +48,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	for _, doc := range docs {
 		switch swErr := outbound.rsClient.Index([]redisearch.Document{*doc}...); {
 		case mod_errors.Contains(swErr, mod_errors.EDocExist):
-			l.Z{l.E: mod_errors.EDocExist, l.M: doc.Properties[_dn.String()]}.Notice()
+			l.Z{l.E: swErr, l.M: doc.Properties[_dn.String()]}.Notice()
 		case swErr != nil:
 			return swErr
 		}

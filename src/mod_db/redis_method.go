@@ -13,7 +13,7 @@ import (
 // func (e *ElementUser) redisearchSchema() *redisearch.Schema   { return buildRedisearchSchema(e) }
 // func (e *ElementHost) redisearchSchema() *redisearch.Schema   { return buildRedisearchSchema(e) }
 
-func (r *Entry) redisearchSchema() (outbound *redisearch.Schema, err error) {
+func (r *entry) redisearchSchema() (outbound *redisearch.Schema, err error) {
 	return buildRedisearchSchema(r)
 }
 
