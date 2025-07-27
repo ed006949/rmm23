@@ -7,6 +7,7 @@ import (
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/gomodule/redigo/redis"
 
+	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 )
 
@@ -52,9 +53,14 @@ func (r *Conf) createIndex() (err error) {
 	// define indexDefinition
 	r.indexDefinition = redisearch.NewIndexDefinition().AddPrefix(entryDocIDHeader)
 
-	// _ = r.rsClient.Drop()
+	switch l.CLEAR {
+	case true:
+		_ = r.rsClient.Drop()
 	// _ = r.rsClient.DropIndex(true)
-	_ = r.rsClient.DropIndex(false)
+	default:
+		_ = r.rsClient.DropIndex(false)
+	}
+
 	switch swErr := r.rsClient.CreateIndexWithIndexDefinition(r.schema, r.indexDefinition); {
 	case mod_errors.Contains(swErr, mod_errors.EIndexExist):
 	case swErr != nil:

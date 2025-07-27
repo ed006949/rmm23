@@ -13,6 +13,10 @@ import (
 )
 
 var (
+	CLEAR = true
+)
+
+var (
 	buildName      string                       // to be set by builder
 	buildVerbosity = zerolog.InfoLevel.String() // defaults
 	buildDryRun    = "true"                     // defaults
@@ -115,7 +119,7 @@ var (
 			}
 		}(),
 		config: buildConfig,
-		time: time.Unix(mod_errors.StripErr1(strconv.ParseInt(buildTime, 10, 64)),0),
+		time:   time.Unix(mod_errors.StripErr1(strconv.ParseInt(buildTime, 10, 64)), 0),
 		commit: buildCommit,
 	}
 )

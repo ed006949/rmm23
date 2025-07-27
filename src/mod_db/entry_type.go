@@ -16,13 +16,13 @@ type entry struct {
 	BaseDN attrDN          `json:"baseDN,omitempty" msgpack:"baseDN,omitempty" redis:"baseDN" redisearch:"tag,sortable"`     //
 
 	// element meta data
-	UUID            attrUUID          `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid,omitempty"            redis:"uuid"            redisearch:"numeric,sortable"` // must be unique
-	DN              attrDN            `json:"dn,omitempty"              ldap:"dn"              msgpack:"dn,omitempty"              redis:"dn"              redisearch:"tag,sortable"`     // must be unique
-	ObjectClass     attrObjectClasses `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass,omitempty"     redis:"objectClass"     redisearch:"tag"`              // entry type
-	CreatorsName    attrDN            `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName,omitempty"    redis:"creatorsName"    redisearch:"tag"`              //
-	CreateTimestamp attrTimestamp     `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"numeric"`          //
-	ModifiersName   attrDN            `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName,omitempty"   redis:"modifiersName"   redisearch:"tag"`              //
-	ModifyTimestamp attrTimestamp     `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"numeric"`          //
+	UUID            attrUUID          `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid,omitempty"            redis:"uuid"            redisearch:"tag,sortable"` // must be unique
+	DN              attrDN            `json:"dn,omitempty"              ldap:"dn"              msgpack:"dn,omitempty"              redis:"dn"              redisearch:"tag,sortable"` // must be unique
+	ObjectClass     attrObjectClasses `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass,omitempty"     redis:"objectClass"     redisearch:"tag"`          // entry type
+	CreatorsName    attrDN            `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName,omitempty"    redis:"creatorsName"    redisearch:"tag"`          //
+	CreateTimestamp attrTimestamp     `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"tag"`          //
+	ModifiersName   attrDN            `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName,omitempty"   redis:"modifiersName"   redisearch:"tag"`          //
+	ModifyTimestamp attrTimestamp     `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"tag"`          //
 
 	// element data
 	CN                   attrString                `json:"cn,omitempty"                   ldap:"cn"                   msgpack:"cn,omitempty"                   redis:"cn"                   redisearch:"tag"`              // RDN in group's context
@@ -53,12 +53,12 @@ type entry struct {
 	ACL string `json:"host_acl,omitempty" msgpack:"host_acl,omitempty" redis:"host_acl" redisearch:"tag"` // entry's ACL
 
 	// host specific data
-	HostType        string       `json:"host_type,omitempty"         msgpack:"host_type,omitempty"         redis:"host_type"         redisearch:"tag"`              // host type `(provider|interim|openvpn|ciscovpn)`
-	HostASN         uint32       `json:"host_asn,omitempty"          msgpack:"host_asn,omitempty"          redis:"host_asn"          redisearch:"numeric,sortable"` //
-	HostUpstreamASN uint32       `json:"host_upstream_asn,omitempty" msgpack:"host_upstream_asn,omitempty" redis:"host_upstream_asn" redisearch:"numeric"`          // upstream route
-	HostHostingUUID uint32       `json:"host_hosting_uuid,omitempty" msgpack:"host_hosting_uuid,omitempty" redis:"host_hosting_uuid" redisearch:"tag"`              // (?) replace with member/memberOf
-	HostURL         *mod_net.URL `json:"host_url,omitempty"          msgpack:"host_url,omitempty"          redis:"host_url"          redisearch:"tag,sortable"`     //
-	HostListen      *netip.Addr  `json:"host_listen,omitempty"       msgpack:"host_listen,omitempty"       redis:"host_listen"       redisearch:"tag,sortable"`     //
+	HostType        string       `json:"host_type,omitempty"         msgpack:"host_type,omitempty"         redis:"host_type"         redisearch:"tag"`          // host type `(provider|interim|openvpn|ciscovpn)`
+	HostASN         uint32       `json:"host_asn,omitempty"          msgpack:"host_asn,omitempty"          redis:"host_asn"          redisearch:"tag,sortable"` //
+	HostUpstreamASN uint32       `json:"host_upstream_asn,omitempty" msgpack:"host_upstream_asn,omitempty" redis:"host_upstream_asn" redisearch:"tag"`          // upstream route
+	HostHostingUUID uint32       `json:"host_hosting_uuid,omitempty" msgpack:"host_hosting_uuid,omitempty" redis:"host_hosting_uuid" redisearch:"tag"`          // (?) replace with member/memberOf
+	HostURL         *mod_net.URL `json:"host_url,omitempty"          msgpack:"host_url,omitempty"          redis:"host_url"          redisearch:"tag,sortable"` //
+	HostListen      *netip.Addr  `json:"host_listen,omitempty"       msgpack:"host_listen,omitempty"       redis:"host_listen"       redisearch:"tag,sortable"` //
 
 	// specific data (space-separated KV DB stored as labeledURI)
 	LabeledURI attrLabeledURIs `json:"labeledURI,omitempty" ldap:"labeledURI" msgpack:"labeledURI,omitempty" redis:"labeledURI" redisearch:"tag"` //

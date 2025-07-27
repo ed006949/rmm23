@@ -8,6 +8,7 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
 
+	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
 	"rmm23/src/mod_reflect"
@@ -90,6 +91,11 @@ func buildRedisearchSchema(inbound interface{}) (schema *redisearch.Schema, sche
 }
 
 func getLDAPDocs(inbound *mod_ldap.Conf, schema *redisearch.Schema) (outbound []*redisearch.Document, err error) {
+	switch l.CLEAR {
+	case false:
+		return
+	}
+
 	var (
 		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
 			for _, fnB := range fnSearchResult.Entries {

@@ -3,6 +3,7 @@ package mod_db
 import (
 	"context"
 	"fmt"
+	"strconv"
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 
@@ -12,6 +13,8 @@ import (
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
+	l.CLEAR = false
+
 	var (
 		docs      []*redisearch.Document
 		indexInfo *redisearch.IndexInfo
@@ -23,10 +26,10 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		return
 	}
 
-	// switch docs, err = getLDAPDocs(inbound, outbound.schema); {
-	// case err != nil:
-	// 	return
-	// }
+	switch docs, err = getLDAPDocs(inbound, outbound.schema); {
+	case err != nil:
+		return
+	}
 
 	switch err = outbound.dial(); {
 	case err != nil:
@@ -46,7 +49,6 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	l.Z{l.M: indexInfo.Name, "indexing": indexInfo.IsIndexing, "schema": indexInfo.Schema.Fields}.Informational()
 
 	for _, doc := range docs {
-		// doc = doc
 		switch swErr := outbound.rsClient.Index([]redisearch.Document{*doc}...); {
 		case mod_errors.Contains(swErr, mod_errors.EDocExist):
 			l.Z{l.E: swErr, l.M: doc.Properties[string(_dn)]}.Debug()
@@ -55,7 +57,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		}
 	}
 
-	switch a, b, c := outbound.getDocsByKV(_dn, `"dc=domain,dc=tld"`); {
+	switch a, b, c := outbound.getDocsByKV(_dn, "dc=domain,dc=tld"); {
 	case c != nil:
 		return c
 	case b != 1 || len(a) != 1:
@@ -64,7 +66,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		fmt.Printf("%v\n", a)
 	}
 
-	switch a, b, c := outbound.getDocsByKV(_cn, "*"); {
+	switch a, b, c := outbound.getDocsByKV(_uidNumber, strconv.Itoa(1000)+" "+strconv.Itoa(100000)); {
 	case c != nil:
 		return c
 	case b != 1 || len(a) != 1:
