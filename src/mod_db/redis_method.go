@@ -52,9 +52,9 @@ func (r *Conf) createIndex() (err error) {
 	// define indexDefinition
 	r.indexDefinition = redisearch.NewIndexDefinition().AddPrefix(entryDocIDHeader)
 
-	_ = r.rsClient.Drop()
-	_ = r.rsClient.DropIndex(true)
-	// _ = outbound.rsClient.DropIndex(false)
+	// _ = r.rsClient.Drop()
+	// _ = r.rsClient.DropIndex(true)
+	_ = r.rsClient.DropIndex(false)
 	switch swErr := r.rsClient.CreateIndexWithIndexDefinition(r.schema, r.indexDefinition); {
 	case mod_errors.Contains(swErr, mod_errors.EIndexExist):
 	case swErr != nil:
