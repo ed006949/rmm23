@@ -10,8 +10,8 @@ import (
 	"rmm23/src/mod_ssh"
 )
 
-type attrEntryType int
-type attrEntryStatus int
+type attrEntryType int   //
+type attrEntryStatus int //
 
 type attrCN string                                     //
 type attrCreateTimestamp time.Time                     //
@@ -51,6 +51,6 @@ type attrUserPKCS12s map[attrDN]mod_crypto.Certificate // any type of cert-key p
 type attrUserPassword string                           //
 
 type labeledURILegacy struct {
-	Key   string
-	Value string
+	Key   string `json:"key,omitempty"   msgpack:"key,omitempty"`   //
+	Value string `json:"value,omitempty" msgpack:"value,omitempty"` //
 }
