@@ -11,7 +11,7 @@ import (
 	"github.com/vmihailenco/msgpack/v5"
 )
 
-func unmarshalRedisearchDocument(doc *redisearch.Document, outbound interface{}) (err error) {
+func unmarshalRedisearchDoc(doc *redisearch.Document, outbound interface{}) (err error) {
 	switch {
 	case doc == nil:
 		return fmt.Errorf("input redisearch.Document is nil")
