@@ -85,7 +85,7 @@ func buildRedisearchSchema(inbound interface{}) (outbound *redisearch.Schema, er
 	return schema, nil
 }
 
-func newRedisearchDocument(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (outbound *redisearch.Document, err error) {
+func marshalRedisearchDoc(schema *redisearch.Schema, docID string, score float32, data interface{}, includePayload bool) (outbound *redisearch.Document, err error) {
 	var (
 		rv reflect.Value
 	)
@@ -228,7 +228,7 @@ func getLDAPDocs(inbound *mod_ldap.Conf, schema *redisearch.Schema) (outbound []
 				fnEntry.Status = entryStatusLoaded
 				fnEntry.UUID = attrUUID(uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String())))
 
-				switch fnDoc, fnErr = newRedisearchDocument(
+				switch fnDoc, fnErr = marshalRedisearchDoc(
 					schema,
 					fnEntry.UUID.Entry(),
 					1.0,
