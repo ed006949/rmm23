@@ -22,9 +22,9 @@ func (r *Conf) SearchFn(fn func(fnBaseDN string, fnSearchResultType string, fnSe
 	for _, b := range r.Domains {
 		for _, d := range r.Settings {
 			var (
-				baseDN        = mod_slices.JoinStrings([]string{d.DN, b.DN}, ",", mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
+				requestDN     = mod_slices.JoinStrings([]string{d.DN, b.DN}, ",", mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
 				searchRequest = ldap.NewSearchRequest(
-					baseDN,             // Base DN
+					requestDN,          // Base DN
 					d.Scope.Int(),      // Scope - search entire tree
 					ldap.DerefAlways,   // Deref
 					0,                  // Size limit (0 = no limit)
@@ -42,7 +42,7 @@ func (r *Conf) SearchFn(fn func(fnBaseDN string, fnSearchResultType string, fnSe
 				return
 			}
 
-			switch err = fn(baseDN, d.Type, searchResult); {
+			switch err = fn(b.DN, d.Type, searchResult); {
 			case err != nil:
 				return
 			}
