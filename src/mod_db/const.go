@@ -44,14 +44,11 @@ const (
 
 const (
 	_ldap  = "ldap"
-	_entry = "Entry"
+	_entry = "entry"
 )
 
 const (
-	entryPrefix = "Entry:"
-)
-const (
-	entryDocIDHeader = _ldap + ":" + _entry + ":"
+	entryKeyHeader = _ldap + ":" + _entry
 )
 
 const (

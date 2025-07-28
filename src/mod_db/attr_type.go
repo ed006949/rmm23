@@ -10,6 +10,8 @@ import (
 	"rmm23/src/mod_ssh"
 )
 
+type attrKey string
+
 type attrEntryType int   //
 type attrEntryStatus int //
 

@@ -31,6 +31,8 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 }
 
 // getLDAPDocs fetches entries from LDAP and saves them to Redis using the provided RedisRepository.
+//
+// copy entry one-by-one to save memory.
 func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisRepository) (err error) {
 	switch l.CLEAR {
 	case false:
