@@ -43,7 +43,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
 			for counter, fnB := range fnSearchResult.Entries {
 				switch {
-				case counter > 3:
+				case l.CLEAR && counter > 3:
 					return nil
 				}
 
