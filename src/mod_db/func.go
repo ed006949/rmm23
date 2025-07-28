@@ -2,9 +2,12 @@ package mod_db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
+	"github.com/redis/rueidis"
+	"github.com/redis/rueidis/om"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_ldap"
@@ -13,7 +16,7 @@ import (
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
 	l.CLEAR = true
 
-	switch err = outbound.Dial(); {
+	switch err = outbound.Dial(ctx); {
 	case err != nil:
 		return
 	}
@@ -26,6 +29,17 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	case err != nil:
 		return
 	}
+
+	var (
+		count   int64
+		entries []*Entry
+	)
+
+	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+		return search.Query("@dn:dc=domain,dc=tld").Build()
+	})
+
+	fmt.Print(count, len(entries), err, "\n")
 
 	return
 }
@@ -69,7 +83,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 
 				switch l.CLEAR {
 				case true:
-					_ = repo.repo.Remove(ctx, fnEntry.Key)
+					_ = repo.DeleteEntry(ctx, fnEntry.Key)
 				}
 
 				// Save the Entry using the RedisRepository
