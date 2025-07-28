@@ -43,7 +43,7 @@ type attrString string                                 //
 type attrStrings []string                              //
 type attrTelephoneNumbers []string                     //
 type attrTelexNumbers []string                         //
-type attrTimestamp time.Time                           //
+type attrTime time.Time                                //
 type attrUID string                                    //
 type attrUIDNumber uint64                              //
 type attrUUID uuid.UUID                                //

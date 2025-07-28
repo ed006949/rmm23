@@ -6,23 +6,27 @@ import (
 	"rmm23/src/mod_net"
 )
 
-// entry is the struct that represents an LDAP-compatible entry.
+// Entry is the struct that represents an LDAP-compatible Entry.
 //
 // when updating @src/mod_db/entry_type.go don't forget to update @src/mod_db/entry_const.go.
-type entry struct {
+type Entry struct {
+	// db data
+	Key string `redis:",key"` //
+	Ver int64  `redis:",ver"` //
+
 	// element specific meta data
-	Type   attrEntryType   `json:"type,omitempty"   msgpack:"type,omitempty"   redis:"type"   redisearch:"numeric,sortable"` // entry's type `(domain|group|user|host)`
+	Type   attrEntryType   `json:"type,omitempty"   msgpack:"type,omitempty"   redis:"type"   redisearch:"numeric,sortable"` // Entry's type `(domain|group|user|host)`
 	Status attrEntryStatus `json:"status,omitempty" msgpack:"status,omitempty" redis:"status" redisearch:"numeric,sortable"` //
 	BaseDN attrDN          `json:"baseDN,omitempty" msgpack:"baseDN,omitempty" redis:"baseDN" redisearch:"tag,sortable"`     //
 
 	// element meta data
 	UUID            attrUUID          `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid,omitempty"            redis:"uuid"            redisearch:"tag,sortable"` // must be unique
 	DN              attrDN            `json:"dn,omitempty"              ldap:"dn"              msgpack:"dn,omitempty"              redis:"dn"              redisearch:"tag,sortable"` // must be unique
-	ObjectClass     attrObjectClasses `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass,omitempty"     redis:"objectClass"     redisearch:"tag"`          // entry type
+	ObjectClass     attrObjectClasses `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass,omitempty"     redis:"objectClass"     redisearch:"tag"`          // Entry type
 	CreatorsName    attrDN            `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName,omitempty"    redis:"creatorsName"    redisearch:"tag"`          //
-	CreateTimestamp attrTimestamp     `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"tag"`          //
+	CreateTimestamp attrTime          `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp,omitempty" redis:"createTimestamp" redisearch:"tag"`          //
 	ModifiersName   attrDN            `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName,omitempty"   redis:"modifiersName"   redisearch:"tag"`          //
-	ModifyTimestamp attrTimestamp     `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"tag"`          //
+	ModifyTimestamp attrTime          `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp,omitempty" redis:"modifyTimestamp" redisearch:"tag"`          //
 
 	// element data
 	CN                   attrString                `json:"cn,omitempty"                   ldap:"cn"                   msgpack:"cn,omitempty"                   redis:"cn"                   redisearch:"tag"`              // RDN in group's context
@@ -49,8 +53,8 @@ type entry struct {
 	// MemberOf             attrDNs                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf,omitempty"             redis:"memberOf"             redisearch:"tag"`              // ignore it, don't cache, calculate on the fly or avoid
 
 	// specific data
-	AAA string `json:"host_aaa,omitempty" msgpack:"host_aaa,omitempty" redis:"host_aaa" redisearch:"tag"` // entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`
-	ACL string `json:"host_acl,omitempty" msgpack:"host_acl,omitempty" redis:"host_acl" redisearch:"tag"` // entry's ACL
+	AAA string `json:"host_aaa,omitempty" msgpack:"host_aaa,omitempty" redis:"host_aaa" redisearch:"tag"` // Entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`
+	ACL string `json:"host_acl,omitempty" msgpack:"host_acl,omitempty" redis:"host_acl" redisearch:"tag"` // Entry's ACL
 
 	// host specific data
 	HostType        string       `json:"host_type,omitempty"         msgpack:"host_type,omitempty"         redis:"host_type"         redisearch:"tag"`          // host type `(provider|interim|openvpn|ciscovpn)`

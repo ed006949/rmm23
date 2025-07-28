@@ -10,24 +10,29 @@ import (
 
 // RedisRepository provides methods for interacting with Redis using rueidis.
 type RedisRepository struct {
-	repo om.Repository[entry]
+	repo om.Repository[Entry]
 }
 
 // NewRedisRepository creates a new RedisRepository.
 func NewRedisRepository(client rueidis.Client) *RedisRepository {
 	return &RedisRepository{
-		repo: om.NewJSONRepository[entry](entryPrefix, entry{}, client),
+		repo: om.NewJSONRepository[Entry](entryPrefix, Entry{}, client),
 	}
 }
 
-// GetEntry retrieves an entry from Redis.
-func GetEntry(ctx context.Context, repo *RedisRepository, id string) (*entry, error) {
+// GetEntry retrieves an Entry from Redis.
+func GetEntry(ctx context.Context, repo *RedisRepository, id string) (*Entry, error) {
 	return repo.FindEntry(ctx, id)
 }
 
-// SetEntry saves an entry to Redis.
-func SetEntry(ctx context.Context, repo *RedisRepository, e *entry) error {
+// SetEntry saves an Entry to Redis.
+func SetEntry(ctx context.Context, repo *RedisRepository, e *Entry) error {
 	return repo.SaveEntry(ctx, e)
+}
+
+// DelEntry saves an Entry to Redis.
+func DelEntry(ctx context.Context, repo *RedisRepository, id string) error {
+	return repo.repo.Remove(ctx, id)
 }
 
 func escapeQueryValue(inbound string) string {

@@ -161,7 +161,7 @@ func (r *attrStrings) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 
-func (r *attrTimestamp) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *attrTime) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim time.Time
@@ -172,7 +172,7 @@ func (r *attrTimestamp) UnmarshalLDAPAttr(values []string) (err error) {
 			continue
 		}
 
-		*r = attrTimestamp(interim)
+		*r = attrTime(interim)
 
 		return // return only first value
 	}

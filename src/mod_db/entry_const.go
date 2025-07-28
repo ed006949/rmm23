@@ -1,6 +1,9 @@
 package mod_db
 
 const (
+	_key entryFieldName = "key"
+	_ver entryFieldName = "ver"
+
 	_type   entryFieldName = "type"
 	_status entryFieldName = "status"
 	_baseDN entryFieldName = "baseDN"

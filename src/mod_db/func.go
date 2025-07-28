@@ -10,10 +10,25 @@ import (
 	"rmm23/src/mod_ldap"
 )
 
-// This function will be refactored to use RedisRepository
-// func buildRedisearchSchema(inbound interface{}) (schema *redisearch.Schema, schemaMap schemaMapType, err error) {
-// 	// ... (old content)
-// }
+func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
+	l.CLEAR = true
+
+	switch err = outbound.Dial(); {
+	case err != nil:
+		return
+	}
+
+	defer func() {
+		_ = outbound.Close()
+	}()
+
+	switch err = getLDAPDocs(ctx, inbound, outbound.repo); {
+	case err != nil:
+		return
+	}
+
+	return
+}
 
 // getLDAPDocs fetches entries from LDAP and saves them to Redis using the provided RedisRepository.
 func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisRepository) (err error) {
@@ -24,9 +39,14 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 
 	var (
 		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
-			for _, fnB := range fnSearchResult.Entries {
+			for counter, fnB := range fnSearchResult.Entries {
+				switch {
+				case counter > 3:
+					return nil
+				}
+
 				var (
-					fnEntry = new(entry)
+					fnEntry = new(Entry)
 				)
 
 				switch fnErr = mod_ldap.UnmarshalEntry(fnB, fnEntry); {
@@ -43,7 +63,14 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				fnEntry.Status = entryStatusLoaded
 				fnEntry.UUID = attrUUID(uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String())))
 
-				// Save the entry using the RedisRepository
+				fnEntry.Key = fnEntry.UUID.String()
+
+				switch l.CLEAR {
+				case true:
+					_ = repo.repo.Remove(ctx, fnEntry.Key)
+				}
+
+				// Save the Entry using the RedisRepository
 				switch fnErr = repo.SaveEntry(ctx, fnEntry); {
 				case fnErr != nil:
 					return

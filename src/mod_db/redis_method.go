@@ -2,123 +2,53 @@ package mod_db
 
 import (
 	"context"
-	"time"
 
-	"github.com/RediSearch/redisearch-go/redisearch"
-	"github.com/gomodule/redigo/redis"
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
 
-	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 )
 
-func (r *Conf) dial() (err error) {
-	switch r.rcNetwork, err = r.URL.RedisNetwork(); {
+func (r *Conf) Dial() (err error) {
+	switch r.client, err = rueidis.NewClient(rueidis.ClientOption{
+		InitAddress: []string{r.URL.Host},
+	}); {
 	case err != nil:
 		return
 	}
 
-	r.rsClient = redisearch.NewClientFromPool(&redis.Pool{
-		DialContext: func(ctx context.Context) (redis.Conn, error) {
-			return redis.DialContext(ctx, r.rcNetwork, r.URL.Host, redis.DialDatabase(0))
-		},
-		TestOnBorrow: func(c redis.Conn, t time.Time) (tErr error) {
-			_, tErr = c.Do(_PING)
-
-			return
-		},
-		MaxIdle:         connMaxIdle,
-		MaxActive:       connMaxActive,
-		IdleTimeout:     connIdleTimeout,
-		Wait:            connWait,
-		MaxConnLifetime: connMaxConnLifetime,
-	}, r.Name)
+	r.repo = NewRedisRepository(r.client)
 
 	return
 }
 
-func (r *Conf) createIndex() (err error) {
-	var (
-		indexInfo *redisearch.IndexInfo
-	)
-
-	// define indexDefinition
-	r.indexDefinition = redisearch.NewIndexDefinition().AddPrefix(entryDocIDHeader)
-
-	switch l.CLEAR {
-	case true:
-		_ = r.rsClient.Drop()
-	// _ = r.rsClient.DropIndex(true)
-	default:
-		_ = r.rsClient.DropIndex(false)
+func (r *Conf) Close() (err error) {
+	switch {
+	case r.client == nil:
+		return mod_errors.ENoConn
 	}
 
-	switch swErr := r.rsClient.CreateIndexWithIndexDefinition(r.schema, r.indexDefinition); {
-	case mod_errors.Contains(swErr, mod_errors.EIndexExist):
-	case swErr != nil:
-		return swErr
-	}
-
-	// wait for index to complete
-	switch indexInfo, err = r.rsClient.Info(); {
-	case err != nil:
-		return
-	}
-
-	for indexInfo.IsIndexing {
-		switch indexInfo, err = r.rsClient.Info(); {
-		case err != nil:
-			return
-		}
-	}
+	r.client.Close()
 
 	return
 }
 
-func (r *Conf) getDoc(inbound string) (outbound *redisearch.Document, err error) {
-	return r.rsClient.Get(inbound)
-}
-
-func (r *Conf) getDocByUUID(inbound attrUUID) (outbound *redisearch.Document, err error) {
-	return r.getDoc(inbound.Entry())
-}
-
-func (r *Conf) getDocsByKV(key entryFieldName, value string) (outbound []redisearch.Document, count int, err error) {
-	var (
-		interim string
-	)
-
-	switch r.schemaMap[key] {
-	case redisearch.TextField:
-		interim = "@" + key.String() + ":" + escapeQueryValue(value) + ""
-	case redisearch.NumericField:
-		interim = "@" + key.String() + ":[" + escapeQueryValue(value) + "]"
-	case redisearch.GeoField:
-		interim = "@" + key.String() + ":[" + escapeQueryValue(value) + "]"
-	case redisearch.TagField:
-		interim = "@" + key.String() + ":{" + escapeQueryValue(value) + "}"
-	default:
-		return nil, 0, mod_errors.EUnwilling
-	}
-
-	return r.rsClient.Search(redisearch.NewQuery(interim).SetInFields(key.String()).Limit(0, connMaxPaging))
-}
-
-// SaveEntry saves an entry to Redis.
-func (r *RedisRepository) SaveEntry(ctx context.Context, e *entry) error {
+// SaveEntry saves an Entry to Redis.
+func (r *RedisRepository) SaveEntry(ctx context.Context, e *Entry) error {
 	return r.repo.Save(ctx, e)
 }
 
-// FindEntry finds an entry by its ID.
-func (r *RedisRepository) FindEntry(ctx context.Context, id string) (*entry, error) {
+// FindEntry finds an Entry by its ID.
+func (r *RedisRepository) FindEntry(ctx context.Context, id string) (*Entry, error) {
 	return r.repo.Fetch(ctx, id)
 }
 
-// CreateIndex creates the RediSearch index for the entry struct.
-func (r *RedisRepository) CreateIndex(ctx context.Context) error {
+// CreateIndex creates the RediSearch index for the Entry struct.
+func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
 	return r.repo.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
+			FieldName("$.Key").As("key").Tag().Sortable().
+			FieldName("$.Ver").As("ver").Numeric().Sortable().
 			FieldName("$.Type").As("type").Numeric().Sortable().
 			FieldName("$.Status").As("status").Numeric().Sortable().
 			FieldName("$.BaseDN").As("baseDN").Tag().Sortable().

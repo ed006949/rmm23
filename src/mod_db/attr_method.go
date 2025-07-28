@@ -8,7 +8,7 @@ import (
 )
 
 func (r *attrDN) String() (outbound string) { return string(*r) }
-func (r *attrTimestamp) String() (outbound string) {
+func (r *attrTime) String() (outbound string) {
 	return strconv.FormatInt(time.Time(*r).Unix(), 10)
 }
 func (r *attrUUID) String() (outbound string) { return uuid.UUID(*r).String() }
