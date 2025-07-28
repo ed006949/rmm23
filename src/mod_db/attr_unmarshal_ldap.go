@@ -155,7 +155,7 @@ func (r *attrString) UnmarshalLDAPAttr(values []string) (err error) {
 
 func (r *attrStrings) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
-		*r = append(*r, attrString(value))
+		*r = append(*r, value)
 	}
 
 	return

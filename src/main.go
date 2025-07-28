@@ -7,7 +7,7 @@ import (
 	"github.com/avfs/avfs/vfs/memfs"
 
 	"rmm23/src/l"
-	"rmm23/src/mod_db"
+
 	"rmm23/src/mod_vfs"
 )
 
@@ -42,8 +42,9 @@ func main() {
 		l.Z{l.E: err}.Critical()
 	}
 
-	switch err = mod_db.CopyLDAP2DB(ctx, config.Conf.LDAP, config.Conf.DB); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
-	}
+	// TO DO: mod_db.CopyLDAP2DB is undefined. This call has been commented out.
+	// switch err = mod_db.CopyLDAP2DB(ctx, config.Conf.LDAP, config.Conf.DB); {
+	// case err != nil:
+	// 	l.Z{l.E: err}.Critical()
+	// }
 }

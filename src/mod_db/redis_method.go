@@ -6,19 +6,12 @@ import (
 
 	"github.com/RediSearch/redisearch-go/redisearch"
 	"github.com/gomodule/redigo/redis"
+	"github.com/redis/rueidis"
+	"github.com/redis/rueidis/om"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 )
-
-// func (e *ElementDomain) redisearchSchema() *redisearch.Schema { return buildRedisearchSchema(e) }
-// func (e *ElementGroup) redisearchSchema() *redisearch.Schema  { return buildRedisearchSchema(e) }
-// func (e *ElementUser) redisearchSchema() *redisearch.Schema   { return buildRedisearchSchema(e) }
-// func (e *ElementHost) redisearchSchema() *redisearch.Schema   { return buildRedisearchSchema(e) }
-
-func (r *entry) redisearchSchema() (schema *redisearch.Schema, schemaMap schemaMapType, err error) {
-	return buildRedisearchSchema(r)
-}
 
 func (r *Conf) dial() (err error) {
 	switch r.rcNetwork, err = r.URL.RedisNetwork(); {
@@ -110,4 +103,62 @@ func (r *Conf) getDocsByKV(key entryFieldName, value string) (outbound []redisea
 	}
 
 	return r.rsClient.Search(redisearch.NewQuery(interim).SetInFields(key.String()).Limit(0, connMaxPaging))
+}
+
+// SaveEntry saves an entry to Redis.
+func (r *RedisRepository) SaveEntry(ctx context.Context, e *entry) error {
+	return r.repo.Save(ctx, e)
+}
+
+// FindEntry finds an entry by its ID.
+func (r *RedisRepository) FindEntry(ctx context.Context, id string) (*entry, error) {
+	return r.repo.Fetch(ctx, id)
+}
+
+// CreateIndex creates the RediSearch index for the entry struct.
+func (r *RedisRepository) CreateIndex(ctx context.Context) error {
+	return r.repo.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
+		return schema.
+			FieldName("$.Type").As("type").Numeric().Sortable().
+			FieldName("$.Status").As("status").Numeric().Sortable().
+			FieldName("$.BaseDN").As("baseDN").Tag().Sortable().
+			FieldName("$.UUID").As("uuid").Tag().Sortable().
+			FieldName("$.DN").As("dn").Tag().Sortable().
+			FieldName("$.ObjectClass").As("objectClass").Tag().
+			FieldName("$.CreatorsName").As("creatorsName").Tag().
+			FieldName("$.CreateTimestamp").As("createTimestamp").Tag().
+			FieldName("$.ModifiersName").As("modifiersName").Tag().
+			FieldName("$.ModifyTimestamp").As("modifyTimestamp").Tag().
+			FieldName("$.CN").As("cn").Tag().
+			FieldName("$.DC").As("dc").Tag().Sortable().
+			FieldName("$.Description").As("description").Tag().
+			FieldName("$.DestinationIndicator").As("destinationIndicator").Tag().
+			FieldName("$.DisplayName").As("displayName").Tag().Sortable().
+			FieldName("$.GIDNumber").As("gidNumber").Numeric().Sortable().
+			FieldName("$.HomeDirectory").As("homeDirectory").Tag().
+			FieldName("$.IPHostNumber").As("ipHostNumber").Tag().Sortable().
+			FieldName("$.Mail").As("mail").Tag().
+			FieldName("$.Member").As("member").Tag().Sortable().
+			FieldName("$.O").As("o").Tag().
+			FieldName("$.OU").As("ou").Tag().
+			FieldName("$.Owner").As("owner").Tag().
+			FieldName("$.SN").As("sn").Tag().
+			FieldName("$.SSHPublicKey").As("sshPublicKey").Tag().
+			FieldName("$.TelephoneNumber").As("telephoneNumber").Tag().
+			FieldName("$.TelexNumber").As("telexNumber").Tag().
+			FieldName("$.UID").As("uid").Tag().Sortable().
+			FieldName("$.UIDNumber").As("uidNumber").Numeric().Sortable().
+			FieldName("$.UserPKCS12").As("userPKCS12").Tag().
+			FieldName("$.UserPassword").As("userPassword").Tag().
+			FieldName("$.AAA").As("host_aaa").Tag().
+			FieldName("$.ACL").As("host_acl").Tag().
+			FieldName("$.HostType").As("host_type").Tag().
+			FieldName("$.HostASN").As("host_asn").Numeric().Sortable().
+			FieldName("$.HostUpstreamASN").As("host_upstream_asn").Numeric().
+			FieldName("$.HostHostingUUID").As("host_hosting_uuid").Numeric().
+			FieldName("$.HostURL").As("host_url").Tag().Sortable().
+			FieldName("$.HostListen").As("host_listen").Tag().Sortable().
+			FieldName("$.LabeledURI").As("labeledURI").Tag().
+			Build()
+	})
 }

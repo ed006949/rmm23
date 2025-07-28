@@ -27,7 +27,7 @@ type attrHomeDirectory string                          //
 type attrID string                                     //
 type attrIDNumber uint64                               //
 type attrIPHostNumbers []netip.Prefix                  //
-type attrLabeledURIs []labeledURILegacy                // custom schema alternative TO DO implement custom schemas
+type attrLabeledURIs []labeledURILegacy                //
 type attrMails []string                                //
 type attrMembers []attrDN                              //
 type attrMembersOf []attrDN                            //
@@ -40,7 +40,7 @@ type attrOwners []attrDN                               //
 type attrSN string                                     //
 type attrSSHPublicKeys map[string]mod_ssh.PublicKey    //
 type attrString string                                 //
-type attrStrings []attrString                          //
+type attrStrings []string                              //
 type attrTelephoneNumbers []string                     //
 type attrTelexNumbers []string                         //
 type attrTimestamp time.Time                           //
