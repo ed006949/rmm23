@@ -11,7 +11,9 @@ import (
 
 func (r *Conf) Dial(ctx context.Context) (err error) {
 	switch r.client, err = rueidis.NewClient(rueidis.ClientOption{
-		InitAddress: []string{r.URL.Host},
+		AlwaysRESP2:  true,
+		DisableCache: true,
+		InitAddress:  []string{r.URL.Host},
 	}); {
 	case err != nil:
 		return
@@ -57,55 +59,57 @@ func (r *RedisRepository) DeleteEntry(ctx context.Context, id string) error {
 
 // func (r *RedisRepository) SearchEntries() {}
 
-// CreateIndex creates the RediSearch index for the Entry struct.
+// DropIndex drops the RediSearch index for the Entry struct.
 func (r *RedisRepository) DropIndex(ctx context.Context) (err error) { return r.repo.DropIndex(ctx) }
 
 // CreateIndex creates the RediSearch index for the Entry struct.
 func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
 	return r.repo.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
-			FieldName("$.Key").As("key").Tag().
-			FieldName("$.Ver").As("ver").Numeric().Sortable().
-			FieldName("$.Type").As("type").Numeric().Sortable().
-			FieldName("$.Status").As("status").Numeric().Sortable().
-			FieldName("$.BaseDN").As("baseDN").Tag().
-			FieldName("$.UUID").As("uuid").Tag().
-			FieldName("$.DN").As("dn").Tag().
-			FieldName("$.ObjectClass").As("objectClass").Tag().
-			FieldName("$.CreatorsName").As("creatorsName").Tag().
-			FieldName("$.CreateTimestamp").As("createTimestamp").Tag().
-			FieldName("$.ModifiersName").As("modifiersName").Tag().
-			FieldName("$.ModifyTimestamp").As("modifyTimestamp").Tag().
-			FieldName("$.CN").As("cn").Tag().
-			FieldName("$.DC").As("dc").Tag().
-			FieldName("$.Description").As("description").Tag().
-			FieldName("$.DestinationIndicator").As("destinationIndicator").Tag().
-			FieldName("$.DisplayName").As("displayName").Tag().
-			FieldName("$.GIDNumber").As("gidNumber").Numeric().Sortable().
-			FieldName("$.HomeDirectory").As("homeDirectory").Tag().
-			FieldName("$.IPHostNumber").As("ipHostNumber").Tag().
-			FieldName("$.Mail").As("mail").Tag().
-			FieldName("$.Member").As("member").Tag().
-			FieldName("$.O").As("o").Tag().
-			FieldName("$.OU").As("ou").Tag().
-			FieldName("$.Owner").As("owner").Tag().
-			FieldName("$.SN").As("sn").Tag().
-			FieldName("$.SSHPublicKey").As("sshPublicKey").Tag().
-			FieldName("$.TelephoneNumber").As("telephoneNumber").Tag().
-			FieldName("$.TelexNumber").As("telexNumber").Tag().
-			FieldName("$.UID").As("uid").Tag().
-			FieldName("$.UIDNumber").As("uidNumber").Numeric().Sortable().
-			FieldName("$.UserPKCS12").As("userPKCS12").Tag().
-			FieldName("$.UserPassword").As("userPassword").Tag().
-			FieldName("$.AAA").As("host_aaa").Tag().
-			FieldName("$.ACL").As("host_acl").Tag().
-			FieldName("$.HostType").As("host_type").Tag().
-			FieldName("$.HostASN").As("host_asn").Numeric().Sortable().
-			FieldName("$.HostUpstreamASN").As("host_upstream_asn").Numeric().
-			FieldName("$.HostHostingUUID").As("host_hosting_uuid").Numeric().
-			FieldName("$.HostURL").As("host_url").Tag().
-			FieldName("$.HostListen").As("host_listen").Tag().
-			FieldName("$.LabeledURI").As("labeledURI").Tag().
+			FieldName("$.type").As("type").Numeric().
+			FieldName("$.status").As("status").Numeric().
+			FieldName("$.baseDN").As("baseDN").Tag().
+			FieldName("$.uuid").As("uuid").Tag().
+			FieldName("$.dn").As("dn").Tag().
+			// FieldName("$.objectClass").As("objectClass").Tag().
+			FieldName("$.creatorsName").As("creatorsName").Tag().
+			FieldName("$.createTimestamp").As("createTimestamp").Numeric().
+			FieldName("$.modifiersName").As("modifiersName").Tag().
+			FieldName("$.modifyTimestamp").As("modifyTimestamp").Numeric().
+			FieldName("$.cn").As("cn").Tag().
+			FieldName("$.dc").As("dc").Tag().
+			FieldName("$.description").As("description").Tag().
+			// FieldName("$.destinationIndicator").As("destinationIndicator").Tag().
+			FieldName("$.displayName").As("displayName").Tag().
+			FieldName("$.gidNumber").As("gidNumber").Numeric().
+			FieldName("$.homeDirectory").As("homeDirectory").Tag().
+			// FieldName("$.ipHostNumber").As("ipHostNumber").Tag().
+			// FieldName("$.mail").As("mail").Tag().
+			FieldName("$.member").As("member").Tag().
+			FieldName("$.o").As("o").Tag().
+			FieldName("$.ou").As("ou").Tag().
+			// FieldName("$.owner").As("owner").Tag().
+			FieldName("$.sn").As("sn").Tag().
+			// FieldName("$.sshPublicKey").As("sshPublicKey").Tag().
+			// FieldName("$.telephoneNumber").As("telephoneNumber").Tag().
+			// FieldName("$.telexNumber").As("telexNumber").Tag().
+			FieldName("$.uid").As("uid").Tag().
+			FieldName("$.uidNumber").As("uidNumber").Numeric().
+			// FieldName("$.userPKCS12").As("userPKCS12").Tag().
+			FieldName("$.userPassword").As("userPassword").Tag().
+			// FieldName("$.host_aaa").As("host_aaa").Tag().
+			// FieldName("$.host_acl").As("host_acl").Tag().
+			// FieldName("$.host_type").As("host_type").Tag().
+			// FieldName("$.host_asn").As("host_asn").Tag().
+			// FieldName("$.host_upstream_asn").As("host_upstream_asn").Tag().
+			// FieldName("$.host_hosting_uuid").As("host_hosting_uuid").Tag().
+			// FieldName("$.host_url").As("host_url").Tag().
+			// FieldName("$.host_listen").As("host_listen").Tag().
+
+			// FieldName("$.labeledURI").As("labeledURI").Tag().
+			// FieldName("$.labeledURI[*].key").As("labeledURI_key").Tag().
+			// FieldName("$.labeledURI[*].value").As("labeledURI_value").Tag().
+
 			Build()
 	})
 }

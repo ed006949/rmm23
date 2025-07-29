@@ -1,61 +1,91 @@
 package mod_db
 
 import (
-	"strconv"
+	"encoding/json"
+	"fmt"
 	"time"
 
 	"github.com/google/uuid"
 )
 
+//
+// attrDN
+
 func (r *attrDN) String() (outbound string) { return string(*r) }
 
-// uuid.UUID
+//
+// attrUUID
 
 func (r *attrUUID) String() (outbound string) { return uuid.UUID(*r).String() }
-func (r *attrUUID) Entry() (outbound string)  { return entryKeyHeader + ":" + r.String() }
 
-// // MarshalText implements encoding.TextMarshaler
-// func (r attrUUID) MarshalText() ([]byte, error) { return []byte(r.String()), nil }
-//
-// // UnmarshalText implements encoding.TextUnmarshaler
-// func (r *attrUUID) UnmarshalText(inbound []byte) (err error) {
-// 	var (
-// 		interim uuid.UUID
-// 	)
-//
-// 	switch interim, err = uuid.Parse(string(inbound)); {
-// 	case err != nil:
-// 		return
-// 	}
-//
-// 	*r = attrUUID(interim)
-// 	return
-// }
+func (r *attrUUID) MarshalJSON() (outbound []byte, err error) {
+	return []byte(fmt.Sprintf("%q", r.String())), nil
+}
 
-// String implements fmt.Stringer.
-//
-// convert time.Time to String() seconds.
-func (r *attrTime) String() (outbound string) { return strconv.FormatInt(time.Time(*r).Unix(), 10) }
-
-// MarshalText implements encoding.TextMarshaler.
-//
-// convert time.Time to seconds.
-func (r *attrTime) MarshalText() (outbound []byte, err error) { return []byte(r.String()), nil }
-
-// UnmarshalText implements encoding.TextUnmarshaler.
-//
-// convert seconds to time.Time.
-func (r *attrTime) UnmarshalText(inbound []byte) (err error) {
+func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
 	var (
-		interim int64
+		interim string
 	)
 
-	switch interim, err = strconv.ParseInt(string(inbound), 10, 64); {
+	switch err = json.Unmarshal(inbound, &interim); {
 	case err != nil:
 		return
 	}
 
-	*r = attrTime(time.Unix(interim, int64(time.Second)))
+	var (
+		interimUUID uuid.UUID
+	)
+	switch interimUUID, err = uuid.Parse(interim); {
+	case err != nil:
+		return
+	}
+
+	*r = attrUUID(interimUUID)
+
+	return
+}
+
+//
+// attrTime
+
+func (r *attrTime) String() (outbound string) { return time.Time(*r).String() }
+
+func (r *attrTime) MarshalJSON() (outbound []byte, err error) {
+	return []byte(fmt.Sprintf("%d", time.Time(*r).Unix())), nil
+}
+
+func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
+	var (
+		interim int64
+	)
+
+	switch err = json.Unmarshal(inbound, &interim); {
+	case err != nil:
+		return
+	}
+
+	*r = attrTime(time.Unix(interim, 0))
+
+	return nil
+}
+
+//
+// attrIDNumber
+
+func (r *attrIDNumber) MarshalJSON() (outbound []byte, err error) {
+	return []byte(fmt.Sprintf("%d", *r)), nil
+}
+func (r *attrIDNumber) UnmarshalJSON(inbound []byte) (err error) {
+	var (
+		interim uint
+	)
+
+	switch err = json.Unmarshal(inbound, &interim); {
+	case err != nil:
+		return
+	}
+
+	*r = attrIDNumber(interim)
 
 	return
 }

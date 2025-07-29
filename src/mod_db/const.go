@@ -48,7 +48,8 @@ const (
 )
 
 const (
-	entryKeyHeader = _ldap + ":" + _entry
+	entryKeyHeader = "entry"
+	// entryKeyHeader = _ldap + ":" + _entry.
 )
 
 const (

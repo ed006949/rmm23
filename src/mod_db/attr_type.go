@@ -27,7 +27,7 @@ type attrEntryUUID uuid.UUID                           //
 type attrGIDNumber uint64                              //
 type attrHomeDirectory string                          //
 type attrID string                                     //
-type attrIDNumber uint64                               //
+type attrIDNumber uint                                 //
 type attrIPHostNumbers []netip.Prefix                  //
 type attrLabeledURIs []labeledURILegacy                //
 type attrMails []string                                //

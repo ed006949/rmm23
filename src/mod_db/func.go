@@ -36,8 +36,14 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	)
 
 	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-		return search.Query("@dn:dc=domain,dc=tld").Build()
+		return search.Query("*").Limit().OffsetNum(0, connMaxPaging).Build()
 	})
+
+	// cmd := outbound.client.B().FtSearch().Index(outbound.repo.repo.IndexName()).Query(`*`).Build()
+	// // count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+	// // 	return search.Query(`@dn:dc`).Build()
+	// // })
+	// count, entries, err = outbound.client.Do(ctx, cmd).AsFtSearch()
 
 	fmt.Print(count, len(entries), err, "\n")
 
@@ -85,6 +91,8 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				case true:
 					_ = repo.DeleteEntry(ctx, fnEntry.Key)
 				}
+
+				_ = repo.DeleteEntry(ctx, fnEntry.Key)
 
 				// Save the Entry using the RedisRepository
 				switch fnErr = repo.SaveEntry(ctx, fnEntry); {
