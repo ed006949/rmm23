@@ -27,9 +27,9 @@ type attrEntryUUID uuid.UUID                           //
 type attrGIDNumber uint64                              //
 type attrHomeDirectory string                          //
 type attrID string                                     //
-type attrIDNumber uint                                 //
+type attrIDNumber uint64                               //
 type attrIPHostNumbers []netip.Prefix                  //
-type attrLabeledURIs []labeledURILegacy                //
+type attrLabeledURIs map[string]string                 //
 type attrMails []string                                //
 type attrMembers []attrDN                              //
 type attrMembersOf []attrDN                            //
@@ -52,7 +52,7 @@ type attrUUID uuid.UUID                                //
 type attrUserPKCS12s map[attrDN]mod_crypto.Certificate // any type of cert-key pairs list (transcoding may apply)
 type attrUserPassword string                           //
 
-type labeledURILegacy struct {
-	Key   string `json:"key,omitempty"   msgpack:"key,omitempty"`   //
-	Value string `json:"value,omitempty" msgpack:"value,omitempty"` //
-}
+// type labeledURILegacy struct {
+// 	Key   string `json:"key,omitempty"   msgpack:"key,omitempty"`   //
+// 	Value string `json:"value,omitempty" msgpack:"value,omitempty"` //
+// }

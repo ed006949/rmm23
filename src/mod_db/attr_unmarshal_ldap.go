@@ -106,7 +106,29 @@ func (r *attrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 	return nil
 }
 
+// func (r *attrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
+//	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
+//		var (
+//			interim = strings.SplitN(value, " ", mod_slices.KVElements)
+//		)
+//
+//		switch len(interim) {
+//		case 1:
+//			*r = append(*r, labeledURILegacy{Key: interim[0]})
+//		case mod_slices.KVElements:
+//			*r = append(*r, labeledURILegacy{Key: interim[0], Value: interim[1]})
+//		}
+//	}
+//
+//	return
+// }
+
 func (r *attrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
+	switch {
+	case *r == nil:
+		*r = attrLabeledURIs{}
+	}
+
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim = strings.SplitN(value, " ", mod_slices.KVElements)
@@ -114,9 +136,9 @@ func (r *attrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 
 		switch len(interim) {
 		case 1:
-			*r = append(*r, labeledURILegacy{Key: interim[0]})
+			(*r)[interim[0]] = ""
 		case mod_slices.KVElements:
-			*r = append(*r, labeledURILegacy{Key: interim[0], Value: interim[1]})
+			(*r)[interim[0]] = interim[1]
 		}
 	}
 
@@ -193,11 +215,12 @@ func (r *attrUserPassword) UnmarshalLDAPAttr(values []string) (err error) {
 func (r *attrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
+			forErr  error
 			interim *mod_crypto.Certificate
 		)
 
-		switch interim, err = mod_crypto.ParsePEM([]byte(value)); {
-		case err != nil:
+		switch interim, forErr = mod_crypto.ParsePEM([]byte(value)); {
+		case forErr != nil:
 			continue
 		}
 

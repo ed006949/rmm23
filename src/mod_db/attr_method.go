@@ -66,7 +66,7 @@ func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
 
 	*r = attrTime(time.Unix(interim, 0))
 
-	return nil
+	return
 }
 
 //
@@ -77,7 +77,7 @@ func (r *attrIDNumber) MarshalJSON() (outbound []byte, err error) {
 }
 func (r *attrIDNumber) UnmarshalJSON(inbound []byte) (err error) {
 	var (
-		interim uint
+		interim uint64
 	)
 
 	switch err = json.Unmarshal(inbound, &interim); {
@@ -89,3 +89,11 @@ func (r *attrIDNumber) UnmarshalJSON(inbound []byte) (err error) {
 
 	return
 }
+
+// func (r *attrLabeledURIs) MarshalJSON() (outbound []byte, err error) {
+// // // 	outbound, err = json.Marshal(r)
+// return json.Marshal(map[string]string(*r))
+// // //
+// // // outbound, err = json.Marshal(map[string]string(*r))
+// // //	return
+// }

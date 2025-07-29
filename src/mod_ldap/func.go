@@ -82,8 +82,11 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 			switch rt := reflect.TypeOf(fieldType); rt.Kind() {
 			case reflect.Map:
 				var (
-					ptrVal = reflect.MakeMap(rt)
+					mapVal = reflect.MakeMap(rt)
+					ptrVal = reflect.New(rt)
 				)
+
+				ptrVal.Elem().Set(mapVal)
 
 				switch unmarshaler, ok := ptrVal.Interface().(LDAPAttributeUnmarshaler); {
 				case ok:
@@ -92,7 +95,9 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 						return
 					}
 
-					fv.Set(ptrVal)
+					fv.Set(ptrVal.Elem())
+				default:
+					return
 				}
 			default:
 				var (
