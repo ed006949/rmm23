@@ -6,6 +6,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"rmm23/src/l"
+	"rmm23/src/mod_crypto"
 )
 
 //
@@ -60,7 +63,6 @@ func (r *attrTime) MarshalJSON() (outbound []byte, err error) {
 func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
 	var (
 		interim int64
-		// interimTime time.Time
 	)
 
 	switch err = json.Unmarshal(inbound, &interim); {
@@ -69,6 +71,62 @@ func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
 	}
 
 	*r = attrTime(time.Unix(interim, 0))
+
+	return
+}
+
+func (r *attrUserPKCS12s) MarshalJSON() (outbound []byte, err error) {
+	var (
+		interim = make(map[string][]byte)
+	)
+
+	for a, b := range *r {
+		var (
+			pfxData []byte
+			forErr  error
+		)
+
+		switch pfxData, forErr = b.EncodeP12(); {
+		case forErr != nil:
+			l.Z{l.M: "EncodeP12", l.E: forErr}.Warning()
+
+			continue
+		}
+
+		interim[a.String()] = pfxData
+	}
+
+	return json.Marshal(interim)
+}
+
+func (r *attrUserPKCS12s) UnmarshalJSON(inbound []byte) (err error) {
+	var (
+		interim                = make(map[string][]byte)
+		interimAttrUserPKCS12s = make(attrUserPKCS12s)
+	)
+
+	switch err = json.Unmarshal(inbound, &interim); {
+	case err != nil:
+		return
+	}
+
+	for a, b := range interim {
+		var (
+			forErr      error
+			certificate = new(mod_crypto.Certificate)
+		)
+
+		switch forErr = certificate.DecodeP12(b); {
+		case forErr != nil:
+			l.Z{l.M: "DecodeP12", l.E: forErr}.Warning()
+
+			continue
+		}
+
+		interimAttrUserPKCS12s[attrDN(a)] = certificate
+	}
+
+	*r = interimAttrUserPKCS12s
 
 	return
 }

@@ -10,6 +10,8 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
 
+	"rmm23/src/l"
+	"rmm23/src/mod_crypto"
 	"rmm23/src/mod_slices"
 	"rmm23/src/mod_ssh"
 )
@@ -105,6 +107,23 @@ func (r *attrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 	return nil
 }
 
+// func (r *attrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
+//	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
+//		var (
+//			interim = strings.SplitN(value, " ", mod_slices.KVElements)
+//		)
+//
+//		switch len(interim) {
+//		case 1:
+//			*r = append(*r, labeledURILegacy{Key: interim[0]})
+//		case mod_slices.KVElements:
+//			*r = append(*r, labeledURILegacy{Key: interim[0], Value: interim[1]})
+//		}
+//	}
+//
+//	return
+// }
+
 func (r *attrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 	switch {
 	case *r == nil:
@@ -189,6 +208,26 @@ func (r *attrUserPassword) UnmarshalLDAPAttr(values []string) (err error) {
 		*r = attrUserPassword(value)
 
 		return // return only first value
+	}
+
+	return
+}
+
+func (r *attrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
+		var (
+			forErr  error
+			interim *mod_crypto.Certificate
+		)
+
+		switch interim, forErr = mod_crypto.ParsePEM([]byte(value)); {
+		case forErr != nil:
+			l.Z{l.M: "ParsePEM", l.E: forErr}.Warning()
+
+			continue
+		}
+
+		(*r)[attrDN(interim.Certificates[0].Subject.String())] = interim
 	}
 
 	return

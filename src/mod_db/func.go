@@ -14,7 +14,7 @@ import (
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
-	l.CLEAR = false
+	l.CLEAR = true
 
 	switch err = outbound.Dial(ctx); {
 	case err != nil:
