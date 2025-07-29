@@ -6,6 +6,9 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"rmm23/src/l"
+	"rmm23/src/mod_crypto"
 )
 
 //
@@ -48,6 +51,7 @@ func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
 
 //
 // attrTime
+// store/retrieve time.Time as int64 to utilize redisearch NUMERIC search
 
 func (r *attrTime) String() (outbound string) { return time.Time(*r).String() }
 
@@ -71,48 +75,61 @@ func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
 }
 
 //
-// attrIDNumber
+// attrUserPKCS12s
+// store/retrieve as map[string]p12
 
-// func (r *attrIDNumber) MarshalJSON() (outbound []byte, err error) {
-// 	return []byte(fmt.Sprintf("%d", *r)), nil
-// }
-// func (r *attrIDNumber) UnmarshalJSON(inbound []byte) (err error) {
-// 	var (
-// 		interim uint64
-// 	)
-//
-// 	switch err = json.Unmarshal(inbound, &interim); {
-// 	case err != nil:
-// 		return
-// 	}
-//
-// 	*r = attrIDNumber(interim)
-//
-// 	return
-// }
+func (r *attrUserPKCS12s) MarshalJSON() (outbound []byte, err error) {
+	var (
+		interim = make(map[string][]byte)
+	)
 
-// func (r *attrDNs) MarshalJSON() (outbound []byte, err error) {
-// 	var (
-// 		interim []string
-// 	)
-//
-// 	for _, b := range *r {
-// 		interim = append(interim, b.String())
-// 	}
-//
-// 	// // 	outbound, err = json.Marshal(r)
-// 	outbound, err = json.Marshal(&interim)
-//
-// 	return
-// 	// //
-// 	// // outbound, err = json.Marshal(map[string]string(*r))
-// 	// //	return
-// }
+	for a, b := range *r {
+		var (
+			pfxData []byte
+			forErr  error
+		)
 
-// func (r *attrLabeledURIs) MarshalJSON() (outbound []byte, err error) {
-// // // 	outbound, err = json.Marshal(r)
-// return json.Marshal(map[string]string(*r))
-// // //
-// // // outbound, err = json.Marshal(map[string]string(*r))
-// // //	return
-// }
+		switch pfxData, forErr = b.EncodeP12(); {
+		case forErr != nil:
+			l.Z{l.M: "EncodeP12", l.E: forErr}.Warning()
+
+			continue
+		}
+
+		interim[a.String()] = pfxData
+	}
+
+	return json.Marshal(interim)
+}
+
+func (r *attrUserPKCS12s) UnmarshalJSON(inbound []byte) (err error) {
+	var (
+		interim                = make(map[string][]byte)
+		interimAttrUserPKCS12s = make(attrUserPKCS12s)
+	)
+
+	switch err = json.Unmarshal(inbound, &interim); {
+	case err != nil:
+		return
+	}
+
+	for a, b := range interim {
+		var (
+			forErr      error
+			certificate = new(mod_crypto.Certificate)
+		)
+
+		switch forErr = certificate.DecodeP12(b); {
+		case forErr != nil:
+			l.Z{l.M: "DecodeP12", l.E: forErr}.Warning()
+
+			continue
+		}
+
+		interimAttrUserPKCS12s[attrDN(a)] = certificate
+	}
+
+	*r = interimAttrUserPKCS12s
+
+	return
+}

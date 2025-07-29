@@ -5,10 +5,12 @@ import (
 	"crypto/ecdsa"
 	"crypto/ed25519"
 	"crypto/rsa"
+	"crypto/x509"
 
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	"software.sslmate.com/src/go-pkcs12"
 
 	"rmm23/src/mod_errors"
 )
@@ -96,6 +98,47 @@ func (r *Certificate) checkPrivateKeyED25519(pub ed25519.PublicKey) (err error) 
 		return mod_errors.ETypeMismatchPrivKeyPubKey
 	case !bytes.Equal(priv.Public().(ed25519.PublicKey), pub):
 		return mod_errors.EMismatchPrivKeyPubKey
+	}
+
+	return
+}
+
+func (r *Certificate) EncodeP12() (pfxData []byte, err error) {
+	var (
+		chain []*x509.Certificate
+	)
+
+	switch len(r.Certificates) {
+	case 0:
+		return nil, mod_errors.ENODATA
+	case 1:
+	default:
+		chain = r.Certificates[1:]
+	}
+
+	pfxData, err = pkcs12.LegacyRC2.Encode(r.PrivateKey, r.Certificates[0], chain, pkcs12.DefaultPassword)
+
+	return
+}
+
+func (r *Certificate) DecodeP12(pfxData []byte) (err error) {
+	var (
+		privateKey  any
+		certificate *x509.Certificate
+		chain       []*x509.Certificate
+	)
+
+	switch privateKey, certificate, chain, err = pkcs12.DecodeChain(pfxData, pkcs12.DefaultPassword); {
+	case err != nil:
+		return
+	}
+
+	r.PrivateKey = privateKey
+	r.Certificates = []*x509.Certificate{certificate}
+
+	switch {
+	case chain != nil:
+		r.Certificates = append(r.Certificates, chain...)
 	}
 
 	return

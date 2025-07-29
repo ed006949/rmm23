@@ -4,18 +4,17 @@ go 1.24.5
 
 require (
 	github.com/ProtonMail/go-crypto v1.3.0
-	github.com/RediSearch/redisearch-go v1.1.1
 	github.com/avfs/avfs v0.35.0
 	github.com/fatih/structs v1.1.0
 	github.com/go-asn1-ber/asn1-ber v1.5.8-0.20250403174932-29230038a667
 	github.com/go-git/go-git/v5 v5.16.2
 	github.com/go-ini/ini v1.67.0
 	github.com/go-ldap/ldap/v3 v3.4.11
-	github.com/gomodule/redigo v1.9.2
 	github.com/google/uuid v1.6.0
 	github.com/redis/rueidis v1.0.63
 	github.com/redis/rueidis/om v1.0.63
 	github.com/rs/zerolog v1.34.0
+	software.sslmate.com/src/go-pkcs12 v0.6.0
 )
 
 require (
