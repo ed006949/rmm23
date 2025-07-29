@@ -59,5 +59,7 @@ const (
 	entryStatusUpdated
 	entryStatusDeleted
 	entryStatusInvalid
+	enrtyStatusParsed
+	entryStatusSanitized
 	entryStatusReady = math.MaxInt
 )

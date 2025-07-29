@@ -13,6 +13,8 @@ type PemCertKey string
 type PemCertKeyList map[string]*PemCertKey
 type SignatureScheme uint16
 
+type Certificates map[string]*Certificate
+
 type Certificate struct {
 	PrivateKeyDER   []byte   `json:"privateKey,omitempty"`
 	CertificatesDER [][]byte `json:"certificates,omitempty"`
