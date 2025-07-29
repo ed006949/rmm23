@@ -101,8 +101,8 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				}
 
 				fmt.Printf("\nDN: %s\n", fnEntry.DN.String())
-				_ = c.monitorIndexingFailures(ctx)
 
+				_ = c.monitorIndexingFailures(ctx)
 			}
 
 			return

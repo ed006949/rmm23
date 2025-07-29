@@ -223,6 +223,7 @@ func (r *attrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 		switch interim, forErr = mod_crypto.ParsePEM([]byte(value)); {
 		case forErr != nil:
 			l.Z{l.M: "ParsePEM", l.E: forErr}.Warning()
+
 			continue
 		}
 
