@@ -14,7 +14,9 @@ import (
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
-	l.CLEAR = true
+	l.CLEAR = false
+
+	l.Z{l.M: "indexing", l.E: err}.Warning()
 
 	switch err = outbound.Dial(ctx); {
 	case err != nil:
@@ -34,6 +36,8 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		count   int64
 		entries []*Entry
 	)
+
+	l.Z{l.M: "indexed", l.E: err}.Warning()
 
 	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query("*").Limit().OffsetNum(0, connMaxPaging).Build()
@@ -74,10 +78,6 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 	var (
 		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
 			for _, fnB := range fnSearchResult.Entries {
-				// switch {
-				// case l.CLEAR && counter > 3:
-				// 	return nil
-				// }
 				var (
 					fnEntry = new(Entry)
 				)
