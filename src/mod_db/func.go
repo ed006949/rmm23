@@ -25,7 +25,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		_ = outbound.Close()
 	}()
 
-	switch err = getLDAPDocs(ctx, inbound, outbound.repo); {
+	switch err = getLDAPDocs(ctx, inbound, outbound.repo, outbound); {
 	case err != nil:
 		return
 	}
@@ -53,7 +53,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 // getLDAPDocs fetches entries from LDAP and saves them to Redis using the provided RedisRepository.
 //
 // copy entry one-by-one to save memory.
-func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisRepository) (err error) {
+func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisRepository, c *Conf) (err error) {
 	switch l.CLEAR {
 	case false:
 		return
@@ -99,6 +99,10 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				case fnErr != nil:
 					return
 				}
+
+				fmt.Printf("\nDN: %s\n", fnEntry.DN.String())
+				_ = c.monitorIndexingFailures(ctx)
+
 			}
 
 			return

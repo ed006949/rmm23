@@ -14,35 +14,35 @@ type PemCertKeyList map[string]*PemCertKey
 type SignatureScheme uint16
 
 type Certificate struct {
-	PrivateKeyDER   []byte   `redis:"priv" redisearch:"text,sortable"`
-	CertificatesDER [][]byte `redis:"crt"  redisearch:"text,sortable"`
-	// CertificateCAChainPEM    []byte
+	PrivateKeyDER   []byte   `json:"privateKey,omitempty"`
+	CertificatesDER [][]byte `json:"certificates,omitempty"`
+	// CertificateCAChainPEM    []byte `json:"-"`
 
-	PrivateKeyPEM         []byte
-	CertificatesPEM       [][]byte
-	CertificateCAChainDER []byte
+	PrivateKeyPEM         []byte   `json:"-"`
+	CertificatesPEM       [][]byte `json:"-"`
+	CertificateCAChainDER []byte   `json:"-"`
 
-	PrivateKeyRawPEM         []byte
-	CertificatesRawPEM       [][]byte
-	CertificateCAChainRawPEM []byte
+	PrivateKeyRawPEM         []byte   `json:"-"`
+	CertificatesRawPEM       [][]byte `json:"-"`
+	CertificateCAChainRawPEM []byte   `json:"-"`
 
 	// Certificates is the parsed form of the leaf certificate, which may be initialized
 	// using x509.ParseCertificate to reduce per-handshake processing. If nil,
 	// the leaf certificate will be parsed as needed.
-	Certificates []*x509.Certificate
+	Certificates []*x509.Certificate `json:"-"`
 	// PrivateKey contains the private key corresponding to the public key in
 	// Certificates. This must implement crypto.Signer with an RSA, ECDSA or Ed25519 PublicKey.
 	// For a server up to TLS 1.2, it can also implement crypto.Decrypter with
 	// an RSA PublicKey.
-	PrivateKey crypto.PrivateKey
+	PrivateKey crypto.PrivateKey `json:"-"`
 
 	// SupportedSignatureAlgorithms is an optional list restricting what
 	// signature algorithms the PrivateKey can be used for.
-	SupportedSignatureAlgorithms []SignatureScheme
+	SupportedSignatureAlgorithms []SignatureScheme `json:"-"`
 	// OCSPStaple contains an optional OCSP response which will be served
 	// to clients that request it.
-	OCSPStaple []byte
+	OCSPStaple []byte `json:"-"`
 	// SignedCertificateTimestamps contains an optional list of Signed
 	// Certificate Timestamps which will be served to clients that request it.
-	SignedCertificateTimestamps [][]byte
+	SignedCertificateTimestamps [][]byte `json:"-"`
 }

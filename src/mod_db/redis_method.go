@@ -2,6 +2,7 @@ package mod_db
 
 import (
 	"context"
+	"fmt"
 
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
@@ -28,6 +29,8 @@ func (r *Conf) Dial(ctx context.Context) (err error) {
 		return
 	}
 
+	_ = r.monitorIndexingFailures(ctx)
+
 	return
 }
 
@@ -38,6 +41,37 @@ func (r *Conf) Close() (err error) {
 	}
 
 	r.client.Close()
+
+	return
+}
+
+func (r *Conf) monitorIndexingFailures(ctx context.Context) (err error) {
+	var (
+		resp = r.client.Do(ctx, r.client.B().FtInfo().Index(r.repo.repo.IndexName()).Build())
+	)
+
+	switch err = resp.Error(); {
+	case err != nil:
+		return
+	}
+
+	var (
+		info map[string]string
+	)
+
+	switch info, err = resp.AsStrMap(); {
+	case err != nil:
+		return
+	}
+
+	fmt.Printf("hash_indexing_failures: %s\n", info["hash_indexing_failures"])
+
+	// for a, b := range info {
+	// 	switch a {
+	// 	case "hash_indexing_failures":
+	// 		fmt.Printf("%s: %s\n", a, b)
+	// 	}
+	// }
 
 	return
 }
@@ -95,8 +129,8 @@ func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
 			// FieldName("$.telexNumber").As("telexNumber").Tag().
 			FieldName("$.uid").As("uid").Tag().
 			FieldName("$.uidNumber").As("uidNumber").Numeric().
-			// FieldName("$.userPKCS12").As("userPKCS12").Tag().
-			FieldName("$.userPassword").As("userPassword").Tag().
+			FieldName("$.userPKCS12").As("userPKCS12").Tag().
+			// FieldName("$.userPassword").As("userPassword").Tag().
 			// FieldName("$.host_aaa").As("host_aaa").Tag().
 			// FieldName("$.host_acl").As("host_acl").Tag().
 			// FieldName("$.host_type").As("host_type").Tag().
@@ -106,7 +140,7 @@ func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
 			// FieldName("$.host_url").As("host_url").Tag().
 			// FieldName("$.host_listen").As("host_listen").Tag().
 
-			// FieldName("$.labeledURI").As("labeledURI").Tag().
+			FieldName("$.labeledURI").As("labeledURI").Tag().
 			// FieldName("$.labeledURI[*].key").As("labeledURI_key").Tag().
 			// FieldName("$.labeledURI[*].value").As("labeledURI_value").Tag().
 

@@ -10,6 +10,7 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
 
+	"rmm23/src/l"
 	"rmm23/src/mod_crypto"
 	"rmm23/src/mod_slices"
 	"rmm23/src/mod_ssh"
@@ -221,6 +222,7 @@ func (r *attrUserPKCS12s) UnmarshalLDAPAttr(values []string) (err error) {
 
 		switch interim, forErr = mod_crypto.ParsePEM([]byte(value)); {
 		case forErr != nil:
+			l.Z{l.M: "ParsePEM", l.E: forErr}.Warning()
 			continue
 		}
 
