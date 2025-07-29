@@ -15,7 +15,7 @@ type RedisRepository struct {
 // NewRedisRepository creates a new RedisRepository.
 func NewRedisRepository(client rueidis.Client) *RedisRepository {
 	return &RedisRepository{
-		repo: om.NewJSONRepository[Entry](entryKeyHeader, Entry{}, client),
+		repo: om.NewJSONRepository[Entry](entryKeyHeader, Entry{}, client, om.WithIndexName(entryKeyHeader)),
 	}
 }
 

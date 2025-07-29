@@ -38,14 +38,20 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query("*").Limit().OffsetNum(0, connMaxPaging).Build()
 	})
+	fmt.Print(count, len(entries), err, "\n")
+
+	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+		return search.Query("@objectClass:{posixGroup}").Limit().OffsetNum(0, connMaxPaging).Build()
+	})
+	fmt.Print(count, len(entries), err, "\n")
+
+	// posixGroup
 
 	// cmd := outbound.client.B().FtSearch().Index(outbound.repo.repo.IndexName()).Query(`*`).Build()
 	// // count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 	// // 	return search.Query(`@dn:dc`).Build()
 	// // })
 	// count, entries, err = outbound.client.Do(ctx, cmd).AsFtSearch()
-
-	fmt.Print(count, len(entries), err, "\n")
 
 	return
 }

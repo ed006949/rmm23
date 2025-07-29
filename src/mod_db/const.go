@@ -6,9 +6,9 @@ import (
 )
 
 const (
-	sliceSeparator byte = 0x1f
-	jsonPathHeader      = "$."
-	tagSeparator        = ","
+	sliceSeparator = "\x1f"
+	jsonPathHeader = "$."
+	tagSeparator   = ","
 )
 
 const (

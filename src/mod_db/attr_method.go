@@ -17,6 +17,7 @@ func (r *attrDN) String() (outbound string) { return string(*r) }
 // attrUUID
 
 func (r *attrUUID) String() (outbound string) { return uuid.UUID(*r).String() }
+func (r *attrUUID) Entry() (outbound string)  { return entryKeyHeader + ":" + uuid.UUID(*r).String() }
 
 func (r *attrUUID) MarshalJSON() (outbound []byte, err error) {
 	return []byte(fmt.Sprintf("%q", r.String())), nil
@@ -72,23 +73,41 @@ func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
 //
 // attrIDNumber
 
-func (r *attrIDNumber) MarshalJSON() (outbound []byte, err error) {
-	return []byte(fmt.Sprintf("%d", *r)), nil
-}
-func (r *attrIDNumber) UnmarshalJSON(inbound []byte) (err error) {
-	var (
-		interim uint64
-	)
+// func (r *attrIDNumber) MarshalJSON() (outbound []byte, err error) {
+// 	return []byte(fmt.Sprintf("%d", *r)), nil
+// }
+// func (r *attrIDNumber) UnmarshalJSON(inbound []byte) (err error) {
+// 	var (
+// 		interim uint64
+// 	)
+//
+// 	switch err = json.Unmarshal(inbound, &interim); {
+// 	case err != nil:
+// 		return
+// 	}
+//
+// 	*r = attrIDNumber(interim)
+//
+// 	return
+// }
 
-	switch err = json.Unmarshal(inbound, &interim); {
-	case err != nil:
-		return
-	}
-
-	*r = attrIDNumber(interim)
-
-	return
-}
+// func (r *attrDNs) MarshalJSON() (outbound []byte, err error) {
+// 	var (
+// 		interim []string
+// 	)
+//
+// 	for _, b := range *r {
+// 		interim = append(interim, b.String())
+// 	}
+//
+// 	// // 	outbound, err = json.Marshal(r)
+// 	outbound, err = json.Marshal(&interim)
+//
+// 	return
+// 	// //
+// 	// // outbound, err = json.Marshal(map[string]string(*r))
+// 	// //	return
+// }
 
 // func (r *attrLabeledURIs) MarshalJSON() (outbound []byte, err error) {
 // // // 	outbound, err = json.Marshal(r)

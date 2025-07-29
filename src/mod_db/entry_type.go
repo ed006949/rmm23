@@ -50,8 +50,8 @@ type Entry struct {
 	TelexNumber          attrStrings               `json:"telexNumber,omitempty"          ldap:"telexNumber"          msgpack:"telexNumber"`          //
 	UID                  attrID                    `json:"uid,omitempty"                  ldap:"uid"                  msgpack:"uid"`                  //  RDN in user's context
 	UIDNumber            attrIDNumber              `json:"uidNumber,omitempty"            ldap:"uidNumber"            msgpack:"uidNumber"`            //
-	UserPKCS12           attrUserPKCS12s           `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           msgpack:"userPKCS12"`           //
-	UserPassword         attrUserPassword          `json:"userPassword,omitempty"         ldap:"userPassword"         msgpack:"userPassword"`         //
+	// UserPKCS12           attrUserPKCS12s           `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           msgpack:"userPKCS12"`           //
+	UserPassword attrUserPassword `json:"userPassword,omitempty" ldap:"userPassword" msgpack:"userPassword"` //
 	// MemberOf             attrDNs                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf"            ` //  ignore it, don't cache, calculate on the fly or avoid
 
 	// specific data
