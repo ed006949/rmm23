@@ -108,9 +108,9 @@ func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
 			FieldName("$.uuid").As("uuid").Tag().Separator(sliceSeparator).
 			FieldName("$.dn").As("dn").Tag().Separator(sliceSeparator).
 			FieldName("$.objectClass[*]").As("objectClass").Tag().Separator(sliceSeparator).
-			// FieldName("$.creatorsName").As("creatorsName").Tag().Separator(sliceSeparator).
+			FieldName("$.creatorsName").As("creatorsName").Tag().Separator(sliceSeparator).
 			// FieldName("$.createTimestamp").As("createTimestamp").Numeric().
-			// FieldName("$.modifiersName").As("modifiersName").Tag().Separator(sliceSeparator).
+			FieldName("$.modifiersName").As("modifiersName").Tag().Separator(sliceSeparator).
 			// FieldName("$.modifyTimestamp").As("modifyTimestamp").Numeric().
 			FieldName("$.cn").As("cn").Tag().Separator(sliceSeparator).
 			FieldName("$.dc").As("dc").Tag().Separator(sliceSeparator).
@@ -133,6 +133,7 @@ func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
 			FieldName("$.uidNumber").As("uidNumber").Numeric().
 			FieldName("$.userPKCS12[*]").As("userPKCS12").Tag().Separator(sliceSeparator).
 			// FieldName("$.userPassword").As("userPassword").Tag().Separator(sliceSeparator).
+
 			// FieldName("$.host_aaa").As("host_aaa").Tag().Separator(sliceSeparator).
 			// FieldName("$.host_acl").As("host_acl").Tag().Separator(sliceSeparator).
 			// FieldName("$.host_type").As("host_type").Tag().Separator(sliceSeparator).

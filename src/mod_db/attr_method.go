@@ -62,6 +62,7 @@ func (r *attrTime) MarshalJSON() (outbound []byte, err error) {
 func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
 	var (
 		interim int64
+		// interimTime time.Time
 	)
 
 	switch err = json.Unmarshal(inbound, &interim); {
