@@ -93,8 +93,6 @@ func (r *RedisRepository) DeleteEntry(ctx context.Context, id string) error {
 	return r.repo.Remove(ctx, id)
 }
 
-// func (r *RedisRepository) SearchEntries() {}
-
 // DropIndex drops the RediSearch index for the Entry struct.
 func (r *RedisRepository) DropIndex(ctx context.Context) (err error) { return r.repo.DropIndex(ctx) }
 
@@ -147,6 +145,16 @@ func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
 			// FieldName("$.labeledURI[*].key").As("labeledURI_key").Tag().Separator(sliceSeparator).
 			// FieldName("$.labeledURI[*].value").As("labeledURI_value").Tag().Separator(sliceSeparator).
 
+			Build()
+	})
+}
+
+func (r *RedisRepository) SearchEntries(ctx context.Context, key entryFieldName, value string) (count int64, entries []*Entry, err error) {
+	// "@baseDN:{dc\\=domain\\,dc\\=tld}"
+	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+		return search.Query(fmt.Sprintf("@%s:%v", key.String(), escapeQueryValue(value))).
+			Infields("1").Field(key.String()).
+			Limit().OffsetNum(0, connMaxPaging).
 			Build()
 	})
 }

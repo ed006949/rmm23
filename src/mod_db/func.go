@@ -38,12 +38,20 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query("*").Limit().OffsetNum(0, connMaxPaging).Build()
 	})
-	fmt.Print(count, len(entries), err, "\n")
+	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
 	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query("@objectClass:{posixGroup}").Limit().OffsetNum(0, connMaxPaging).Build()
 	})
-	fmt.Print(count, len(entries), err, "\n")
+	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
+
+	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+		return search.Query("@baseDN:{dc\\=fabric\\,dc\\=domain\\,dc\\=tld}").Infields("1").Field("baseDN").Limit().OffsetNum(0, connMaxPaging).Build()
+	})
+	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
+
+	count, entries, err = outbound.repo.SearchEntries(ctx, _member, `{uid=aaa\-auth,ou=People,dc=fabric,dc=domain,dc=tld}`)
+	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
 	// cmd := outbound.client.B().FtSearch().Index(outbound.repo.repo.IndexName()).Query(`*`).Build()
 	// // count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
@@ -65,12 +73,11 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 
 	var (
 		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
-			for counter, fnB := range fnSearchResult.Entries {
-				switch {
-				case l.CLEAR && counter > 3:
-					return nil
-				}
-
+			for _, fnB := range fnSearchResult.Entries {
+				// switch {
+				// case l.CLEAR && counter > 3:
+				// 	return nil
+				// }
 				var (
 					fnEntry = new(Entry)
 				)
@@ -91,10 +98,10 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 
 				fnEntry.Key = fnEntry.UUID.String()
 
-				switch l.CLEAR {
-				case true:
-					_ = repo.DeleteEntry(ctx, fnEntry.Key)
-				}
+				// switch l.CLEAR {
+				// case true:
+				// 	_ = repo.DeleteEntry(ctx, fnEntry.Key)
+				// }
 
 				_ = repo.DeleteEntry(ctx, fnEntry.Key)
 
