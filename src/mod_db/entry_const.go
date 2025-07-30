@@ -26,6 +26,7 @@ const (
 	_ipHostNumber         entryFieldName = "ipHostNumber"
 	_mail                 entryFieldName = "mail"
 	_member               entryFieldName = "member"
+	_memberOf             entryFieldName = "memberOf"
 	_o                    entryFieldName = "o"
 	_ou                   entryFieldName = "ou"
 	_owner                entryFieldName = "owner"

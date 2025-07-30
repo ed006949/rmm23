@@ -6,7 +6,24 @@ import (
 	"time"
 
 	"github.com/google/uuid"
+
+	"rmm23/src/mod_errors"
 )
+
+//
+// attrEntryType
+
+func (r *attrEntryType) String() (outbound string) { return entryTypeName[*r] }
+func (r *attrEntryType) Parse(inbound string) (err error) {
+	switch value, ok := entryTypeID[inbound]; {
+	case !ok:
+		return mod_errors.EUnknownType
+	default:
+		*r = value
+
+		return
+	}
+}
 
 //
 // attrDN
@@ -49,7 +66,7 @@ func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
 
 //
 // attrTime
-// store/retrieve time.Time as int64 to utilize redisearch NUMERIC search
+// store/retrieve time.Time as int64 to utilize redisearch NUMERIC search [min max]
 
 func (r *attrTime) String() (outbound string) { return time.Time(*r).String() }
 

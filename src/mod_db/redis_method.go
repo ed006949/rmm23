@@ -13,6 +13,59 @@ import (
 	"rmm23/src/mod_errors"
 )
 
+// CreateIndex creates the RediSearch index for the Entry struct.
+func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
+	return r.repo.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
+		return schema.
+			FieldName("$.type").As("type").Numeric().
+			FieldName("$.status").As("status").Numeric().
+			FieldName("$.baseDN").As("baseDN").Tag().Separator(sliceSeparator).
+			FieldName("$.uuid").As("uuid").Tag().Separator(sliceSeparator).
+			FieldName("$.dn").As("dn").Tag().Separator(sliceSeparator).
+			FieldName("$.objectClass[*]").As("objectClass").Tag().Separator(sliceSeparator).
+			FieldName("$.creatorsName").As("creatorsName").Tag().Separator(sliceSeparator).
+			// FieldName("$.createTimestamp").As("createTimestamp").Numeric().
+			FieldName("$.modifiersName").As("modifiersName").Tag().Separator(sliceSeparator).
+			// FieldName("$.modifyTimestamp").As("modifyTimestamp").Numeric().
+			FieldName("$.cn").As("cn").Tag().Separator(sliceSeparator).
+			FieldName("$.dc").As("dc").Tag().Separator(sliceSeparator).
+			// FieldName("$.description").As("description").Tag().Separator(sliceSeparator).
+			FieldName("$.destinationIndicator[*]").As("destinationIndicator").Tag().Separator(sliceSeparator).
+			// FieldName("$.displayName").As("displayName").Tag().Separator(sliceSeparator).
+			FieldName("$.gidNumber").As("gidNumber").Numeric().
+			// FieldName("$.homeDirectory").As("homeDirectory").Tag().Separator(sliceSeparator).
+			FieldName("$.ipHostNumber[*]").As("ipHostNumber").Tag().Separator(sliceSeparator).
+			FieldName("$.mail[*]").As("mail").Tag().Separator(sliceSeparator).
+			FieldName("$.member[*]").As("member").Tag().Separator(sliceSeparator).
+			// FieldName("$.o").As("o").Tag().Separator(sliceSeparator).
+			// FieldName("$.ou").As("ou").Tag().Separator(sliceSeparator).
+			FieldName("$.owner[*]").As("owner").Tag().Separator(sliceSeparator).
+			// FieldName("$.sn").As("sn").Tag().Separator(sliceSeparator).
+			FieldName("$.sshPublicKey[*]").As("sshPublicKey").Tag().Separator(sliceSeparator).
+			FieldName("$.telephoneNumber[*]").As("telephoneNumber").Tag().Separator(sliceSeparator).
+			FieldName("$.telexNumber[*]").As("telexNumber").Tag().Separator(sliceSeparator).
+			FieldName("$.uid").As("uid").Tag().Separator(sliceSeparator).
+			FieldName("$.uidNumber").As("uidNumber").Numeric().
+			FieldName("$.userPKCS12[*]").As("userPKCS12").Tag().Separator(sliceSeparator).
+			// FieldName("$.userPassword").As("userPassword").Tag().Separator(sliceSeparator).
+
+			// FieldName("$.host_aaa").As("host_aaa").Tag().Separator(sliceSeparator).
+			// FieldName("$.host_acl").As("host_acl").Tag().Separator(sliceSeparator).
+			// FieldName("$.host_type").As("host_type").Tag().Separator(sliceSeparator).
+			// FieldName("$.host_asn").As("host_asn").Tag().Separator(sliceSeparator).
+			// FieldName("$.host_upstream_asn").As("host_upstream_asn").Tag().Separator(sliceSeparator).
+			// FieldName("$.host_hosting_uuid").As("host_hosting_uuid").Tag().Separator(sliceSeparator).
+			// FieldName("$.host_url").As("host_url").Tag().Separator(sliceSeparator).
+			// FieldName("$.host_listen").As("host_listen").Tag().Separator(sliceSeparator).
+
+			FieldName("$.labeledURI[*]").As("labeledURI").Tag().Separator(sliceSeparator).
+			// FieldName("$.labeledURI[*].key").As("labeledURI_key").Tag().Separator(sliceSeparator).
+			// FieldName("$.labeledURI[*].value").As("labeledURI_value").Tag().Separator(sliceSeparator).
+
+			Build()
+	})
+}
+
 func (r *Conf) Dial(ctx context.Context) (err error) {
 	switch r.client, err = rueidis.NewClient(rueidis.ClientOption{
 		InitAddress: []string{r.URL.Host},
@@ -89,76 +142,19 @@ func (r *Conf) monitorIndexingFailures(ctx context.Context) (err error) {
 	return
 }
 
-// SaveEntry saves an Entry to Redis.
 func (r *RedisRepository) SaveEntry(ctx context.Context, e *Entry) error {
 	return r.repo.Save(ctx, e)
 }
 
-// FindEntry finds an Entry by its ID.
 func (r *RedisRepository) FindEntry(ctx context.Context, id string) (*Entry, error) {
 	return r.repo.Fetch(ctx, id)
 }
 
-// DeleteEntry deletes an Entry by its ID.
 func (r *RedisRepository) DeleteEntry(ctx context.Context, id string) error {
 	return r.repo.Remove(ctx, id)
 }
 
-// DropIndex drops the RediSearch index for the Entry struct.
 func (r *RedisRepository) DropIndex(ctx context.Context) (err error) { return r.repo.DropIndex(ctx) }
-
-// CreateIndex creates the RediSearch index for the Entry struct.
-func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
-	return r.repo.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
-		return schema.
-			FieldName("$.type").As("type").Numeric().
-			FieldName("$.status").As("status").Numeric().
-			FieldName("$.baseDN").As("baseDN").Tag().Separator(sliceSeparator).
-			FieldName("$.uuid").As("uuid").Tag().Separator(sliceSeparator).
-			FieldName("$.dn").As("dn").Tag().Separator(sliceSeparator).
-			FieldName("$.objectClass[*]").As("objectClass").Tag().Separator(sliceSeparator).
-			FieldName("$.creatorsName").As("creatorsName").Tag().Separator(sliceSeparator).
-			// FieldName("$.createTimestamp").As("createTimestamp").Numeric().
-			FieldName("$.modifiersName").As("modifiersName").Tag().Separator(sliceSeparator).
-			// FieldName("$.modifyTimestamp").As("modifyTimestamp").Numeric().
-			FieldName("$.cn").As("cn").Tag().Separator(sliceSeparator).
-			FieldName("$.dc").As("dc").Tag().Separator(sliceSeparator).
-			// FieldName("$.description").As("description").Tag().Separator(sliceSeparator).
-			FieldName("$.destinationIndicator[*]").As("destinationIndicator").Tag().Separator(sliceSeparator).
-			// FieldName("$.displayName").As("displayName").Tag().Separator(sliceSeparator).
-			FieldName("$.gidNumber").As("gidNumber").Numeric().
-			// FieldName("$.homeDirectory").As("homeDirectory").Tag().Separator(sliceSeparator).
-			FieldName("$.ipHostNumber[*]").As("ipHostNumber").Tag().Separator(sliceSeparator).
-			FieldName("$.mail[*]").As("mail").Tag().Separator(sliceSeparator).
-			FieldName("$.member[*]").As("member").Tag().Separator(sliceSeparator).
-			// FieldName("$.o").As("o").Tag().Separator(sliceSeparator).
-			// FieldName("$.ou").As("ou").Tag().Separator(sliceSeparator).
-			FieldName("$.owner[*]").As("owner").Tag().Separator(sliceSeparator).
-			// FieldName("$.sn").As("sn").Tag().Separator(sliceSeparator).
-			FieldName("$.sshPublicKey[*]").As("sshPublicKey").Tag().Separator(sliceSeparator).
-			FieldName("$.telephoneNumber[*]").As("telephoneNumber").Tag().Separator(sliceSeparator).
-			FieldName("$.telexNumber[*]").As("telexNumber").Tag().Separator(sliceSeparator).
-			FieldName("$.uid").As("uid").Tag().Separator(sliceSeparator).
-			FieldName("$.uidNumber").As("uidNumber").Numeric().
-			FieldName("$.userPKCS12[*]").As("userPKCS12").Tag().Separator(sliceSeparator).
-			// FieldName("$.userPassword").As("userPassword").Tag().Separator(sliceSeparator).
-
-			// FieldName("$.host_aaa").As("host_aaa").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_acl").As("host_acl").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_type").As("host_type").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_asn").As("host_asn").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_upstream_asn").As("host_upstream_asn").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_hosting_uuid").As("host_hosting_uuid").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_url").As("host_url").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_listen").As("host_listen").Tag().Separator(sliceSeparator).
-
-			FieldName("$.labeledURI[*]").As("labeledURI").Tag().Separator(sliceSeparator).
-			// FieldName("$.labeledURI[*].key").As("labeledURI_key").Tag().Separator(sliceSeparator).
-			// FieldName("$.labeledURI[*].value").As("labeledURI_value").Tag().Separator(sliceSeparator).
-
-			Build()
-	})
-}
 
 func (r *RedisRepository) SearchQ(ctx context.Context, query string /*, outFields ...entryFieldName*/) (count int64, entries []*Entry, err error) {
 	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {

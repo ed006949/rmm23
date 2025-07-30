@@ -40,7 +40,7 @@ type Entry struct {
 	Description          attrString                `json:"description,omitempty"          ldap:"description"          msgpack:"description"`          //
 	DestinationIndicator attrDestinationIndicators `json:"destinationIndicator,omitempty" ldap:"destinationIndicator" msgpack:"destinationIndicator"` //
 	DisplayName          attrString                `json:"displayName,omitempty"          ldap:"displayName"          msgpack:"displayName"`          //
-	GIDNumber            attrIDNumber              `json:"gidNumber,omitempty"            ldap:"gidNumber"            msgpack:"gidNumber"`            //  Primary GIDNumber in user's context (ignore it) and GIDNumber in group's context.
+	GIDNumber            attrIDNumber              `json:"gidNumber,omitempty"            ldap:"gidNumber"            msgpack:"gidNumber"`            //  Primary GIDNumber in user's context (ignore it), GIDNumber in group's context.
 	HomeDirectory        attrString                `json:"homeDirectory,omitempty"        ldap:"homeDirectory"        msgpack:"homeDirectory"`        //
 	IPHostNumber         attrIPHostNumbers         `json:"ipHostNumber,omitempty"         ldap:"ipHostNumber"         msgpack:"ipHostNumber"`         //
 	Mail                 attrMails                 `json:"mail,omitempty"                 ldap:"mail"                 msgpack:"mail"`                 //
@@ -56,7 +56,7 @@ type Entry struct {
 	UIDNumber            attrIDNumber              `json:"uidNumber,omitempty"            ldap:"uidNumber"            msgpack:"uidNumber"`            //
 	UserPKCS12           mod_crypto.Certificates   `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           msgpack:"userPKCS12"`           //
 	UserPassword         attrUserPassword          `json:"userPassword,omitempty"         ldap:"userPassword"         msgpack:"userPassword"`         //
-	// MemberOf             attrDNs                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf"            ` //  ignore it, don't cache, calculate on the fly or avoid
+	// MemberOf             attrDNs                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf"            ` //  don't trust LDAP
 
 	// specific data
 	AAA string `json:"host_aaa,omitempty" msgpack:"host_aaa"` //  Entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`

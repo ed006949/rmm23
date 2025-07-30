@@ -24,6 +24,7 @@ var (
 		_ipHostNumber:         rediSearchTagTypeTag,
 		_mail:                 rediSearchTagTypeTag,
 		_member:               rediSearchTagTypeTag,
+		_memberOf:             rediSearchTagTypeTag,
 		_o:                    rediSearchTagTypeTag,
 		_ou:                   rediSearchTagTypeTag,
 		_owner:                rediSearchTagTypeTag,
