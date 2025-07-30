@@ -49,11 +49,7 @@ Welcome to the Remote Monitoring and Management (episode 23).
 
 * data must be unique within the entire infrastructure:
 	* UUID
-		* generate new `UUID` if it already exists
-			* `UUID` must be static for same account:
-				* xxxxxxxx-xxxx-Mxxx-Nxxx-xxxxxxxxxxxx
-				* | _same_value_for_all_ || _DN_hash_ |
-				* hash `DN` to `UUID`'s `node` field
+		- [x] generate new null-based `UUID` against `DN` while loading legacy data from `LDAP`
 	* `ipHostNumber`
 	* `dn`
 	* certificates (`fingerprint`) and certificates's `CN`
@@ -155,7 +151,7 @@ Welcome to the Remote Monitoring and Management (episode 23).
 	- [ ] API i/o
 - [ ] data processor:
 	- [ ] go templates
-	- [ ] JSON
+	- [x] JSON
 	- [x] XML
 	- [ ] LDAP:
 		- [x] load from LDAP
@@ -170,7 +166,7 @@ Welcome to the Remote Monitoring and Management (episode 23).
 		- [ ] multimaster
 - [ ] DB
 	- [x] redis as DB backend instead of memory
-		- [x] db0: main db with `rediSearch` for indexing
+		- [x] db0: main db with indexing
 		- [ ] db1: config
 		- [ ] db2: `MQTT`
 	- [ ] auth front-ends:
@@ -296,14 +292,15 @@ TODO
 ### build
 
 * [Go][URL_Go]
-* [Redis][URL_Redigo]
-* [RediSearch][URL_redisearch-go]
+	* [Rueidis][URL_Go_Rueidis]
+	* [Rueidis OM][URL_Go_Rueidis_OM]
+	* [LDAP][URL_Go_LDAP]
 
 ### run
 
 * [Redis][URL_Redis] server with modules:
 	* [RediSearch][URL_RediSearch]
-	* [~~RedisJSON~~][URL_RedisJSON]
+	* [RedisJSON][URL_RedisJSON]
 
 [URL_Redis]: https://github.com/redis/redis
 
@@ -313,9 +310,11 @@ TODO
 
 [URL_Go]: https://golang.org/
 
-[URL_redisearch-go]: https://github.com/RediSearch/redisearch-go
+[URL_Go_Rueidis]: https://github.com/redis/rueidis
 
-[URL_redigo]: https://github.com/gomodule/redigo
+[URL_Go_Rueidis_OM]: https://github.com/redis/rueidis/om
+
+[URL_Go_LDAP]: https://github.com/go-ldap/ldap/v3
 
 ## questions
 
