@@ -11,6 +11,7 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
+	"rmm23/src/mod_slices"
 )
 
 // CreateIndex creates the RediSearch index for the Entry struct.
@@ -156,7 +157,7 @@ func (r *RedisRepository) DeleteEntry(ctx context.Context, id string) error {
 
 func (r *RedisRepository) DropIndex(ctx context.Context) (err error) { return r.repo.DropIndex(ctx) }
 
-func (r *RedisRepository) SearchQ(ctx context.Context, query string /*, outFields ...entryFieldName*/) (count int64, entries []*Entry, err error) {
+func (r *RedisRepository) SearchQ(ctx context.Context, query string) (count int64, entries []*Entry, err error) {
 	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query(query).
 			Limit().OffsetNum(0, connMaxPaging).
@@ -164,17 +165,17 @@ func (r *RedisRepository) SearchQ(ctx context.Context, query string /*, outField
 	})
 }
 
-func (r *RedisRepository) SearchFV(ctx context.Context, field entryFieldName, value string /*, outFields ...entryFieldName*/) (count int64, entries []*Entry, err error) {
+func (r *RedisRepository) SearchFV(ctx context.Context, field entryFieldName, value string) (count int64, entries []*Entry, err error) {
 	return r.SearchQ(ctx, fmt.Sprintf(
 		"@%s:%s%v%s",
 		field.String(),
 		entryFieldValueEnclosure[entryFieldMap[field]][0],
 		escapeQueryValue(value),
 		entryFieldValueEnclosure[entryFieldMap[field]][1],
-	) /*, outFields...*/)
+	))
 }
 
-func (r *RedisRepository) SearchMFV(ctx context.Context, mfv []_FV /*, outFields ...entryFieldName*/) (count int64, entries []*Entry, err error) {
+func (r *RedisRepository) SearchMFV(ctx context.Context, mfv []_FV) (count int64, entries []*Entry, err error) {
 	var (
 		interim = make([]string, len(mfv), len(mfv))
 	)
@@ -189,5 +190,50 @@ func (r *RedisRepository) SearchMFV(ctx context.Context, mfv []_FV /*, outFields
 		)
 	}
 
-	return r.SearchQ(ctx, strings.Join(interim, " ") /*, outFields...*/)
+	return r.SearchQ(ctx, strings.Join(interim, " "))
+}
+
+func (r *Conf) Search(ctx context.Context, fvof _FVOF) (count int64, entries []rueidis.FtSearchDoc, err error) {
+	var (
+		interimFV = make([]string, len(fvof._FV), len(fvof._FV))
+		// interimOF = make([]string, len(fvof._OF), len(fvof._OF))
+		interimOF = mod_slices.ToStrings(fvof._OF, mod_slices.FlagNone)
+	)
+
+	for i, fv := range fvof._FV {
+		interimFV[i] = fmt.Sprintf(
+			"@%s:%s%v%s",
+			fv._F.String(),
+			entryFieldValueEnclosure[entryFieldMap[fv._F]][0],
+			escapeQueryValue(fv._V),
+			entryFieldValueEnclosure[entryFieldMap[fv._F]][1],
+		)
+	}
+
+	var (
+		resp = r.client.
+			Do(
+				ctx,
+				r.client.
+					B().
+					Arbitrary("FT.SEARCH").
+					Args(r.repo.repo.IndexName()).
+					Args(interimFV...).
+					Args(
+						"LIMIT",
+						"0",
+						fmt.Sprintf("%d", connMaxPaging)).
+					Args(
+						"RETURN",
+						fmt.Sprintf("%d", len(interimOF))).
+					Args(interimOF...).
+					Build())
+	)
+
+	switch err = resp.Error(); {
+	case err != nil:
+		return
+	}
+
+	return resp.AsFtSearch()
 }
