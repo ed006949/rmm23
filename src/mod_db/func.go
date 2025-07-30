@@ -54,10 +54,10 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	})
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
-	count, entries, err = outbound.repo.SearchEntries(ctx, _member, `{uid=aaa\-auth,ou=People,dc=fabric,dc=domain,dc=tld}`, _dn, _baseDN)
+	count, entries, err = outbound.repo.SearchFV(ctx, _member, `uid=aaa\-auth,ou=People,dc=fabric,dc=domain,dc=tld`)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
-	count, entries, err = outbound.repo.MSearch(
+	count, entries, err = outbound.repo.SearchMFV(
 		ctx,
 		[]_Q{
 			{

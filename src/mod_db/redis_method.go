@@ -11,7 +11,6 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
-	"rmm23/src/mod_slices"
 )
 
 func (r *Conf) Dial(ctx context.Context) (err error) {
@@ -161,22 +160,7 @@ func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
 	})
 }
 
-func (r *RedisRepository) SearchEntries(ctx context.Context, field entryFieldName, value string, outFields ...entryFieldName) (count int64, entries []*Entry, err error) {
-	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-		switch outFieldsString := mod_slices.ToStrings(outFields, mod_slices.FlagNormalize); len(outFieldsString) {
-		case 0:
-			return search.Query(fmt.Sprintf("@%s:%v", field.String(), escapeQueryValue(value))).
-				Limit().OffsetNum(0, connMaxPaging).
-				Build()
-		default:
-			return search.Query(fmt.Sprintf("@%s:%v", field.String(), escapeQueryValue(value))).
-				Limit().OffsetNum(0, connMaxPaging).
-				Build()
-		}
-	})
-}
-
-func (r *RedisRepository) QSearch(ctx context.Context, query string, outFields ...entryFieldName) (count int64, entries []*Entry, err error) {
+func (r *RedisRepository) SearchQ(ctx context.Context, query string /*, outFields ...entryFieldName*/) (count int64, entries []*Entry, err error) {
 	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query(query).
 			Limit().OffsetNum(0, connMaxPaging).
@@ -184,12 +168,22 @@ func (r *RedisRepository) QSearch(ctx context.Context, query string, outFields .
 	})
 }
 
-func (r *RedisRepository) MSearch(ctx context.Context, query []_Q, outFields ...entryFieldName) (count int64, entries []*Entry, err error) {
+func (r *RedisRepository) SearchFV(ctx context.Context, field entryFieldName, value string /*, outFields ...entryFieldName*/) (count int64, entries []*Entry, err error) {
+	return r.SearchQ(ctx, fmt.Sprintf(
+		"@%s:%s%v%s",
+		field.String(),
+		entryFieldValueEnclosure[entryFieldMap[field]][0],
+		escapeQueryValue(value),
+		entryFieldValueEnclosure[entryFieldMap[field]][1],
+	) /*, outFields...*/)
+}
+
+func (r *RedisRepository) SearchMFV(ctx context.Context, mfv []_Q /*, outFields ...entryFieldName*/) (count int64, entries []*Entry, err error) {
 	var (
-		interim = make([]string, len(query), len(query))
+		interim = make([]string, len(mfv), len(mfv))
 	)
 
-	for _, b := range query {
+	for _, b := range mfv {
 		interim = append(interim, fmt.Sprintf(
 			"@%s:%s%v%s",
 			b._F.String(),
@@ -199,9 +193,5 @@ func (r *RedisRepository) MSearch(ctx context.Context, query []_Q, outFields ...
 		))
 	}
 
-	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-		return search.Query(strings.Join(interim, " ")).
-			Limit().OffsetNum(0, connMaxPaging).
-			Build()
-	})
+	return r.SearchQ(ctx, strings.Join(interim, " ") /*, outFields...*/)
 }
