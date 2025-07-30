@@ -59,7 +59,7 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 
 	count, entries, err = outbound.repo.SearchMFV(
 		ctx,
-		[]_Q{
+		[]_FV{
 			{
 				_F: _baseDN,
 				_V: "dc=fabric,dc=domain,dc=tld",

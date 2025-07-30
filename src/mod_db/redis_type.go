@@ -1,11 +1,20 @@
 package mod_db
 
-type qs struct {
-	_Q  []_Q
+import (
+	"github.com/redis/rueidis/om"
+)
+
+type _FVOF struct {
+	_FV []_FV
 	_OF []entryFieldName
 }
 
-type _Q struct {
+type _FV struct {
 	_F entryFieldName
 	_V string
+}
+
+// RedisRepository provides methods for interacting with Redis using rueidis.
+type RedisRepository struct {
+	repo om.Repository[Entry]
 }

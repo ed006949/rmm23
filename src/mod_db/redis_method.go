@@ -178,19 +178,19 @@ func (r *RedisRepository) SearchFV(ctx context.Context, field entryFieldName, va
 	) /*, outFields...*/)
 }
 
-func (r *RedisRepository) SearchMFV(ctx context.Context, mfv []_Q /*, outFields ...entryFieldName*/) (count int64, entries []*Entry, err error) {
+func (r *RedisRepository) SearchMFV(ctx context.Context, mfv []_FV /*, outFields ...entryFieldName*/) (count int64, entries []*Entry, err error) {
 	var (
 		interim = make([]string, len(mfv), len(mfv))
 	)
 
-	for _, b := range mfv {
-		interim = append(interim, fmt.Sprintf(
+	for i, fv := range mfv {
+		interim[i] = fmt.Sprintf(
 			"@%s:%s%v%s",
-			b._F.String(),
-			entryFieldValueEnclosure[entryFieldMap[b._F]][0],
-			escapeQueryValue(b._V),
-			entryFieldValueEnclosure[entryFieldMap[b._F]][1],
-		))
+			fv._F.String(),
+			entryFieldValueEnclosure[entryFieldMap[fv._F]][0],
+			escapeQueryValue(fv._V),
+			entryFieldValueEnclosure[entryFieldMap[fv._F]][1],
+		)
 	}
 
 	return r.SearchQ(ctx, strings.Join(interim, " ") /*, outFields...*/)
