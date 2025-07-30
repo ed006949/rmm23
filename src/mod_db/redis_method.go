@@ -11,7 +11,6 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
-	"rmm23/src/mod_slices"
 )
 
 // CreateIndex creates the RediSearch index for the Entry struct.
@@ -193,47 +192,47 @@ func (r *RedisRepository) SearchMFV(ctx context.Context, mfv []_FV) (count int64
 	return r.SearchQ(ctx, strings.Join(interim, " "))
 }
 
-func (r *Conf) Search(ctx context.Context, fvof _FVOF) (count int64, entries []rueidis.FtSearchDoc, err error) {
-	var (
-		interimFV = make([]string, len(fvof._FV), len(fvof._FV))
-		// interimOF = make([]string, len(fvof._OF), len(fvof._OF))
-		interimOF = mod_slices.ToStrings(fvof._OF, mod_slices.FlagNone)
-	)
-
-	for i, fv := range fvof._FV {
-		interimFV[i] = fmt.Sprintf(
-			"@%s:%s%v%s",
-			fv._F.String(),
-			entryFieldValueEnclosure[entryFieldMap[fv._F]][0],
-			escapeQueryValue(fv._V),
-			entryFieldValueEnclosure[entryFieldMap[fv._F]][1],
-		)
-	}
-
-	var (
-		resp = r.client.
-			Do(
-				ctx,
-				r.client.
-					B().
-					Arbitrary("FT.SEARCH").
-					Args(r.repo.repo.IndexName()).
-					Args(interimFV...).
-					Args(
-						"LIMIT",
-						"0",
-						fmt.Sprintf("%d", connMaxPaging)).
-					Args(
-						"RETURN",
-						fmt.Sprintf("%d", len(interimOF))).
-					Args(interimOF...).
-					Build())
-	)
-
-	switch err = resp.Error(); {
-	case err != nil:
-		return
-	}
-
-	return resp.AsFtSearch()
-}
+// func (r *Conf) Search(ctx context.Context, fvof _FVOF) (count int64, entries []rueidis.FtSearchDoc, err error) {
+// 	var (
+// 		interimFV = make([]string, len(fvof._FV), len(fvof._FV))
+// 		// interimOF = make([]string, len(fvof._OF), len(fvof._OF))
+// 		interimOF = mod_slices.ToStrings(fvof._OF, mod_slices.FlagNone)
+// 	)
+//
+// 	for i, fv := range fvof._FV {
+// 		interimFV[i] = fmt.Sprintf(
+// 			"@%s:%s%v%s",
+// 			fv._F.String(),
+// 			entryFieldValueEnclosure[entryFieldMap[fv._F]][0],
+// 			escapeQueryValue(fv._V),
+// 			entryFieldValueEnclosure[entryFieldMap[fv._F]][1],
+// 		)
+// 	}
+//
+// 	var (
+// 		resp = r.client.
+// 			Do(
+// 				ctx,
+// 				r.client.
+// 					B().
+// 					Arbitrary("FT.SEARCH").
+// 					Args(r.repo.repo.IndexName()).
+// 					Args(interimFV...).
+// 					Args(
+// 						"LIMIT",
+// 						"0",
+// 						fmt.Sprintf("%d", connMaxPaging)).
+// 					Args(
+// 						"RETURN",
+// 						fmt.Sprintf("%d", len(interimOF))).
+// 					Args(interimOF...).
+// 					Build())
+// 	)
+//
+// 	switch err = resp.Error(); {
+// 	case err != nil:
+// 		return
+// 	}
+//
+// 	return resp.AsFtSearch()
+// }
