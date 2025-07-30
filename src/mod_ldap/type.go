@@ -23,8 +23,8 @@ type settings struct {
 	Type   string           `json:"type,omitempty"`
 	DN     string           `json:"dn,omitempty"`
 	CN     string           `json:"cn,omitempty"`
-	Scope  AttrSearchScope  `json:"scope,omitempty"`
-	Filter AttrSearchFilter `json:"filter,omitempty"`
+	Scope  attrSearchScope  `json:"scope,omitempty"`
+	Filter attrSearchFilter `json:"filter,omitempty"`
 }
 
 type domain struct {
@@ -33,5 +33,5 @@ type domain struct {
 	// Settings []*settings `json:"settings,omitempty"`
 }
 
-type AttrSearchScope int
-type AttrSearchFilter string
+type attrSearchScope int
+type attrSearchFilter string

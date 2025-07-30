@@ -94,7 +94,7 @@ func (r *Conf) close() (err error) {
 	return r.conn.Close()
 }
 
-func (d *AttrSearchScope) UnmarshalJSON(data []byte) (err error) {
+func (d *attrSearchScope) UnmarshalJSON(data []byte) (err error) {
 	switch value, ok := scopeIDMap[strings.Trim(string(data), " \"")]; {
 	case !ok:
 		return mod_errors.EINVAL
@@ -104,5 +104,5 @@ func (d *AttrSearchScope) UnmarshalJSON(data []byte) (err error) {
 		return
 	}
 }
-func (d *AttrSearchScope) Int() (outbound int)        { return int(*d) }
-func (d *AttrSearchFilter) String() (outbound string) { return string(*d) }
+func (d *attrSearchScope) Int() (outbound int)        { return int(*d) }
+func (d *attrSearchFilter) String() (outbound string) { return string(*d) }

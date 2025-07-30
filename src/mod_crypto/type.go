@@ -16,9 +16,11 @@ type SignatureScheme uint16
 type Certificates map[string]*Certificate
 
 type Certificate struct {
-	PrivateKeyDER   []byte   `json:"privateKey,omitempty"`
-	CertificatesDER [][]byte `json:"certificates,omitempty"`
-	// CertificateCAChainPEM    []byte `json:"-"`
+	P12 []byte `json:"p12,omitempty"`
+
+	PrivateKeyDER         []byte   `json:"-"`
+	CertificatesDER       [][]byte `json:"-"`
+	CertificateCAChainPEM []byte   `json:"-"`
 
 	PrivateKeyPEM         []byte   `json:"-"`
 	CertificatesPEM       [][]byte `json:"-"`
@@ -31,7 +33,9 @@ type Certificate struct {
 	// Certificates is the parsed form of the leaf certificate, which may be initialized
 	// using x509.ParseCertificate to reduce per-handshake processing. If nil,
 	// the leaf certificate will be parsed as needed.
-	Certificates []*x509.Certificate `json:"-"`
+	Certificates       []*x509.Certificate `json:"-"`
+	Certificate        *x509.Certificate   `json:"-"`
+	CertificateCAChain []*x509.Certificate `json:"-"`
 	// PrivateKey contains the private key corresponding to the public key in
 	// Certificates. This must implement crypto.Signer with an RSA, ECDSA or Ed25519 PublicKey.
 	// For a server up to TLS 1.2, it can also implement crypto.Decrypter with

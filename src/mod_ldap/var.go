@@ -5,7 +5,7 @@ import (
 )
 
 var (
-	scopeIDMap = map[string]AttrSearchScope{
+	scopeIDMap = map[string]attrSearchScope{
 		// strconv.Itoa(ldap.ScopeBaseObject):   ldap.ScopeBaseObject,
 		// strconv.Itoa(ldap.ScopeSingleLevel):  ldap.ScopeSingleLevel,
 		// strconv.Itoa(ldap.ScopeWholeSubtree): ldap.ScopeWholeSubtree,

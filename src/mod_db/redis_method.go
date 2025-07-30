@@ -3,6 +3,7 @@ package mod_db
 import (
 	"context"
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/redis/rueidis"
@@ -56,6 +57,8 @@ func (r *Conf) monitorIndexingFailures(ctx context.Context) (err error) {
 
 	switch err = resp.Error(); {
 	case err != nil:
+		l.Z{l.M: "redis resp", l.E: err}.Error()
+
 		return
 	}
 
@@ -65,17 +68,24 @@ func (r *Conf) monitorIndexingFailures(ctx context.Context) (err error) {
 
 	switch info, err = resp.AsStrMap(); {
 	case err != nil:
+		l.Z{l.M: "redis info", l.E: err}.Error()
+
 		return
 	}
 
-	fmt.Printf("hash_indexing_failures: %s\n", info["hash_indexing_failures"])
-
-	// for a, b := range info {
-	// 	switch a {
-	// 	case "hash_indexing_failures":
-	// 		fmt.Printf("%s: %s\n", a, b)
-	// 	}
-	// }
+	for a, b := range info {
+		switch a {
+		case "hash_indexing_failures":
+			switch c, d := strconv.ParseInt(b, 10, 64); {
+			case d == nil && c == 0:
+				l.Z{l.M: "redis", a: b}.Informational()
+			case d == nil:
+				l.Z{l.M: "redis", a: b}.Warning()
+			default:
+				l.Z{l.M: "redis info", l.E: err, a: b}.Error()
+			}
+		}
+	}
 
 	return
 }
