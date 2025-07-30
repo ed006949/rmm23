@@ -3,12 +3,14 @@ package mod_db
 import (
 	"context"
 	"fmt"
+	"strings"
 
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
+	"rmm23/src/mod_slices"
 )
 
 func (r *Conf) Dial(ctx context.Context) (err error) {
@@ -149,11 +151,46 @@ func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
 	})
 }
 
-func (r *RedisRepository) SearchEntries(ctx context.Context, key entryFieldName, value string) (count int64, entries []*Entry, err error) {
-	// "@baseDN:{dc\\=domain\\,dc\\=tld}"
+func (r *RedisRepository) SearchEntries(ctx context.Context, field entryFieldName, value string, outFields ...entryFieldName) (count int64, entries []*Entry, err error) {
 	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-		return search.Query(fmt.Sprintf("@%s:%v", key.String(), escapeQueryValue(value))).
-			Infields("1").Field(key.String()).
+		switch outFieldsString := mod_slices.ToStrings(outFields, mod_slices.FlagNormalize); len(outFieldsString) {
+		case 0:
+			return search.Query(fmt.Sprintf("@%s:%v", field.String(), escapeQueryValue(value))).
+				Limit().OffsetNum(0, connMaxPaging).
+				Build()
+		default:
+			return search.Query(fmt.Sprintf("@%s:%v", field.String(), escapeQueryValue(value))).
+				Limit().OffsetNum(0, connMaxPaging).
+				Build()
+		}
+	})
+}
+
+func (r *RedisRepository) QSearch(ctx context.Context, query string, outFields ...entryFieldName) (count int64, entries []*Entry, err error) {
+	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+		return search.Query(query).
+			Limit().OffsetNum(0, connMaxPaging).
+			Build()
+	})
+}
+
+func (r *RedisRepository) MSearch(ctx context.Context, query []_Q, outFields ...entryFieldName) (count int64, entries []*Entry, err error) {
+	var (
+		interim = make([]string, len(query), len(query))
+	)
+
+	for _, b := range query {
+		interim = append(interim, fmt.Sprintf(
+			"@%s:%s%v%s",
+			b._F.String(),
+			entryFieldValueEnclosure[entryFieldMap[b._F]][0],
+			escapeQueryValue(b._V),
+			entryFieldValueEnclosure[entryFieldMap[b._F]][1],
+		))
+	}
+
+	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+		return search.Query(strings.Join(interim, " ")).
 			Limit().OffsetNum(0, connMaxPaging).
 			Build()
 	})

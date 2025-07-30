@@ -39,22 +39,37 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 
 	l.Z{l.M: "indexed", l.E: err}.Warning()
 
+	// count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+	// 	return search.Query("*").Limit().OffsetNum(0, connMaxPaging).Build()
+	// })
+	// l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
+	//
+	// count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+	// 	return search.Query("@objectClass:{posixGroup}").Limit().OffsetNum(0, connMaxPaging).Build()
+	// })
+	// l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
+
 	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-		return search.Query("*").Limit().OffsetNum(0, connMaxPaging).Build()
+		return search.Query("@baseDN:{dc\\=fabric\\,dc\\=domain\\,dc\\=tld} @objectClass:{posixGroup}").Limit().OffsetNum(0, connMaxPaging).Build()
 	})
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
-	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-		return search.Query("@objectClass:{posixGroup}").Limit().OffsetNum(0, connMaxPaging).Build()
-	})
+	count, entries, err = outbound.repo.SearchEntries(ctx, _member, `{uid=aaa\-auth,ou=People,dc=fabric,dc=domain,dc=tld}`, _dn, _baseDN)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
-	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-		return search.Query("@baseDN:{dc\\=fabric\\,dc\\=domain\\,dc\\=tld}").Infields("1").Field("baseDN").Limit().OffsetNum(0, connMaxPaging).Build()
-	})
-	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
-
-	count, entries, err = outbound.repo.SearchEntries(ctx, _member, `{uid=aaa\-auth,ou=People,dc=fabric,dc=domain,dc=tld}`)
+	count, entries, err = outbound.repo.MSearch(
+		ctx,
+		[]_Q{
+			{
+				_F: _baseDN,
+				_V: "dc=fabric,dc=domain,dc=tld",
+			},
+			{
+				_F: _objectClass,
+				_V: "posixGroup",
+			},
+		},
+	)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
 	// cmd := outbound.client.B().FtSearch().Index(outbound.repo.repo.IndexName()).Query(`*`).Build()
