@@ -6,8 +6,6 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
-	"github.com/redis/rueidis"
-	"github.com/redis/rueidis/om"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_ldap"
@@ -39,44 +37,31 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 
 	l.Z{l.M: "indexed", l.E: err}.Warning()
 
-	// count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-	// 	return search.Query("*").Limit().OffsetNum(0, connMaxPaging).Build()
-	// })
-	// l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
-	//
-	// count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-	// 	return search.Query("@objectClass:{posixGroup}").Limit().OffsetNum(0, connMaxPaging).Build()
-	// })
-	// l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
-
-	count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-		return search.Query("@baseDN:{dc\\=fabric\\,dc\\=domain\\,dc\\=tld} @objectClass:{posixGroup}").Limit().OffsetNum(0, connMaxPaging).Build()
-	})
-	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
-
-	count, entries, err = outbound.repo.SearchFV(ctx, _member, `uid=aaa\-auth,ou=People,dc=fabric,dc=domain,dc=tld`)
+	count, entries, err = outbound.repo.SearchMFV(
+		ctx,
+		[]_FV{
+			{
+				_member,
+				"uid=aaa-auth,ou=People,dc=fabric,dc=domain,dc=tld",
+			},
+		},
+	)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
 	count, entries, err = outbound.repo.SearchMFV(
 		ctx,
 		[]_FV{
 			{
-				_F: _baseDN,
-				_V: "dc=fabric,dc=domain,dc=tld",
+				_baseDN,
+				"dc=fabric,dc=domain,dc=tld",
 			},
 			{
-				_F: _objectClass,
-				_V: "posixGroup",
+				_objectClass,
+				"posixGroup",
 			},
 		},
 	)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
-
-	// cmd := outbound.client.B().FtSearch().Index(outbound.repo.repo.IndexName()).Query(`*`).Build()
-	// // count, entries, err = outbound.repo.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-	// // 	return search.Query(`@dn:dc`).Build()
-	// // })
-	// count, entries, err = outbound.client.Do(ctx, cmd).AsFtSearch()
 
 	return
 }
