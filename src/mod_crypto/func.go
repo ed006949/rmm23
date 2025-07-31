@@ -43,10 +43,13 @@ func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 	)
 
 	func() {
+		var (
+			certificateCounter int
+		)
+
 		for {
 			var (
 				interimDERBlock    *pem.Block
-				interimDERBlocks   []*pem.Block
 				interimCertificate *x509.Certificate
 			)
 
@@ -63,15 +66,11 @@ func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 
 			switch {
 			case interimDERBlock.Type == _CERTIFICATE:
-				interimDERBlocks = append(interimDERBlocks, interimDERBlock)
-
-				switch len(interimDERBlocks) {
-				case 0:
-					return
+				switch certificateCounter++; certificateCounter {
 				case 1:
 					switch interim.Certificate, err = x509.ParseCertificate(interimDERBlock.Bytes); {
 					case err != nil:
-						continue // ignore bad PEM block
+						return
 					}
 
 					interim.CertificateDER = interimDERBlock.Bytes
@@ -80,7 +79,7 @@ func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 				default:
 					switch interimCertificate, err = x509.ParseCertificate(interimDERBlock.Bytes); {
 					case err != nil:
-						continue // ignore bad PEM block
+						return
 					}
 
 					interim.CertificateCAChain = append(interim.CertificateCAChain, interimCertificate)
@@ -91,7 +90,7 @@ func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 			case interimDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(interimDERBlock.Type, __PRIVATE_KEY):
 				switch interim.PrivateKey, err = parsePrivateKey(interimDERBlock.Bytes); {
 				case err != nil:
-					continue // ignore bad PEM block
+					return
 				}
 
 				interim.PrivateKeyDER = interimDERBlock.Bytes
