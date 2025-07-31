@@ -47,7 +47,7 @@ func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 			certificateCounter int
 		)
 
-		for {
+		for len(inbound) != 0 {
 			var (
 				interimDERBlock    *pem.Block
 				interimCertificate *x509.Certificate

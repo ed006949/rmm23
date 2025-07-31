@@ -105,14 +105,14 @@ func (r *Certificate) checkPrivateKeyED25519(pub ed25519.PublicKey) (err error) 
 
 func (r *Certificate) EncodeP12() (err error) {
 	var (
-		pfxData []byte
+		interim []byte
 	)
-	switch pfxData, err = pkcs12.LegacyRC2.Encode(r.PrivateKey, r.Certificate, r.CertificateCAChain, pkcs12.DefaultPassword); {
+	switch interim, err = pkcs12.LegacyRC2.Encode(r.PrivateKey, r.Certificate, r.CertificateCAChain, pkcs12.DefaultPassword); {
 	case err != nil:
 		return
 	}
 
-	r.P12 = pfxData
+	r.P12 = interim
 
 	return
 }
