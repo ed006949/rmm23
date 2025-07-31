@@ -21,6 +21,7 @@ clean-clean-clean-clean:
 	-find ./ -name ".DS_Store" -delete
 	-find ./ -name "._.DS_Store" -delete
 
+commit: lint
 commit: status
 #
 # TODO
