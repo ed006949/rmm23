@@ -61,7 +61,7 @@ func (r *AuthDB) ReadAuth(name string) (outbound transport.AuthMethod, err error
 // checkPrivateKey
 // We don't need to parse the public key for TLS, but we so do anyway to check that it looks sane and matches the private key.
 func (r *Certificate) checkPrivateKey() (err error) {
-	switch pub := r.Certificates[0].PublicKey.(type) {
+	switch pub := r.Certificate.PublicKey.(type) {
 	case *rsa.PublicKey:
 		return r.checkPrivateKeyRSA(pub)
 	case *ecdsa.PublicKey:
@@ -103,43 +103,68 @@ func (r *Certificate) checkPrivateKeyED25519(pub ed25519.PublicKey) (err error) 
 	return
 }
 
-func (r *Certificate) EncodeP12() (pfxData []byte, err error) {
+func (r *Certificate) EncodeP12() (err error) {
 	var (
-		chain []*x509.Certificate
+		pfxData []byte
 	)
-
-	switch len(r.Certificates) {
-	case 0:
-		return nil, mod_errors.ENODATA
-	case 1:
-	default:
-		chain = r.Certificates[1:]
+	switch pfxData, err = pkcs12.LegacyRC2.Encode(r.PrivateKey, r.Certificate, r.CertificateCAChain, pkcs12.DefaultPassword); {
+	case err != nil:
+		return
 	}
 
-	pfxData, err = pkcs12.LegacyRC2.Encode(r.PrivateKey, r.Certificates[0], chain, pkcs12.DefaultPassword)
+	r.P12 = pfxData
 
 	return
 }
 
-func (r *Certificate) DecodeP12(pfxData []byte) (err error) {
+func (r *Certificate) DecodeP12() (err error) {
 	var (
 		privateKey  any
 		certificate *x509.Certificate
 		chain       []*x509.Certificate
 	)
 
-	switch privateKey, certificate, chain, err = pkcs12.DecodeChain(pfxData, pkcs12.DefaultPassword); {
+	switch privateKey, certificate, chain, err = pkcs12.DecodeChain(r.P12, pkcs12.DefaultPassword); {
 	case err != nil:
 		return
 	}
 
 	r.PrivateKey = privateKey
-	r.Certificates = []*x509.Certificate{certificate}
-
-	switch {
-	case chain != nil:
-		r.Certificates = append(r.Certificates, chain...)
-	}
+	r.Certificate = certificate
+	r.CertificateCAChain = chain
 
 	return
+}
+
+func (r *Certificate) DecodePEM() (err error) {
+	var (
+		interim *Certificate
+	)
+
+	switch interim, err = parsePEM(r.PEM); {
+	case err != nil:
+		return
+	}
+
+	*r = *interim
+
+	return
+}
+
+func (r *Certificate) GetP12() (outbound []byte, err error) {
+	switch {
+	case r.P12 != nil:
+		return r.P12, nil
+	}
+
+	switch err = r.EncodeP12(); {
+	case err != nil:
+		return
+	}
+
+	return r.P12, nil
+}
+
+func (r *Certificate) GetPEM() (outbound []byte, err error) {
+	return r.PEM, nil
 }

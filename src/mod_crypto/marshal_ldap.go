@@ -9,17 +9,19 @@ func (r *Certificates) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			forErr  error
-			interim *Certificate
+			interim = new(Certificate)
 		)
 
-		switch interim, forErr = ParsePEM([]byte(value)); {
+		interim.PEM = []byte(value)
+
+		switch forErr = interim.DecodePEM(); {
 		case forErr != nil:
 			l.Z{l.M: "ParsePEM", l.E: forErr}.Warning()
 
 			continue
 		}
 
-		(*r)[interim.Certificates[0].Subject.String()] = interim
+		(*r)[interim.Certificate.Subject.String()] = interim
 	}
 
 	return

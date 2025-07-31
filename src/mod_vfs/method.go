@@ -11,7 +11,6 @@ import (
 	"github.com/go-ini/ini"
 
 	"rmm23/src/l"
-	"rmm23/src/mod_crypto"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_fs"
 )
@@ -302,29 +301,29 @@ func (r *VFSDB) CompareAndCopyFileToFS(name string) (err error) {
 	return
 }
 
-func (r *VFSDB) LoadX509KeyPair(chain string, key string) (outbound *mod_crypto.Certificate, err error) {
-	var (
-		chainData []byte
-		keyData   []byte
-	)
-
-	switch chainData, err = r.VFS.ReadFile(chain); {
-	case err != nil:
-		return
-	}
-
-	switch keyData, err = r.VFS.ReadFile(key); {
-	case err != nil:
-		return
-	}
-
-	switch outbound, err = mod_crypto.X509KeyPair(chainData, keyData); {
-	case err != nil:
-		return nil, err
-	}
-
-	return
-}
+// func (r *VFSDB) LoadX509KeyPair(chain string, key string) (outbound *mod_crypto.Certificate, err error) {
+// 	var (
+// 		chainData []byte
+// 		keyData   []byte
+// 	)
+//
+// 	switch chainData, err = r.VFS.ReadFile(chain); {
+// 	case err != nil:
+// 		return
+// 	}
+//
+// 	switch keyData, err = r.VFS.ReadFile(key); {
+// 	case err != nil:
+// 		return
+// 	}
+//
+// 	switch outbound, err = mod_crypto.X509KeyPair(chainData, keyData); {
+// 	case err != nil:
+// 		return nil, err
+// 	}
+//
+// 	return
+// }
 
 func (r *VFSDB) LoadIniMapTo(v any, source string) (err error) {
 	var (

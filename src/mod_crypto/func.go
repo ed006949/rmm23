@@ -18,87 +18,93 @@ import (
 // modified to be more useful
 //
 
-func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate, err error) {
-	var (
-		certDERBlock *pem.Block
-		keyDERBlock  *pem.Block
-		interimCert  *x509.Certificate
-	)
+// func X509KeyPair(certPEMBlock []byte, keyPEMBlock []byte) (outbound *Certificate, err error) {
+// 	var (
+// 		certDERBlock *pem.Block
+// 		keyDERBlock  *pem.Block
+// 		interimCert  *x509.Certificate
+// 	)
+//
+// 	outbound = new(Certificate)
+//
+// 	func() {
+// 		for {
+// 			certDERBlock, certPEMBlock = pem.Decode(certPEMBlock)
+// 			// for ; certDERBlock != nil; certDERBlock, certPEMBlock = pem.Decode(certPEMBlock) {
+// 			switch {
+// 			case certDERBlock == nil:
+// 				return
+// 			case certDERBlock.Type == _CERTIFICATE:
+// 				outbound.CertificateDER = append(
+// 					outbound.CertificateDER,
+// 					certDERBlock.Bytes,
+// 				)
+// 				outbound.CertificateRawPEM = append(
+// 					outbound.CertificateRawPEM,
+// 					[]byte(base64.RawStdEncoding.EncodeToString(certDERBlock.Bytes)),
+// 				)
+//
+// 				switch {
+// 				case len(outbound.CertificateDER) > 1:
+// 					outbound.CertificateCAChainDER = append(outbound.CertificateCAChainDER, certDERBlock.Bytes...)
+// 				}
+// 			}
+// 		}
+// 	}()
+//
+// 	switch {
+// 	case len(outbound.CertificateDER) == 0:
+// 		return nil, mod_errors.EPEMNoDataCert
+// 	}
+//
+// 	outbound.CertificateCAChainPEM = append(outbound.CertificateCAChainPEM, []byte(base64.RawStdEncoding.EncodeToString(outbound.CertificateCAChainDER)))
+//
+// 	func() {
+// 		for {
+// 			keyDERBlock, keyPEMBlock = pem.Decode(keyPEMBlock)
+// 			// for ; keyDERBlock != nil; keyDERBlock, keyPEMBlock = pem.Decode(keyPEMBlock) {
+// 			switch {
+// 			case keyDERBlock == nil:
+// 				return
+// 			case keyDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(keyDERBlock.Type, __PRIVATE_KEY):
+// 				outbound.PrivateKeyDER = keyDERBlock.Bytes
+// 				outbound.PrivateKeyRawPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.PrivateKeyDER))
+// 			}
+// 		}
+// 	}()
+//
+// 	switch {
+// 	case len(outbound.PrivateKeyDER) == 0:
+// 		return nil, mod_errors.EPEMNoDataKey
+// 	}
+//
+// 	switch outbound.Certificate, err = x509.ParseCertificate(outbound.CertificateDER); {
+// 	case err != nil:
+// 		return nil, err
+// 	}
+//
+// 	for _, b := range outbound.CertificateCAChainDER {
+// 		switch interimCert, err = x509.ParseCertificate(b); {
+// 		case err != nil:
+// 			return nil, err
+// 		}
+//
+// 		outbound.CertificateCAChain = append(outbound.CertificateCAChain, interimCert)
+// 	}
+//
+// 	switch outbound.PrivateKey, err = ParsePrivateKey(outbound.PrivateKeyDER); {
+// 	case err != nil:
+// 		return nil, err
+// 	}
+//
+// 	switch err = outbound.checkPrivateKey(); {
+// 	case err != nil:
+// 		return nil, err
+// 	}
+//
+// 	return
+// }
 
-	outbound = new(Certificate)
-
-	func() {
-		for {
-			certDERBlock, certPEMBlock = pem.Decode(certPEMBlock)
-			// for ; certDERBlock != nil; certDERBlock, certPEMBlock = pem.Decode(certPEMBlock) {
-			switch {
-			case certDERBlock == nil:
-				return
-			case certDERBlock.Type == _CERTIFICATE:
-				outbound.CertificatesDER = append(
-					outbound.CertificatesDER,
-					certDERBlock.Bytes,
-				)
-				outbound.CertificatesRawPEM = append(
-					outbound.CertificatesRawPEM,
-					[]byte(base64.RawStdEncoding.EncodeToString(certDERBlock.Bytes)),
-				)
-
-				switch {
-				case len(outbound.CertificatesDER) > 1:
-					outbound.CertificateCAChainDER = append(outbound.CertificateCAChainDER, certDERBlock.Bytes...)
-				}
-			}
-		}
-	}()
-
-	switch {
-	case len(outbound.CertificatesDER) == 0:
-		return nil, mod_errors.EPEMNoDataCert
-	}
-
-	outbound.CertificateCAChainRawPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.CertificateCAChainDER))
-
-	func() {
-		for {
-			keyDERBlock, keyPEMBlock = pem.Decode(keyPEMBlock)
-			// for ; keyDERBlock != nil; keyDERBlock, keyPEMBlock = pem.Decode(keyPEMBlock) {
-			switch {
-			case keyDERBlock == nil:
-				return
-			case keyDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(keyDERBlock.Type, __PRIVATE_KEY):
-				outbound.PrivateKeyDER = keyDERBlock.Bytes
-				outbound.PrivateKeyRawPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.PrivateKeyDER))
-			}
-		}
-	}()
-
-	switch {
-	case len(outbound.PrivateKeyDER) == 0:
-		return nil, mod_errors.EPEMNoDataKey
-	}
-
-	for _, b := range outbound.CertificatesDER {
-		switch interimCert, err = x509.ParseCertificate(b); {
-		case err != nil:
-			return nil, err
-		default:
-			outbound.Certificates = append(outbound.Certificates, interimCert)
-		}
-	}
-
-	switch outbound.PrivateKey, err = ParsePrivateKey(outbound.PrivateKeyDER); {
-	case err != nil:
-		return nil, err
-	}
-
-	switch err = outbound.checkPrivateKey(); {
-	case err != nil:
-		return nil, err
-	}
-
-	return
-}
 func ParsePrivateKey(der []byte) (key crypto.PrivateKey, err error) {
 	switch key, err = x509.ParsePKCS1PrivateKey(der); err {
 	case nil:
@@ -125,7 +131,9 @@ func ParsePrivateKey(der []byte) (key crypto.PrivateKey, err error) {
 
 func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
 	var (
-		interimCert *x509.Certificate
+		interimCert      *x509.Certificate
+		interimDERBlocks []*pem.Block
+		interimPEMs      []string
 	)
 
 	outbound = new(Certificate)
@@ -142,41 +150,57 @@ func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
 			case interimDERBlock == nil:
 				return
 			case interimDERBlock.Type == _CERTIFICATE:
-				outbound.CertificatesDER = append(
-					outbound.CertificatesDER,
-					interimDERBlock.Bytes,
-				)
-				outbound.CertificatesRawPEM = append(
-					outbound.CertificatesRawPEM,
-					[]byte(base64.RawStdEncoding.EncodeToString(interimDERBlock.Bytes)),
+				interimDERBlocks = append(
+					interimDERBlocks,
+					interimDERBlock,
 				)
 
-				switch {
-				case len(outbound.CertificatesDER) > 1:
-					outbound.CertificateCAChainDER = append(outbound.CertificateCAChainDER, interimDERBlock.Bytes...)
+				interimPEMs = append(
+					interimPEMs,
+					base64.RawStdEncoding.EncodeToString(interimDERBlock.Bytes),
+				)
+
+				switch len(interimDERBlocks) {
+				case 0:
+					outbound.CertificateDER = interimDERBlock.Bytes
+				default:
+					outbound.CertificateCAChainDER = append(outbound.CertificateCAChainDER, interimDERBlock.Bytes)
 				}
 			case interimDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(interimDERBlock.Type, __PRIVATE_KEY):
 				outbound.PrivateKeyDER = interimDERBlock.Bytes
-				outbound.PrivateKeyRawPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.PrivateKeyDER))
+				outbound.PrivateKeyPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.PrivateKeyDER))
 			}
 		}
 	}()
 
 	switch {
-	case len(outbound.CertificatesDER) == 0:
+	case len(outbound.CertificateDER) == 0:
 		return nil, mod_errors.EPEMNoDataCert
 	case len(outbound.PrivateKeyDER) == 0:
 		return nil, mod_errors.EPEMNoDataKey
 	}
 
-	outbound.CertificateCAChainRawPEM = []byte(base64.RawStdEncoding.EncodeToString(outbound.CertificateCAChainDER))
+	for _, b := range outbound.CertificateCAChainDER {
+		outbound.CertificateCAChainPEM = append(
+			outbound.CertificateCAChainPEM,
+			[]byte(base64.RawStdEncoding.EncodeToString(b)),
+		)
+	}
 
-	for _, b := range outbound.CertificatesDER {
+	switch outbound.Certificate, err = x509.ParseCertificate(outbound.CertificateDER); {
+	case err != nil:
+		return nil, err
+	}
+
+	for _, b := range outbound.CertificateCAChainDER {
 		switch interimCert, err = x509.ParseCertificate(b); {
 		case err != nil:
 			return nil, err
 		default:
-			outbound.Certificates = append(outbound.Certificates, interimCert)
+			outbound.CertificateCAChain = append(
+				outbound.CertificateCAChain,
+				interimCert,
+			)
 		}
 	}
 
@@ -191,4 +215,88 @@ func ParsePEM(PEMBlock []byte) (outbound *Certificate, err error) {
 	}
 
 	return
+}
+
+func parsePEM(inbound []byte) (outbound *Certificate, err error) {
+	var (
+		interim = new(Certificate)
+	)
+
+	func() {
+		for {
+			var (
+				interimDERBlock    *pem.Block
+				interimDERBlocks   []*pem.Block
+				interimCertificate *x509.Certificate
+			)
+
+			interimDERBlock, inbound = pem.Decode(inbound)
+
+			switch {
+			case interimDERBlock == nil:
+				return
+			}
+
+			var (
+				interimPEMBlock = []byte(base64.RawStdEncoding.EncodeToString(interimDERBlock.Bytes)) // sanitized PEM
+			)
+
+			switch {
+			case interimDERBlock.Type == _CERTIFICATE:
+				interimDERBlocks = append(interimDERBlocks, interimDERBlock)
+
+				switch len(interimDERBlocks) {
+				case 0:
+					return
+				case 1:
+					switch interim.Certificate, err = x509.ParseCertificate(interimDERBlock.Bytes); {
+					case err != nil:
+						return
+					}
+
+					interim.CertificateDER = interimDERBlock.Bytes
+					interim.CertificatePEM = interimPEMBlock
+					interim.PEM = append(interim.PEM, interimPEMBlock...)
+				default:
+					switch interimCertificate, err = x509.ParseCertificate(interimDERBlock.Bytes); {
+					case err != nil:
+						return
+					}
+
+					interim.CertificateCAChain = append(interim.CertificateCAChain, interimCertificate)
+					interim.CertificateCAChainDER = append(interim.CertificateCAChainDER, interimDERBlock.Bytes)
+					interim.CertificateCAChainPEM = append(interim.CertificateCAChainPEM, interimPEMBlock)
+					interim.PEM = append(interim.PEM, interimPEMBlock...)
+				}
+			case interimDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(interimDERBlock.Type, __PRIVATE_KEY):
+				switch interim.PrivateKey, err = ParsePrivateKey(interimDERBlock.Bytes); {
+				case err != nil:
+					return
+				}
+
+				interim.PrivateKeyDER = interimDERBlock.Bytes
+				interim.PrivateKeyPEM = interimPEMBlock
+				interim.PEM = append(interim.PEM, interimPEMBlock...)
+			}
+		}
+	}()
+
+	switch {
+	case interim.Certificate == nil:
+		return nil, mod_errors.EPEMNoDataCert
+	case interim.PrivateKey == nil:
+		return nil, mod_errors.EPEMNoDataKey
+	}
+
+	switch err = interim.checkPrivateKey(); {
+	case err != nil:
+		return nil, err
+	}
+
+	switch err = interim.EncodeP12(); {
+	case err != nil:
+		return nil, err
+	}
+
+	return interim, err
 }

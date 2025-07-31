@@ -4,28 +4,31 @@ import (
 	"encoding/json"
 )
 
-func (r *Certificate) MarshalJSON() (outbound []byte, err error) {
-	var (
-		pfxData []byte
-	)
+func (r *Certificate) MarshalJSON() ([]byte, error)       { return json.Marshal(&r.P12) }
+func (r *Certificate) UnmarshalJSON(inbound []byte) error { return json.Unmarshal(inbound, &r.P12) }
 
-	switch pfxData, err = r.EncodeP12(); {
-	case err != nil:
-		return
-	}
+// func (r *Certificate) MarshalJSON() (outbound []byte, err error) {
+// 	var (
+// 		pfxData []byte
+// 	)
+//
+// 	switch pfxData, err = r.EncodeP12(); {
+// 	case err != nil:
+// 		return
+// 	}
+//
+// 	return json.Marshal(pfxData)
+// }
 
-	return json.Marshal(pfxData)
-}
-
-func (r *Certificate) UnmarshalJSON(inbound []byte) (err error) {
-	var (
-		interim []byte
-	)
-
-	switch err = json.Unmarshal(inbound, &interim); {
-	case err != nil:
-		return
-	}
-
-	return r.DecodeP12(interim)
-}
+// func (r *Certificate) UnmarshalJSON(inbound []byte) (err error) {
+// 	var (
+// 		interim []byte
+// 	)
+//
+// 	switch err = json.Unmarshal(inbound, &interim); {
+// 	case err != nil:
+// 		return
+// 	}
+//
+// 	return r.DecodeP12(interim)
+// }

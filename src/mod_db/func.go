@@ -53,11 +53,11 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		[]_FV{
 			{
 				_baseDN,
-				"dc=fabric,dc=domain,dc=tld",
+				"dc=domain,dc=tld",
 			},
 			{
 				_objectClass,
-				"posixGroup",
+				"posixAccount",
 			},
 		},
 	)
