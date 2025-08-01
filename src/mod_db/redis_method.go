@@ -171,7 +171,11 @@ func (r *RedisRepository) SearchMFV(ctx context.Context, mfv _MFV) (count int64,
 	return r.SearchQ(ctx, mfv.buildMFVQuery())
 }
 
-// SearchMFVField is not working - `unexpected end of JSON input`.
+// SearchMFVField is not working:
+//
+// err is `unexpected end of JSON input`
+//
+// JSONRepository receives empty JSON stream.
 func (r *RedisRepository) SearchMFVField(ctx context.Context, mfv _MFV, field entryFieldName) (count int64, entries []*Entry, err error) {
 	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		var (

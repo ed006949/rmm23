@@ -415,5 +415,10 @@ vendor
 #
 #
 .crush
+**/.crush
+#
+#
+.continue
+**/.continue
 #
 #
