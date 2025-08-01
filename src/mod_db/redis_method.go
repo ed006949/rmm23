@@ -2,7 +2,6 @@ package mod_db
 
 import (
 	"context"
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -165,29 +164,33 @@ func (r *RedisRepository) SearchQ(ctx context.Context, query string) (count int6
 }
 
 func (r *RedisRepository) SearchFV(ctx context.Context, field entryFieldName, value string) (count int64, entries []*Entry, err error) {
-	return r.SearchQ(ctx, fmt.Sprintf(
-		"@%s:%s%v%s",
-		field.String(),
-		entryFieldValueEnclosure[entryFieldMap[field]][0],
-		escapeQueryValue(value),
-		entryFieldValueEnclosure[entryFieldMap[field]][1],
-	))
+	return r.SearchMFV(ctx, _MFV{{field, value}})
 }
 
-func (r *RedisRepository) SearchMFV(ctx context.Context, mfv []_FV) (count int64, entries []*Entry, err error) {
+func (r *RedisRepository) SearchMFV(ctx context.Context, mfv _MFV) (count int64, entries []*Entry, err error) {
+	return r.SearchQ(ctx, mfv.buildMFVQuery())
+}
+
+func (r *Conf) SearchMFVField(ctx context.Context, mfv _MFV, field entryFieldName) (total int64, docs []rueidis.FtSearchDoc, err error) {
 	var (
-		interim = make([]string, len(mfv), len(mfv))
+		command = r.client.B().FtSearch().Index(r.repo.repo.IndexName()).
+			Query(mfv.buildMFVQuery()).
+			Return(strconv.Itoa(1)).
+			Identifier(field.String()).
+			Build()
 	)
 
-	for i, fv := range mfv {
-		interim[i] = fmt.Sprintf(
-			"@%s:%s%v%s",
-			fv._F.String(),
-			entryFieldValueEnclosure[entryFieldMap[fv._F]][0],
-			escapeQueryValue(fv._V),
-			entryFieldValueEnclosure[entryFieldMap[fv._F]][1],
-		)
+	return r.client.Do(ctx, command).AsFtSearch()
+}
+
+func (r *_MFV) buildMFVQuery() (outbound string) {
+	var (
+		interim = make([]string, len(*r), len(*r))
+	)
+
+	for i, fv := range *r {
+		interim[i] = buildFVQuery(fv._F, fv._V)
 	}
 
-	return r.SearchQ(ctx, strings.Join(interim, " "))
+	return strings.Join(interim, " ")
 }

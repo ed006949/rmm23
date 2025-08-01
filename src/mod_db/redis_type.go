@@ -4,6 +4,8 @@ import (
 	"github.com/redis/rueidis/om"
 )
 
+type _MFV []_FV
+
 type _FV struct {
 	_F entryFieldName
 	_V string
