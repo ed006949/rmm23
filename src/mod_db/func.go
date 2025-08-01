@@ -41,14 +41,14 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		ctx,
 		[]_FV{
 			{
-				_member,
-				"uid=aaa-auth,ou=People,dc=fabric,dc=domain,dc=tld",
+				_type,
+				entryTypeUser.Number() + " " + entryTypeUser.Number(),
 			},
 		},
 	)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
-	count, entries, err = outbound.repo.SearchMFVField(
+	count, entries, err = outbound.repo.SearchMFV(
 		ctx,
 		_MFV{
 			{
@@ -60,7 +60,6 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 				"posixAccount",
 			},
 		},
-		_dn,
 	)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 

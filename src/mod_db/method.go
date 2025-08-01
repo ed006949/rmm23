@@ -1,3 +1,3 @@
 package mod_db
 
-func (r *entryFieldName) String() (outbound string) { return string(*r) }
+func (r entryFieldName) String() (outbound string) { return string(r) }
