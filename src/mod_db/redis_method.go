@@ -171,16 +171,20 @@ func (r *RedisRepository) SearchMFV(ctx context.Context, mfv _MFV) (count int64,
 	return r.SearchQ(ctx, mfv.buildMFVQuery())
 }
 
-func (r *Conf) SearchMFVField(ctx context.Context, mfv _MFV, field entryFieldName) (total int64, docs []rueidis.FtSearchDoc, err error) {
-	var (
-		command = r.client.B().FtSearch().Index(r.repo.repo.IndexName()).
-			Query(mfv.buildMFVQuery()).
-			Return(strconv.Itoa(1)).
-			Identifier(field.String()).
-			Build()
-	)
+// SearchMFVField is not working - `unexpected end of JSON input`.
+func (r *RedisRepository) SearchMFVField(ctx context.Context, mfv _MFV, field entryFieldName) (count int64, entries []*Entry, err error) {
+	return r.repo.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+		var (
+			command = search.Query(mfv.buildMFVQuery()).
+				Return(strconv.FormatInt(1, 10)).
+				Identifier(field.String()).
+				Limit().OffsetNum(0, connMaxPaging).
+				Build()
+		)
+		l.Z{l.M: "redis", "command": strings.Join(command.Commands(), " ")}.Informational()
 
-	return r.client.Do(ctx, command).AsFtSearch()
+		return command
+	})
 }
 
 func (r *_MFV) buildMFVQuery() (outbound string) {

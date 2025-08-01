@@ -63,20 +63,6 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
-	a, b, c := outbound.SearchMFVField(ctx, _MFV{
-		{
-			_baseDN,
-			"dc=fabric,dc=domain,dc=tld",
-		},
-		{
-			_objectClass,
-			"posixAccount",
-		},
-	},
-		"dn")
-
-	fmt.Print(a, b, c)
-
 	return
 }
 
