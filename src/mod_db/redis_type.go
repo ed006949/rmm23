@@ -1,6 +1,7 @@
 package mod_db
 
 import (
+	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
 )
 
@@ -13,6 +14,7 @@ type _FV struct {
 
 // RedisRepository provides methods for interacting with Redis using rueidis.
 type RedisRepository struct {
-	entry om.Repository[Entry]
-	cert  om.Repository[Certificate]
+	client rueidis.Client
+	entry  om.Repository[Entry]
+	cert   om.Repository[Certificate]
 }

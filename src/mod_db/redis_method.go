@@ -92,14 +92,17 @@ func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 }
 
 func (r *Conf) Dial(ctx context.Context) (err error) {
-	switch r.client, err = rueidis.NewClient(rueidis.ClientOption{
+	var (
+		client rueidis.Client
+	)
+	switch client, err = rueidis.NewClient(rueidis.ClientOption{
 		InitAddress: []string{r.URL.Host},
 	}); {
 	case err != nil:
 		return
 	}
 
-	r.repo = NewRedisRepository(r.client)
+	r.repo = NewRedisRepository(client)
 
 	switch {
 	case l.CLEAR:
@@ -117,26 +120,26 @@ func (r *Conf) Dial(ctx context.Context) (err error) {
 		}
 	}
 
-	_ = r.monitorIndexingFailures(ctx)
+	_ = r.repo.monitorIndexingFailures(ctx)
 
 	return
 }
 
 func (r *Conf) Close() (err error) {
 	switch {
-	case r.client == nil:
+	case r.repo.client == nil:
 		return mod_errors.ENoConn
 	}
 
-	r.client.Close()
+	r.repo.client.Close()
 
 	return
 }
 
-func (r *Conf) monitorIndexingFailures(ctx context.Context) (err error) {
+func (r *RedisRepository) monitorIndexingFailures(ctx context.Context) (err error) {
 	for indexName, resp := range map[string]rueidis.RedisResult{
-		r.repo.entry.IndexName(): r.client.Do(ctx, r.client.B().FtInfo().Index(r.repo.entry.IndexName()).Build()),
-		r.repo.cert.IndexName():  r.client.Do(ctx, r.client.B().FtInfo().Index(r.repo.cert.IndexName()).Build()),
+		r.entry.IndexName(): r.client.Do(ctx, r.client.B().FtInfo().Index(r.entry.IndexName()).Build()),
+		r.cert.IndexName():  r.client.Do(ctx, r.client.B().FtInfo().Index(r.cert.IndexName()).Build()),
 	} {
 		switch err = resp.Error(); {
 		case err != nil:
@@ -189,19 +192,33 @@ func (r *_MFV) buildMFVQuery() (outbound string) {
 //
 
 func (r *RedisRepository) SaveEntry(ctx context.Context, e *Entry) (err error) {
-	return r.entry.Save(ctx, e)
+	err = r.entry.Save(ctx, e)
+	_ = r.monitorIndexingFailures(ctx)
+
+	return
 }
 
 func (r *RedisRepository) SaveCert(ctx context.Context, e *Certificate) (err error) {
-	return r.cert.Save(ctx, e)
+	err = r.cert.Save(ctx, e)
+	_ = r.monitorIndexingFailures(ctx)
+
+	return
 }
 
+//
+
 func (r *RedisRepository) SaveMultiEntry(ctx context.Context, e ...*Entry) (err []error) {
-	return r.entry.SaveMulti(ctx, e...)
+	err = r.entry.SaveMulti(ctx, e...)
+	_ = r.monitorIndexingFailures(ctx)
+
+	return
 }
 
 func (r *RedisRepository) SaveMultiCert(ctx context.Context, e ...*Certificate) (err []error) {
-	return r.cert.SaveMulti(ctx, e...)
+	err = r.cert.SaveMulti(ctx, e...)
+	_ = r.monitorIndexingFailures(ctx)
+
+	return
 }
 
 //

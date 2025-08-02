@@ -11,8 +11,9 @@ import (
 // NewRedisRepository creates a new RedisRepository.
 func NewRedisRepository(client rueidis.Client) *RedisRepository {
 	return &RedisRepository{
-		entry: om.NewJSONRepository[Entry](entryKeyHeader, Entry{}, client, om.WithIndexName(entryKeyHeader)),
-		cert:  om.NewJSONRepository[Certificate](certKeyHeader, Certificate{}, client, om.WithIndexName(certKeyHeader)),
+		client: client,
+		entry:  om.NewJSONRepository[Entry](entryKeyHeader, Entry{}, client, om.WithIndexName(entryKeyHeader)),
+		cert:   om.NewJSONRepository[Certificate](certKeyHeader, Certificate{}, client, om.WithIndexName(certKeyHeader)),
 	}
 }
 
