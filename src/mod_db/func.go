@@ -25,45 +25,11 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 
 	switch l.CLEAR {
 	case true:
-		switch err = getLDAPDocs(ctx, inbound, outbound.repo); {
+		switch err = getLDAPDocs(ctx, inbound, outbound.Repo); {
 		case err != nil:
 			return
 		}
 	}
-
-	var (
-		count   int64
-		entries []*Entry
-	)
-
-	count, entries, err = outbound.repo.SearchEntryMFV(
-		ctx,
-		[]_FV{
-			{
-				_type,
-				entryTypeHost.Number() + " " + entryTypeHost.Number(),
-			},
-		},
-	)
-	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
-
-	count, entries, err = outbound.repo.SearchEntryMFV(
-		ctx,
-		_MFV{
-			{
-				_baseDN,
-				"dc=fabric,dc=domain,dc=tld",
-			},
-			{
-				_objectClass,
-				"posixAccount",
-			},
-		},
-	)
-	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
-
-	count, entries, err = outbound.repo.SearchEntryQ(ctx, "*")
-	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
 	return
 }
@@ -141,7 +107,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				for a, e := range repo.SaveMultiCert(ctx, fnCerts...) {
 					switch {
 					case e != nil:
-						l.Z{l.M: "repo.SaveMultiCert", "DN": fnEntry.DN.String(), "cert": fnCerts[a].Key, l.E: e}.Warning()
+						l.Z{l.M: "Repo.SaveMultiCert", "DN": fnEntry.DN.String(), "cert": fnCerts[a].Key, l.E: e}.Warning()
 					}
 				}
 			}

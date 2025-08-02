@@ -5,11 +5,11 @@ import (
 	"github.com/redis/rueidis/om"
 )
 
-type _MFV []_FV
+type MFV []FV
 
-type _FV struct {
-	_F entryFieldName
-	_V string
+type FV struct {
+	Field entryFieldName
+	Value string
 }
 
 // RedisRepository provides methods for interacting with Redis using rueidis.

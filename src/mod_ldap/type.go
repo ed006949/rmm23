@@ -14,9 +14,14 @@ type LDAPAttributeUnmarshaler interface {
 
 type Conf struct {
 	URL      *mod_net.URL `json:"url,omitempty"`
-	Settings []*settings  `json:"settings,omitempty"`
 	Domains  []*domain    `json:"domain,omitempty"`
+	Settings []*settings  `json:"settings,omitempty"`
 	conn     *ldap.Conn
+}
+
+type domain struct {
+	DN string `json:"dn,omitempty"`
+	// Settings []*settings `json:"settings,omitempty"`
 }
 
 type settings struct {
@@ -25,12 +30,6 @@ type settings struct {
 	CN     string           `json:"cn,omitempty"`
 	Scope  attrSearchScope  `json:"scope,omitempty"`
 	Filter attrSearchFilter `json:"filter,omitempty"`
-}
-
-type domain struct {
-	DN string `json:"dn,omitempty"`
-
-	// Settings []*settings `json:"settings,omitempty"`
 }
 
 type attrSearchScope int

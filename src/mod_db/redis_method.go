@@ -16,55 +16,55 @@ import (
 func (r *RedisRepository) CreateEntryIndex(ctx context.Context) (err error) {
 	return r.entry.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
-			FieldName(_type.FieldName()).As(_type.String()).Numeric().
-			FieldName(_status.FieldName()).As(_status.String()).Numeric().
-			FieldName(_baseDN.FieldName()).As(_baseDN.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_type.FieldName()).As(F_type.String()).Numeric().
+			FieldName(F_status.FieldName()).As(F_status.String()).Numeric().
+			FieldName(F_baseDN.FieldName()).As(F_baseDN.String()).Tag().Separator(sliceSeparator).
 
 			//
-			FieldName(_uuid.FieldName()).As(_uuid.String()).Tag().Separator(sliceSeparator).
-			FieldName(_dn.FieldName()).As(_dn.String()).Tag().Separator(sliceSeparator).
-			FieldName(_objectClass.FieldNameSlice()).As(_objectClass.String()).Tag().Separator(sliceSeparator).
-			FieldName(_creatorsName.FieldName()).As(_creatorsName.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_createTimestamp.FieldName()).As(_createTimestamp.String()).Numeric().
-			FieldName(_modifiersName.FieldName()).As(_modifiersName.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_modifyTimestamp.FieldName()).As(_modifyTimestamp.String()).Numeric().
+			FieldName(F_uuid.FieldName()).As(F_uuid.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_dn.FieldName()).As(F_dn.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_objectClass.FieldNameSlice()).As(F_objectClass.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_creatorsName.FieldName()).As(F_creatorsName.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_createTimestamp.FieldName()).As(	F_createTimestamp.String()).Numeric().
+			FieldName(F_modifiersName.FieldName()).As(F_modifiersName.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_modifyTimestamp.FieldName()).As(	F_modifyTimestamp.String()).Numeric().
 
 			//
-			FieldName(_cn.FieldName()).As(_cn.String()).Tag().Separator(sliceSeparator).
-			FieldName(_dc.FieldName()).As(_dc.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_description.FieldName()).As(_description.String()).Tag().Separator(sliceSeparator).
-			FieldName(_destinationIndicator.FieldNameSlice()).As(_destinationIndicator.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_displayName.FieldName()).As(_displayName.String()).Tag().Separator(sliceSeparator).
-			FieldName(_gidNumber.FieldName()).As(_gidNumber.String()).Numeric().
-			// FieldName(_homeDirectory.FieldName()).As(_homeDirectory.String()).Tag().Separator(sliceSeparator).
-			FieldName(_ipHostNumber.FieldNameSlice()).As(_ipHostNumber.String()).Tag().Separator(sliceSeparator).
-			FieldName(_mail.FieldNameSlice()).As(_mail.String()).Tag().Separator(sliceSeparator).
-			FieldName(_member.FieldNameSlice()).As(_member.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_o.FieldName()).As(_o.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_ou.FieldName()).As(_ou.String()).Tag().Separator(sliceSeparator).
-			FieldName(_owner.FieldNameSlice()).As(_owner.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_sn.FieldName()).As(_sn.String()).Tag().Separator(sliceSeparator).
-			FieldName(_sshPublicKey.FieldNameSlice()).As(_sshPublicKey.String()).Tag().Separator(sliceSeparator).
-			FieldName(_telephoneNumber.FieldNameSlice()).As(_telephoneNumber.String()).Tag().Separator(sliceSeparator).
-			FieldName(_telexNumber.FieldNameSlice()).As(_telexNumber.String()).Tag().Separator(sliceSeparator).
-			FieldName(_uid.FieldName()).As(_uid.String()).Tag().Separator(sliceSeparator).
-			FieldName(_uidNumber.FieldName()).As(_uidNumber.String()).Numeric().
-			FieldName(_userPKCS12.FieldNameSlice()).As(_userPKCS12.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_userPassword.FieldName()).As(_userPassword.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_cn.FieldName()).As(F_cn.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_dc.FieldName()).As(F_dc.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_description.FieldName()).As(	F_description.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_destinationIndicator.FieldNameSlice()).As(F_destinationIndicator.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_displayName.FieldName()).As(	F_displayName.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_gidNumber.FieldName()).As(F_gidNumber.String()).Numeric().
+			// FieldName(	F_homeDirectory.FieldName()).As(	F_homeDirectory.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_ipHostNumber.FieldNameSlice()).As(F_ipHostNumber.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_mail.FieldNameSlice()).As(F_mail.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_member.FieldNameSlice()).As(F_member.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_o.FieldName()).As(	F_o.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_ou.FieldName()).As(	F_ou.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_owner.FieldNameSlice()).As(F_owner.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_sn.FieldName()).As(	F_sn.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_sshPublicKey.FieldNameSlice()).As(F_sshPublicKey.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_telephoneNumber.FieldNameSlice()).As(F_telephoneNumber.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_telexNumber.FieldNameSlice()).As(F_telexNumber.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_uid.FieldName()).As(F_uid.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_uidNumber.FieldName()).As(F_uidNumber.String()).Numeric().
+			FieldName(F_userPKCS12.FieldNameSlice()).As(F_userPKCS12.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_userPassword.FieldName()).As(	F_userPassword.String()).Tag().Separator(sliceSeparator).
 
 			//
-			// FieldName(_host_aaa.FieldName()).As(_host_aaa.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_host_acl.FieldName()).As(_host_acl.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_host_type.FieldName()).As(_host_type.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_host_asn.FieldName()).As(_host_asn.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_host_upstream_asn.FieldName()).As(_host_upstream_asn.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_host_hosting_uuid.FieldName()).As(_host_hosting_uuid.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_host_url.FieldName()).As(_host_url.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_host_listen.FieldName()).As(_host_listen.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_host_aaa.FieldName()).As(	F_host_aaa.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_host_acl.FieldName()).As(	F_host_acl.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_host_type.FieldName()).As(	F_host_type.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_host_asn.FieldName()).As(	F_host_asn.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_host_upstream_asn.FieldName()).As(	F_host_upstream_asn.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_host_hosting_uuid.FieldName()).As(	F_host_hosting_uuid.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_host_url.FieldName()).As(	F_host_url.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_host_listen.FieldName()).As(	F_host_listen.String()).Tag().Separator(sliceSeparator).
 
-			FieldName(_labeledURI.FieldNameSlice()).As(_labeledURI.String()).Tag().Separator(sliceSeparator).
-			// FieldName( _labeledURI.FieldNameSlice() + ".key").As(_labeledURI.String() + "_key").Tag().Separator(sliceSeparator).
-			// FieldName( _labeledURI.FieldNameSlice() + ".value").As(_labeledURI.String() + "_value").Tag().Separator(sliceSeparator).
+			FieldName(F_labeledURI.FieldNameSlice()).As(F_labeledURI.String()).Tag().Separator(sliceSeparator).
+			// FieldName( _labeledURI.FieldNameSlice() + ".key").As(	F_labeledURI.String() + "_key").Tag().Separator(sliceSeparator).
+			// FieldName( _labeledURI.FieldNameSlice() + ".value").As(	F_labeledURI.String() + "_value").Tag().Separator(sliceSeparator).
 			Build()
 	})
 }
@@ -73,19 +73,19 @@ func (r *RedisRepository) CreateEntryIndex(ctx context.Context) (err error) {
 func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 	return r.cert.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
-			FieldName(_type.FieldName()).As(_type.String()).Numeric().
-			FieldName(_status.FieldName()).As(_status.String()).Numeric().
-			FieldName(_baseDN.FieldName()).As(_baseDN.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_type.FieldName()).As(F_type.String()).Numeric().
+			FieldName(F_status.FieldName()).As(F_status.String()).Numeric().
+			FieldName(F_baseDN.FieldName()).As(F_baseDN.String()).Tag().Separator(sliceSeparator).
 
 			//
-			FieldName(_uuid.FieldName()).As(_uuid.String()).Tag().Separator(sliceSeparator).
-			FieldName(_dn.FieldName()).As(_dn.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_uuid.FieldName()).As(F_uuid.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_dn.FieldName()).As(F_dn.String()).Tag().Separator(sliceSeparator).
 
 			//
-			FieldName(_creatorsName.FieldName()).As(_creatorsName.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_createTimestamp.FieldName()).As(_createTimestamp.String()).Numeric().
-			FieldName(_modifiersName.FieldName()).As(_modifiersName.String()).Tag().Separator(sliceSeparator).
-			// FieldName(_modifyTimestamp.FieldName()).As(_modifyTimestamp.String()).Numeric().
+			FieldName(F_creatorsName.FieldName()).As(F_creatorsName.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_createTimestamp.FieldName()).As(	F_createTimestamp.String()).Numeric().
+			FieldName(F_modifiersName.FieldName()).As(F_modifiersName.String()).Tag().Separator(sliceSeparator).
+			// FieldName(	F_modifyTimestamp.FieldName()).As(	F_modifyTimestamp.String()).Numeric().
 
 			Build()
 	})
@@ -102,36 +102,36 @@ func (r *Conf) Dial(ctx context.Context) (err error) {
 		return
 	}
 
-	r.repo = NewRedisRepository(client)
+	r.Repo = NewRedisRepository(client)
 
 	switch {
 	case l.CLEAR:
-		_ = r.repo.DropEntryIndex(ctx)
-		_ = r.repo.DropCertIndex(ctx)
+		_ = r.Repo.DropEntryIndex(ctx)
+		_ = r.Repo.DropCertIndex(ctx)
 
-		switch err = r.repo.CreateEntryIndex(ctx); {
+		switch err = r.Repo.CreateEntryIndex(ctx); {
 		case err != nil:
 			return
 		}
 
-		switch err = r.repo.CreateCertIndex(ctx); {
+		switch err = r.Repo.CreateCertIndex(ctx); {
 		case err != nil:
 			return
 		}
 	}
 
-	_ = r.repo.monitorIndexingFailures(ctx)
+	_ = r.Repo.monitorIndexingFailures(ctx)
 
 	return
 }
 
 func (r *Conf) Close() (err error) {
 	switch {
-	case r.repo.client == nil:
+	case r.Repo.client == nil:
 		return mod_errors.ENoConn
 	}
 
-	r.repo.client.Close()
+	r.Repo.client.Close()
 
 	return
 }
@@ -177,13 +177,13 @@ func (r *RedisRepository) monitorIndexingFailures(ctx context.Context) (err erro
 	return nil
 }
 
-func (r *_MFV) buildMFVQuery() (outbound string) {
+func (r *MFV) buildMFVQuery() (outbound string) {
 	var (
 		interim = make([]string, len(*r), len(*r))
 	)
 
 	for i, fv := range *r {
-		interim[i] = buildFVQuery(fv._F, fv._V)
+		interim[i] = buildFVQuery(fv.Field, fv.Value)
 	}
 
 	return strings.Join(interim, " ")
@@ -268,10 +268,10 @@ func (r *RedisRepository) SearchEntryQ(ctx context.Context, query string) (count
 }
 
 func (r *RedisRepository) SearchEntryFV(ctx context.Context, field entryFieldName, value string) (count int64, entries []*Entry, err error) {
-	return r.SearchEntryMFV(ctx, _MFV{{field, value}})
+	return r.SearchEntryMFV(ctx, MFV{{field, value}})
 }
 
-func (r *RedisRepository) SearchEntryMFV(ctx context.Context, mfv _MFV) (count int64, entries []*Entry, err error) {
+func (r *RedisRepository) SearchEntryMFV(ctx context.Context, mfv MFV) (count int64, entries []*Entry, err error) {
 	return r.SearchEntryQ(ctx, mfv.buildMFVQuery())
 }
 
@@ -280,7 +280,7 @@ func (r *RedisRepository) SearchEntryMFV(ctx context.Context, mfv _MFV) (count i
 // err is `unexpected end of JSON input`
 //
 // JSONRepository receives empty JSON stream.
-func (r *RedisRepository) SearchEntryMFVField(ctx context.Context, mfv _MFV, field entryFieldName) (count int64, entries []*Entry, err error) {
+func (r *RedisRepository) SearchEntryMFVField(ctx context.Context, mfv MFV, field entryFieldName) (count int64, entries []*Entry, err error) {
 	return r.entry.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		var (
 			command = search.Query(mfv.buildMFVQuery()).

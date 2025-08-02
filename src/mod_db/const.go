@@ -13,21 +13,21 @@ const (
 
 const (
 	redisTagName                = "redis"
-	rediSearchTagName           = "redisearch"
-	rediSearchTagTypeIgnore     = "-"
-	rediSearchTagTypeTag        = "tag"
-	rediSearchTagTypeGeo        = "geo"
-	rediSearchTagTypeText       = "text"
-	rediSearchTagTypeNumeric    = "numeric"
-	rediSearchTagOptionSortable = "sortable"
+	redisearchTagName           = "redisearch"
+	redisearchTagTypeIgnore     = "-"
+	redisearchTagTypeTag        = "tag"
+	redisearchTagTypeGeo        = "geo"
+	redisearchTagTypeText       = "text"
+	redisearchTagTypeNumeric    = "numeric"
+	redisearchTagOptionSortable = "sortable"
 )
 
 const (
 	entryTypeEmpty attrEntryType = iota
-	entryTypeDomain
-	entryTypeGroup
-	entryTypeUser
-	entryTypeHost
+	EntryTypeDomain
+	EntryTypeGroup
+	EntryTypeUser
+	EntryTypeHost
 )
 
 const (
