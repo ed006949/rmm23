@@ -62,6 +62,9 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 	)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
+	count, entries, err = outbound.repo.SearchEntryQ(ctx, "*")
+	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
+
 	return
 }
 

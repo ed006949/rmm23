@@ -6,7 +6,6 @@ import (
 
 type Conf struct {
 	URL  *mod_net.URL `json:"url,omitempty"`
-	Name string       `json:"name,omitempty"`
 	repo *RedisRepository
 }
 
