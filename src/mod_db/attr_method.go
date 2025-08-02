@@ -35,8 +35,9 @@ func (r *attrDN) String() (outbound string) { return string(*r) }
 // attrUUID
 // store/retrieve uuid.UUID as []byte
 
-func (r *attrUUID) String() (outbound string) { return uuid.UUID(*r).String() }
-func (r *attrUUID) Entry() (outbound string)  { return entryKeyHeader + ":" + uuid.UUID(*r).String() }
+func (r *attrUUID) String() (outbound string)             { return uuid.UUID(*r).String() }
+func (r *attrUUID) Entry() (outbound string)              { return entryKeyHeader + ":" + uuid.UUID(*r).String() }
+func (r *attrUUID) Generate(space uuid.UUID, data []byte) { *r = attrUUID(uuid.NewSHA1(space, data)) }
 
 func (r *attrUUID) MarshalJSON() (outbound []byte, err error) {
 	return []byte(fmt.Sprintf("%q", r.String())), nil

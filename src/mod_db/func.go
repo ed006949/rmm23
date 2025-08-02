@@ -14,8 +14,6 @@ import (
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
 	l.CLEAR = false
 
-	l.Z{l.M: "indexing", l.E: err}.Warning()
-
 	switch err = outbound.Dial(ctx); {
 	case err != nil:
 		return
@@ -25,17 +23,18 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		_ = outbound.Close()
 	}()
 
-	switch err = getLDAPDocs(ctx, inbound, outbound.repo); {
-	case err != nil:
-		return
+	switch l.CLEAR {
+	case true:
+		switch err = getLDAPDocs(ctx, inbound, outbound.repo); {
+		case err != nil:
+			return
+		}
 	}
 
 	var (
 		count   int64
 		entries []*Entry
 	)
-
-	l.Z{l.M: "indexed", l.E: err}.Warning()
 
 	count, entries, err = outbound.repo.SearchEntryMFV(
 		ctx,
@@ -70,17 +69,21 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 //
 // copy entry one-by-one to save memory.
 func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisRepository) (err error) {
-	switch l.CLEAR {
-	case false:
-		return
-	}
-
-	type certificate struct {
+	type entryCerts struct {
 		UserPKCS12 mod_crypto.Certificates `ldap:"userPKCS12"`
 	}
 
 	var (
 		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
+			var (
+				entryType attrEntryType
+			)
+
+			switch fnErr = entryType.Parse(fnSearchResultType); {
+			case fnErr != nil:
+				return
+			}
+
 			for _, fnB := range fnSearchResult.Entries {
 				var (
 					fnEntry = new(Entry)
@@ -91,38 +94,28 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					return
 				}
 
-				switch fnErr = fnEntry.Type.Parse(fnSearchResultType); {
-				case fnErr != nil:
-					return
-				}
-
+				fnEntry.Type = entryType
 				fnEntry.BaseDN = attrDN(fnBaseDN)
 				fnEntry.Status = entryStatusLoaded
-				fnEntry.UUID = attrUUID(uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String())))
+				fnEntry.UUID.Generate(uuid.Nil, []byte(fnEntry.DN.String()))
 
 				fnEntry.Key = fnEntry.UUID.String()
 
-				// switch l.CLEAR {
-				// case true:
-				// 	_ = entry.DeleteEntry(ctx, fnEntry.Key)
-				// }
-
 				_ = repo.DeleteEntry(ctx, fnEntry.Key)
 
-				// Save the Entry using the RedisRepository
 				switch fnErr = repo.SaveEntry(ctx, fnEntry); {
 				case fnErr != nil:
 					return
 				}
 
 				var (
-					cert    = new(certificate)
+					cert    = new(entryCerts)
 					fnCerts []*Certificate
 				)
 
 				switch e := mod_ldap.UnmarshalEntry(fnB, cert); {
 				case e != nil:
-					l.Z{l.M: "parse LDAP", "DN": fnEntry.Key, "cert": "all", l.E: e}.Warning()
+					l.Z{l.M: "mod_ldap.UnmarshalEntry", "DN": fnEntry.DN.String(), "cert": "all", l.E: e}.Warning()
 
 					continue
 				}
@@ -131,22 +124,21 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					var (
 						fnCert = new(Certificate)
 					)
-					// fnCert.BaseDN = attrDN(fnBaseDN)
+
 					fnCert.Status = entryStatusLoaded
-					// fnCert.DN = attrDN(a)
+					fnCert.Certificate = e
 
 					fnCert.Key = a
-					fnCert.Certificate = e
 
 					_ = repo.DeleteCert(ctx, fnCert.Key)
 
 					fnCerts = append(fnCerts, fnCert)
 				}
 
-				for i, b := range repo.SaveMultiCert(ctx, fnCerts...) {
+				for a, e := range repo.SaveMultiCert(ctx, fnCerts...) {
 					switch {
-					case b != nil:
-						l.Z{l.M: "parse LDAP", "DN": fnEntry.Key, "cert": fnCerts[i].Key, l.E: b}.Warning()
+					case e != nil:
+						l.Z{l.M: "repo.SaveMultiCert", "DN": fnEntry.DN.String(), "cert": fnCerts[a].Key, l.E: e}.Warning()
 					}
 				}
 			}

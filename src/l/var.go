@@ -13,7 +13,7 @@ import (
 )
 
 var (
-	CLEAR = true
+	CLEAR = false
 )
 
 var (
