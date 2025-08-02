@@ -12,7 +12,7 @@ import (
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
-	l.CLEAR = true
+	l.CLEAR = false
 
 	l.Z{l.M: "indexing", l.E: err}.Warning()
 

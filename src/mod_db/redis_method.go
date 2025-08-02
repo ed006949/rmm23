@@ -244,7 +244,9 @@ func (r *RedisRepository) DropCertIndex(ctx context.Context) (err error) {
 
 func (r *RedisRepository) SearchEntryQ(ctx context.Context, query string) (count int64, entries []*Entry, err error) {
 	return r.entry.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
-		return searchQueryCommand(query)
+		return search.Query(query).
+			Limit().OffsetNum(0, connMaxPaging).
+			Build()
 	})
 }
 

@@ -28,28 +28,24 @@ func buildFVQuery(field entryFieldName, value string) (outbound string) {
 
 func escapeQueryValue(inbound string) (outbound string) {
 	replacer := strings.NewReplacer(
-		"=", "\\=", //
-		",", "\\,", //
-		"(", "\\(", //
-		")", "\\)", //
-		"{", "\\{", //
-		"}", "\\}", //
-		"[", "\\[", //
-		"]", "\\]", //
-		"\"", "\\\"", //
-		"'", "\\'", //
-		"~", "\\~", //
-		"-", "\\-", // (?)
+		`=`, `\=`, //
+		`,`, `\,`, //
+		`(`, `\(`, //
+		`)`, `\)`, //
+		`{`, `\{`, //
+		`}`, `\}`, //
+		`[`, `\[`, //
+		`]`, `\]`, //
+		`"`, `\"`, //
+		`'`, `\'`, //
+		`~`, `\~`, //
+		`-`, `\-`, // (?)
 	)
 
 	return replacer.Replace(inbound)
 }
 
-func searchQueryCommand(query string) rueidis.Completed {
-	var (
-		search om.FtSearchIndex
-	)
-
+func searchQueryCommand(search om.FtSearchIndex, query string) rueidis.Completed {
 	return search.Query(query).
 		Limit().OffsetNum(0, connMaxPaging).
 		Build()
