@@ -267,6 +267,14 @@ func (r *RedisRepository) SearchEntryQ(ctx context.Context, query string) (count
 	})
 }
 
+func (r *RedisRepository) SearchCertQ(ctx context.Context, query string) (count int64, entries []*Certificate, err error) {
+	return r.cert.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
+		return search.Query(query).
+			Limit().OffsetNum(0, connMaxPaging).
+			Build()
+	})
+}
+
 func (r *RedisRepository) SearchEntryFV(ctx context.Context, field entryFieldName, value string) (count int64, entries []*Entry, err error) {
 	return r.SearchEntryMFV(ctx, MFV{{field, value}})
 }
