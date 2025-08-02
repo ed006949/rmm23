@@ -2,17 +2,17 @@ package mod_db
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
 
 	"rmm23/src/l"
+	"rmm23/src/mod_crypto"
 	"rmm23/src/mod_ldap"
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
-	l.CLEAR = false
+	l.CLEAR = true
 
 	l.Z{l.M: "indexing", l.E: err}.Warning()
 
@@ -37,18 +37,18 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 
 	l.Z{l.M: "indexed", l.E: err}.Warning()
 
-	count, entries, err = outbound.repo.SearchMFV(
+	count, entries, err = outbound.repo.SearchEntryMFV(
 		ctx,
 		[]_FV{
 			{
 				_type,
-				entryTypeUser.Number() + " " + entryTypeUser.Number(),
+				entryTypeHost.Number() + " " + entryTypeHost.Number(),
 			},
 		},
 	)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
-	count, entries, err = outbound.repo.SearchMFV(
+	count, entries, err = outbound.repo.SearchEntryMFV(
 		ctx,
 		_MFV{
 			{
@@ -73,6 +73,10 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 	switch l.CLEAR {
 	case false:
 		return
+	}
+
+	type certificate struct {
+		UserPKCS12 mod_crypto.Certificates `ldap:"userPKCS12"`
 	}
 
 	var (
@@ -100,7 +104,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 
 				// switch l.CLEAR {
 				// case true:
-				// 	_ = repo.DeleteEntry(ctx, fnEntry.Key)
+				// 	_ = entry.DeleteEntry(ctx, fnEntry.Key)
 				// }
 
 				_ = repo.DeleteEntry(ctx, fnEntry.Key)
@@ -111,7 +115,42 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					return
 				}
 
-				fmt.Printf("\nDN: %s\n", fnEntry.DN.String())
+				_ = c.monitorIndexingFailures(ctx)
+
+				var (
+					cert    = new(certificate)
+					fnCerts []*Certificate
+				)
+
+				switch e := mod_ldap.UnmarshalEntry(fnB, cert); {
+				case e != nil:
+					l.Z{l.M: "parse LDAP", "DN": fnEntry.Key, "cert": "all", l.E: e}.Warning()
+
+					continue
+				}
+
+				for a, e := range cert.UserPKCS12 {
+					var (
+						fnCert = new(Certificate)
+					)
+					// fnCert.BaseDN = attrDN(fnBaseDN)
+					fnCert.Status = entryStatusLoaded
+					// fnCert.DN = attrDN(a)
+
+					fnCert.Key = a
+					fnCert.Certificate = e
+
+					_ = repo.DeleteCert(ctx, fnCert.Key)
+
+					fnCerts = append(fnCerts, fnCert)
+				}
+
+				for i, b := range repo.SaveMultiCert(ctx, fnCerts...) {
+					switch {
+					case b != nil:
+						l.Z{l.M: "parse LDAP", "DN": fnEntry.Key, "cert": fnCerts[i].Key, l.E: b}.Warning()
+					}
+				}
 
 				_ = c.monitorIndexingFailures(ctx)
 			}

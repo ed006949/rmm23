@@ -4,7 +4,6 @@ import (
 	"net/netip"
 	"time"
 
-	"rmm23/src/mod_crypto"
 	"rmm23/src/mod_net"
 )
 
@@ -54,8 +53,8 @@ type Entry struct {
 	TelexNumber          attrStrings               `json:"telexNumber,omitempty"          ldap:"telexNumber"          msgpack:"telexNumber"`          //
 	UID                  attrID                    `json:"uid,omitempty"                  ldap:"uid"                  msgpack:"uid"`                  //  RDN in user's context
 	UIDNumber            attrIDNumber              `json:"uidNumber,omitempty"            ldap:"uidNumber"            msgpack:"uidNumber"`            //
-	UserPKCS12           mod_crypto.Certificates   `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           msgpack:"userPKCS12"`           //
-	UserPassword         attrUserPassword          `json:"userPassword,omitempty"         ldap:"userPassword"         msgpack:"userPassword"`         //
+	// UserPKCS12           mod_crypto.Certificates   `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           msgpack:"userPKCS12"`           //
+	UserPassword attrUserPassword `json:"userPassword,omitempty" ldap:"userPassword" msgpack:"userPassword"` //
 	// MemberOf             attrDNs                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf"            ` //  don't trust LDAP
 
 	// specific data

@@ -50,6 +50,7 @@ const (
 const (
 	entryKeyHeader = "entry"
 	// entryKeyHeader = _ldap + ":" + _entry.
+	certKeyHeader = "certificate"
 )
 
 const (

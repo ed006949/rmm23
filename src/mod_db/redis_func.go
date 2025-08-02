@@ -11,7 +11,8 @@ import (
 // NewRedisRepository creates a new RedisRepository.
 func NewRedisRepository(client rueidis.Client) *RedisRepository {
 	return &RedisRepository{
-		repo: om.NewJSONRepository[Entry](entryKeyHeader, Entry{}, client, om.WithIndexName(entryKeyHeader)),
+		entry: om.NewJSONRepository[Entry](entryKeyHeader, Entry{}, client, om.WithIndexName(entryKeyHeader)),
+		cert:  om.NewJSONRepository[Certificate](certKeyHeader, Certificate{}, client, om.WithIndexName(certKeyHeader)),
 	}
 }
 
@@ -42,4 +43,14 @@ func escapeQueryValue(inbound string) (outbound string) {
 	)
 
 	return replacer.Replace(inbound)
+}
+
+func searchQueryCommand(query string) rueidis.Completed {
+	var (
+		search om.FtSearchIndex
+	)
+
+	return search.Query(query).
+		Limit().OffsetNum(0, connMaxPaging).
+		Build()
 }

@@ -17,8 +17,8 @@ type Certificates map[string]*Certificate
 
 type Certificate struct {
 	P12 []byte `json:"p12,omitempty"`
-	DER []byte `json:"der,omitempty"`
-	PEM []byte `json:"pem,omitempty"`
+	DER []byte `json:"-"` // `json:"der,omitempty"`
+	PEM []byte `json:"-"` // `json:"pem,omitempty"`
 
 	PrivateKeyDER         []byte   `json:"-"`
 	CertificateDER        []byte   `json:"-"`

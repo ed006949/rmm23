@@ -13,5 +13,6 @@ type _FV struct {
 
 // RedisRepository provides methods for interacting with Redis using rueidis.
 type RedisRepository struct {
-	repo om.Repository[Entry]
+	entry om.Repository[Entry]
+	cert  om.Repository[Certificate]
 }
