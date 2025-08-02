@@ -16,50 +16,50 @@ import (
 func (r *RedisRepository) CreateIndex(ctx context.Context) (err error) {
 	return r.repo.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
-			FieldName("$." + _type.String()).As(_type.String()).Numeric().
-			FieldName("$." + _status.String()).As(_status.String()).Numeric().
-			FieldName("$." + _baseDN.String()).As(_baseDN.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _uuid.String()).As(_uuid.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _dn.String()).As(_dn.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _objectClass.String() + "[*]").As(_objectClass.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _creatorsName.String()).As(_creatorsName.String()).Tag().Separator(sliceSeparator).
-			// FieldName("$.createTimestamp").As("createTimestamp").Numeric().
-			FieldName("$." + _modifiersName.String()).As(_modifiersName.String()).Tag().Separator(sliceSeparator).
-			// FieldName("$.modifyTimestamp").As("modifyTimestamp").Numeric().
-			FieldName("$." + _cn.String()).As(_cn.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _dc.String()).As(_dc.String()).Tag().Separator(sliceSeparator).
-			// FieldName("$.description").As("description").Tag().Separator(sliceSeparator).
-			FieldName("$." + _destinationIndicator.String() + "[*]").As(_destinationIndicator.String()).Tag().Separator(sliceSeparator).
-			// FieldName("$.displayName").As("displayName").Tag().Separator(sliceSeparator).
-			FieldName("$." + _gidNumber.String()).As(_gidNumber.String()).Numeric().
-			// FieldName("$.homeDirectory").As("homeDirectory").Tag().Separator(sliceSeparator).
-			FieldName("$." + _ipHostNumber.String() + "[*]").As(_ipHostNumber.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _mail.String() + "[*]").As(_mail.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _member.String() + "[*]").As(_member.String()).Tag().Separator(sliceSeparator).
-			// FieldName("$.o").As("o").Tag().Separator(sliceSeparator).
-			// FieldName("$.ou").As("ou").Tag().Separator(sliceSeparator).
-			FieldName("$." + _owner.String() + "[*]").As(_owner.String()).Tag().Separator(sliceSeparator).
-			// FieldName("$.sn").As("sn").Tag().Separator(sliceSeparator).
-			FieldName("$." + _sshPublicKey.String() + "[*]").As(_sshPublicKey.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _telephoneNumber.String() + "[*]").As(_telephoneNumber.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _telexNumber.String() + "[*]").As(_telexNumber.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _uid.String()).As(_uid.String()).Tag().Separator(sliceSeparator).
-			FieldName("$." + _uidNumber.String()).As(_uidNumber.String()).Numeric().
-			FieldName("$." + _userPKCS12.String() + "[*]").As(_userPKCS12.String()).Tag().Separator(sliceSeparator).
-			// FieldName("$.userPassword").As("userPassword").Tag().Separator(sliceSeparator).
+			FieldName(_type.FieldName()).As(_type.String()).Numeric().
+			FieldName(_status.FieldName()).As(_status.String()).Numeric().
+			FieldName(_baseDN.FieldName()).As(_baseDN.String()).Tag().Separator(sliceSeparator).
+			FieldName(_uuid.FieldName()).As(_uuid.String()).Tag().Separator(sliceSeparator).
+			FieldName(_dn.FieldName()).As(_dn.String()).Tag().Separator(sliceSeparator).
+			FieldName(_objectClass.FieldNameSlice()).As(_objectClass.String()).Tag().Separator(sliceSeparator).
+			FieldName(_creatorsName.FieldName()).As(_creatorsName.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_createTimestamp.FieldName()).As(_createTimestamp.String()).Numeric().
+			FieldName(_modifiersName.FieldName()).As(_modifiersName.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_modifyTimestamp.FieldName()).As(_modifyTimestamp.String()).Numeric().
+			FieldName(_cn.FieldName()).As(_cn.String()).Tag().Separator(sliceSeparator).
+			FieldName(_dc.FieldName()).As(_dc.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_description.FieldName()).As(_description.String()).Tag().Separator(sliceSeparator).
+			FieldName(_destinationIndicator.FieldNameSlice()).As(_destinationIndicator.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_displayName.FieldName()).As(_displayName.String()).Tag().Separator(sliceSeparator).
+			FieldName(_gidNumber.FieldName()).As(_gidNumber.String()).Numeric().
+			// FieldName(_homeDirectory.FieldName()).As(_homeDirectory.String()).Tag().Separator(sliceSeparator).
+			FieldName(_ipHostNumber.FieldNameSlice()).As(_ipHostNumber.String()).Tag().Separator(sliceSeparator).
+			FieldName(_mail.FieldNameSlice()).As(_mail.String()).Tag().Separator(sliceSeparator).
+			FieldName(_member.FieldNameSlice()).As(_member.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_o.FieldName()).As(_o.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_ou.FieldName()).As(_ou.String()).Tag().Separator(sliceSeparator).
+			FieldName(_owner.FieldNameSlice()).As(_owner.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_sn.FieldName()).As(_sn.String()).Tag().Separator(sliceSeparator).
+			FieldName(_sshPublicKey.FieldNameSlice()).As(_sshPublicKey.String()).Tag().Separator(sliceSeparator).
+			FieldName(_telephoneNumber.FieldNameSlice()).As(_telephoneNumber.String()).Tag().Separator(sliceSeparator).
+			FieldName(_telexNumber.FieldNameSlice()).As(_telexNumber.String()).Tag().Separator(sliceSeparator).
+			FieldName(_uid.FieldName()).As(_uid.String()).Tag().Separator(sliceSeparator).
+			FieldName(_uidNumber.FieldName()).As(_uidNumber.String()).Numeric().
+			FieldName(_userPKCS12.FieldNameSlice()).As(_userPKCS12.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_userPassword.FieldName()).As(_userPassword.String()).Tag().Separator(sliceSeparator).
 
-			// FieldName("$.host_aaa").As("host_aaa").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_acl").As("host_acl").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_type").As("host_type").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_asn").As("host_asn").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_upstream_asn").As("host_upstream_asn").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_hosting_uuid").As("host_hosting_uuid").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_url").As("host_url").Tag().Separator(sliceSeparator).
-			// FieldName("$.host_listen").As("host_listen").Tag().Separator(sliceSeparator).
+			// FieldName(_host_aaa.FieldName()).As(_host_aaa.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_host_acl.FieldName()).As(_host_acl.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_host_type.FieldName()).As(_host_type.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_host_asn.FieldName()).As(_host_asn.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_host_upstream_asn.FieldName()).As(_host_upstream_asn.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_host_hosting_uuid.FieldName()).As(_host_hosting_uuid.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_host_url.FieldName()).As(_host_url.String()).Tag().Separator(sliceSeparator).
+			// FieldName(_host_listen.FieldName()).As(_host_listen.String()).Tag().Separator(sliceSeparator).
 
-			FieldName("$." + _labeledURI.String() + "[*]").As(_labeledURI.String()).Tag().Separator(sliceSeparator).
-			// FieldName("$." + _labeledURI.String() + "[*].key").As(_labeledURI.String() + "_key").Tag().Separator(sliceSeparator).
-			// FieldName("$." + _labeledURI.String() + "[*].value").As(_labeledURI.String() + "_value").Tag().Separator(sliceSeparator).
+			FieldName(_labeledURI.FieldNameSlice()).As(_labeledURI.String()).Tag().Separator(sliceSeparator).
+			// FieldName( _labeledURI.FieldNameSlice() + ".key").As(_labeledURI.String() + "_key").Tag().Separator(sliceSeparator).
+			// FieldName( _labeledURI.FieldNameSlice() + ".value").As(_labeledURI.String() + "_value").Tag().Separator(sliceSeparator).
 			Build()
 	})
 }
