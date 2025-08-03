@@ -69,7 +69,7 @@ func (r *RedisRepository) CreateEntryIndex(ctx context.Context) (err error) {
 	})
 }
 
-// CreateCertIndex creates the RediSearch index for the Certificate struct.
+// CreateCertIndex creates the RediSearch index for the Cert struct.
 func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 	return r.cert.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
@@ -198,7 +198,7 @@ func (r *RedisRepository) SaveEntry(ctx context.Context, e *Entry) (err error) {
 	return
 }
 
-func (r *RedisRepository) SaveCert(ctx context.Context, e *Certificate) (err error) {
+func (r *RedisRepository) SaveCert(ctx context.Context, e *Cert) (err error) {
 	err = r.cert.Save(ctx, e)
 	_ = r.monitorIndexingFailures(ctx)
 
@@ -214,7 +214,7 @@ func (r *RedisRepository) SaveMultiEntry(ctx context.Context, e ...*Entry) (err 
 	return
 }
 
-func (r *RedisRepository) SaveMultiCert(ctx context.Context, e ...*Certificate) (err []error) {
+func (r *RedisRepository) SaveMultiCert(ctx context.Context, e ...*Cert) (err []error) {
 	err = r.cert.SaveMulti(ctx, e...)
 	_ = r.monitorIndexingFailures(ctx)
 
@@ -227,7 +227,7 @@ func (r *RedisRepository) FindEntry(ctx context.Context, id string) (entry *Entr
 	return r.entry.Fetch(ctx, id)
 }
 
-func (r *RedisRepository) FindCert(ctx context.Context, id string) (cert *Certificate, err error) {
+func (r *RedisRepository) FindCert(ctx context.Context, id string) (cert *Cert, err error) {
 	return r.cert.Fetch(ctx, id)
 }
 
@@ -267,7 +267,7 @@ func (r *RedisRepository) SearchEntryQ(ctx context.Context, query string) (count
 	})
 }
 
-func (r *RedisRepository) SearchCertQ(ctx context.Context, query string) (count int64, entries []*Certificate, err error) {
+func (r *RedisRepository) SearchCertQ(ctx context.Context, query string) (count int64, entries []*Cert, err error) {
 	return r.cert.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query(query).
 			Limit().OffsetNum(0, connMaxPaging).

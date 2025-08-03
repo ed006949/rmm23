@@ -6,13 +6,13 @@ import (
 	"rmm23/src/mod_crypto"
 )
 
-// Certificate is the struct that represents an LDAP-compatible Entry.
+// Cert is the struct that represents an LDAP userPKCS12 attribute.
 //
 // when updating @src/mod_db/entry_type.go don't forget to update:
 //
 //	@src/mod_db/certificate_*.go
 //	@src/mod_db/redis_*.go
-type Certificate struct {
+type Cert struct {
 	// db data
 	Key string    `redis:",key"`  //
 	Ver int64     `redis:",ver"`  //

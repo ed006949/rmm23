@@ -16,5 +16,5 @@ type FV struct {
 type RedisRepository struct {
 	client rueidis.Client
 	entry  om.Repository[Entry]
-	cert   om.Repository[Certificate]
+	cert   om.Repository[Cert]
 }

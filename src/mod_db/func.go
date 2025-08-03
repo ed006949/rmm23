@@ -79,7 +79,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 
 				var (
 					cert    = new(entryCerts)
-					fnCerts []*Certificate
+					fnCerts []*Cert
 				)
 
 				switch e := mod_ldap.UnmarshalEntry(fnB, cert); {
@@ -91,7 +91,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 
 				for a, e := range cert.UserPKCS12 {
 					var (
-						fnCert = new(Certificate)
+						fnCert = new(Cert)
 					)
 
 					fnCert.Status = entryStatusLoaded

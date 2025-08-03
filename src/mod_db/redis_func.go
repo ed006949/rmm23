@@ -13,7 +13,7 @@ func NewRedisRepository(client rueidis.Client) *RedisRepository {
 	return &RedisRepository{
 		client: client,
 		entry:  om.NewJSONRepository[Entry](entryKeyHeader, Entry{}, client, om.WithIndexName(entryKeyHeader)),
-		cert:   om.NewJSONRepository[Certificate](certKeyHeader, Certificate{}, client, om.WithIndexName(certKeyHeader)),
+		cert:   om.NewJSONRepository[Cert](certKeyHeader, Cert{}, client, om.WithIndexName(certKeyHeader)),
 	}
 }
 

@@ -60,7 +60,7 @@ func main() {
 	var (
 		count   int64
 		entries []*mod_db.Entry
-		certs   []*mod_db.Certificate
+		certs   []*mod_db.Cert
 	)
 
 	count, entries, err = config.Conf.DB.Repo.SearchEntryMFV(
