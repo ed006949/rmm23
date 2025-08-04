@@ -22,7 +22,6 @@ func Parse(inbound string) (bool, error) {
 	}
 
 	inbound = strings.ToLower(inbound)
-
 	switch inbound {
 	case "1", "t", "y", "true", "yes", "on":
 		return true, nil

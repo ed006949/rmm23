@@ -21,14 +21,12 @@ func (r *Token) command(payload string) (outbound []string, err error) {
 	)
 
 	interim.RawQuery = url.PathEscape(payload)
-
 	switch request, err = http.NewRequest(http.MethodGet, interim.String(), nil); {
 	case err != nil:
 		return nil, err
 	}
 
 	// request.SetBasicAuth(r.Username, r.BindPassword)
-
 	switch response, err = http.DefaultClient.Do(request); {
 	case err != nil:
 		return nil, err

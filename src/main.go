@@ -32,7 +32,6 @@ func main() {
 			}),
 		}
 	)
-
 	switch err = l.Run.ConfigUnmarshal(&config); {
 	case err != nil:
 		os.Exit(1)

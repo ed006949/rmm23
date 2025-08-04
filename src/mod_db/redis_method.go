@@ -107,8 +107,8 @@ func (r *Conf) Dial(ctx context.Context) (err error) {
 	switch {
 	case l.CLEAR:
 		_ = r.Repo.DropEntryIndex(ctx)
-		_ = r.Repo.DropCertIndex(ctx)
 
+		_ = r.Repo.DropCertIndex(ctx)
 		switch err = r.Repo.CreateEntryIndex(ctx); {
 		case err != nil:
 			return
@@ -151,7 +151,6 @@ func (r *RedisRepository) monitorIndexingFailures(ctx context.Context) (err erro
 		var (
 			info map[string]string
 		)
-
 		switch info, err = resp.AsStrMap(); {
 		case err != nil:
 			l.Z{l.M: "redis info", "index": indexName, l.E: err}.Error()

@@ -70,7 +70,6 @@ func (r *runType) dbSetString(inbound string) (err error) {
 	var (
 		interim *url.URL
 	)
-
 	switch interim, err = url.Parse(inbound); {
 	case err != nil:
 		return err
@@ -84,7 +83,6 @@ func (r *runType) dryRunSetString(inbound string) (err error) {
 	var (
 		interim bool
 	)
-
 	switch interim, err = mod_bools.Parse(inbound); {
 	case err != nil:
 		return
@@ -98,7 +96,6 @@ func (r *runType) modeSetString(inbound string) (err error) {
 	var (
 		interim int
 	)
-
 	switch interim, err = strconv.Atoi(inbound); {
 	case err != nil:
 		return err
@@ -112,7 +109,6 @@ func (r *runType) nodeSetString(inbound string) (err error) {
 	var (
 		interim int
 	)
-
 	switch interim, err = strconv.Atoi(inbound); {
 	case err != nil:
 		return err
@@ -126,7 +122,6 @@ func (r *runType) verbositySetString(inbound string) (err error) {
 	var (
 		interim zerolog.Level
 	)
-
 	switch interim, err = zerolog.ParseLevel(inbound); {
 	case err != nil:
 		return
@@ -141,7 +136,6 @@ func (r *runType) ConfigUnmarshal(inbound any) (err error) {
 	var (
 		content []byte
 	)
-
 	switch content, err = os.ReadFile(r.config); {
 	case err != nil:
 		return

@@ -20,20 +20,22 @@ import (
 //	@src/mod_db/redis_*.go
 type Cert struct {
 	// db data
-	Key string `redis:",key"` //
-	// Ver int64  `redis:",ver"` //
-	// Ext time.Time `redis:",exat"` //
+	Key string    `redis:",key"`  //
+	Ver int64     `redis:",ver"`  //
+	Ext time.Time `redis:",exat"` //
 
-	SerialNumber   *big.Int   `json:"SerialNumber"`                 //
-	Issuer         pkix.Name  `json:"Issuer"`                       //
-	Subject        pkix.Name  `json:"Subject"        redis:",key"`  //
-	NotBefore      time.Time  `json:"NotBefore"`                    //
-	NotAfter       time.Time  `json:"NotAfter"       redis:",exat"` //
-	DNSNames       []string   `json:"DNSNames"`                     //
-	EmailAddresses []string   `json:"EmailAddresses"`               //
-	IPAddresses    []net.IP   `json:"IPAddresses"`                  //
-	URIs           []*url.URL `json:"URIs"`                         //
-	IsCA           bool       `json:"IsCA"`                         //
+	UUID attrUUID `json:"uuid,omitempty" msgpack:"uuid"` //
+
+	SerialNumber   *big.Int   `json:"serialNumber"`   // redis:",key"
+	Issuer         pkix.Name  `json:"issuer"`         //
+	Subject        pkix.Name  `json:"subject"`        //
+	NotBefore      time.Time  `json:"notBefore"`      //
+	NotAfter       time.Time  `json:"notAfter"`       // redis:",exat"
+	DNSNames       []string   `json:"dnsNames"`       //
+	EmailAddresses []string   `json:"emailAddresses"` //
+	IPAddresses    []net.IP   `json:"ipAddresses"`    //
+	URIs           []*url.URL `json:"uris"`           //
+	IsCA           bool       `json:"isCA"`           //
 
 	// // element specific meta data
 	// Type   attrEntryType   `json:"type,omitempty"   msgpack:"type"`   // (?) Certificate's type

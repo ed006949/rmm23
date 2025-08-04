@@ -68,7 +68,6 @@ func (r *GitDB) Commit(msg string) (err error) {
 		gitStatus    git.Status
 		plumbingHash plumbing.Hash
 	)
-
 	switch gitStatus, err = r.Worktree.Status(); {
 	case err != nil:
 		return

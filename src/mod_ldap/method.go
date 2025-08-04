@@ -36,7 +36,6 @@ func (r *Conf) SearchFn(fn func(fnBaseDN string, fnSearchResultType string, fnSe
 				)
 				searchResult *ldap.SearchResult
 			)
-
 			switch searchResult, err = r.conn.Search(searchRequest); {
 			case err != nil:
 				return

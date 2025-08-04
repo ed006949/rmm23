@@ -17,4 +17,5 @@ type RedisRepository struct {
 	client rueidis.Client
 	entry  om.Repository[Entry]
 	cert   om.Repository[Cert]
+	issued om.Repository[Cert]
 }

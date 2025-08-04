@@ -10,7 +10,6 @@ func GetStructRV(inbound any) (outboundRV reflect.Value, err error) {
 	var (
 		rv = reflect.ValueOf(inbound)
 	)
-
 	switch {
 	case rv.Kind() == reflect.Ptr:
 		rv = rv.Elem()
@@ -50,7 +49,6 @@ func GetStructSVST(inbound any) (outboundSV reflect.Value, outboundST reflect.Ty
 	var (
 		sv, st = reflect.ValueOf(inbound).Elem(), reflect.TypeOf(inbound).Elem()
 	)
-
 	switch {
 	case sv.Kind() != reflect.Struct:
 		return outboundSV, outboundST, mod_errors.ENotStruct

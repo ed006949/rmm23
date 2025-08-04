@@ -54,7 +54,6 @@ func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 			)
 
 			interimDERBlock, inbound = pem.Decode(inbound)
-
 			switch {
 			case interimDERBlock == nil:
 				return
@@ -63,7 +62,6 @@ func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 			var (
 				interimPEMBlock = []byte(base64.RawStdEncoding.EncodeToString(interimDERBlock.Bytes)) // sanitized PEM
 			)
-
 			switch {
 			case interimDERBlock.Type == _CERTIFICATE:
 				switch certificateCounter++; certificateCounter {

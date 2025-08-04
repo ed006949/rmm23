@@ -1,11 +1,13 @@
 package mod_db
 
 import (
+	"crypto/x509/pkix"
 	"encoding/json"
 	"fmt"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/tsaarni/x500dn"
 
 	"rmm23/src/mod_errors"
 )
@@ -30,6 +32,19 @@ func (r *attrEntryType) Parse(inbound string) (err error) {
 // attrDN
 
 func (r *attrDN) String() (outbound string) { return string(*r) }
+func (r *attrDN) Parse(inbound string) (err error) {
+	var (
+		interim *pkix.Name
+	)
+	switch interim, err = x500dn.ParseDN(inbound); {
+	case err != nil:
+		return
+	}
+
+	*r = attrDN(interim.String())
+
+	return
+}
 
 //
 // attrUUID
@@ -47,7 +62,6 @@ func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
 	var (
 		interim string
 	)
-
 	switch err = json.Unmarshal(inbound, &interim); {
 	case err != nil:
 		return
@@ -80,7 +94,6 @@ func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
 	var (
 		interim int64
 	)
-
 	switch err = json.Unmarshal(inbound, &interim); {
 	case err != nil:
 		return

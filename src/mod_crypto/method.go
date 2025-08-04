@@ -24,7 +24,6 @@ func (r *AuthDB) WriteSSH(name string, user string, pemBytes []byte, password st
 	var (
 		sshPublicKeys *ssh.PublicKeys
 	)
-
 	switch sshPublicKeys, err = ssh.NewPublicKeys(user, pemBytes, password); {
 	case err != nil:
 		return
@@ -123,7 +122,6 @@ func (r *Certificate) DecodeP12() (err error) {
 		certificate *x509.Certificate
 		chain       []*x509.Certificate
 	)
-
 	switch privateKey, certificate, chain, err = pkcs12.DecodeChain(r.P12, pkcs12.DefaultPassword); {
 	case err != nil:
 		return
@@ -140,7 +138,6 @@ func (r *Certificate) DecodePEM() (err error) {
 	var (
 		interim *Certificate
 	)
-
 	switch interim, err = parsePEM(r.PEM); {
 	case err != nil:
 		return

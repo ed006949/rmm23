@@ -22,7 +22,6 @@ func (r *attrDN) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim *ldap.DN
 		)
-
 		switch interim, err = ldap.ParseDN(value); {
 		case err != nil:
 			continue
@@ -41,7 +40,6 @@ func (r *attrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim *ldap.DN
 		)
-
 		switch interim, err = ldap.ParseDN(value); {
 		case err != nil:
 			continue
@@ -74,7 +72,6 @@ func (r *attrIDNumber) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim uint64
 		)
-
 		switch interim, err = strconv.ParseUint(value, 0, 0); {
 		case err != nil:
 			continue
@@ -93,7 +90,6 @@ func (r *attrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim netip.Prefix
 		)
-
 		switch interim, err = netip.ParsePrefix(value); {
 		case err != nil:
 			continue
@@ -115,7 +111,6 @@ func (r *attrLabeledURIs) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim = strings.SplitN(value, " ", mod_slices.KVElements)
 		)
-
 		switch len(interim) {
 		case 1:
 			(*r)[interim[0]] = ""
@@ -170,7 +165,6 @@ func (r *attrTime) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim time.Time
 		)
-
 		switch interim, err = ber.ParseGeneralizedTime([]byte(value)); {
 		case err != nil:
 			continue
@@ -199,7 +193,6 @@ func (r *attrUUID) UnmarshalLDAPAttr(values []string) (err error) {
 		var (
 			interim uuid.UUID
 		)
-
 		switch interim, err = uuid.Parse(value); {
 		case err != nil:
 			continue

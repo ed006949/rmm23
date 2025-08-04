@@ -15,7 +15,6 @@ func LookupMX(names []string) (outbound []string, errs mod_errors.Errs) {
 			errDetail    *net.DNSError
 			_            = errors.As(err, &errDetail)
 		)
-
 		switch {
 		case errDetail != nil && errDetail.IsNotFound:
 			continue

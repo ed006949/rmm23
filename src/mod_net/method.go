@@ -14,7 +14,6 @@ func (r *URL) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 	var (
 		interim *url.URL
 	)
-
 	switch interim, err = url.Parse(attr.Value); {
 	case err != nil:
 		return
@@ -34,7 +33,6 @@ func (r *URL) UnmarshalJSON(inbound []byte) (err error) {
 		interim    string
 		interimURL *url.URL
 	)
-
 	switch err = json.Unmarshal(inbound, &interim); {
 	case err != nil:
 		return

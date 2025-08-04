@@ -73,7 +73,6 @@ func (r *VFSDB) CopyFromFS(name string) (err error) {
 				var (
 					target string
 				)
-
 				switch target, err = os.Readlink(name); {
 				case err != nil:
 					return
@@ -114,7 +113,6 @@ func (r *VFSDB) CopyFromFS(name string) (err error) {
 			return
 		}
 	)
-
 	switch name, err = filepath.Abs(name); {
 	case err != nil:
 		return
@@ -231,7 +229,6 @@ func (r *VFSDB) WriteVFS() (err error) {
 			return
 		}
 	)
-
 	switch err = r.VFS.WalkDir("/", syncFn); {
 	case err != nil:
 		return
@@ -244,7 +241,6 @@ func (r *VFSDB) CopyFileFromFS(name string) (err error) {
 	var (
 		data []byte
 	)
-
 	switch data, err = os.ReadFile(name); {
 	case err != nil:
 		return
@@ -261,7 +257,6 @@ func (r *VFSDB) CopyFileToFS(name string) (err error) {
 	var (
 		data []byte
 	)
-
 	switch data, err = r.VFS.ReadFile(name); {
 	case err != nil:
 		return
@@ -279,7 +274,6 @@ func (r *VFSDB) CompareAndCopyFileToFS(name string) (err error) {
 		dataVFS []byte
 		dataFS  []byte
 	)
-
 	switch dataVFS, err = r.VFS.ReadFile(name); {
 	case err != nil:
 		return
@@ -329,7 +323,6 @@ func (r *VFSDB) LoadIniMapTo(v any, source string) (err error) {
 	var (
 		data []byte
 	)
-
 	switch data, err = r.VFS.ReadFile(source); {
 	case err != nil:
 		return

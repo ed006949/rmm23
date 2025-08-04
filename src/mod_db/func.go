@@ -47,7 +47,6 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 			var (
 				entryType attrEntryType
 			)
-
 			switch fnErr = entryType.Parse(fnSearchResultType); {
 			case fnErr != nil:
 				return
@@ -57,7 +56,6 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				var (
 					fnEntry = new(Entry)
 				)
-
 				switch fnErr = mod_ldap.UnmarshalEntry(fnB, fnEntry); {
 				case fnErr != nil:
 					return
@@ -71,7 +69,6 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				fnEntry.Key = fnEntry.UUID.String()
 
 				_ = repo.DeleteEntry(ctx, fnEntry.Key)
-
 				switch fnErr = repo.SaveEntry(ctx, fnEntry); {
 				case fnErr != nil:
 					return
@@ -81,7 +78,6 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					cert    = new(entryCerts)
 					fnCerts []*Cert
 				)
-
 				switch e := mod_ldap.UnmarshalEntry(fnB, cert); {
 				case e != nil:
 					l.Z{l.M: "mod_ldap.UnmarshalEntry", "DN": fnEntry.DN.String(), "cert": "all", l.E: e}.Warning()
@@ -115,7 +111,6 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 			return
 		}
 	)
-
 	switch err = inbound.SearchFn(ldap2doc); {
 	case err != nil:
 		return

@@ -14,6 +14,7 @@ require (
 	github.com/redis/rueidis v1.0.63
 	github.com/redis/rueidis/om v1.0.63
 	github.com/rs/zerolog v1.34.0
+	github.com/tsaarni/x500dn v1.1.0
 	software.sslmate.com/src/go-pkcs12 v0.6.0
 )
 

@@ -14,7 +14,6 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 	var (
 		val, ok = f.Tag.Lookup(ldapTagName)
 	)
-
 	switch {
 	case !ok:
 		return f.Name, false
@@ -24,7 +23,6 @@ func readTag(f reflect.StructField) (options string, flag bool) {
 		// opts = mod_slices.SplitString(val, mod_strings.TagSeparator, mod_slices.FlagNormalize)
 		opts = strings.Split(val, ",")
 	)
-
 	switch {
 	case len(opts) == mod_slices.KVElements:
 		flag = opts[1] == ldapTagOptionOmitEmpty
@@ -38,7 +36,6 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 		sv reflect.Value
 		st reflect.Type
 	)
-
 	switch sv, st, err = mod_reflect.GetStructSVST(i); {
 	case err != nil:
 		return
@@ -49,7 +46,6 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 			fv = sv.Field(n) // Holds struct field value
 			ft = st.Field(n) // Holds struct field type
 		)
-
 		switch {
 		case len(ft.PkgPath) != 0: // skip unexported fields
 			continue
@@ -71,7 +67,6 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 		var (
 			values = e.GetAttributeValues(fieldTag)
 		)
-
 		switch {
 		case len(values) == 0:
 			continue
@@ -103,7 +98,6 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 				var (
 					ptrVal = reflect.New(rt)
 				)
-
 				switch unmarshaler, ok := ptrVal.Interface().(LDAPAttributeUnmarshaler); {
 				case ok:
 					switch err = unmarshaler.UnmarshalLDAPAttr(values); {
