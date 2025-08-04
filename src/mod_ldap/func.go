@@ -6,6 +6,7 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 
+	"rmm23/src/mod_errors"
 	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_slices"
 )
@@ -59,9 +60,24 @@ func UnmarshalEntry(e *ldap.Entry, i interface{}) (err error) {
 		// Fill the field with the distinguishedName if the tag key is `dn`
 		switch fieldTag {
 		case "dn":
-			fv.SetString(e.DN)
+			switch {
+			case fv.CanSet():
+				switch unmarshaler, ok := fv.Addr().Interface().(LDAPAttributeUnmarshaler); {
+				case ok:
+					switch err = unmarshaler.UnmarshalLDAPAttr([]string{e.DN}); {
+					case err != nil:
+						return
+					}
 
-			continue
+					continue
+				case fv.Kind() == reflect.String:
+					fv.SetString(e.DN)
+
+					continue
+				}
+			}
+
+			return mod_errors.EParse
 		}
 
 		var (

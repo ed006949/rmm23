@@ -82,15 +82,14 @@ func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 			//
 			FieldName(F_uuid.FieldName()).As(F_uuid.String()).Tag().Separator(sliceSeparator).
 			FieldName(F_serialNumber.FieldName()).As(F_serialNumber.String()).Numeric().
-			FieldName(F_modifiersName.FieldName()).As(F_modifiersName.String()).Tag().Separator(sliceSeparator).
 			FieldName(F_issuer.FieldName()).As(F_issuer.String()).Tag().Separator(sliceSeparator).
 			FieldName(F_subject.FieldName()).As(F_subject.String()).Tag().Separator(sliceSeparator).
 			FieldName(F_notBefore.FieldName()).As(F_notBefore.String()).Numeric().
 			FieldName(F_notAfter.FieldName()).As(F_notAfter.String()).Numeric().
-			FieldName(F_dnsNames.FieldName()).As(F_dnsNames.String()).Tag().Separator(sliceSeparator).
-			FieldName(F_emailAddresses.FieldName()).As(F_emailAddresses.String()).Tag().Separator(sliceSeparator).
-			FieldName(F_ipAddresses.FieldName()).As(F_ipAddresses.String()).Tag().Separator(sliceSeparator).
-			FieldName(F_uris.FieldName()).As(F_uris.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_dnsNames.FieldNameSlice()).As(F_dnsNames.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_emailAddresses.FieldNameSlice()).As(F_emailAddresses.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_ipAddresses.FieldNameSlice()).As(F_ipAddresses.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_uris.FieldNameSlice()).As(F_uris.String()).Tag().Separator(sliceSeparator).
 			FieldName(F_isCA.FieldName()).As(F_isCA.String()).Numeric().
 
 			//
