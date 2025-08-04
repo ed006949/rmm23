@@ -63,7 +63,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				}
 
 				fnEntry.Type = entryType
-				fnEntry.BaseDN = &attrDN{*fnBaseDN}
+				fnEntry.BaseDN = attrDN{*fnBaseDN}
 				fnEntry.Status = entryStatusLoaded
 				fnEntry.UUID.Generate(uuid.Nil, []byte(fnEntry.DN.String()))
 

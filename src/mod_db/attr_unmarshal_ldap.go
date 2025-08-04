@@ -50,11 +50,11 @@ func (r *attrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 
-func (r *attrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = mod_slices.StringsNormalize(values, mod_slices.FlagNormalize)
-
-	return
-}
+// func (r *attrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error) {
+// 	*r = mod_slices.StringsNormalize(values, mod_slices.FlagNormalize)
+//
+// 	return
+// }
 
 func (r *attrID) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
@@ -84,6 +84,24 @@ func (r *attrIDNumber) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 
+func (r *attrIPHostNumber) UnmarshalLDAPAttr(values []string) (err error) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
+		var (
+			interim netip.Prefix
+		)
+		switch interim, err = netip.ParsePrefix(value); {
+		case err != nil:
+			continue
+		}
+
+		*r = attrIPHostNumber{interim}
+
+		return // return only first value
+	}
+
+	return nil
+}
+
 func (r *attrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
@@ -94,7 +112,7 @@ func (r *attrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 			continue
 		}
 
-		*r = append(*r, interim)
+		*r = append(*r, &attrIPHostNumber{interim})
 	}
 
 	return nil
@@ -127,11 +145,11 @@ func (r *attrMails) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 
-func (r *attrObjectClasses) UnmarshalLDAPAttr(values []string) (err error) {
-	*r = mod_slices.StringsNormalize(values, mod_slices.FlagNormalize)
-
-	return
-}
+// func (r *attrObjectClasses) UnmarshalLDAPAttr(values []string) (err error) {
+// 	*r = mod_slices.StringsNormalize(values, mod_slices.FlagNormalize)
+//
+// 	return
+// }
 
 func (r *attrSSHPublicKeys) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
@@ -153,7 +171,7 @@ func (r *attrString) UnmarshalLDAPAttr(values []string) (err error) {
 
 func (r *attrStrings) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
-		*r = append(*r, value)
+		*r = append(*r, attrString(value))
 	}
 
 	return
