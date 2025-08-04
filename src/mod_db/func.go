@@ -94,7 +94,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 						fnCert = new(Cert)
 					)
 
-					fnCert.Status = entryStatusLoaded
+					// fnCert.Status = entryStatusLoaded
 					fnCert.Certificate = e
 
 					fnCert.Key = a

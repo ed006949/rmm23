@@ -60,7 +60,7 @@ func main() {
 	var (
 		count   int64
 		entries []*mod_db.Entry
-		certs   []*mod_db.Cert
+		cert    *mod_db.Cert
 	)
 
 	count, entries, err = config.Conf.DB.Repo.SearchEntryMFV(
@@ -92,8 +92,13 @@ func main() {
 	count, entries, err = config.Conf.DB.Repo.SearchEntryQ(ctx, "*")
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
-	count, certs, err = config.Conf.DB.Repo.SearchCertQ(ctx, "*")
-	l.Z{l.M: count, l.E: err, "certs": len(certs)}.Warning()
+	switch cert, err = config.Conf.DB.Repo.FindCert(ctx, "CN=*.domain.tld,O=domain.tld"); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+	}
+
+	err = cert.Certificate.DecodeP12()
+	l.Z{l.M: "cert", l.E: err, "cert": cert.Subject.String()}.Warning()
 
 	os.Exit(1)
 }
