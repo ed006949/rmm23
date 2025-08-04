@@ -2,6 +2,7 @@ package mod_db
 
 import (
 	"context"
+	"crypto/x509/pkix"
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
@@ -43,7 +44,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 	}
 
 	var (
-		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
+		ldap2doc = func(fnBaseDN *pkix.Name, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
 			var (
 				entryType attrEntryType
 			)
@@ -62,7 +63,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				}
 
 				fnEntry.Type = entryType
-				fnEntry.BaseDN = attrDN(fnBaseDN)
+				fnEntry.BaseDN = &attrDN{*fnBaseDN}
 				fnEntry.Status = entryStatusLoaded
 				fnEntry.UUID.Generate(uuid.Nil, []byte(fnEntry.DN.String()))
 

@@ -7,7 +7,6 @@ import (
 	"time"
 
 	ber "github.com/go-asn1-ber/asn1-ber"
-	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
 
 	"rmm23/src/mod_slices"
@@ -20,14 +19,14 @@ import (
 func (r *attrDN) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
-			interim *ldap.DN
+			interim = new(attrDN)
 		)
-		switch interim, err = ldap.ParseDN(value); {
+		switch err = interim.Parse(value); {
 		case err != nil:
 			continue
 		}
 
-		*r = attrDN(interim.String())
+		*r = *interim
 
 		return
 	}
@@ -38,14 +37,14 @@ func (r *attrDN) UnmarshalLDAPAttr(values []string) (err error) {
 func (r *attrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
-			interim *ldap.DN
+			interim = new(attrDN)
 		)
-		switch interim, err = ldap.ParseDN(value); {
+		switch err = interim.Parse(value); {
 		case err != nil:
 			continue
 		}
 
-		*r = append(*r, attrDN(interim.String()))
+		*r = append(*r, interim)
 	}
 
 	return
@@ -170,7 +169,7 @@ func (r *attrTime) UnmarshalLDAPAttr(values []string) (err error) {
 			continue
 		}
 
-		*r = attrTime(interim)
+		*r = attrTime{interim}
 
 		return // return only first value
 	}
@@ -198,7 +197,7 @@ func (r *attrUUID) UnmarshalLDAPAttr(values []string) (err error) {
 			continue
 		}
 
-		*r = attrUUID(interim)
+		*r = attrUUID{interim}
 
 		return // return only first value
 	}
