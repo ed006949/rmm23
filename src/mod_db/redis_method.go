@@ -65,6 +65,8 @@ func (r *RedisRepository) CreateEntryIndex(ctx context.Context) (err error) {
 			FieldName(F_labeledURI.FieldNameSlice()).As(F_labeledURI.String()).Tag().Separator(sliceSeparator).
 			// FieldName( _labeledURI.FieldNameSlice() + ".key").As(	F_labeledURI.String() + "_key").Tag().Separator(sliceSeparator).
 			// FieldName( _labeledURI.FieldNameSlice() + ".value").As(	F_labeledURI.String() + "_value").Tag().Separator(sliceSeparator).
+
+			//
 			Build()
 	})
 }
@@ -79,14 +81,19 @@ func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 
 			//
 			FieldName(F_uuid.FieldName()).As(F_uuid.String()).Tag().Separator(sliceSeparator).
-			FieldName(F_dn.FieldName()).As(F_dn.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_serialNumber.FieldName()).As(F_serialNumber.String()).Numeric().
+			FieldName(F_modifiersName.FieldName()).As(F_modifiersName.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_issuer.FieldName()).As(F_issuer.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_subject.FieldName()).As(F_subject.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_notBefore.FieldName()).As(F_notBefore.String()).Numeric().
+			FieldName(F_notAfter.FieldName()).As(F_notAfter.String()).Numeric().
+			FieldName(F_dnsNames.FieldName()).As(F_dnsNames.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_emailAddresses.FieldName()).As(F_emailAddresses.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_ipAddresses.FieldName()).As(F_ipAddresses.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_uris.FieldName()).As(F_uris.String()).Tag().Separator(sliceSeparator).
+			FieldName(F_isCA.FieldName()).As(F_isCA.String()).Numeric().
 
 			//
-			FieldName(F_creatorsName.FieldName()).As(F_creatorsName.String()).Tag().Separator(sliceSeparator).
-			// FieldName(	F_createTimestamp.FieldName()).As(	F_createTimestamp.String()).Numeric().
-			FieldName(F_modifiersName.FieldName()).As(F_modifiersName.String()).Tag().Separator(sliceSeparator).
-			// FieldName(	F_modifyTimestamp.FieldName()).As(	F_modifyTimestamp.String()).Numeric().
-
 			Build()
 	})
 }
@@ -105,7 +112,7 @@ func (r *Conf) Dial(ctx context.Context) (err error) {
 	r.Repo = NewRedisRepository(client)
 
 	switch {
-	case l.CLEAR:
+	case !l.Run.DryRunValue():
 		_ = r.Repo.DropEntryIndex(ctx)
 
 		_ = r.Repo.DropCertIndex(ctx)

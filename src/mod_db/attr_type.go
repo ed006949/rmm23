@@ -17,8 +17,10 @@ type attrDN struct{ pkix.Name }                     //
 type attrDNs []*attrDN                              //
 type attrID string                                  //
 type attrIDNumber uint64                            //
-type attrIPHostNumber struct{ netip.Prefix }        //
-type attrIPHostNumbers []*attrIPHostNumber          //
+type attrIPAddress struct{ netip.Addr }             //
+type attrIPAddresses []*attrIPAddress               //
+type attrIPPrefix struct{ netip.Prefix }            //
+type attrIPPrefixes []*attrIPPrefix                 //
 type attrLabeledURIs map[string]string              //
 type attrMails []string                             //
 type attrSSHPublicKey mod_ssh.PublicKey             //

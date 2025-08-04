@@ -40,4 +40,15 @@ const (
 	F_userPassword         entryFieldName = "userPassword"
 
 	F_labeledURI entryFieldName = "labeledURI"
+
+	F_serialNumber   entryFieldName = "serialNumber"
+	F_issuer         entryFieldName = "issuer"
+	F_subject        entryFieldName = "subject"
+	F_notBefore      entryFieldName = "notBefore"
+	F_notAfter       entryFieldName = "notAfter"
+	F_dnsNames       entryFieldName = "dnsNames"
+	F_emailAddresses entryFieldName = "emailAddresses"
+	F_ipAddresses    entryFieldName = "ipAddresses"
+	F_uris           entryFieldName = "uris"
+	F_isCA           entryFieldName = "isCA"
 )

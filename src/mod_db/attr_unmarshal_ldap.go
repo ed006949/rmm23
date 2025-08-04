@@ -18,17 +18,12 @@ import (
 
 func (r *attrDN) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
-		var (
-			interim = new(attrDN)
-		)
-		switch err = interim.Parse(value); {
+		switch err = r.Parse(value); {
 		case err != nil:
 			continue
 		}
 
-		*r = *interim
-
-		return
+		return // return only first value
 	}
 
 	return
@@ -84,17 +79,17 @@ func (r *attrIDNumber) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 
-func (r *attrIPHostNumber) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *attrIPAddress) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
-			interim netip.Prefix
+			interim netip.Addr
 		)
-		switch interim, err = netip.ParsePrefix(value); {
+		switch interim, err = netip.ParseAddr(value); {
 		case err != nil:
 			continue
 		}
 
-		*r = attrIPHostNumber{interim}
+		r.Addr = interim
 
 		return // return only first value
 	}
@@ -102,7 +97,23 @@ func (r *attrIPHostNumber) UnmarshalLDAPAttr(values []string) (err error) {
 	return nil
 }
 
-func (r *attrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *attrIPAddresses) UnmarshalLDAPAttr(values []string) (err error) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
+		var (
+			interim netip.Addr
+		)
+		switch interim, err = netip.ParseAddr(value); {
+		case err != nil:
+			continue
+		}
+
+		*r = append(*r, &attrIPAddress{interim})
+	}
+
+	return nil
+}
+
+func (r *attrIPPrefix) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim netip.Prefix
@@ -112,7 +123,25 @@ func (r *attrIPHostNumbers) UnmarshalLDAPAttr(values []string) (err error) {
 			continue
 		}
 
-		*r = append(*r, &attrIPHostNumber{interim})
+		r.Prefix = interim
+
+		return // return only first value
+	}
+
+	return nil
+}
+
+func (r *attrIPPrefixes) UnmarshalLDAPAttr(values []string) (err error) {
+	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
+		var (
+			interim netip.Prefix
+		)
+		switch interim, err = netip.ParsePrefix(value); {
+		case err != nil:
+			continue
+		}
+
+		*r = append(*r, &attrIPPrefix{interim})
 	}
 
 	return nil
@@ -187,7 +216,7 @@ func (r *attrTime) UnmarshalLDAPAttr(values []string) (err error) {
 			continue
 		}
 
-		*r = attrTime{interim}
+		r.Time = interim
 
 		return // return only first value
 	}
@@ -215,7 +244,7 @@ func (r *attrUUID) UnmarshalLDAPAttr(values []string) (err error) {
 			continue
 		}
 
-		*r = attrUUID{interim}
+		r.UUID = interim
 
 		return // return only first value
 	}

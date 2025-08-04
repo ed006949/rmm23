@@ -41,7 +41,7 @@ type Entry struct {
 	DisplayName          attrString        `json:"displayName,omitempty"          ldap:"displayName"          msgpack:"displayName"`          //
 	GIDNumber            attrIDNumber      `json:"gidNumber,omitempty"            ldap:"gidNumber"            msgpack:"gidNumber"`            //  Primary GIDNumber in user's context (ignore it), GIDNumber in group's context.
 	HomeDirectory        attrString        `json:"homeDirectory,omitempty"        ldap:"homeDirectory"        msgpack:"homeDirectory"`        //
-	IPHostNumber         attrIPHostNumbers `json:"ipHostNumber,omitempty"         ldap:"ipHostNumber"         msgpack:"ipHostNumber"`         //
+	IPHostNumber         attrIPPrefixes    `json:"ipHostNumber,omitempty"         ldap:"ipHostNumber"         msgpack:"ipHostNumber"`         //
 	Mail                 attrMails         `json:"mail,omitempty"                 ldap:"mail"                 msgpack:"mail"`                 //
 	Member               attrDNs           `json:"member,omitempty"               ldap:"member"               msgpack:"member"`               //
 	O                    attrString        `json:"o,omitempty"                    ldap:"o"                    msgpack:"o"`                    //

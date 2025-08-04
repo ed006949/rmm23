@@ -25,7 +25,7 @@ func (r *URL) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 }
 
 func (r *URL) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
-	return xml.Attr{Name: name, Value: r.String()}, nil
+	return xml.Attr{Name: name, Value: r.URL.String()}, nil
 }
 
 func (r *URL) UnmarshalJSON(inbound []byte) (err error) {
@@ -43,13 +43,13 @@ func (r *URL) UnmarshalJSON(inbound []byte) (err error) {
 		return
 	}
 
-	*r = URL{interimURL}
+	r.URL = interimURL
 
 	return
 }
-func (r *URL) MarshalJSON() ([]byte, error) { return json.Marshal(r.String()) }
+func (r *URL) MarshalJSON() ([]byte, error) { return json.Marshal(r.URL.String()) }
 
-func (r *URL) CleanPath() (outbound string) { return strings.TrimPrefix(r.Path, "/") }
+func (r *URL) CleanPath() (outbound string) { return strings.TrimPrefix(r.URL.Path, "/") }
 func (r *URL) CleanUser() (username string, password string) {
 	return r.CleanUsername(), r.CleanPassword()
 }

@@ -41,7 +41,7 @@ func (r *attrDN) Parse(inbound string) (err error) {
 		return
 	}
 
-	*r = attrDN{*interim}
+	r.Name = *interim
 
 	return
 }

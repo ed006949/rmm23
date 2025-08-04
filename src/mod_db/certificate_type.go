@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"rmm23/src/mod_crypto"
+	"rmm23/src/mod_net"
 )
 
 // Cert is the struct that represents an LDAP userPKCS12 attribute.
@@ -26,16 +27,16 @@ type Cert struct {
 
 	UUID attrUUID `json:"uuid,omitempty" msgpack:"uuid"` //
 
-	SerialNumber   *big.Int   `json:"serialNumber"`   // redis:",key"
-	Issuer         pkix.Name  `json:"issuer"`         //
-	Subject        pkix.Name  `json:"subject"`        //
-	NotBefore      time.Time  `json:"notBefore"`      //
-	NotAfter       time.Time  `json:"notAfter"`       // redis:",exat"
-	DNSNames       []string   `json:"dnsNames"`       //
-	EmailAddresses []string   `json:"emailAddresses"` //
-	IPAddresses    []net.IP   `json:"ipAddresses"`    //
-	URIs           []*url.URL `json:"uris"`           //
-	IsCA           bool       `json:"isCA"`           //
+	SerialNumber   *big.Int         `json:"serialNumber"`   // redis:",key"
+	Issuer         attrDN           `json:"issuer"`         //
+	Subject        attrDN           `json:"subject"`        //
+	NotBefore      attrTime         `json:"notBefore"`      //
+	NotAfter       attrTime         `json:"notAfter"`       // redis:",exat"
+	DNSNames       []string         `json:"dnsNames"`       //
+	EmailAddresses []string         `json:"emailAddresses"` //
+	IPAddresses    []*attrIPAddress `json:"ipAddresses"`    //
+	URIs           []*mod_net.URL   `json:"uris"`           //
+	IsCA           bool             `json:"isCA"`           //
 
 	// // element specific meta data
 	// Type   attrEntryType   `json:"type,omitempty"   msgpack:"type"`   // (?) Certificate's type
@@ -57,7 +58,7 @@ type Cert struct {
 	// CN           attrString        `json:"cn,omitempty"           msgpack:"cn"`           //  RDN in group's context
 	// DC           attrString        `json:"dc,omitempty"           msgpack:"dc"`           //
 	// Description  attrString        `json:"description,omitempty"  msgpack:"description"`  //
-	// IPHostNumber attrIPHostNumbers `json:"ipHostNumber,omitempty" msgpack:"ipHostNumber"` //
+	// IPHostNumber attrIPPrefixes `json:"ipHostNumber,omitempty" msgpack:"ipHostNumber"` //
 	// Mail         attrMails         `json:"mail,omitempty"         msgpack:"mail"`         //
 	// O            attrString        `json:"o,omitempty"            msgpack:"o"`            //
 	// OU           attrString        `json:"ou,omitempty"           msgpack:"ou"`           //
