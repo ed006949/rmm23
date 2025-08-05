@@ -89,13 +89,33 @@ func (r *attrDN) UnmarshalJSON(inbound []byte) (err error) {
 }
 
 func (r *attrDN) UnmarshalLDAPAttr(values []string) (err error) {
+	var (
+		interim attrDN
+	)
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
-		return r.Parse(value) // return only first value
+		switch err = interim.Parse(value); {
+		case err != nil:
+			return
+		}
+
+		*r = interim
+
+		return // return only first value
 	}
 
 	return
 }
 
 func (r *attrDNs) UnmarshalLDAPAttr(values []string) (err error) {
-	return r.Parse(mod_slices.StringsNormalize(values, mod_slices.FlagNormalize))
+	var (
+		interim attrDNs
+	)
+	switch err = interim.Parse(mod_slices.StringsNormalize(values, mod_slices.FlagNormalize)); {
+	case err != nil:
+		return
+	}
+
+	*r = interim
+
+	return
 }

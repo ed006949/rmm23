@@ -57,8 +57,10 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				var (
 					fnEntry = new(Entry)
 				)
-				switch fnErr = mod_ldap.UnmarshalEntry(fnB, fnEntry); {
-				case fnErr != nil:
+				switch e := mod_ldap.UnmarshalEntry(fnB, fnEntry); {
+				case e != nil:
+					l.Z{l.M: "mod_ldap.UnmarshalEntry", "DN": fnEntry.DN.String(), l.E: e}.Warning()
+
 					return
 				}
 
@@ -70,9 +72,11 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				fnEntry.Key = fnEntry.UUID.String()
 
 				_ = repo.DeleteEntry(ctx, fnEntry.Key)
-				switch fnErr = repo.SaveEntry(ctx, fnEntry); {
-				case fnErr != nil:
-					return
+				switch e := repo.SaveEntry(ctx, fnEntry); {
+				case e != nil:
+					l.Z{l.M: "repo.SaveEntry", "DN": fnEntry.DN.String(), l.E: e}.Warning()
+
+					continue
 				}
 
 				var (
@@ -122,7 +126,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				for a, e := range repo.SaveMultiCert(ctx, fnCerts...) {
 					switch {
 					case e != nil:
-						l.Z{l.M: "Repo.SaveMultiCert", "DN": fnEntry.DN.String(), "cert": fnCerts[a].Key, l.E: e}.Warning()
+						l.Z{l.M: "repo.SaveMultiCert", "DN": fnEntry.DN.String(), "cert": fnCerts[a].Key, l.E: e}.Warning()
 					}
 				}
 			}
