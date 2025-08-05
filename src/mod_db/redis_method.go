@@ -182,21 +182,48 @@ func (r *RedisRepository) monitorIndexingFailures(ctx context.Context) (err erro
 	return nil
 }
 
-func (r *MFV) buildMFVQuery() (outbound string) {
-	var (
-		interim = make([]string, len(*r), len(*r))
-	)
-
-	for i, fv := range *r {
-		interim[i] = buildFVQuery(fv.Field, fv.Value)
-	}
-
-	return strings.Join(interim, " ")
+func (r *RedisRepository) waitEntryIndexing(ctx context.Context) (err error) {
+	return r.waitIndexing(ctx, r.entry.IndexName())
 }
 
-//
+func (r *RedisRepository) waitCertIndexing(ctx context.Context) (err error) {
+	return r.waitIndexing(ctx, r.cert.IndexName())
+}
+
+func (r *RedisRepository) waitIndexing(ctx context.Context, indexName string) (err error) {
+	var (
+		resp = r.client.Do(ctx, r.client.B().FtInfo().Index(indexName).Build())
+	)
+
+	switch err = resp.Error(); {
+	case err != nil:
+		return
+	}
+
+	var (
+		info map[string]string
+	)
+	switch info, err = resp.AsStrMap(); {
+	case err != nil:
+		return
+	}
+
+	for info["percent_indexed"] != "1" {
+		switch info, err = resp.AsStrMap(); {
+		case err != nil:
+			return
+		}
+	}
+
+	return
+}
 
 func (r *RedisRepository) SaveEntry(ctx context.Context, e *Entry) (err error) {
+	switch {
+	case l.Run.DryRunValue():
+		return
+	}
+
 	err = r.entry.Save(ctx, e)
 	_ = r.monitorIndexingFailures(ctx)
 
@@ -204,6 +231,11 @@ func (r *RedisRepository) SaveEntry(ctx context.Context, e *Entry) (err error) {
 }
 
 func (r *RedisRepository) SaveCert(ctx context.Context, e *Cert) (err error) {
+	switch {
+	case l.Run.DryRunValue():
+		return
+	}
+
 	err = r.cert.Save(ctx, e)
 	_ = r.monitorIndexingFailures(ctx)
 
@@ -213,6 +245,11 @@ func (r *RedisRepository) SaveCert(ctx context.Context, e *Cert) (err error) {
 //
 
 func (r *RedisRepository) SaveMultiEntry(ctx context.Context, e ...*Entry) (err []error) {
+	switch {
+	case l.Run.DryRunValue():
+		return
+	}
+
 	err = r.entry.SaveMulti(ctx, e...)
 	_ = r.monitorIndexingFailures(ctx)
 
@@ -220,6 +257,11 @@ func (r *RedisRepository) SaveMultiEntry(ctx context.Context, e ...*Entry) (err 
 }
 
 func (r *RedisRepository) SaveMultiCert(ctx context.Context, e ...*Cert) (err []error) {
+	switch {
+	case l.Run.DryRunValue():
+		return
+	}
+
 	err = r.cert.SaveMulti(ctx, e...)
 	_ = r.monitorIndexingFailures(ctx)
 
@@ -239,11 +281,25 @@ func (r *RedisRepository) FindCert(ctx context.Context, id string) (cert *Cert, 
 //
 
 func (r *RedisRepository) DeleteEntry(ctx context.Context, id string) (err error) {
-	return r.entry.Remove(ctx, id)
+	switch {
+	case l.Run.DryRunValue():
+		return
+	}
+
+	err = r.entry.Remove(ctx, id)
+
+	return
 }
 
 func (r *RedisRepository) DeleteCert(ctx context.Context, id string) (err error) {
-	return r.cert.Remove(ctx, id)
+	switch {
+	case l.Run.DryRunValue():
+		return
+	}
+
+	err = r.cert.Remove(ctx, id)
+
+	return
 }
 
 //
@@ -255,16 +311,32 @@ func (r *RedisRepository) DeleteCert(ctx context.Context, id string) (err error)
 // }
 
 func (r *RedisRepository) DropEntryIndex(ctx context.Context) (err error) {
-	return r.entry.DropIndex(ctx)
+	switch {
+	case l.Run.DryRunValue():
+		return
+	}
+
+	err = r.entry.DropIndex(ctx)
+
+	return
 }
 
 func (r *RedisRepository) DropCertIndex(ctx context.Context) (err error) {
-	return r.cert.DropIndex(ctx)
+	switch {
+	case l.Run.DryRunValue():
+		return
+	}
+
+	err = r.cert.DropIndex(ctx)
+
+	return
 }
 
 //
 
 func (r *RedisRepository) SearchEntryQ(ctx context.Context, query string) (count int64, entries []*Entry, err error) {
+	_ = r.waitEntryIndexing(ctx)
+
 	return r.entry.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query(query).
 			Limit().OffsetNum(0, connMaxPaging).
@@ -273,6 +345,8 @@ func (r *RedisRepository) SearchEntryQ(ctx context.Context, query string) (count
 }
 
 func (r *RedisRepository) SearchCertQ(ctx context.Context, query string) (count int64, entries []*Cert, err error) {
+	_ = r.waitCertIndexing(ctx)
+
 	return r.cert.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query(query).
 			Limit().OffsetNum(0, connMaxPaging).
@@ -302,6 +376,8 @@ func (r *RedisRepository) SearchCertMFV(ctx context.Context, mfv MFV) (count int
 //
 // JSONRepository receives empty JSON stream.
 func (r *RedisRepository) SearchEntryMFVField(ctx context.Context, mfv MFV, field entryFieldName) (count int64, entries []*Entry, err error) {
+	_ = r.waitEntryIndexing(ctx)
+
 	return r.entry.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		var (
 			command = search.Query(mfv.buildMFVQuery()).

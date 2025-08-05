@@ -24,12 +24,9 @@ func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (e
 		_ = outbound.Close()
 	}()
 
-	switch {
-	case !l.Run.DryRunValue():
-		switch err = getLDAPDocs(ctx, inbound, outbound.Repo); {
-		case err != nil:
-			return
-		}
+	switch err = getLDAPDocs(ctx, inbound, outbound.Repo); {
+	case err != nil:
+		return
 	}
 
 	return

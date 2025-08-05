@@ -37,14 +37,12 @@ func main() {
 		os.Exit(1)
 	}
 
-	switch err = vfsDB.CopyFromFS("./etc/legacy/"); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
-	}
-
-	switch err = mod_db.CopyLDAP2DB(ctx, config.Conf.LDAP, config.Conf.DB); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
+	switch {
+	case !l.Run.DryRunValue():
+		switch err = mod_db.CopyLDAP2DB(ctx, config.Conf.LDAP, config.Conf.DB); {
+		case err != nil:
+			l.Z{l.E: err}.Critical()
+		}
 	}
 
 	switch err = config.Conf.DB.Dial(ctx); {
@@ -55,6 +53,11 @@ func main() {
 	defer func() {
 		_ = config.Conf.DB.Close()
 	}()
+
+	switch err = vfsDB.CopyFromFS("./etc/legacy/"); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+	}
 
 	var (
 		count   int64

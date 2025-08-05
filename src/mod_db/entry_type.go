@@ -11,7 +11,7 @@ import (
 //
 // when updating @src/mod_db/entry_type.go don't forget to update:
 //
-//	@src/mod_db/field_const.go
+//	@src/mod_db/redis_field.go
 //	@src/mod_db/redis_*.go
 type Entry struct {
 	// db data
