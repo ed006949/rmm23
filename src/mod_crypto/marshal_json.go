@@ -1,11 +1,7 @@
 package mod_crypto
 
-import (
-	"encoding/json"
-)
-
-func (r *Certificate) MarshalJSON() ([]byte, error)       { return json.Marshal(&r.P12) }
-func (r *Certificate) UnmarshalJSON(inbound []byte) error { return json.Unmarshal(inbound, &r.P12) }
+// func (r *Certificate) MarshalJSON() ([]byte, error)       { return json.Marshal(&r.P12) }
+// func (r *Certificate) UnmarshalJSON(inbound []byte) error { return json.Unmarshal(inbound, &r.P12) }
 
 // func (r *Certificate) MarshalJSON() (outbound []byte, err error) {
 // 	var (

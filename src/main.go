@@ -8,7 +8,6 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_db"
-
 	"rmm23/src/mod_vfs"
 )
 
@@ -39,7 +38,20 @@ func main() {
 
 	switch {
 	case !l.Run.DryRunValue():
-		switch err = mod_db.CopyLDAP2DB(ctx, config.Conf.LDAP, config.Conf.DB); {
+		switch err = mod_db.GetLDAPDocs(ctx, config.Conf.LDAP, config.Conf.DB); {
+		case err != nil:
+			l.Z{l.E: err}.Critical()
+		}
+	}
+
+	switch err = vfsDB.CopyFromFS("./etc/legacy/"); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+	}
+
+	switch {
+	case !l.Run.DryRunValue():
+		switch err = mod_db.GetFSCerts(ctx, vfsDB, config.Conf.DB); {
 		case err != nil:
 			l.Z{l.E: err}.Critical()
 		}
@@ -53,11 +65,6 @@ func main() {
 	defer func() {
 		_ = config.Conf.DB.Close()
 	}()
-
-	switch err = vfsDB.CopyFromFS("./etc/legacy/"); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
-	}
 
 	var (
 		count   int64

@@ -8,10 +8,10 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-type attrDN []struct{ Field, Value string }
-type attrDNs []*attrDN
+type AttrDN []struct{ Field, Value string }
+type attrDNs []*AttrDN
 
-func (r *attrDN) String() (outbound string) {
+func (r *AttrDN) String() (outbound string) {
 	var (
 		interim = make([]string, len(*r), len(*r))
 	)
@@ -30,10 +30,10 @@ func (r *attrDNs) String() (outbound []string) {
 	return
 }
 
-func (r *attrDN) Parse(inbound string) (err error) {
+func (r *AttrDN) Parse(inbound string) (err error) {
 	var (
 		interimFVs = strings.Split(inbound, ",")
-		interim    = make(attrDN, len(interimFVs), len(interimFVs))
+		interim    = make(AttrDN, len(interimFVs), len(interimFVs))
 	)
 
 	for a, b := range interimFVs {
@@ -58,7 +58,7 @@ func (r *attrDNs) Parse(inbound []string) (err error) {
 		interim = make(attrDNs, len(inbound), len(inbound))
 	)
 	for a, b := range inbound {
-		interim[a] = new(attrDN)
+		interim[a] = new(AttrDN)
 		switch err = interim[a].Parse(b); {
 		case err != nil:
 			return mod_errors.EParse
@@ -70,9 +70,9 @@ func (r *attrDNs) Parse(inbound []string) (err error) {
 	return
 }
 
-func (r *attrDN) MarshalJSON() (outbound []byte, err error) { return json.Marshal(r.String()) }
+func (r *AttrDN) MarshalJSON() (outbound []byte, err error) { return json.Marshal(r.String()) }
 
-func (r *attrDN) UnmarshalJSON(inbound []byte) (err error) {
+func (r *AttrDN) UnmarshalJSON(inbound []byte) (err error) {
 	var (
 		interim string
 	)
@@ -89,9 +89,9 @@ func (r *attrDN) UnmarshalJSON(inbound []byte) (err error) {
 	return
 }
 
-func (r *attrDN) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *AttrDN) UnmarshalLDAPAttr(values []string) (err error) {
 	var (
-		interim attrDN
+		interim AttrDN
 	)
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		switch err = interim.Parse(value); {

@@ -17,16 +17,22 @@ type Certificates map[string]*Certificate
 
 type Certificate struct {
 	P12 []byte `json:"p12,omitempty"`
-	DER []byte `json:"-"` // `json:"der,omitempty"`
-	PEM []byte `json:"-"` // `json:"pem,omitempty"`
+	DER []byte `json:"-"`
+	PEM []byte `json:"-"`
+	CRL []byte `json:"crl,omitempty"`
+	CSR []byte `json:"csr,omitempty"`
 
 	PrivateKeyDER         []byte   `json:"-"`
+	CertificateRequestDER []byte   `json:"-"`
 	CertificateDER        []byte   `json:"-"`
 	CertificateCAChainDER [][]byte `json:"-"`
+	RevocationListDER     []byte   `json:"-"`
 
 	PrivateKeyPEM         []byte   `json:"-"`
+	CertificateRequestPEM []byte   `json:"-"`
 	CertificatePEM        []byte   `json:"-"`
 	CertificateCAChainPEM [][]byte `json:"-"`
+	RevocationListPEM     []byte   `json:"-"`
 
 	// PrivateKey contains the private key corresponding to the public key in
 	// Certificates. This must implement crypto.Signer with an RSA, ECDSA or Ed25519 PublicKey.
@@ -37,16 +43,8 @@ type Certificate struct {
 	// using x509.ParseCertificate to reduce per-handshake processing. If nil,
 	// the leaf certificate will be parsed as needed.
 	// Certificates       []*x509.Certificate `json:"-"`
-	Certificate        *x509.Certificate   `json:"-"`
-	CertificateCAChain []*x509.Certificate `json:"-"`
-
-	// SupportedSignatureAlgorithms is an optional list restricting what
-	// signature algorithms the PrivateKey can be used for.
-	SupportedSignatureAlgorithms []SignatureScheme `json:"-"`
-	// OCSPStaple contains an optional OCSP response which will be served
-	// to clients that request it.
-	OCSPStaple []byte `json:"-"`
-	// SignedCertificateTimestamps contains an optional list of Signed
-	// Certificate Timestamps which will be served to clients that request it.
-	SignedCertificateTimestamps [][]byte `json:"-"`
+	CertificateRequest *x509.CertificateRequest `json:"-"`
+	Certificate        *x509.Certificate        `json:"-"`
+	CertificateCAChain []*x509.Certificate      `json:"-"`
+	RevocationList     *x509.RevocationList     `json:"-"`
 }

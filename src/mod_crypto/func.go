@@ -13,7 +13,7 @@ import (
 	"rmm23/src/mod_errors"
 )
 
-func parsePrivateKey(der []byte) (key crypto.PrivateKey, err error) {
+func ParsePrivateKey(der []byte) (key crypto.PrivateKey, err error) {
 	switch key, err = x509.ParsePKCS1PrivateKey(der); {
 	case err == nil:
 		return
@@ -86,7 +86,7 @@ func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 					interim.PEM = append(interim.PEM, interimPEMBlock...)
 				}
 			case interimDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(interimDERBlock.Type, __PRIVATE_KEY):
-				switch interim.PrivateKey, err = parsePrivateKey(interimDERBlock.Bytes); {
+				switch interim.PrivateKey, err = ParsePrivateKey(interimDERBlock.Bytes); {
 				case err != nil:
 					return
 				}

@@ -24,13 +24,13 @@ type attrSSHPublicKey mod_ssh.PublicKey             //
 type attrSSHPublicKeys map[string]mod_ssh.PublicKey //
 type attrString string                              //
 type attrStrings []attrString                       //
-type attrTime struct{ time.Time }                   //
-type attrUUID struct{ uuid.UUID }                   //
+type AttrTime struct{ time.Time }                   //
+type AttrUUID struct{ uuid.UUID }                   //
 type attrUserPassword string                        //
 
 // type attrCN string                                  //
 // type attrCreateTimestamp struct{ time.Time }        //
-// type attrCreatorsName *attrDN                       //
+// type attrCreatorsName *AttrDN                       //
 // type attrDescription string                         //
 // type attrDestinationIndicators []string             // interim host list
 // type attrDisplayName string                         //
@@ -39,7 +39,7 @@ type attrUserPassword string                        //
 // type attrHomeDirectory string                       //
 // type attrMembers attrDNs                            //
 // type attrMembersOf attrDNs                          //
-// type attrModifiersName *attrDN                      //
+// type attrModifiersName *AttrDN                      //
 // type attrModifyTimestamp struct{ time.Time }        //
 // type attrO string                                   //
 // type attrOU string                                  //
