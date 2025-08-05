@@ -38,6 +38,17 @@ var (
 		F_userPassword:         redisearchTagTypeTag,
 
 		F_labeledURI: redisearchTagTypeTag,
+
+		F_serialNumber:   redisearchTagTypeNumeric,
+		F_issuer:         redisearchTagTypeTag,
+		F_subject:        redisearchTagTypeTag,
+		F_notBefore:      redisearchTagTypeTag,
+		F_notAfter:       redisearchTagTypeTag,
+		F_dnsNames:       redisearchTagTypeTag,
+		F_emailAddresses: redisearchTagTypeTag,
+		F_ipAddresses:    redisearchTagTypeTag,
+		F_uris:           redisearchTagTypeTag,
+		F_isCA:           redisearchTagTypeNumeric,
 	}
 	entryFieldValueEnclosure = map[string][2]string{
 		redisearchTagTypeText:    {enclosureEmpty0, enclosureEmpty1},

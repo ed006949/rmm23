@@ -284,8 +284,16 @@ func (r *RedisRepository) SearchEntryFV(ctx context.Context, field entryFieldNam
 	return r.SearchEntryMFV(ctx, MFV{{field, value}})
 }
 
+func (r *RedisRepository) SearchCertFV(ctx context.Context, field entryFieldName, value string) (count int64, entries []*Cert, err error) {
+	return r.SearchCertMFV(ctx, MFV{{field, value}})
+}
+
 func (r *RedisRepository) SearchEntryMFV(ctx context.Context, mfv MFV) (count int64, entries []*Entry, err error) {
 	return r.SearchEntryQ(ctx, mfv.buildMFVQuery())
+}
+
+func (r *RedisRepository) SearchCertMFV(ctx context.Context, mfv MFV) (count int64, entries []*Cert, err error) {
+	return r.SearchCertQ(ctx, mfv.buildMFVQuery())
 }
 
 // SearchEntryMFVField is not working:
