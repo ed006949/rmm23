@@ -1,7 +1,6 @@
 package mod_db
 
 import (
-	"crypto/x509/pkix"
 	"net/netip"
 	"time"
 
@@ -13,8 +12,6 @@ import (
 type attrEntryType int   //
 type attrEntryStatus int //
 
-type attrDN struct{ pkix.Name }                     //
-type attrDNs []*attrDN                              //
 type attrID string                                  //
 type attrIDNumber uint64                            //
 type attrIPAddress struct{ netip.Addr }             //

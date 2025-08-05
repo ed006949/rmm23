@@ -12,22 +12,6 @@ import (
 // call `Normalize` from each method instead of from `UnmarshalEntry` in hope that sometime `go-ldap` will implement custom marshal/unmarshal mechanics.
 // according to `LDAP` spec, output is not ordered.
 
-func (r *attrDNs) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
-		var (
-			interim = new(attrDN)
-		)
-		switch err = interim.Parse(value); {
-		case err != nil:
-			continue
-		}
-
-		*r = append(*r, interim)
-	}
-
-	return
-}
-
 // func (r *attrDestinationIndicators) UnmarshalLDAPAttr(values []string) (err error) {
 // 	*r = mod_slices.StringsNormalize(values, mod_slices.FlagNormalize)
 //

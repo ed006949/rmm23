@@ -2,7 +2,6 @@ package mod_db
 
 import (
 	"context"
-	"crypto/x509/pkix"
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
@@ -45,7 +44,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 	}
 
 	var (
-		ldap2doc = func(fnBaseDN *pkix.Name, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
+		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
 			var (
 				entryType attrEntryType
 			)
@@ -64,7 +63,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				}
 
 				fnEntry.Type = entryType
-				fnEntry.BaseDN = attrDN{*fnBaseDN}
+				_ = fnEntry.BaseDN.Parse(fnBaseDN)
 				fnEntry.Status = entryStatusLoaded
 				fnEntry.UUID.Generate(uuid.Nil, []byte(fnEntry.DN.String()))
 
@@ -93,10 +92,10 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 							// Key:            "",
 							// Ver:            0,
 							// UUID:           attrUUID{},
+							// Issuer:         attrDN{},
+							// Subject:        attrDN{},
 							Ext:            e.Certificate.NotAfter,
 							SerialNumber:   e.Certificate.SerialNumber,
-							Issuer:         attrDN{e.Certificate.Issuer},
-							Subject:        attrDN{e.Certificate.Subject},
 							NotBefore:      attrTime{e.Certificate.NotBefore},
 							NotAfter:       attrTime{e.Certificate.NotAfter},
 							DNSNames:       e.Certificate.DNSNames,
@@ -108,6 +107,8 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 						}
 					)
 
+					_ = fnCert.Issuer.Parse(e.Certificate.Issuer.String())
+					_ = fnCert.Subject.Parse(e.Certificate.Subject.String())
 					fnCert.UUID.Generate(uuid.NameSpaceOID, fnCert.Certificate.Certificate.Raw)
 					fnCert.Key = fnCert.UUID.String()
 

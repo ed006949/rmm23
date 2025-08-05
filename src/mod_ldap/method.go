@@ -1,17 +1,15 @@
 package mod_ldap
 
 import (
-	"crypto/x509/pkix"
 	"strings"
 
 	"github.com/go-ldap/ldap/v3"
-	"github.com/tsaarni/x500dn"
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_slices"
 )
 
-func (r *Conf) SearchFn(fn func(fnBaseDN *pkix.Name, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error)) (err error) {
+func (r *Conf) SearchFn(fn func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error)) (err error) {
 	switch err = r.dial(); {
 	case err != nil:
 		return
@@ -24,7 +22,6 @@ func (r *Conf) SearchFn(fn func(fnBaseDN *pkix.Name, fnSearchResultType string, 
 	for _, b := range r.Domains {
 		for _, d := range r.Settings {
 			var (
-				baseDN        *pkix.Name
 				requestDN     = mod_slices.JoinStrings([]string{d.DN, b.DN}, ",", mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
 				searchRequest = ldap.NewSearchRequest(
 					requestDN,          // Base DN
@@ -39,17 +36,12 @@ func (r *Conf) SearchFn(fn func(fnBaseDN *pkix.Name, fnSearchResultType string, 
 				)
 				searchResult *ldap.SearchResult
 			)
-			switch baseDN, err = x500dn.ParseDN(requestDN); {
-			case err != nil:
-				return
-			}
-
 			switch searchResult, err = r.conn.Search(searchRequest); {
 			case err != nil:
 				return
 			}
 
-			switch err = fn(baseDN, d.Type, searchResult); {
+			switch err = fn(b.DN, d.Type, searchResult); {
 			case err != nil:
 				return
 			}
