@@ -58,6 +58,7 @@ func (r *attrDNs) Parse(inbound []string) (err error) {
 		interim = make(attrDNs, len(inbound), len(inbound))
 	)
 	for a, b := range inbound {
+		interim[a] = new(attrDN)
 		switch err = interim[a].Parse(b); {
 		case err != nil:
 			return mod_errors.EParse
