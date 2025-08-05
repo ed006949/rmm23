@@ -4,10 +4,6 @@ import (
 	"net/netip"
 	"strconv"
 	"strings"
-	"time"
-
-	ber "github.com/go-asn1-ber/asn1-ber"
-	"github.com/google/uuid"
 
 	"rmm23/src/mod_slices"
 	"rmm23/src/mod_ssh"
@@ -15,19 +11,6 @@ import (
 
 // call `Normalize` from each method instead of from `UnmarshalEntry` in hope that sometime `go-ldap` will implement custom marshal/unmarshal mechanics.
 // according to `LDAP` spec, output is not ordered.
-
-func (r *attrDN) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
-		switch err = r.Parse(value); {
-		case err != nil:
-			continue
-		}
-
-		return // return only first value
-	}
-
-	return
-}
 
 func (r *attrDNs) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
@@ -206,45 +189,9 @@ func (r *attrStrings) UnmarshalLDAPAttr(values []string) (err error) {
 	return
 }
 
-func (r *attrTime) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
-		var (
-			interim time.Time
-		)
-		switch interim, err = ber.ParseGeneralizedTime([]byte(value)); {
-		case err != nil:
-			continue
-		}
-
-		r.Time = interim
-
-		return // return only first value
-	}
-
-	return
-}
-
 func (r *attrUserPassword) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		*r = attrUserPassword(value)
-
-		return // return only first value
-	}
-
-	return
-}
-
-func (r *attrUUID) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
-		var (
-			interim uuid.UUID
-		)
-		switch interim, err = uuid.Parse(value); {
-		case err != nil:
-			continue
-		}
-
-		r.UUID = interim
 
 		return // return only first value
 	}

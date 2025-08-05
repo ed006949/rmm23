@@ -32,7 +32,7 @@ func Parse(inbound string) (bool, error) {
 	}
 }
 
-func FormatBool(inbound bool) string {
+func FormatBoolString(inbound bool) string {
 	switch inbound {
 	case true:
 		return "true"

@@ -1,14 +1,6 @@
 package mod_db
 
 import (
-	"crypto/x509/pkix"
-	"encoding/json"
-	"fmt"
-	"time"
-
-	"github.com/google/uuid"
-	"github.com/tsaarni/x500dn"
-
 	"rmm23/src/mod_errors"
 )
 
@@ -26,100 +18,4 @@ func (r *attrEntryType) Parse(inbound string) (err error) {
 
 		return
 	}
-}
-
-//
-// attrDN
-
-func (r *attrDN) String() (outbound string) { return r.Name.String() }
-func (r *attrDN) Parse(inbound string) (err error) {
-	var (
-		interim *pkix.Name
-	)
-	switch interim, err = x500dn.ParseDN(inbound); {
-	case err != nil:
-		return
-	}
-
-	r.Name = *interim
-
-	return
-}
-func (r *attrDN) MarshalJSON() (outbound []byte, err error) {
-	return []byte(r.Name.String()), nil
-}
-
-func (r *attrDN) UnmarshalJSON(inbound []byte) (err error) {
-	var (
-		interim string
-	)
-	switch err = json.Unmarshal(inbound, &interim); {
-	case err != nil:
-		return
-	}
-
-	switch err = r.Parse(interim); {
-	case err != nil:
-		return
-	}
-
-	return
-}
-
-//
-// attrUUID
-// store/retrieve uuid.UUID as []byte
-
-func (r *attrUUID) String() (outbound string)             { return r.UUID.String() }
-func (r *attrUUID) Entry() (outbound string)              { return entryKeyHeader + ":" + r.UUID.String() }
-func (r *attrUUID) Generate(space uuid.UUID, data []byte) { *r = attrUUID{uuid.NewSHA1(space, data)} }
-
-func (r *attrUUID) MarshalJSON() (outbound []byte, err error) {
-	return []byte(fmt.Sprintf("%q", r.String())), nil
-}
-
-func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
-	var (
-		interim string
-	)
-	switch err = json.Unmarshal(inbound, &interim); {
-	case err != nil:
-		return
-	}
-
-	var (
-		interimUUID uuid.UUID
-	)
-	switch interimUUID, err = uuid.Parse(interim); {
-	case err != nil:
-		return
-	}
-
-	*r = attrUUID{interimUUID}
-
-	return
-}
-
-//
-// attrTime
-// store/retrieve time.Time as int64 to utilize redisearch NUMERIC search [min max]
-
-func (r *attrTime) String() (outbound string) { return r.Time.String() }
-
-func (r *attrTime) MarshalJSON() (outbound []byte, err error) {
-	return []byte(fmt.Sprintf("%d", r.Time.Unix())), nil
-}
-
-func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
-	var (
-		interim int64
-	)
-	switch err = json.Unmarshal(inbound, &interim); {
-	case err != nil:
-		return
-	}
-
-	*r = attrTime{time.Unix(interim, 0)}
-
-	return
 }

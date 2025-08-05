@@ -75,9 +75,9 @@ func (r *RedisRepository) CreateEntryIndex(ctx context.Context) (err error) {
 func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 	return r.cert.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
-			FieldName(F_type.FieldName()).As(F_type.String()).Numeric().
-			FieldName(F_status.FieldName()).As(F_status.String()).Numeric().
-			FieldName(F_baseDN.FieldName()).As(F_baseDN.String()).Tag().Separator(sliceSeparator).
+			// FieldName(F_type.FieldName()).As(F_type.String()).Numeric().
+			// FieldName(F_status.FieldName()).As(F_status.String()).Numeric().
+			// FieldName(F_baseDN.FieldName()).As(F_baseDN.String()).Tag().Separator(sliceSeparator).
 
 			//
 			FieldName(F_uuid.FieldName()).As(F_uuid.String()).Tag().Separator(sliceSeparator).

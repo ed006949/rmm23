@@ -8,8 +8,11 @@ import (
 	"github.com/google/uuid"
 
 	"rmm23/src/l"
+	"rmm23/src/mod_bools"
 	"rmm23/src/mod_crypto"
+	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
+	"rmm23/src/mod_net"
 )
 
 func CopyLDAP2DB(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
@@ -84,15 +87,31 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					continue
 				}
 
-				for a, e := range cert.UserPKCS12 {
+				for _, e := range cert.UserPKCS12 {
 					var (
-						fnCert = new(Cert)
+						fnCert = &Cert{
+							// Key:            "",
+							// Ver:            0,
+							// UUID:           attrUUID{},
+							Ext:            e.Certificate.NotAfter,
+							SerialNumber:   e.Certificate.SerialNumber,
+							Issuer:         attrDN{e.Certificate.Issuer},
+							Subject:        attrDN{e.Certificate.Subject},
+							NotBefore:      attrTime{e.Certificate.NotBefore},
+							NotAfter:       attrTime{e.Certificate.NotAfter},
+							DNSNames:       e.Certificate.DNSNames,
+							EmailAddresses: e.Certificate.EmailAddresses,
+							IPAddresses:    mod_errors.StripErr1(mod_net.ParseNetIPs(e.Certificate.IPAddresses)),
+							URIs:           e.Certificate.URIs,
+							IsCA:           mod_bools.AttrBool(e.Certificate.IsCA),
+							Certificate:    e,
+						}
 					)
 
-					// fnCert.Status = entryStatusLoaded
-					fnCert.Certificate = e
+					fnCert.UUID.Generate(uuid.NameSpaceOID, fnCert.Certificate.Certificate.Raw)
+					fnCert.Key = fnCert.UUID.String()
 
-					fnCert.Key = a
+					// fnCert.Status = entryStatusLoaded
 
 					_ = repo.DeleteCert(ctx, fnCert.Key)
 

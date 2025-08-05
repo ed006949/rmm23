@@ -6,11 +6,12 @@ import (
 	"encoding/asn1"
 	"math/big"
 	"net"
+	"net/netip"
 	"net/url"
 	"time"
 
+	"rmm23/src/mod_bools"
 	"rmm23/src/mod_crypto"
-	"rmm23/src/mod_net"
 )
 
 // Cert is the struct that represents an LDAP userPKCS12 attribute.
@@ -18,6 +19,7 @@ import (
 // when updating @src/mod_db/entry_type.go don't forget to update:
 //
 //	@src/mod_db/certificate_*.go
+//	@src/mod_db/field_const.go
 //	@src/mod_db/redis_*.go
 type Cert struct {
 	// db data
@@ -27,16 +29,16 @@ type Cert struct {
 
 	UUID attrUUID `json:"uuid,omitempty" msgpack:"uuid"` //
 
-	SerialNumber   *big.Int         `json:"serialNumber"`   // redis:",key"
-	Issuer         attrDN           `json:"issuer"`         //
-	Subject        attrDN           `json:"subject"`        //
-	NotBefore      attrTime         `json:"notBefore"`      //
-	NotAfter       attrTime         `json:"notAfter"`       // redis:",exat"
-	DNSNames       []string         `json:"dnsNames"`       //
-	EmailAddresses []string         `json:"emailAddresses"` //
-	IPAddresses    []*attrIPAddress `json:"ipAddresses"`    //
-	URIs           []*mod_net.URL   `json:"uris"`           //
-	IsCA           bool             `json:"isCA"`           //
+	SerialNumber   *big.Int           `json:"serialNumber"`   // redis:",key"
+	Issuer         attrDN             `json:"issuer"`         //
+	Subject        attrDN             `json:"subject"`        //
+	NotBefore      attrTime           `json:"notBefore"`      //
+	NotAfter       attrTime           `json:"notAfter"`       // redis:",exat"
+	DNSNames       []string           `json:"dnsNames"`       //
+	EmailAddresses []string           `json:"emailAddresses"` //
+	IPAddresses    []*netip.Addr      `json:"ipAddresses"`    //
+	URIs           []*url.URL         `json:"uris"`           //
+	IsCA           mod_bools.AttrBool `json:"isCA"`           //
 
 	// // element specific meta data
 	// Type   attrEntryType   `json:"type,omitempty"   msgpack:"type"`   // (?) Certificate's type
