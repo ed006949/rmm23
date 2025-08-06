@@ -22,15 +22,15 @@ type Entry struct {
 	// element specific meta data
 	Type   attrEntryType   `json:"type,omitempty"   msgpack:"type"`   //  Entry's type `(domain|group|user|host)`
 	Status attrEntryStatus `json:"status,omitempty" msgpack:"status"` //
-	BaseDN AttrDN          `json:"baseDN,omitempty" msgpack:"baseDN"` //
+	BaseDN attrDN          `json:"baseDN,omitempty" msgpack:"baseDN"` //
 
 	// element meta data
 	UUID            AttrUUID    `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid"`            //  must be unique
-	DN              AttrDN      `json:"dn,omitempty"              ldap:"dn"              msgpack:"dn"`              //  must be unique
+	DN              attrDN      `json:"dn,omitempty"              ldap:"dn"              msgpack:"dn"`              //  must be unique
 	ObjectClass     attrStrings `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass"`     //  Entry type
-	CreatorsName    AttrDN      `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName"`    //
+	CreatorsName    attrDN      `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName"`    //
 	CreateTimestamp AttrTime    `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp"` //
-	ModifiersName   AttrDN      `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName"`   //
+	ModifiersName   attrDN      `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName"`   //
 	ModifyTimestamp AttrTime    `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp"` //
 
 	// element data

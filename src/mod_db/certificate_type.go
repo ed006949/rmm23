@@ -14,7 +14,6 @@ import (
 //
 // when updating @src/mod_db/entry_type.go don't forget to update:
 //
-//	@src/mod_db/certificate_*.go
 //	@src/mod_db/redis_field.go
 //	@src/mod_db/redis_*.go
 type Cert struct {
@@ -26,8 +25,8 @@ type Cert struct {
 	// element meta data
 	UUID           AttrUUID           `json:"uuid"           msgpack:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
 	SerialNumber   *big.Int           `json:"serialNumber"   msgpack:"serialNumber"`   // (?) redis:",key"
-	Issuer         AttrDN             `json:"issuer"         msgpack:"issuer"`         //
-	Subject        AttrDN             `json:"subject"        msgpack:"subject"`        //
+	Issuer         attrDN             `json:"issuer"         msgpack:"issuer"`         //
+	Subject        attrDN             `json:"subject"        msgpack:"subject"`        //
 	NotBefore      AttrTime           `json:"notBefore"      msgpack:"notBefore"`      //
 	NotAfter       AttrTime           `json:"notAfter"       msgpack:"notAfter"`       // redis:",exat"
 	DNSNames       []string           `json:"dnsNames"       msgpack:"dnsNames"`       //
@@ -39,14 +38,14 @@ type Cert struct {
 	// // element specific meta data
 	// Type   attrEntryType   `json:"type,omitempty"   msgpack:"type"`   // (?) Certificate's type
 	// Status attrEntryStatus `json:"status,omitempty" msgpack:"status"` //
-	// BaseDN AttrDN          `json:"baseDN,omitempty" msgpack:"baseDN"` //
+	// BaseDN attrDN          `json:"baseDN,omitempty" msgpack:"baseDN"` //
 
 	// // element meta data
 	// UUID            AttrUUID `json:"uuid,omitempty"            msgpack:"uuid"`            //  must be unique
-	// DN              AttrDN   `json:"dn,omitempty"              msgpack:"dn"`              //  must be unique
-	// CreatorsName    AttrDN   `json:"creatorsName,omitempty"    msgpack:"creatorsName"`    //
+	// DN              attrDN   `json:"dn,omitempty"              msgpack:"dn"`              //  must be unique
+	// CreatorsName    attrDN   `json:"creatorsName,omitempty"    msgpack:"creatorsName"`    //
 	// CreateTimestamp AttrTime `json:"createTimestamp,omitempty" msgpack:"createTimestamp"` //
-	// ModifiersName   AttrDN   `json:"modifiersName,omitempty"   msgpack:"modifiersName"`   //
+	// ModifiersName   attrDN   `json:"modifiersName,omitempty"   msgpack:"modifiersName"`   //
 	// ModifyTimestamp AttrTime `json:"modifyTimestamp,omitempty" msgpack:"modifyTimestamp"` //
 
 	// element data

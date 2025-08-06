@@ -30,7 +30,7 @@ type attrUserPassword string                        //
 
 // type attrCN string                                  //
 // type attrCreateTimestamp struct{ time.Time }        //
-// type attrCreatorsName *AttrDN                       //
+// type attrCreatorsName *attrDN                       //
 // type attrDescription string                         //
 // type attrDestinationIndicators []string             // interim host list
 // type attrDisplayName string                         //
@@ -39,7 +39,7 @@ type attrUserPassword string                        //
 // type attrHomeDirectory string                       //
 // type attrMembers attrDNs                            //
 // type attrMembersOf attrDNs                          //
-// type attrModifiersName *AttrDN                      //
+// type attrModifiersName *attrDN                      //
 // type attrModifyTimestamp struct{ time.Time }        //
 // type attrO string                                   //
 // type attrOU string                                  //
