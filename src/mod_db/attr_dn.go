@@ -8,6 +8,11 @@ import (
 	"rmm23/src/mod_slices"
 )
 
+const (
+	dnSeparator     = "="
+	dnPathSeparator = ","
+)
+
 type attrDN []struct{ Field, Value string }
 type attrDNs []*attrDN
 
@@ -67,10 +72,10 @@ func (r *attrDN) String() (outbound string) {
 		interim = make([]string, len(*r), len(*r))
 	)
 	for a, b := range *r {
-		interim[a] = strings.Join([]string{b.Field, b.Value}, "=")
+		interim[a] = strings.Join([]string{b.Field, b.Value}, dnSeparator)
 	}
 
-	return strings.Join(interim, ",")
+	return strings.Join(interim, dnPathSeparator)
 }
 
 func (r *attrDNs) String() (outbound []string) {
@@ -81,45 +86,45 @@ func (r *attrDNs) String() (outbound []string) {
 	return
 }
 
-func (r *attrDN) parse(inbound string) (err error) {
+func parseDN(inbound string) (outbound *attrDN, err error) {
 	var (
-		interim attrDN
+		interim = new(attrDN)
 	)
-	switch interim, err = parseDN(inbound); {
+	switch err = interim.parse(inbound); {
 	case err != nil:
 		return
 	}
 
-	*r = interim
-
-	return
+	return interim, err
 }
 
-func parseDN(inbound string) (outbound attrDN, err error) {
+func (r *attrDN) parse(inbound string) (err error) {
 	var (
-		interimFVs = mod_slices.SplitString(inbound, ",", mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
+		interimFVs = mod_slices.SplitString(inbound, dnPathSeparator, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
 		interim    = make(attrDN, len(interimFVs), len(interimFVs))
 	)
 	for a, b := range interimFVs {
 		var (
-			interimElement = mod_slices.SplitStringN(b, "=", mod_slices.KVElements, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
+			interimElement = mod_slices.SplitStringN(b, dnSeparator, mod_slices.KVElements, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
 		)
 		switch {
 		case len(interimElement) != mod_slices.KVElements:
-			return nil, mod_errors.EParse
+			return mod_errors.EParse
 		}
 
 		for _, d := range interimElement {
 			switch {
 			case len(d) == 0:
-				return nil, mod_errors.EParse
+				return mod_errors.EParse
 			}
 		}
 
 		interim[a] = struct{ Field, Value string }{interimElement[0], interimElement[1]}
 	}
 
-	return interim, nil
+	*r = interim
+
+	return
 }
 
 func (r *attrDNs) parse(inbound []string) (err error) {

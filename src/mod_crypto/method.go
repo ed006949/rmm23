@@ -102,7 +102,7 @@ func (r *Certificate) checkPrivateKeyED25519(pub ed25519.PublicKey) (err error) 
 	return
 }
 
-func (r *Certificate) EncodeP12() (err error) {
+func (r *Certificate) encodeP12() (err error) {
 	var (
 		interim []byte
 	)
@@ -116,7 +116,7 @@ func (r *Certificate) EncodeP12() (err error) {
 	return
 }
 
-func (r *Certificate) DecodeP12() (err error) {
+func (r *Certificate) decodeP12() (err error) {
 	var (
 		privateKey  any
 		certificate *x509.Certificate
@@ -134,7 +134,7 @@ func (r *Certificate) DecodeP12() (err error) {
 	return
 }
 
-func (r *Certificate) DecodePEM() (err error) {
+func (r *Certificate) decodePEM() (err error) {
 	var (
 		interim *Certificate
 	)
@@ -148,13 +148,13 @@ func (r *Certificate) DecodePEM() (err error) {
 	return
 }
 
-func (r *Certificate) GetP12() (outbound []byte, err error) {
+func (r *Certificate) getP12() (outbound []byte, err error) {
 	switch {
 	case r.P12 != nil:
 		return r.P12, nil
 	}
 
-	switch err = r.EncodeP12(); {
+	switch err = r.encodeP12(); {
 	case err != nil:
 		return
 	}
@@ -162,6 +162,59 @@ func (r *Certificate) GetP12() (outbound []byte, err error) {
 	return r.P12, nil
 }
 
-func (r *Certificate) GetPEM() (outbound []byte, err error) {
+func (r *Certificate) getPEM() (outbound []byte, err error) {
 	return r.PEM, nil
+}
+
+func (r *Certificate) ParseDERs(key, crt, ca, crl, csr []byte) (err error) {
+	var (
+		interim = new(Certificate)
+	)
+
+	switch interim.PrivateKey, err = x509.ParsePKCS8PrivateKey(key); {
+	case err != nil:
+		return
+	}
+
+	switch interim.Certificate, err = x509.ParseCertificate(crt); {
+	case err != nil:
+		return
+	}
+
+	switch interim.CertificateCAChain, err = x509.ParseCertificates(ca); {
+	case err != nil:
+		// return
+	default:
+		for _, b := range interim.CertificateCAChain {
+			interim.CertificateCAChainDER = append(interim.CertificateCAChainDER, b.Raw)
+		}
+	}
+
+	switch interim.RevocationList, err = x509.ParseRevocationList(crl); {
+	case err != nil:
+	// return
+	default:
+		interim.RevocationListDER = interim.RevocationList.Raw
+	}
+
+	switch interim.CertificateRequest, err = x509.ParseCertificateRequest(csr); {
+	case err != nil:
+		// return
+	default:
+		interim.CertificateRequestDER = interim.CertificateRequest.Raw
+	}
+
+	switch err = interim.checkPrivateKey(); {
+	case err != nil:
+		return
+	}
+
+	switch err = interim.encodeP12(); {
+	case err != nil:
+		return
+	}
+
+	*r = *interim
+
+	return
 }

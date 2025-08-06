@@ -2,28 +2,35 @@ package mod_db
 
 import (
 	"encoding/json"
-	"fmt"
 
 	"github.com/google/uuid"
 
 	"rmm23/src/mod_slices"
 )
 
-func (r *attrUUID) String() (outbound string)             { return r.UUID.String() }
-func (r *attrUUID) Entry() (outbound string)              { return entryKeyHeader + headerSeparator + r.UUID.String() }
-func (r *attrUUID) generate(space uuid.UUID, data []byte) { *r = generateUUID(space, data) }
+func (r *attrUUID) String() (outbound string) { return r.UUID.String() }
+func (r *attrUUID) Entry() (outbound string) {
+	return entryKeyHeader + headerSeparator + r.UUID.String()
+}
 
-func generateUUID(space uuid.UUID, data []byte) (outbound attrUUID) {
-	return attrUUID{uuid.NewSHA1(space, data)}
+func (r *attrUUID) generate(space uuid.UUID, data []byte) {
+	*r = attrUUID{uuid.NewSHA1(space, data)}
+}
+
+func generateUUID(space uuid.UUID, data []byte) (outbound *attrUUID) {
+	outbound = new(attrUUID)
+	outbound.generate(space, data)
+
+	return
 }
 
 func (r *attrUUID) MarshalJSON() (outbound []byte, err error) {
-	return []byte(fmt.Sprintf("%q", r.String())), nil
+	return json.Marshal(r.UUID)
 }
 
 func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
 	var (
-		interim string
+		interim []byte
 	)
 	switch err = json.Unmarshal(inbound, &interim); {
 	case err != nil:
@@ -33,7 +40,7 @@ func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
 	var (
 		interimUUID uuid.UUID
 	)
-	switch interimUUID, err = uuid.Parse(interim); {
+	switch interimUUID, err = uuid.ParseBytes(interim); {
 	case err != nil:
 		return
 	}

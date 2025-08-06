@@ -6,7 +6,6 @@ import (
 	"crypto/ed25519"
 	"crypto/rsa"
 	"crypto/x509"
-	"encoding/base64"
 	"encoding/pem"
 	"strings"
 
@@ -39,7 +38,8 @@ func ParsePrivateKey(der []byte) (key crypto.PrivateKey, err error) {
 
 func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 	var (
-		interim = new(Certificate)
+		interim                = new(Certificate)
+		key, crt, ca, crl, csr []byte
 	)
 
 	func() {
@@ -49,8 +49,7 @@ func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 
 		for len(inbound) != 0 {
 			var (
-				interimDERBlock    *pem.Block
-				interimCertificate *x509.Certificate
+				interimDERBlock *pem.Block
 			)
 
 			interimDERBlock, inbound = pem.Decode(inbound)
@@ -59,61 +58,26 @@ func parsePEM(inbound []byte) (outbound *Certificate, err error) {
 				return
 			}
 
-			var (
-				interimPEMBlock = []byte(base64.RawStdEncoding.EncodeToString(interimDERBlock.Bytes)) // sanitized PEM
-			)
 			switch {
 			case interimDERBlock.Type == _CERTIFICATE:
-				switch certificateCounter++; certificateCounter {
-				case 1:
-					switch interim.Certificate, err = x509.ParseCertificate(interimDERBlock.Bytes); {
-					case err != nil:
-						return
-					}
-
-					interim.CertificateDER = interimDERBlock.Bytes
-					interim.CertificatePEM = interimPEMBlock
-					interim.PEM = append(interim.PEM, interimPEMBlock...)
+				switch certificateCounter {
+				case 0:
+					crt = interimDERBlock.Bytes
 				default:
-					switch interimCertificate, err = x509.ParseCertificate(interimDERBlock.Bytes); {
-					case err != nil:
-						return
-					}
-
-					interim.CertificateCAChain = append(interim.CertificateCAChain, interimCertificate)
-					interim.CertificateCAChainDER = append(interim.CertificateCAChainDER, interimDERBlock.Bytes)
-					interim.CertificateCAChainPEM = append(interim.CertificateCAChainPEM, interimPEMBlock)
-					interim.PEM = append(interim.PEM, interimPEMBlock...)
+					ca = append(ca, interimDERBlock.Bytes...)
 				}
+
+				certificateCounter++
 			case interimDERBlock.Type == _PRIVATE_KEY || strings.HasSuffix(interimDERBlock.Type, __PRIVATE_KEY):
-				switch interim.PrivateKey, err = ParsePrivateKey(interimDERBlock.Bytes); {
-				case err != nil:
-					return
-				}
-
-				interim.PrivateKeyDER = interimDERBlock.Bytes
-				interim.PrivateKeyPEM = interimPEMBlock
-				interim.PEM = append(interim.PEM, interimPEMBlock...)
+				key = interimDERBlock.Bytes
 			}
 		}
 	}()
 
-	switch {
-	case interim.Certificate == nil:
-		return nil, mod_errors.EPEMNoDataCert
-	case interim.PrivateKey == nil:
-		return nil, mod_errors.EPEMNoDataKey
+	switch err = interim.ParseDERs(key, crt, ca, crl, csr); {
+	case err == nil:
+		return
 	}
 
-	switch err = interim.checkPrivateKey(); {
-	case err != nil:
-		return nil, err
-	}
-
-	switch err = interim.EncodeP12(); {
-	case err != nil:
-		return nil, err
-	}
-
-	return interim, err
+	return interim, nil
 }

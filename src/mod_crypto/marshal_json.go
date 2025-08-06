@@ -8,7 +8,7 @@ package mod_crypto
 // 		pfxData []byte
 // 	)
 //
-// 	switch pfxData, err = r.EncodeP12(); {
+// 	switch pfxData, err = r.encodeP12(); {
 // 	case err != nil:
 // 		return
 // 	}
@@ -26,5 +26,5 @@ package mod_crypto
 // 		return
 // 	}
 //
-// 	return r.DecodeP12(interim)
+// 	return r.decodeP12(interim)
 // }

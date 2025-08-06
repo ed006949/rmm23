@@ -2,8 +2,6 @@ package mod_db
 
 import (
 	"context"
-	"crypto"
-	"crypto/x509"
 	"io/fs"
 	"strings"
 
@@ -117,8 +115,8 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 							SerialNumber:   e.Certificate.SerialNumber,
 							Issuer:         mod_errors.StripErr1(parseDN(e.Certificate.Issuer.String())),
 							Subject:        mod_errors.StripErr1(parseDN(e.Certificate.Subject.String())),
-							NotBefore:      attrTime{e.Certificate.NotBefore},
-							NotAfter:       attrTime{e.Certificate.NotAfter},
+							NotBefore:      &attrTime{e.Certificate.NotBefore},
+							NotAfter:       &attrTime{e.Certificate.NotAfter},
 							DNSNames:       e.Certificate.DNSNames,
 							EmailAddresses: e.Certificate.EmailAddresses,
 							IPAddresses:    mod_errors.StripErr1(mod_net.ParseNetIPs(e.Certificate.IPAddresses)),
@@ -160,7 +158,7 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 	var (
 		c          = make(map[string][][]byte)
 		fileExts   = 2
-		totalFiles = 4
+		totalFiles = 5
 
 		fn = func(name string, dirEntry fs.DirEntry, err error) (fnErr error) {
 			switch {
@@ -193,10 +191,12 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 				c[n][0], _ = vfsDB.VFS.ReadFile(name)
 			case "crt":
 				c[n][1], _ = vfsDB.VFS.ReadFile(name)
-			case "crl":
+			case "ca":
 				c[n][2], _ = vfsDB.VFS.ReadFile(name)
-			case "csr":
+			case "crl":
 				c[n][3], _ = vfsDB.VFS.ReadFile(name)
+			case "csr":
+				c[n][4], _ = vfsDB.VFS.ReadFile(name)
 			default:
 				return
 			}
@@ -211,98 +211,18 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 
 	for a, b := range c {
 		var (
-			forErr error
-			key    crypto.PrivateKey
-			cert   *x509.Certificate
-			crl    *x509.RevocationList
-			csr    *x509.CertificateRequest
+			forErr  error
+			forCert = new(Cert)
 		)
 
-		switch key, forErr = mod_crypto.ParsePrivateKey(b[0]); {
+		switch forErr = forCert.ParseDERs(b[0], b[1], b[2], b[3], b[4]); {
 		case forErr != nil:
 			continue
 		}
 
-		switch cert, forErr = x509.ParseCertificate(b[1]); {
-		case forErr != nil:
-			continue
-		}
+		_ = repo.DeleteCert(ctx, forCert.Key)
 
-		switch crl, forErr = x509.ParseRevocationList(b[2]); {
-		case forErr != nil:
-			// continue
-		}
-
-		switch csr, forErr = x509.ParseCertificateRequest(b[3]); {
-		case forErr != nil:
-			// continue
-		}
-
-		var (
-			fnCert = &Cert{
-				// Key:            "",
-				// Ver:            0,
-				Ext:            cert.NotAfter,
-				UUID:           generateUUID(uuid.NameSpaceOID, cert.Raw),
-				SerialNumber:   cert.SerialNumber,
-				Issuer:         mod_errors.StripErr1(parseDN(cert.Issuer.String())),
-				Subject:        mod_errors.StripErr1(parseDN(cert.Subject.String())),
-				NotBefore:      attrTime{cert.NotBefore},
-				NotAfter:       attrTime{cert.NotAfter},
-				DNSNames:       cert.DNSNames,
-				EmailAddresses: cert.EmailAddresses,
-				IPAddresses:    mod_errors.StripErr1(mod_net.ParseNetIPs(cert.IPAddresses)),
-				URIs:           cert.URIs,
-				IsCA:           mod_bools.AttrBool(cert.IsCA),
-				Certificate: &mod_crypto.Certificate{
-					P12: nil,
-					DER: nil,
-					PEM: nil,
-					CRL: func() (outbound []byte) {
-						switch {
-						case crl != nil:
-							return crl.Raw
-						}
-
-						return
-					}(),
-					CSR: func() (outbound []byte) {
-						switch {
-						case csr != nil:
-							return csr.Raw
-						}
-
-						return
-					}(),
-					PrivateKeyDER:         nil,
-					CertificateRequestDER: nil,
-					CertificateDER:        nil,
-					CertificateCAChainDER: nil,
-					RevocationListDER:     nil,
-					PrivateKeyPEM:         nil,
-					CertificateRequestPEM: nil,
-					CertificatePEM:        nil,
-					CertificateCAChainPEM: nil,
-					RevocationListPEM:     nil,
-					PrivateKey:            key,
-					CertificateRequest:    csr,
-					Certificate:           cert,
-					CertificateCAChain:    nil,
-					RevocationList:        crl,
-				},
-			}
-		)
-
-		fnCert.Key = fnCert.UUID.String()
-
-		switch forErr = fnCert.Certificate.EncodeP12(); {
-		case forErr != nil:
-			continue
-		}
-
-		_ = repo.DeleteCert(ctx, fnCert.Key)
-
-		switch forErr = repo.SaveCert(ctx, fnCert); {
+		switch forErr = repo.SaveCert(ctx, forCert); {
 		case forErr != nil:
 			l.Z{l.M: "repo.SaveCert", "cert": a, l.E: forErr}.Warning()
 		}

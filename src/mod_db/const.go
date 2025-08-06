@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	sliceSeparator = "\x1f"
-	jsonPathHeader = "$."
-	tagSeparator   = ","
-	headerSeparator   = ":"
+	sliceSeparator  = "\x1f"
+	jsonPathHeader  = "$."
+	tagSeparator    = ","
+	headerSeparator = ":"
 )
 
 const (
@@ -44,14 +44,15 @@ const (
 )
 
 const (
-	_ldap  = "ldap"
-	_entry = "entry"
+	_ldap        = "ldap"
+	_entry       = "entry"
+	_certificate = "certificate"
 )
 
 const (
-	entryKeyHeader = "entry"
+	entryKeyHeader = _entry
 	// entryKeyHeader = _ldap + headerSeparator + _entry.
-	certKeyHeader = "certificate"
+	certKeyHeader = _certificate
 )
 
 const (
