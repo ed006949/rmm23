@@ -140,7 +140,7 @@ func (r *Certificate) ParseDERs(key, crt, ca, crl, csr []byte) (err error) {
 		interim = new(Certificate)
 	)
 
-	switch interim.PrivateKey, err = x509.ParsePKCS8PrivateKey(key); {
+	switch interim.PrivateKey, err = ParsePrivateKey(key); {
 	case err != nil:
 		return
 	}
@@ -231,7 +231,7 @@ func (r *Certificate) ParsePEM(inbound []byte) (err error) {
 	}
 
 	switch err = interim.ParseDERs(key, crt, ca, crl, csr); {
-	case err == nil:
+	case err != nil:
 		return
 	}
 

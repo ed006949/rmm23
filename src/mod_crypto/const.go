@@ -11,7 +11,7 @@ const (
 	_PRIVATE             = "PRIVATE"
 	_KEY                 = "KEY"
 	_REQUEST             = "REQUEST"
-	_PRIVATE_KEY         = _PRIVATE + _KEY
+	_PRIVATE_KEY         = _PRIVATE + __ + _KEY
 	__PRIVATE_KEY        = __ + _PRIVATE_KEY
 	_RSA_PRIVATE_KEY     = _RSA + __ + _PRIVATE_KEY
 	_EC_PRIVATE_KEY      = _EC + __ + _PRIVATE_KEY
