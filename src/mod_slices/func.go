@@ -107,6 +107,10 @@ func SplitString(inbound string, sep string, flag flagType) (outbound []string) 
 	return StringsNormalize(strings.Split(inbound, sep), flag)
 }
 
+func SplitStringN(inbound string, sep string, n int, flag flagType) (outbound []string) {
+	return StringsNormalize(strings.SplitN(inbound, sep, n), flag)
+}
+
 func StringsNormalize(inbound []string, flag flagType) (outbound []string) {
 	switch {
 	case flag.has(FlagTrimSpace):

@@ -24,8 +24,8 @@ type attrSSHPublicKey mod_ssh.PublicKey             //
 type attrSSHPublicKeys map[string]mod_ssh.PublicKey //
 type attrString string                              //
 type attrStrings []attrString                       //
-type AttrTime struct{ time.Time }                   //
-type AttrUUID struct{ uuid.UUID }                   //
+type attrTime struct{ time.Time }                   //
+type attrUUID struct{ uuid.UUID }                   //
 type attrUserPassword string                        //
 
 // type attrCN string                                  //

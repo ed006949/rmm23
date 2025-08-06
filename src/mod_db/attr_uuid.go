@@ -9,15 +9,19 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-func (r *AttrUUID) String() (outbound string)             { return r.UUID.String() }
-func (r *AttrUUID) Entry() (outbound string)              { return entryKeyHeader + ":" + r.UUID.String() }
-func (r *AttrUUID) Generate(space uuid.UUID, data []byte) { *r = AttrUUID{uuid.NewSHA1(space, data)} }
+func (r *attrUUID) String() (outbound string)             { return r.UUID.String() }
+func (r *attrUUID) Entry() (outbound string)              { return entryKeyHeader + headerSeparator + r.UUID.String() }
+func (r *attrUUID) generate(space uuid.UUID, data []byte) { *r = generateUUID(space, data) }
 
-func (r *AttrUUID) MarshalJSON() (outbound []byte, err error) {
+func generateUUID(space uuid.UUID, data []byte) (outbound attrUUID) {
+	return attrUUID{uuid.NewSHA1(space, data)}
+}
+
+func (r *attrUUID) MarshalJSON() (outbound []byte, err error) {
 	return []byte(fmt.Sprintf("%q", r.String())), nil
 }
 
-func (r *AttrUUID) UnmarshalJSON(inbound []byte) (err error) {
+func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
 	var (
 		interim string
 	)
@@ -34,12 +38,12 @@ func (r *AttrUUID) UnmarshalJSON(inbound []byte) (err error) {
 		return
 	}
 
-	*r = AttrUUID{interimUUID}
+	*r = attrUUID{interimUUID}
 
 	return
 }
 
-func (r *AttrUUID) UnmarshalLDAPAttr(values []string) (err error) {
+func (r *attrUUID) UnmarshalLDAPAttr(values []string) (err error) {
 	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim uuid.UUID

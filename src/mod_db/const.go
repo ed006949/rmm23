@@ -9,6 +9,7 @@ const (
 	sliceSeparator = "\x1f"
 	jsonPathHeader = "$."
 	tagSeparator   = ","
+	headerSeparator   = ":"
 )
 
 const (
@@ -49,7 +50,7 @@ const (
 
 const (
 	entryKeyHeader = "entry"
-	// entryKeyHeader = _ldap + ":" + _entry.
+	// entryKeyHeader = _ldap + headerSeparator + _entry.
 	certKeyHeader = "certificate"
 )
 
@@ -60,7 +61,7 @@ const (
 	entryStatusUpdated
 	entryStatusDeleted
 	entryStatusInvalid
-	enrtyStatusParsed
+	entryStatusParsed
 	entryStatusSanitized
 	entryStatusReady = math.MaxInt
 )

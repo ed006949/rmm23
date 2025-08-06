@@ -25,13 +25,13 @@ type Entry struct {
 	BaseDN attrDN          `json:"baseDN,omitempty" msgpack:"baseDN"` //
 
 	// element meta data
-	UUID            AttrUUID    `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid"`            //  must be unique
+	UUID            attrUUID    `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid"`            //  must be unique
 	DN              attrDN      `json:"dn,omitempty"              ldap:"dn"              msgpack:"dn"`              //  must be unique
 	ObjectClass     attrStrings `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass"`     //  Entry type
 	CreatorsName    attrDN      `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName"`    //
-	CreateTimestamp AttrTime    `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp"` //
+	CreateTimestamp attrTime    `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp"` //
 	ModifiersName   attrDN      `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName"`   //
-	ModifyTimestamp AttrTime    `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp"` //
+	ModifyTimestamp attrTime    `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp"` //
 
 	// element data
 	CN                   attrString        `json:"cn,omitempty"                   ldap:"cn"                   msgpack:"cn"`                   //  RDN in group's context

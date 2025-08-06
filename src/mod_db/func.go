@@ -82,9 +82,9 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				}
 
 				fnEntry.Type = entryType
-				_ = fnEntry.BaseDN.Parse(fnBaseDN)
+				_ = fnEntry.BaseDN.parse(fnBaseDN)
 				fnEntry.Status = entryStatusLoaded
-				fnEntry.UUID.Generate(uuid.Nil, []byte(fnEntry.DN.String()))
+				fnEntry.UUID.generate(uuid.Nil, []byte(fnEntry.DN.String()))
 
 				fnEntry.Key = fnEntry.UUID.String()
 
@@ -113,12 +113,12 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 							// Key:            "",
 							// Ver:            0,
 							Ext:            e.Certificate.NotAfter,
-							UUID:           AttrUUID{},
+							UUID:           generateUUID(uuid.NameSpaceOID, e.Certificate.Raw),
 							SerialNumber:   e.Certificate.SerialNumber,
-							Issuer:         attrDN{},
-							Subject:        attrDN{},
-							NotBefore:      AttrTime{e.Certificate.NotBefore},
-							NotAfter:       AttrTime{e.Certificate.NotAfter},
+							Issuer:         mod_errors.StripErr1(parseDN(e.Certificate.Issuer.String())),
+							Subject:        mod_errors.StripErr1(parseDN(e.Certificate.Subject.String())),
+							NotBefore:      attrTime{e.Certificate.NotBefore},
+							NotAfter:       attrTime{e.Certificate.NotAfter},
 							DNSNames:       e.Certificate.DNSNames,
 							EmailAddresses: e.Certificate.EmailAddresses,
 							IPAddresses:    mod_errors.StripErr1(mod_net.ParseNetIPs(e.Certificate.IPAddresses)),
@@ -128,9 +128,6 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 						}
 					)
 
-					_ = fnCert.Issuer.Parse(e.Certificate.Issuer.String())
-					_ = fnCert.Subject.Parse(e.Certificate.Subject.String())
-					fnCert.UUID.Generate(uuid.NameSpaceOID, fnCert.Certificate.Certificate.Raw)
 					fnCert.Key = fnCert.UUID.String()
 
 					// fnCert.Status = entryStatusLoaded
@@ -165,10 +162,10 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 		fileExts   = 2
 		totalFiles = 4
 
-		fn = func(name string, dirEntry fs.DirEntry, fnErr error) (err error) {
+		fn = func(name string, dirEntry fs.DirEntry, err error) (fnErr error) {
 			switch {
-			case fnErr != nil:
-				return fnErr
+			case err != nil:
+				return err
 			}
 
 			var (
@@ -246,12 +243,12 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 				// Key:            "",
 				// Ver:            0,
 				Ext:            cert.NotAfter,
-				UUID:           AttrUUID{},
+				UUID:           generateUUID(uuid.NameSpaceOID, cert.Raw),
 				SerialNumber:   cert.SerialNumber,
-				Issuer:         attrDN{},
-				Subject:        attrDN{},
-				NotBefore:      AttrTime{cert.NotBefore},
-				NotAfter:       AttrTime{cert.NotAfter},
+				Issuer:         mod_errors.StripErr1(parseDN(cert.Issuer.String())),
+				Subject:        mod_errors.StripErr1(parseDN(cert.Subject.String())),
+				NotBefore:      attrTime{cert.NotBefore},
+				NotAfter:       attrTime{cert.NotAfter},
 				DNSNames:       cert.DNSNames,
 				EmailAddresses: cert.EmailAddresses,
 				IPAddresses:    mod_errors.StripErr1(mod_net.ParseNetIPs(cert.IPAddresses)),
@@ -296,21 +293,18 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 			}
 		)
 
-		_ = fnCert.Issuer.Parse(fnCert.Certificate.Certificate.Issuer.String())
-		_ = fnCert.Subject.Parse(fnCert.Certificate.Certificate.Subject.String())
-		fnCert.UUID.Generate(uuid.NameSpaceOID, fnCert.Certificate.Certificate.Raw)
 		fnCert.Key = fnCert.UUID.String()
 
-		switch e := fnCert.Certificate.EncodeP12(); {
-		case e != nil:
+		switch forErr = fnCert.Certificate.EncodeP12(); {
+		case forErr != nil:
 			continue
 		}
 
 		_ = repo.DeleteCert(ctx, fnCert.Key)
 
-		switch e := repo.SaveCert(ctx, fnCert); {
-		case e != nil:
-			l.Z{l.M: "repo.SaveCert", "cert": a, l.E: e}.Warning()
+		switch forErr = repo.SaveCert(ctx, fnCert); {
+		case forErr != nil:
+			l.Z{l.M: "repo.SaveCert", "cert": a, l.E: forErr}.Warning()
 		}
 	}
 
