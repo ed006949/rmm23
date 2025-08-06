@@ -12,8 +12,7 @@ func (r *Certificates) UnmarshalLDAPAttr(values []string) (err error) {
 			interim = new(Certificate)
 		)
 
-		interim.PEM = []byte(value)
-		switch forErr = interim.decodePEM(); {
+		switch forErr = interim.ParsePEM([]byte(value)); {
 		case forErr != nil:
 			l.Z{l.M: "ParsePEM", l.E: forErr}.Warning()
 

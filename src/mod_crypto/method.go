@@ -6,6 +6,7 @@ import (
 	"crypto/ed25519"
 	"crypto/rsa"
 	"crypto/x509"
+	"encoding/pem"
 
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
@@ -134,38 +135,6 @@ func (r *Certificate) decodeP12() (err error) {
 	return
 }
 
-func (r *Certificate) decodePEM() (err error) {
-	var (
-		interim *Certificate
-	)
-	switch interim, err = parsePEM(r.PEM); {
-	case err != nil:
-		return
-	}
-
-	*r = *interim
-
-	return
-}
-
-func (r *Certificate) getP12() (outbound []byte, err error) {
-	switch {
-	case r.P12 != nil:
-		return r.P12, nil
-	}
-
-	switch err = r.encodeP12(); {
-	case err != nil:
-		return
-	}
-
-	return r.P12, nil
-}
-
-func (r *Certificate) getPEM() (outbound []byte, err error) {
-	return r.PEM, nil
-}
-
 func (r *Certificate) ParseDERs(key, crt, ca, crl, csr []byte) (err error) {
 	var (
 		interim = new(Certificate)
@@ -211,6 +180,58 @@ func (r *Certificate) ParseDERs(key, crt, ca, crl, csr []byte) (err error) {
 
 	switch err = interim.encodeP12(); {
 	case err != nil:
+		return
+	}
+
+	*r = *interim
+
+	return
+}
+
+func (r *Certificate) ParsePEM(inbound []byte) (err error) {
+	var (
+		interim                = new(Certificate)
+		key, crt, ca, crl, csr []byte
+		block                  *pem.Block
+	)
+
+	for block, inbound = pem.Decode(inbound); block != nil; block, inbound = pem.Decode(inbound) {
+		switch block.Type {
+		case _CERTIFICATE:
+			switch {
+			case crt == nil:
+				crt = block.Bytes
+			default:
+				ca = append(ca, block.Bytes...)
+			}
+		case _PRIVATE_KEY, _DSA_PRIVATE_KEY, _RSA_PRIVATE_KEY, _EC_PRIVATE_KEY:
+			switch {
+			case key != nil:
+				return mod_errors.EParse
+			}
+
+			key = block.Bytes
+		case _X509_CRL:
+			switch {
+			case crl != nil:
+				return mod_errors.EParse
+			}
+
+			crl = block.Bytes
+		case _CERTIFICATE_REQUEST:
+			switch {
+			case csr != nil:
+				return mod_errors.EParse
+			}
+
+			csr = block.Bytes
+		default:
+			return mod_errors.EParse
+		}
+	}
+
+	switch err = interim.ParseDERs(key, crt, ca, crl, csr); {
+	case err == nil:
 		return
 	}
 

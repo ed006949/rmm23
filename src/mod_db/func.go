@@ -126,6 +126,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 						}
 					)
 
+
 					fnCert.Key = fnCert.UUID.String()
 
 					// fnCert.Status = entryStatusLoaded
