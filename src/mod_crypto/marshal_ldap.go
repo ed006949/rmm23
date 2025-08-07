@@ -3,10 +3,11 @@ package mod_crypto
 import (
 	"rmm23/src/l"
 	"rmm23/src/mod_slices"
+	"rmm23/src/mod_strings"
 )
 
 func (r *Certificates) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_strings.Normalize(values, mod_slices.FlagNormalize) {
 		var (
 			forErr  error
 			interim = new(Certificate)

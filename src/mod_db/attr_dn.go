@@ -2,10 +2,12 @@ package mod_db
 
 import (
 	"encoding/json"
+	"fmt"
 	"strings"
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_slices"
+	"rmm23/src/mod_strings"
 )
 
 const (
@@ -16,6 +18,41 @@ const (
 type attrDN []struct{ Field, Value string }
 type attrDNs []*attrDN
 
+func (r *attrDN) UnmarshalText(text []byte) error {
+	var (
+		s = string(text)
+	)
+	switch {
+	case len(s) == 0:
+		*r = nil
+
+		return nil
+	}
+
+	var (
+		// Split the DN on commas, respecting simple RFC4514 escaping
+		dnParts = make([]struct{ Field, Value string }, len(text), len(text))
+	)
+
+	fields := strings.Split(s, ",")
+	for _, f := range fields {
+		kv := strings.SplitN(strings.TrimSpace(f), mod_slices.KVSeparator, mod_slices.KVElements)
+		if len(kv) != mod_slices.KVElements {
+			return fmt.Errorf("attrDN: invalid DN component: %q", f)
+		}
+
+		dnParts = append(dnParts, struct {
+			Field, Value string
+		}{
+			Field: kv[0],
+			Value: kv[1],
+		})
+	}
+
+	*r = dnParts
+
+	return nil
+}
 func (r *attrDN) MarshalJSON() (outbound []byte, err error) { return json.Marshal(r.String()) }
 
 func (r *attrDN) UnmarshalJSON(inbound []byte) (err error) {
@@ -31,38 +68,6 @@ func (r *attrDN) UnmarshalJSON(inbound []byte) (err error) {
 	case err != nil:
 		return
 	}
-
-	return
-}
-
-func (r *attrDN) UnmarshalLDAPAttr(values []string) (err error) {
-	var (
-		interim attrDN
-	)
-	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
-		switch err = interim.parse(value); {
-		case err != nil:
-			return
-		}
-
-		*r = interim
-
-		return // return only first value
-	}
-
-	return
-}
-
-func (r *attrDNs) UnmarshalLDAPAttr(values []string) (err error) {
-	var (
-		interim attrDNs
-	)
-	switch err = interim.parse(mod_slices.StringsNormalize(values, mod_slices.FlagNormalize)); {
-	case err != nil:
-		return
-	}
-
-	*r = interim
 
 	return
 }
@@ -100,12 +105,12 @@ func parseDN(inbound string) (outbound *attrDN, err error) {
 
 func (r *attrDN) parse(inbound string) (err error) {
 	var (
-		interimFVs = mod_slices.SplitString(inbound, dnPathSeparator, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
+		interimFVs = mod_strings.Split(inbound, dnPathSeparator, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
 		interim    = make(attrDN, len(interimFVs), len(interimFVs))
 	)
 	for a, b := range interimFVs {
 		var (
-			interimElement = mod_slices.SplitStringN(b, dnSeparator, mod_slices.KVElements, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
+			interimElement = mod_strings.SplitN(b, dnSeparator, mod_slices.KVElements, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
 		)
 		switch {
 		case len(interimElement) != mod_slices.KVElements:

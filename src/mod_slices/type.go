@@ -1,3 +1,3 @@
 package mod_slices
 
-type flagType uint
+type FlagType uint

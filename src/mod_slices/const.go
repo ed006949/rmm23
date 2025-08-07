@@ -2,8 +2,8 @@ package mod_slices
 
 // normalization flags.
 const (
-	FlagNone flagType = 0
-	FlagSort flagType = 1 << iota
+	FlagNone FlagType = 0
+	FlagSort FlagType = 1 << iota
 	FlagCompact
 	FlagFilterEmpty
 	FlagTrimSpace
@@ -11,5 +11,6 @@ const (
 )
 
 const (
-	KVElements = 2 // to honor the lint.mnd()
+	KVElements  = 2 // to honor the lint.mnd()
+	KVSeparator = "="
 )

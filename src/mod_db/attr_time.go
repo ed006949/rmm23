@@ -8,6 +8,7 @@ import (
 	ber "github.com/go-asn1-ber/asn1-ber"
 
 	"rmm23/src/mod_slices"
+	"rmm23/src/mod_strings"
 )
 
 func (r *attrTime) String() (outbound string) { return r.Time.String() }
@@ -31,7 +32,7 @@ func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
 }
 
 func (r *attrTime) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_strings.Normalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim time.Time
 		)

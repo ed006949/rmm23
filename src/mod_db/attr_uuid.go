@@ -6,6 +6,7 @@ import (
 	"github.com/google/uuid"
 
 	"rmm23/src/mod_slices"
+	"rmm23/src/mod_strings"
 )
 
 func (r *attrUUID) String() (outbound string) { return r.UUID.String() }
@@ -51,7 +52,7 @@ func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
 }
 
 func (r *attrUUID) UnmarshalLDAPAttr(values []string) (err error) {
-	for _, value := range mod_slices.StringsNormalize(values, mod_slices.FlagNormalize) {
+	for _, value := range mod_strings.Normalize(values, mod_slices.FlagNormalize) {
 		var (
 			interim uuid.UUID
 		)
