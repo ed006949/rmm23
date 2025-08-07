@@ -4,6 +4,8 @@ import (
 	"net/netip"
 	"time"
 
+	"github.com/google/uuid"
+
 	"rmm23/src/mod_net"
 )
 
@@ -25,7 +27,7 @@ type Entry struct {
 	BaseDN attrDN          `json:"baseDN,omitempty" msgpack:"baseDN"` //
 
 	// element meta data
-	UUID            attrUUID    `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid"`            //  must be unique
+	UUID            uuid.UUID   `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid"`            //  must be unique
 	DN              attrDN      `json:"dn,omitempty"              ldap:"dn"              msgpack:"dn"`              //  must be unique
 	ObjectClass     attrStrings `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass"`     //  Entry type
 	CreatorsName    attrDN      `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName"`    //
@@ -65,7 +67,7 @@ type Entry struct {
 	HostType        string       `json:"host_type,omitempty"         msgpack:"host_type"`         //  host type `(provider|interim|openvpn|ciscovpn)`
 	HostASN         uint32       `json:"host_asn,omitempty"          msgpack:"host_asn"`          //
 	HostUpstreamASN uint32       `json:"host_upstream_asn,omitempty" msgpack:"host_upstream_asn"` //  upstream route
-	HostHostingUUID uint32       `json:"host_hosting_uuid,omitempty" msgpack:"host_hosting_uuid"` //  (?) replace with member/memberOf
+	HostHostingUUID uuid.UUID    `json:"host_hosting_uuid,omitempty" msgpack:"host_hosting_uuid"` //  (?) replace with member/memberOf
 	HostURL         *mod_net.URL `json:"host_url,omitempty"          msgpack:"host_url"`          //
 	HostListen      *netip.Addr  `json:"host_listen,omitempty"       msgpack:"host_listen"`       //
 

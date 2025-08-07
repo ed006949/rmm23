@@ -6,6 +6,8 @@ import (
 	"net/url"
 	"time"
 
+	"github.com/google/uuid"
+
 	"rmm23/src/mod_bools"
 	"rmm23/src/mod_crypto"
 )
@@ -23,12 +25,12 @@ type Cert struct {
 	Ext time.Time `redis:",exat"` //
 
 	// element meta data
-	UUID           *attrUUID           `json:"uuid"           msgpack:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
+	UUID           uuid.UUID          `json:"uuid"           msgpack:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
 	SerialNumber   *big.Int           `json:"serialNumber"   msgpack:"serialNumber"`   // (?) redis:",key"
-	Issuer         *attrDN             `json:"issuer"         msgpack:"issuer"`         //
-	Subject        *attrDN             `json:"subject"        msgpack:"subject"`        //
-	NotBefore      *attrTime           `json:"notBefore"      msgpack:"notBefore"`      //
-	NotAfter       *attrTime           `json:"notAfter"       msgpack:"notAfter"`       // redis:",exat"
+	Issuer         *attrDN            `json:"issuer"         msgpack:"issuer"`         //
+	Subject        *attrDN            `json:"subject"        msgpack:"subject"`        //
+	NotBefore      *attrTime          `json:"notBefore"      msgpack:"notBefore"`      //
+	NotAfter       *attrTime          `json:"notAfter"       msgpack:"notAfter"`       // redis:",exat"
 	DNSNames       []string           `json:"dnsNames"       msgpack:"dnsNames"`       //
 	EmailAddresses []string           `json:"emailAddresses" msgpack:"emailAddresses"` //
 	IPAddresses    []*netip.Addr      `json:"ipAddresses"    msgpack:"ipAddresses"`    //

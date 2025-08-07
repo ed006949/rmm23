@@ -30,7 +30,7 @@ func (r *attrUUID) MarshalJSON() (outbound []byte, err error) {
 
 func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
 	var (
-		interim []byte
+		interim string
 	)
 	switch err = json.Unmarshal(inbound, &interim); {
 	case err != nil:
@@ -40,7 +40,7 @@ func (r *attrUUID) UnmarshalJSON(inbound []byte) (err error) {
 	var (
 		interimUUID uuid.UUID
 	)
-	switch interimUUID, err = uuid.ParseBytes(interim); {
+	switch interimUUID, err = uuid.Parse(interim); {
 	case err != nil:
 		return
 	}

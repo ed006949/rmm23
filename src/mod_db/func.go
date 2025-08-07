@@ -82,7 +82,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				fnEntry.Type = entryType
 				_ = fnEntry.BaseDN.parse(fnBaseDN)
 				fnEntry.Status = entryStatusLoaded
-				fnEntry.UUID.generate(uuid.Nil, []byte(fnEntry.DN.String()))
+				fnEntry.UUID = uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))
 
 				fnEntry.Key = fnEntry.UUID.String()
 
@@ -111,7 +111,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 							// Key:            "",
 							// Ver:            0,
 							Ext:            e.Certificate.NotAfter,
-							UUID:           generateUUID(uuid.NameSpaceOID, e.Certificate.Raw),
+							UUID:           uuid.NewSHA1(uuid.NameSpaceOID, e.Certificate.Raw),
 							SerialNumber:   e.Certificate.SerialNumber,
 							Issuer:         mod_errors.StripErr1(parseDN(e.Certificate.Issuer.String())),
 							Subject:        mod_errors.StripErr1(parseDN(e.Certificate.Subject.String())),
@@ -125,7 +125,6 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 							Certificate:    e,
 						}
 					)
-
 
 					fnCert.Key = fnCert.UUID.String()
 

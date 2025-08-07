@@ -23,7 +23,7 @@ func (r *Cert) ParseDERs(key, crt, ca, crl, csr []byte) (err error) {
 		// Key:            "",
 		// Ver:            0,
 		Ext:            cert.Certificate.NotAfter,
-		UUID:           generateUUID(uuid.NameSpaceOID, cert.Certificate.Raw),
+		UUID:           uuid.NewSHA1(uuid.NameSpaceOID, cert.Certificate.Raw),
 		SerialNumber:   cert.Certificate.SerialNumber,
 		Issuer:         mod_errors.StripErr1(parseDN(cert.Certificate.Issuer.String())),
 		Subject:        mod_errors.StripErr1(parseDN(cert.Certificate.Subject.String())),
