@@ -11,74 +11,113 @@ import (
 )
 
 func UnmarshalEntry(e *ldap.Entry, out interface{}) error {
-	vo := reflect.ValueOf(out)
-	if vo.Kind() != reflect.Ptr || vo.IsNil() || vo.Elem().Kind() != reflect.Struct {
+	var (
+		vo = reflect.ValueOf(out)
+	)
+	switch {
+	case vo.Kind() != reflect.Ptr || vo.IsNil() || vo.Elem().Kind() != reflect.Struct:
 		return errors.New("UnmarshalEntry: expected pointer to struct")
 	}
 
-	val := vo.Elem()
-	typ := val.Type()
+	var (
+		val = vo.Elem()
+		typ = val.Type()
+	)
 
 	for i := 0; i < typ.NumField(); i++ {
-		field := typ.Field(i)
-		fv := val.Field(i)
-
-		if field.PkgPath != "" {
-			continue // skip unexported
+		var (
+			field = typ.Field(i)
+			fv    = val.Field(i)
+		)
+		switch {
+		case field.PkgPath != "":
+			continue // skip unexported fields
 		}
 
-		tag := field.Tag.Get("ldap")
-		if tag == "" {
+		var (
+			tag = field.Tag.Get("ldap")
+		)
+		switch {
+		case tag == "":
 			continue
 		}
 
-		if tag == "dn" {
-			if fv.Kind() == reflect.String && fv.CanSet() {
+		switch {
+		case tag == "dn":
+			switch {
+			case fv.Kind() == reflect.String && fv.CanSet():
 				fv.SetString(e.DN)
 			}
 
 			continue
 		}
 
-		values := getAttributeValues(e, tag)
-		if len(values) == 0 {
+		var (
+			values = getAttributeValues(e, tag)
+		)
+		switch {
+		case len(values) == 0:
 			continue
 		}
 
 		// 1. Pointer to scalar
-		if isPointerToScalar(fv) {
-			if err := assignPointerToScalar(fv, values[0]); err != nil {
+		switch {
+		case isPointerToScalar(fv):
+			var (
+				err = assignPointerToScalar(fv, values[0])
+			)
+			switch {
+			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
 
 			continue
 		}
 		// 2. Pointer to slice
-		if isPointerToSlice(fv) {
-			if err := assignPointerToSlice(fv, values); err != nil {
+		switch {
+		case isPointerToSlice(fv):
+			var (
+				err = assignPointerToSlice(fv, values)
+			)
+			switch {
+			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
 
 			continue
 		}
 		// 3. Slice of pointers
-		if isSliceOfPointers(fv) {
-			if err := assignSliceOfPointers(fv, values); err != nil {
+		switch {
+		case isSliceOfPointers(fv):
+			var (
+				err = assignSliceOfPointers(fv, values)
+			)
+			switch {
+			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
 
 			continue
 		}
 		// 4. Slice of values
-		if fv.Kind() == reflect.Slice && fv.CanSet() {
-			if err := assignSlice(fv, values); err != nil {
+		switch {
+		case fv.Kind() == reflect.Slice && fv.CanSet():
+			var (
+				err = assignSlice(fv, values)
+			)
+			switch {
+			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
 
 			continue
 		}
 		// 5. Scalar
-		if err := assignScalar(fv, values[0]); err != nil {
+		var (
+			err = assignScalar(fv, values[0])
+		)
+		switch {
+		case err != nil:
 			return fmt.Errorf("%s: %w", field.Name, err)
 		}
 	}
@@ -89,48 +128,97 @@ func UnmarshalEntry(e *ldap.Entry, out interface{}) error {
 // ==== Field shape utilities ====
 
 func isPointerToScalar(v reflect.Value) bool {
-	return v.Kind() == reflect.Ptr && v.CanSet() && v.Type().Elem().Kind() != reflect.Slice
+	var (
+		kind     = v.Kind()
+		elemKind = v.Type().Elem().Kind()
+		canSet   = v.CanSet()
+	)
+	switch {
+	case kind == reflect.Ptr && canSet && elemKind != reflect.Slice:
+		return true
+	}
+
+	return false
 }
 
 func isPointerToSlice(v reflect.Value) bool {
-	return v.Kind() == reflect.Ptr && v.CanSet() && v.Type().Elem().Kind() == reflect.Slice
+	var (
+		kind     = v.Kind()
+		elemKind = v.Type().Elem().Kind()
+		canSet   = v.CanSet()
+	)
+	switch {
+	case kind == reflect.Ptr && canSet && elemKind == reflect.Slice:
+		return true
+	}
+
+	return false
 }
 
 func isSliceOfPointers(v reflect.Value) bool {
-	return v.Kind() == reflect.Slice && v.Type().Elem().Kind() == reflect.Ptr && v.CanSet()
+	var (
+		kind     = v.Kind()
+		elemKind = v.Type().Elem().Kind()
+		canSet   = v.CanSet()
+	)
+	switch {
+	case kind == reflect.Slice && elemKind == reflect.Ptr && canSet:
+		return true
+	}
+
+	return false
 }
 
 // ==== Helper assignment functions ====
 
 func assignPointerToScalar(fv reflect.Value, val string) error {
-	elemType := fv.Type().Elem()
-	if fv.IsNil() {
+	var (
+		elemType = fv.Type().Elem()
+	)
+	switch {
+	case fv.IsNil():
 		fv.Set(reflect.New(elemType))
 	}
 
-	elemPtr := fv
-	if u, ok := elemPtr.Interface().(encoding.TextUnmarshaler); ok {
+	var (
+		elemPtr = fv
+	)
+	switch u := elemPtr.Interface().(type) {
+	case encoding.TextUnmarshaler:
 		return u.UnmarshalText([]byte(val))
 	}
 
-	elem := fv.Elem()
+	var (
+		elem = fv.Elem()
+	)
 
 	return assignBasic(elem, val)
 }
 
 func assignPointerToSlice(fv reflect.Value, values []string) error {
-	sliceType := fv.Type().Elem()
-
-	elemType := sliceType.Elem()
-	if fv.IsNil() {
+	var (
+		sliceType = fv.Type().Elem()
+		elemType  = sliceType.Elem()
+	)
+	switch {
+	case fv.IsNil():
 		fv.Set(reflect.New(sliceType))
 	}
 
-	slice := reflect.MakeSlice(sliceType, len(values), len(values))
-	for j, v := range values {
-		elemPtr := reflect.New(elemType)
-		if u, ok := elemPtr.Interface().(encoding.TextUnmarshaler); ok {
-			if err := u.UnmarshalText([]byte(v)); err != nil {
+	var (
+		slice = reflect.MakeSlice(sliceType, len(values), len(values))
+	)
+
+	for j := 0; j < len(values); j++ {
+		var (
+			v       = values[j]
+			elemPtr = reflect.New(elemType)
+		)
+		switch u := elemPtr.Interface().(type) {
+		case encoding.TextUnmarshaler:
+			var err = u.UnmarshalText([]byte(v))
+			switch {
+			case err != nil:
 				return err
 			}
 
@@ -139,9 +227,13 @@ func assignPointerToSlice(fv reflect.Value, values []string) error {
 			continue
 		}
 
-		if err := assignBasic(elemPtr.Elem(), v); err != nil {
+		var err = assignBasic(elemPtr.Elem(), v)
+		switch {
+		case err != nil:
 			return err
 		}
+
+		slice.Index(j).Set(elemPtr.Elem())
 	}
 
 	fv.Elem().Set(slice)
@@ -150,14 +242,21 @@ func assignPointerToSlice(fv reflect.Value, values []string) error {
 }
 
 func assignSliceOfPointers(fv reflect.Value, values []string) error {
-	elemPtrType := fv.Type().Elem() // *T
-	elemType := elemPtrType.Elem()  // T
-
-	slice := reflect.MakeSlice(fv.Type(), len(values), len(values))
-	for j, v := range values {
-		elemPtr := reflect.New(elemType) // *T
-		if u, ok := elemPtr.Interface().(encoding.TextUnmarshaler); ok {
-			if err := u.UnmarshalText([]byte(v)); err != nil {
+	var (
+		elemPtrType = fv.Type().Elem()
+		elemType    = elemPtrType.Elem()
+		slice       = reflect.MakeSlice(fv.Type(), len(values), len(values))
+	)
+	for j := 0; j < len(values); j++ {
+		var (
+			v       = values[j]
+			elemPtr = reflect.New(elemType) // *T
+		)
+		switch u := elemPtr.Interface().(type) {
+		case encoding.TextUnmarshaler:
+			var err = u.UnmarshalText([]byte(v))
+			switch {
+			case err != nil:
 				return err
 			}
 
@@ -166,7 +265,9 @@ func assignSliceOfPointers(fv reflect.Value, values []string) error {
 			continue
 		}
 
-		if err := assignBasic(elemPtr.Elem(), v); err != nil {
+		var err = assignBasic(elemPtr.Elem(), v)
+		switch {
+		case err != nil:
 			return err
 		}
 
@@ -179,13 +280,20 @@ func assignSliceOfPointers(fv reflect.Value, values []string) error {
 }
 
 func assignSlice(fv reflect.Value, values []string) error {
-	elemType := fv.Type().Elem()
-
-	slice := reflect.MakeSlice(fv.Type(), len(values), len(values))
-	for j, v := range values {
-		elemPtr := reflect.New(elemType)
-		if u, ok := elemPtr.Interface().(encoding.TextUnmarshaler); ok {
-			if err := u.UnmarshalText([]byte(v)); err != nil {
+	var (
+		elemType = fv.Type().Elem()
+		slice    = reflect.MakeSlice(fv.Type(), len(values), len(values))
+	)
+	for j := 0; j < len(values); j++ {
+		var (
+			v       = values[j]
+			elemPtr = reflect.New(elemType)
+		)
+		switch u := elemPtr.Interface().(type) {
+		case encoding.TextUnmarshaler:
+			var err = u.UnmarshalText([]byte(v))
+			switch {
+			case err != nil:
 				return err
 			}
 
@@ -194,7 +302,9 @@ func assignSlice(fv reflect.Value, values []string) error {
 			continue
 		}
 
-		if err := assignBasic(slice.Index(j), v); err != nil {
+		var err = assignBasic(slice.Index(j), v)
+		switch {
+		case err != nil:
 			return err
 		}
 	}
@@ -205,12 +315,14 @@ func assignSlice(fv reflect.Value, values []string) error {
 }
 
 func assignScalar(fv reflect.Value, val string) error {
-	ptr := fv
-	if fv.CanAddr() {
+	var ptr = fv
+	switch {
+	case fv.CanAddr():
 		ptr = fv.Addr()
 	}
 
-	if u, ok := ptr.Interface().(encoding.TextUnmarshaler); ok {
+	switch u := ptr.Interface().(type) {
+	case encoding.TextUnmarshaler:
 		return u.UnmarshalText([]byte(val))
 	}
 
@@ -224,22 +336,40 @@ func assignBasic(fv reflect.Value, val string) error {
 	case reflect.String:
 		fv.SetString(val)
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		n, err := strconv.ParseInt(val, 10, 64)
-		if err != nil {
+		var (
+			n   int64
+			err error
+		)
+
+		n, err = strconv.ParseInt(val, 10, 64)
+		switch {
+		case err != nil:
 			return err
 		}
 
 		fv.SetInt(n)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
-		n, err := strconv.ParseUint(val, 10, 64)
-		if err != nil {
+		var (
+			n   uint64
+			err error
+		)
+
+		n, err = strconv.ParseUint(val, 10, 64)
+		switch {
+		case err != nil:
 			return err
 		}
 
 		fv.SetUint(n)
 	case reflect.Bool:
-		b, err := strconv.ParseBool(val)
-		if err != nil {
+		var (
+			b   bool
+			err error
+		)
+
+		b, err = strconv.ParseBool(val)
+		switch {
+		case err != nil:
 			return err
 		}
 
@@ -254,7 +384,8 @@ func assignBasic(fv reflect.Value, val string) error {
 // Helper: extract attribute values from github.com/go-ldap/ldap/v3 entries.
 func getAttributeValues(e *ldap.Entry, name string) []string {
 	for _, attr := range e.Attributes {
-		if attr.Name == name {
+		switch {
+		case attr.Name == name:
 			return attr.Values
 		}
 	}
