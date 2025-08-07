@@ -30,20 +30,17 @@ func UnmarshalEntry(e *ldap.Entry, out interface{}) error {
 			fv    = val.Field(i)
 		)
 		switch {
-		case field.PkgPath != "":
+		case len(field.PkgPath) != 0:
 			continue // skip unexported fields
 		}
 
 		var (
-			tag = field.Tag.Get("ldap")
+			tag = field.Tag.Get(ldapTagName)
 		)
-		switch {
-		case tag == "":
+		switch tag {
+		case "":
 			continue
-		}
-
-		switch {
-		case tag == "dn":
+		case "dn":
 			switch {
 			case fv.Kind() == reflect.String && fv.CanSet():
 				fv.SetString(e.DN)
@@ -60,65 +57,32 @@ func UnmarshalEntry(e *ldap.Entry, out interface{}) error {
 			continue
 		}
 
-		// 1. Pointer to scalar
 		switch {
-		case isPointerToScalar(fv):
-			var (
-				err = assignPointerToScalar(fv, values[0])
-			)
-			switch {
+		case isPointerToScalar(fv): // 1. Pointer to scalar
+			switch err := assignPointerToScalar(fv, values[0]); {
 			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
-
-			continue
-		}
-		// 2. Pointer to slice
-		switch {
-		case isPointerToSlice(fv):
-			var (
-				err = assignPointerToSlice(fv, values)
-			)
-			switch {
+		case isPointerToSlice(fv): // 2. Pointer to slice
+			switch err := assignPointerToSlice(fv, values); {
 			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
-
-			continue
-		}
-		// 3. Slice of pointers
-		switch {
-		case isSliceOfPointers(fv):
-			var (
-				err = assignSliceOfPointers(fv, values)
-			)
-			switch {
+		case isSliceOfPointers(fv): // 3. Slice of pointers
+			switch err := assignSliceOfPointers(fv, values); {
 			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
-
-			continue
-		}
-		// 4. Slice of values
-		switch {
-		case fv.Kind() == reflect.Slice && fv.CanSet():
-			var (
-				err = assignSlice(fv, values)
-			)
-			switch {
+		case fv.Kind() == reflect.Slice && fv.CanSet(): // 4. Slice of values
+			switch err := assignSlice(fv, values); {
 			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
-
-			continue
-		}
-		// 5. Scalar
-		var (
-			err = assignScalar(fv, values[0])
-		)
-		switch {
-		case err != nil:
-			return fmt.Errorf("%s: %w", field.Name, err)
+		default: // 5. Scalar
+			switch err := assignScalar(fv, values[0]); {
+			case err != nil:
+				return fmt.Errorf("%s: %w", field.Name, err)
+			}
 		}
 	}
 
@@ -216,8 +180,7 @@ func assignPointerToSlice(fv reflect.Value, values []string) error {
 		)
 		switch u := elemPtr.Interface().(type) {
 		case encoding.TextUnmarshaler:
-			var err = u.UnmarshalText([]byte(v))
-			switch {
+			switch err := u.UnmarshalText([]byte(v)); {
 			case err != nil:
 				return err
 			}
@@ -227,8 +190,7 @@ func assignPointerToSlice(fv reflect.Value, values []string) error {
 			continue
 		}
 
-		var err = assignBasic(elemPtr.Elem(), v)
-		switch {
+		switch err := assignBasic(elemPtr.Elem(), v); {
 		case err != nil:
 			return err
 		}
@@ -254,8 +216,7 @@ func assignSliceOfPointers(fv reflect.Value, values []string) error {
 		)
 		switch u := elemPtr.Interface().(type) {
 		case encoding.TextUnmarshaler:
-			var err = u.UnmarshalText([]byte(v))
-			switch {
+			switch err := u.UnmarshalText([]byte(v)); {
 			case err != nil:
 				return err
 			}
@@ -265,8 +226,7 @@ func assignSliceOfPointers(fv reflect.Value, values []string) error {
 			continue
 		}
 
-		var err = assignBasic(elemPtr.Elem(), v)
-		switch {
+		switch err := assignBasic(elemPtr.Elem(), v); {
 		case err != nil:
 			return err
 		}
@@ -291,8 +251,7 @@ func assignSlice(fv reflect.Value, values []string) error {
 		)
 		switch u := elemPtr.Interface().(type) {
 		case encoding.TextUnmarshaler:
-			var err = u.UnmarshalText([]byte(v))
-			switch {
+			switch err := u.UnmarshalText([]byte(v)); {
 			case err != nil:
 				return err
 			}
@@ -302,8 +261,7 @@ func assignSlice(fv reflect.Value, values []string) error {
 			continue
 		}
 
-		var err = assignBasic(slice.Index(j), v)
-		switch {
+		switch err := assignBasic(slice.Index(j), v); {
 		case err != nil:
 			return err
 		}
@@ -340,9 +298,7 @@ func assignBasic(fv reflect.Value, val string) error {
 			n   int64
 			err error
 		)
-
-		n, err = strconv.ParseInt(val, 10, 64)
-		switch {
+		switch n, err = strconv.ParseInt(val, 10, 64); {
 		case err != nil:
 			return err
 		}
@@ -353,9 +309,7 @@ func assignBasic(fv reflect.Value, val string) error {
 			n   uint64
 			err error
 		)
-
-		n, err = strconv.ParseUint(val, 10, 64)
-		switch {
+		switch n, err = strconv.ParseUint(val, 10, 64); {
 		case err != nil:
 			return err
 		}
@@ -366,9 +320,7 @@ func assignBasic(fv reflect.Value, val string) error {
 			b   bool
 			err error
 		)
-
-		b, err = strconv.ParseBool(val)
-		switch {
+		switch b, err = strconv.ParseBool(val); {
 		case err != nil:
 			return err
 		}
