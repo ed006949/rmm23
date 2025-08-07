@@ -8,6 +8,8 @@ import (
 	"strconv"
 
 	"github.com/go-ldap/ldap/v3"
+
+	"rmm23/src/mod_reflect"
 )
 
 func UnmarshalEntry(e *ldap.Entry, out interface{}) error {
@@ -57,28 +59,28 @@ func UnmarshalEntry(e *ldap.Entry, out interface{}) error {
 			continue
 		}
 
-		switch {
-		case isPointerToScalar(fv): // 1. Pointer to scalar
+		switch mod_reflect.CheckPointer(fv) {
+		case mod_reflect.PointerToScalar: // 1. Pointer to scalar
 			switch err := assignPointerToScalar(fv, values[0]); {
 			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
-		case isPointerToSlice(fv): // 2. Pointer to slice
+		case mod_reflect.PointerToSlice: // 2. Pointer to slice
 			switch err := assignPointerToSlice(fv, values); {
 			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
-		case isSliceOfPointers(fv): // 3. Slice of pointers
+		case mod_reflect.SliceOfPointers: // 3. Slice of pointers
 			switch err := assignSliceOfPointers(fv, values); {
 			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
-		case fv.Kind() == reflect.Slice && fv.CanSet(): // 4. Slice of values
+		case mod_reflect.SliceOfValues: // 4. Slice of values
 			switch err := assignSlice(fv, values); {
 			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
 			}
-		default: // 5. Scalar
+		default: // 5. try Scalar
 			switch err := assignScalar(fv, values[0]); {
 			case err != nil:
 				return fmt.Errorf("%s: %w", field.Name, err)
@@ -87,50 +89,6 @@ func UnmarshalEntry(e *ldap.Entry, out interface{}) error {
 	}
 
 	return nil
-}
-
-// ==== Field shape utilities ====
-
-func isPointerToScalar(v reflect.Value) bool {
-	var (
-		kind     = v.Kind()
-		elemKind = v.Type().Elem().Kind()
-		canSet   = v.CanSet()
-	)
-	switch {
-	case kind == reflect.Ptr && canSet && elemKind != reflect.Slice:
-		return true
-	}
-
-	return false
-}
-
-func isPointerToSlice(v reflect.Value) bool {
-	var (
-		kind     = v.Kind()
-		elemKind = v.Type().Elem().Kind()
-		canSet   = v.CanSet()
-	)
-	switch {
-	case kind == reflect.Ptr && canSet && elemKind == reflect.Slice:
-		return true
-	}
-
-	return false
-}
-
-func isSliceOfPointers(v reflect.Value) bool {
-	var (
-		kind     = v.Kind()
-		elemKind = v.Type().Elem().Kind()
-		canSet   = v.CanSet()
-	)
-	switch {
-	case kind == reflect.Slice && elemKind == reflect.Ptr && canSet:
-		return true
-	}
-
-	return false
 }
 
 // ==== Helper assignment functions ====
