@@ -6,13 +6,6 @@ import (
 )
 
 const (
-	sliceSeparator  = "\x1f"
-	jsonPathHeader  = "$."
-	tagSeparator    = ","
-	headerSeparator = ":"
-)
-
-const (
 	redisTagName                = "redis"
 	redisearchTagName           = "redisearch"
 	redisearchTagTypeIgnore     = "-"
@@ -51,7 +44,7 @@ const (
 
 const (
 	entryKeyHeader = _entry
-	// entryKeyHeader = _ldap + headerSeparator + _entry.
+	// entryKeyHeader = _ldap + HeaderSeparator + _entry.
 	certKeyHeader = _certificate
 )
 

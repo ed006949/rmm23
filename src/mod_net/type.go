@@ -5,4 +5,3 @@ import (
 )
 
 type URL struct{ *url.URL }
-type URLs []*URL

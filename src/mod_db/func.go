@@ -14,10 +14,19 @@ import (
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
 	"rmm23/src/mod_net"
+	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_vfs"
 )
 
 func GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
+	var (
+		a Entry
+		b Cert
+	)
+
+	mod_reflect.WalkStructFields(a, "ldap")
+	mod_reflect.WalkStructFields(b, "ldap")
+
 	switch err = outbound.Dial(ctx); {
 	case err != nil:
 		return
@@ -55,7 +64,7 @@ func GetFSCerts(ctx context.Context, inbound *mod_vfs.VFSDB, outbound *Conf) (er
 
 func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisRepository) (err error) {
 	type entryCerts struct {
-		UserPKCS12 mod_crypto.Certificates `ldap:"userPKCS12"`
+		UserPKCS12 mod_crypto.Certificates `json:"userPKCS12,omitempty" ldap:"userPKCS12"`
 	}
 
 	var (
@@ -80,10 +89,10 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				}
 
 				fnEntry.Type = entryType
-				_ = fnEntry.BaseDN.parse(fnBaseDN)
+				fnEntry.BaseDN = mod_errors.StripErr1(parseDN(fnBaseDN))
 				fnEntry.Status = entryStatusLoaded
-				t1 := uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))
-				fnEntry.UUID = &t1
+				tUUID := uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))
+				fnEntry.UUID = tUUID
 
 				fnEntry.Key = fnEntry.UUID.String()
 
@@ -116,8 +125,8 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 							SerialNumber:   e.Certificate.SerialNumber,
 							Issuer:         mod_errors.StripErr1(parseDN(e.Certificate.Issuer.String())),
 							Subject:        mod_errors.StripErr1(parseDN(e.Certificate.Subject.String())),
-							NotBefore:      &attrTime{e.Certificate.NotBefore},
-							NotAfter:       &attrTime{e.Certificate.NotAfter},
+							NotBefore:      e.Certificate.NotBefore,
+							NotAfter:       e.Certificate.NotAfter,
 							DNSNames:       e.Certificate.DNSNames,
 							EmailAddresses: e.Certificate.EmailAddresses,
 							IPAddresses:    mod_errors.StripErr1(mod_net.ParseNetIPs(e.Certificate.IPAddresses)),

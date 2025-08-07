@@ -2,7 +2,6 @@ package mod_net
 
 import (
 	"encoding/json"
-	"encoding/xml"
 	"net/url"
 	"strings"
 
@@ -10,11 +9,12 @@ import (
 	"rmm23/src/mod_errors"
 )
 
-func (r *URL) UnmarshalXMLAttr(attr xml.Attr) (err error) {
+func (r *URL) UnmarshalText(inbound []byte) (err error) {
 	var (
 		interim *url.URL
 	)
-	switch interim, err = url.Parse(attr.Value); {
+
+	switch interim, err = url.Parse(string(inbound)); {
 	case err != nil:
 		return
 	}
@@ -23,33 +23,9 @@ func (r *URL) UnmarshalXMLAttr(attr xml.Attr) (err error) {
 
 	return
 }
+func (r *URL) MarshalText() (outbound []byte, err error) { return json.Marshal(r.String()) }
 
-func (r *URL) MarshalXMLAttr(name xml.Name) (xml.Attr, error) {
-	return xml.Attr{Name: name, Value: r.URL.String()}, nil
-}
-
-func (r *URL) UnmarshalJSON(inbound []byte) (err error) {
-	var (
-		interim    string
-		interimURL *url.URL
-	)
-	switch err = json.Unmarshal(inbound, &interim); {
-	case err != nil:
-		return
-	}
-
-	switch interimURL, err = url.Parse(interim); {
-	case err != nil:
-		return
-	}
-
-	r.URL = interimURL
-
-	return
-}
-func (r *URL) MarshalJSON() ([]byte, error) { return json.Marshal(r.URL.String()) }
-
-func (r *URL) CleanPath() (outbound string) { return strings.TrimPrefix(r.URL.Path, "/") }
+func (r *URL) CleanPath() (outbound string) { return strings.TrimPrefix(r.Path, "/") }
 func (r *URL) CleanUser() (username string, password string) {
 	return r.CleanUsername(), r.CleanPassword()
 }

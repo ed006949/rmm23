@@ -5,10 +5,8 @@ import (
 )
 
 type Conf struct {
-	URL  *mod_net.URL `json:"url,omitempty"`
-	Repo *RedisRepository
+	URL  *mod_net.URL     `json:"url,omitempty"`
+	Repo *RedisRepository `json:"-"`
 }
 
-type entryFieldName string
-
-// type schemaMapType map[entryFieldName]redisearch.FieldType
+// type schemaMapType map[EntryFieldName]redisearch.FieldType

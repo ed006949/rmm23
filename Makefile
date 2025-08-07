@@ -13,13 +13,15 @@ build:
 	go build -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}" ./src/*.go
 	GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}-freebsd-amd64" ./src/*.go
 
-clean-clean-clean-clean:
-	-gh auth logout
+clean:
 	-go clean -i -r -x -cache -testcache -modcache -fuzzcache
 	-rm -v go.mod
 	-rm -v go.sum
 	-find ./ -name ".DS_Store" -delete
 	-find ./ -name "._.DS_Store" -delete
+	-go mod init ${TARGET}
+	-go get -u ./...
+	-go mod tidy
 
 commit: lint
 commit: status
@@ -113,7 +115,6 @@ init_hook:
 	chmod -v +x ./.git/hooks/prepare-commit-msg
 
 #
-
 # init local package
 # > make init_localpackage localpackage=package_name
 #
@@ -129,6 +130,13 @@ ifneq (${localpackage},)
 	echo "package ${localpackage}" > ./src/${localpackage}/type.go
 	echo "package ${localpackage}" > ./src/${localpackage}/var.go
 endif
+
+#
+#
+#
+#
+clean-clean-clean-clean: clean
+	-gh auth logout
 
 #
 # new repo init

@@ -3,6 +3,8 @@ package mod_db
 import (
 	"fmt"
 	"strings"
+
+	"rmm23/src/mod_strings"
 )
 
 const (
@@ -17,59 +19,59 @@ const (
 type MFV []FV
 
 type FV struct {
-	Field entryFieldName
+	Field mod_strings.EntryFieldName
 	Value string
 }
 
 var (
-	entryFieldMap = map[entryFieldName]string{
-		F_type:   redisearchTagTypeNumeric,
-		F_status: redisearchTagTypeNumeric,
-		F_baseDN: redisearchTagTypeTag,
+	EntryFieldMap = map[mod_strings.EntryFieldName]string{
+		mod_strings.F_type:   redisearchTagTypeNumeric,
+		mod_strings.F_status: redisearchTagTypeNumeric,
+		mod_strings.F_baseDN: redisearchTagTypeTag,
 
-		F_uuid:            redisearchTagTypeTag,
-		F_dn:              redisearchTagTypeTag,
-		F_objectClass:     redisearchTagTypeTag,
-		F_creatorsName:    redisearchTagTypeTag,
-		F_createTimestamp: redisearchTagTypeTag,
-		F_modifiersName:   redisearchTagTypeTag,
-		F_modifyTimestamp: redisearchTagTypeTag,
+		mod_strings.F_uuid:            redisearchTagTypeTag,
+		mod_strings.F_dn:              redisearchTagTypeTag,
+		mod_strings.F_objectClass:     redisearchTagTypeTag,
+		mod_strings.F_creatorsName:    redisearchTagTypeTag,
+		mod_strings.F_createTimestamp: redisearchTagTypeTag,
+		mod_strings.F_modifiersName:   redisearchTagTypeTag,
+		mod_strings.F_modifyTimestamp: redisearchTagTypeTag,
 
-		F_cn:                   redisearchTagTypeTag,
-		F_dc:                   redisearchTagTypeTag,
-		F_description:          redisearchTagTypeTag,
-		F_destinationIndicator: redisearchTagTypeTag,
-		F_displayName:          redisearchTagTypeTag,
-		F_gidNumber:            redisearchTagTypeNumeric,
-		F_homeDirectory:        redisearchTagTypeTag,
-		F_ipHostNumber:         redisearchTagTypeTag,
-		F_mail:                 redisearchTagTypeTag,
-		F_member:               redisearchTagTypeTag,
-		F_memberOf:             redisearchTagTypeTag,
-		F_o:                    redisearchTagTypeTag,
-		F_ou:                   redisearchTagTypeTag,
-		F_owner:                redisearchTagTypeTag,
-		F_sn:                   redisearchTagTypeTag,
-		F_sshPublicKey:         redisearchTagTypeTag,
-		F_telephoneNumber:      redisearchTagTypeTag,
-		F_telexNumber:          redisearchTagTypeTag,
-		F_uid:                  redisearchTagTypeTag,
-		F_uidNumber:            redisearchTagTypeNumeric,
-		F_userPKCS12:           redisearchTagTypeTag,
-		F_userPassword:         redisearchTagTypeTag,
+		mod_strings.F_cn:                   redisearchTagTypeTag,
+		mod_strings.F_dc:                   redisearchTagTypeTag,
+		mod_strings.F_description:          redisearchTagTypeTag,
+		mod_strings.F_destinationIndicator: redisearchTagTypeTag,
+		mod_strings.F_displayName:          redisearchTagTypeTag,
+		mod_strings.F_gidNumber:            redisearchTagTypeNumeric,
+		mod_strings.F_homeDirectory:        redisearchTagTypeTag,
+		mod_strings.F_ipHostNumber:         redisearchTagTypeTag,
+		mod_strings.F_mail:                 redisearchTagTypeTag,
+		mod_strings.F_member:               redisearchTagTypeTag,
+		mod_strings.F_memberOf:             redisearchTagTypeTag,
+		mod_strings.F_o:                    redisearchTagTypeTag,
+		mod_strings.F_ou:                   redisearchTagTypeTag,
+		mod_strings.F_owner:                redisearchTagTypeTag,
+		mod_strings.F_sn:                   redisearchTagTypeTag,
+		mod_strings.F_sshPublicKey:         redisearchTagTypeTag,
+		mod_strings.F_telephoneNumber:      redisearchTagTypeTag,
+		mod_strings.F_telexNumber:          redisearchTagTypeTag,
+		mod_strings.F_uid:                  redisearchTagTypeTag,
+		mod_strings.F_uidNumber:            redisearchTagTypeNumeric,
+		mod_strings.F_userPKCS12:           redisearchTagTypeTag,
+		mod_strings.F_userPassword:         redisearchTagTypeTag,
 
-		F_labeledURI: redisearchTagTypeTag,
+		mod_strings.F_labeledURI: redisearchTagTypeTag,
 
-		F_serialNumber:   redisearchTagTypeNumeric,
-		F_issuer:         redisearchTagTypeTag,
-		F_subject:        redisearchTagTypeTag,
-		F_notBefore:      redisearchTagTypeTag,
-		F_notAfter:       redisearchTagTypeTag,
-		F_dnsNames:       redisearchTagTypeTag,
-		F_emailAddresses: redisearchTagTypeTag,
-		F_ipAddresses:    redisearchTagTypeTag,
-		F_uris:           redisearchTagTypeTag,
-		F_isCA:           redisearchTagTypeNumeric,
+		mod_strings.F_serialNumber:   redisearchTagTypeNumeric,
+		mod_strings.F_issuer:         redisearchTagTypeTag,
+		mod_strings.F_subject:        redisearchTagTypeTag,
+		mod_strings.F_notBefore:      redisearchTagTypeTag,
+		mod_strings.F_notAfter:       redisearchTagTypeTag,
+		mod_strings.F_dnsNames:       redisearchTagTypeTag,
+		mod_strings.F_emailAddresses: redisearchTagTypeTag,
+		mod_strings.F_ipAddresses:    redisearchTagTypeTag,
+		mod_strings.F_uris:           redisearchTagTypeTag,
+		mod_strings.F_isCA:           redisearchTagTypeNumeric,
 	}
 	entryFieldValueEnclosure = map[string][2]string{
 		redisearchTagTypeText:    {enclosureEmpty0, enclosureEmpty1},
@@ -77,59 +79,6 @@ var (
 		redisearchTagTypeNumeric: {enclosureSquare0, enclosureSquare1},
 		redisearchTagTypeGeo:     {enclosureSquare0, enclosureSquare1},
 	}
-)
-
-const (
-	F_key entryFieldName = "key"
-	F_ver entryFieldName = "ver"
-
-	F_type   entryFieldName = "type"
-	F_status entryFieldName = "status"
-	F_baseDN entryFieldName = "baseDN"
-
-	F_uuid            entryFieldName = "uuid"
-	F_dn              entryFieldName = "dn"
-	F_objectClass     entryFieldName = "objectClass"
-	F_creatorsName    entryFieldName = "creatorsName"
-	F_createTimestamp entryFieldName = "createTimestamp"
-	F_modifiersName   entryFieldName = "modifiersName"
-	F_modifyTimestamp entryFieldName = "modifyTimestamp"
-
-	F_cn                   entryFieldName = "cn"
-	F_dc                   entryFieldName = "dc"
-	F_description          entryFieldName = "description"
-	F_destinationIndicator entryFieldName = "destinationIndicator"
-	F_displayName          entryFieldName = "displayName"
-	F_gidNumber            entryFieldName = "gidNumber"
-	F_homeDirectory        entryFieldName = "homeDirectory"
-	F_ipHostNumber         entryFieldName = "ipHostNumber"
-	F_mail                 entryFieldName = "mail"
-	F_member               entryFieldName = "member"
-	F_memberOf             entryFieldName = "memberOf"
-	F_o                    entryFieldName = "o"
-	F_ou                   entryFieldName = "ou"
-	F_owner                entryFieldName = "owner"
-	F_sn                   entryFieldName = "sn"
-	F_sshPublicKey         entryFieldName = "sshPublicKey"
-	F_telephoneNumber      entryFieldName = "telephoneNumber"
-	F_telexNumber          entryFieldName = "telexNumber"
-	F_uid                  entryFieldName = "uid"
-	F_uidNumber            entryFieldName = "uidNumber"
-	F_userPKCS12           entryFieldName = "userPKCS12"
-	F_userPassword         entryFieldName = "userPassword"
-
-	F_labeledURI entryFieldName = "labeledURI"
-
-	F_serialNumber   entryFieldName = "serialNumber"
-	F_issuer         entryFieldName = "issuer"
-	F_subject        entryFieldName = "subject"
-	F_notBefore      entryFieldName = "notBefore"
-	F_notAfter       entryFieldName = "notAfter"
-	F_dnsNames       entryFieldName = "dnsNames"
-	F_emailAddresses entryFieldName = "emailAddresses"
-	F_ipAddresses    entryFieldName = "ipAddresses"
-	F_uris           entryFieldName = "uris"
-	F_isCA           entryFieldName = "isCA"
 )
 
 func (r *MFV) buildMFVQuery() (outbound string) {
@@ -144,13 +93,13 @@ func (r *MFV) buildMFVQuery() (outbound string) {
 	return strings.Join(interim, " ")
 }
 
-func buildFVQuery(field entryFieldName, value string) (outbound string) {
+func buildFVQuery(field mod_strings.EntryFieldName, value string) (outbound string) {
 	return fmt.Sprintf(
 		"@%s:%s%v%s",
 		field.String(),
-		entryFieldValueEnclosure[entryFieldMap[field]][0],
+		entryFieldValueEnclosure[EntryFieldMap[field]][0],
 		escapeQueryValue(value),
-		entryFieldValueEnclosure[entryFieldMap[field]][1],
+		entryFieldValueEnclosure[EntryFieldMap[field]][1],
 	)
 }
 

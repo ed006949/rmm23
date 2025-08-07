@@ -1,6 +1,6 @@
 module rmm23
 
-go 1.24.5
+go 1.24.6
 
 require (
 	github.com/ProtonMail/go-crypto v1.3.0
@@ -11,10 +11,9 @@ require (
 	github.com/go-ini/ini v1.67.0
 	github.com/go-ldap/ldap/v3 v3.4.11
 	github.com/google/uuid v1.6.0
-	github.com/redis/rueidis v1.0.63
-	github.com/redis/rueidis/om v1.0.63
+	github.com/redis/rueidis v1.0.64
+	github.com/redis/rueidis/om v1.0.64
 	github.com/rs/zerolog v1.34.0
-	github.com/tsaarni/x500dn v1.1.0
 	software.sslmate.com/src/go-pkcs12 v0.6.0
 )
 
@@ -39,6 +38,6 @@ require (
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
 	golang.org/x/crypto v0.40.0 // indirect
 	golang.org/x/net v0.42.0 // indirect
-	golang.org/x/sys v0.34.0 // indirect
+	golang.org/x/sys v0.35.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )

@@ -1,7 +1,6 @@
 package mod_db
 
 import (
-	"encoding/json"
 	"strings"
 
 	"rmm23/src/mod_errors"
@@ -14,8 +13,30 @@ const (
 	dnPathSeparator = ","
 )
 
-type attrDN []struct{ Field, Value string }
-type attrDNs []*attrDN
+type attrDN []attrDNFV
+
+type attrDNFV struct{ Field, Value string }
+
+// func (r *attrDN) MarshalJSON() (outbound []byte, err error) { return r.Time.MarshalJSON() }
+//
+// func (r *attrDN) UnmarshalJSON(inbound []byte) (err error) {
+// 	switch swInterim, swErr := ber.ParseGeneralizedTime(inbound); {
+// 	case swErr == nil:
+// 		r.Time = swInterim
+// 		return
+// 	}
+// 	var (
+// 		interim []time.Time
+// 	)
+// 	switch err = json.Unmarshal(inbound, &interim); {
+// 	case err != nil:
+// 		return
+// 	}
+//
+// 	r.Time = interim[0]
+//
+// 	return
+// }
 
 func (r *attrDN) UnmarshalText(inbound []byte) (err error) {
 	var (
@@ -57,36 +78,9 @@ func (r *attrDN) MarshalText() (outbound []byte, err error) {
 	return []byte(strings.Join(interim, dnPathSeparator)), nil
 }
 
-func (r *attrDN) MarshalJSON() (outbound []byte, err error) { return json.Marshal(r.String()) }
-
-func (r *attrDN) UnmarshalJSON(inbound []byte) (err error) {
-	var (
-		interim string
-	)
-	switch err = json.Unmarshal(inbound, &interim); {
-	case err != nil:
-		return
-	}
-
-	switch err = r.parse(interim); {
-	case err != nil:
-		return
-	}
-
-	return
-}
-
 func (r *attrDN) String() (outbound string) { return string(mod_errors.StripErr1(r.MarshalText())) }
 
-func (r *attrDNs) Strings() (outbound []string) {
-	for _, b := range *r {
-		outbound = append(outbound, b.String())
-	}
-
-	return
-}
-
-func parseDN(inbound string) (outbound *attrDN, err error) {
+func parseDN(inbound string) (outbound attrDN, err error) {
 	var (
 		interim = new(attrDN)
 	)
@@ -95,7 +89,7 @@ func parseDN(inbound string) (outbound *attrDN, err error) {
 		return
 	}
 
-	return interim, err
+	return *interim, err
 }
 
 func (r *attrDN) parse(inbound string) (err error) {
@@ -109,23 +103,6 @@ func (r *attrDN) parse(inbound string) (err error) {
 	}
 
 	*r = *interim
-
-	return
-}
-
-func (r *attrDNs) parse(inbound []string) (err error) {
-	var (
-		interim = make(attrDNs, len(inbound), len(inbound))
-	)
-	for a, b := range inbound {
-		interim[a] = new(attrDN)
-		switch err = interim[a].UnmarshalText([]byte(b)); {
-		case err != nil:
-			return
-		}
-	}
-
-	*r = interim
 
 	return
 }

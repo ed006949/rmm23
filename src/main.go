@@ -8,6 +8,7 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_db"
+	"rmm23/src/mod_strings"
 	"rmm23/src/mod_vfs"
 )
 
@@ -76,7 +77,7 @@ func main() {
 		ctx,
 		[]mod_db.FV{
 			{
-				mod_db.F_type,
+				mod_strings.F_type,
 				mod_db.EntryTypeHost.Number() + " " + mod_db.EntryTypeHost.Number(),
 			},
 		},
@@ -87,11 +88,11 @@ func main() {
 		ctx,
 		mod_db.MFV{
 			{
-				mod_db.F_baseDN,
+				mod_strings.F_baseDN,
 				"dc=fabric,dc=domain,dc=tld",
 			},
 			{
-				mod_db.F_objectClass,
+				mod_strings.F_objectClass,
 				"posixAccount",
 			},
 		},
@@ -105,7 +106,7 @@ func main() {
 		ctx,
 		[]mod_db.FV{
 			{
-				mod_db.F_isCA,
+				mod_strings.F_isCA,
 				"1 1",
 			},
 		},

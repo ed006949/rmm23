@@ -76,7 +76,7 @@ func (r *Conf) bind() (err error) {
 		return mod_errors.ENoConn
 	}
 
-	switch err = r.conn.Bind(r.URL.CleanUsername(), r.URL.CleanPassword()); {
+	switch err = r.conn.Bind(r.URL.CleanUser()); {
 	case err != nil:
 		return
 	case len(r.URL.CleanUsername()) == 0:
