@@ -82,7 +82,8 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				fnEntry.Type = entryType
 				_ = fnEntry.BaseDN.parse(fnBaseDN)
 				fnEntry.Status = entryStatusLoaded
-				fnEntry.UUID = uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))
+				t1 := uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))
+				fnEntry.UUID = &t1
 
 				fnEntry.Key = fnEntry.UUID.String()
 

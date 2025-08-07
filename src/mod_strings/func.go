@@ -16,7 +16,7 @@ func JoinStrings(inbound []string, sep string, flag mod_slices.FlagType) (outbou
 }
 
 func TrimSpace(inbound []string) (outbound []string) {
-	outbound = make([]string, 0, len(inbound))
+	outbound = make([]string, len(inbound), len(inbound))
 
 	for a, b := range inbound {
 		outbound[a] = strings.TrimSpace(b)

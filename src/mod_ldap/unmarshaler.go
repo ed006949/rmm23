@@ -12,6 +12,32 @@ import (
 	"rmm23/src/mod_reflect"
 )
 
+// Entry represents a single search result entry.
+type Entry struct {
+	// DN is the distinguished name of the entry
+	DN string `json:"dn"`
+	// Attributes are the returned attributes for the entry
+	Attributes map[string][][]byte `json:"attributes"`
+}
+
+// // Entry represents a single search result entry
+// type Entry struct {
+// 	// DN is the distinguished name of the entry
+// 	DN string `json:"dn"`
+// 	// Attributes are the returned attributes for the entry
+// 	Attributes []*ldap.EntryAttribute `json:"attributes"`
+// }
+
+// // EntryAttribute holds a single attribute
+// type EntryAttribute struct {
+// 	// Name is the name of the attribute
+// 	Name string
+// 	// Values contain the string values of the attribute
+// 	Values []string
+// 	// ByteValues contain the raw values of the attribute
+// 	ByteValues [][]byte
+// }
+
 func UnmarshalEntry(e *ldap.Entry, out interface{}) error {
 	var (
 		vo = reflect.ValueOf(out)
