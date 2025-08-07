@@ -13,7 +13,9 @@ const (
 	dnPathSeparator = ","
 )
 
-type attrDN []attrDNFV
+type attrDN struct {
+	dn []attrDNFV
+}
 
 type attrDNFV struct{ Field, Value string }
 
@@ -41,7 +43,7 @@ type attrDNFV struct{ Field, Value string }
 func (r *attrDN) UnmarshalText(inbound []byte) (err error) {
 	var (
 		interimFVs = mod_strings.Split(string(inbound), dnPathSeparator, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
-		interim    = make(attrDN, len(interimFVs), len(interimFVs))
+		interim    = make([]attrDNFV, len(interimFVs))
 	)
 	for a, b := range interimFVs {
 		var (
@@ -59,19 +61,19 @@ func (r *attrDN) UnmarshalText(inbound []byte) (err error) {
 			}
 		}
 
-		interim[a] = struct{ Field, Value string }{interimElement[0], interimElement[1]}
+		interim[a] = attrDNFV{interimElement[0], interimElement[1]}
 	}
 
-	*r = interim
+	r.dn = interim
 
 	return
 }
 
 func (r *attrDN) MarshalText() (outbound []byte, err error) {
 	var (
-		interim = make([]string, len(*r), len(*r))
+		interim = make([]string, len(r.dn), len(r.dn))
 	)
-	for a, b := range *r {
+	for a, b := range r.dn {
 		interim[a] = strings.Join([]string{b.Field, b.Value}, dnSeparator)
 	}
 

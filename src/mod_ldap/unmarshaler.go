@@ -15,10 +15,10 @@ import (
 
 func UnmarshalEntry(e *ldap.Entry, out any) (err error) {
 	var (
-		structKind, structType = mod_reflect.BuildStructMap(out, "ldap")
+		structMap = mod_reflect.BuildStructMap(out, "ldap")
 	)
 
-	fmt.Print(structKind, structType)
+	fmt.Print(structMap)
 
 	var (
 		interimEntry  = make(map[string][]string)
@@ -58,7 +58,7 @@ func UnmarshalEntry(e *ldap.Entry, out any) (err error) {
 
 	for a, b := range interimEntry {
 		switch {
-		case structKind[a] == reflect.Slice && structType[a] != reflect.Struct:
+		case structMap[a].Kind == reflect.Slice:
 			outboundEntry[a] = b
 		default:
 			switch {

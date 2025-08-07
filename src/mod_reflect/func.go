@@ -6,6 +6,7 @@ import (
 	"strings"
 
 	"rmm23/src/mod_errors"
+	"rmm23/src/mod_slices"
 )
 
 func WalkStructFields(structval interface{}, targetTag string) {
@@ -47,37 +48,47 @@ func WalkStructFields(structval interface{}, targetTag string) {
 	}
 }
 
-func BuildStructMap(structval interface{}, targetTag string) (outboundKind map[string]reflect.Kind, outboundType map[string]reflect.Kind) {
-	outboundKind = make(map[string]reflect.Kind)
-	outboundType = make(map[string]reflect.Kind)
+// FieldTypeInfo holds the kind and, if applicable, element type of a struct field.
+type FieldTypeInfo struct {
+	Kind     reflect.Kind
+	Type     reflect.Type // The field's own type
+	ElemType reflect.Type // Non-nil if Kind == Slice
+}
+
+func BuildStructMap(structval interface{}, targetTag string) (outbound map[string]FieldTypeInfo) {
+	outbound = make(map[string]FieldTypeInfo)
 
 	var (
-		v reflect.Value
-		t reflect.Type
+		t = reflect.TypeOf(structval)
 	)
-	switch t = reflect.TypeOf(structval); {
+	switch {
 	case t.Kind() == reflect.Ptr:
 		t = t.Elem()
 	}
 
-	switch v = reflect.ValueOf(structval); {
-	case v.Kind() == reflect.Ptr:
-		v = v.Elem()
-	}
-
 	for i := 0; i < t.NumField(); i++ {
 		var (
-			field = t.Field(i)
-			kind  = field.Type.Kind()
-			tag   = strings.Split(field.Tag.Get(targetTag), ",")
+			field  = t.Field(i)
+			tagStr = field.Tag.Get(targetTag)
+			tag    = strings.SplitN(tagStr, ",", mod_slices.KVElements)
 		)
 		switch {
-		case len(tag) == 0 || len(tag[0]) == 0:
+		case len(tag) == 0 || len(tag[0]) == 0 || tag[0] == "-":
 			continue
 		}
 
-		outboundKind[tag[0]] = kind
-		outboundType[tag[0]] = field.Type.Kind()
+		var (
+			fTypeInfo = FieldTypeInfo{
+				Kind: field.Type.Kind(),
+				Type: field.Type,
+			}
+		)
+		switch {
+		case field.Type.Kind() == reflect.Slice:
+			fTypeInfo.ElemType = field.Type.Elem()
+		}
+
+		outbound[tag[0]] = fTypeInfo
 	}
 
 	return
