@@ -82,14 +82,14 @@ func (r *RedisRepository) monitorIndexingFailures(ctx context.Context) (err erro
 
 		for a, b := range info {
 			switch a {
-			case "hash_indexing_failures":
+			case ftInfo_hash_indexing_failures:
 				switch c, d := strconv.ParseInt(b, 10, 64); {
 				case d == nil && c == 0:
-					l.Z{l.M: "redis", "index": info["index_name"], a: b}.Debug()
+					l.Z{l.M: "redis", "index": info[ftInfo_index_name], a: b}.Debug()
 				case d == nil:
-					l.Z{l.M: "redis", "index": info["index_name"], a: b}.Warning()
+					l.Z{l.M: "redis", "index": info[ftInfo_index_name], a: b}.Warning()
 				default:
-					l.Z{l.M: "redis info", "index": info["index_name"], l.E: err, a: b}.Error()
+					l.Z{l.M: "redis info", "index": info[ftInfo_index_name], l.E: err, a: b}.Error()
 				}
 			}
 		}
@@ -110,23 +110,14 @@ func (r *RedisRepository) waitIndexing(ctx context.Context, indexName string) (e
 	var (
 		resp = r.client.Do(ctx, r.client.B().FtInfo().Index(indexName).Build())
 	)
-
 	switch err = resp.Error(); {
 	case err != nil:
 		return
 	}
 
-	var (
-		info map[string]string
-	)
-	switch info, err = resp.AsStrMap(); {
-	case err != nil:
-		return
-	}
-
-	for info["percent_indexed"] != "1" {
-		switch info, err = resp.AsStrMap(); {
-		case err != nil:
+	for info, forErr := resp.AsStrMap(); info[ftInfo_percent_indexed] != "1"; info, forErr = resp.AsStrMap() {
+		switch {
+		case forErr != nil:
 			return
 		}
 	}

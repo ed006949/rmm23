@@ -129,7 +129,8 @@ func (r *RedisRepository) CreateEntryIndex(ctx context.Context) (err error) {
 			// FieldName(	mod_strings.F_host_url.FieldName()).As(	mod_strings.F_host_url.String()).Tag().Separator(mod_strings.SliceSeparator).
 			// FieldName(	mod_strings.F_host_listen.FieldName()).As(	mod_strings.F_host_listen.String()).Tag().Separator(mod_strings.SliceSeparator).
 
-			FieldName(mod_strings.F_labeledURI.FieldNameSlice()).As(mod_strings.F_labeledURI.String()).Tag().Separator(mod_strings.SliceSeparator).
+			//
+			// FieldName(mod_strings.F_labeledURI.FieldNameSlice()).As(mod_strings.F_labeledURI.String()).Tag().Separator(mod_strings.SliceSeparator).
 			// FieldName( _labeledURI.FieldNameSlice() + ".key").As(	mod_strings.F_labeledURI.String() + "_key").Tag().Separator(mod_strings.SliceSeparator).
 			// FieldName( _labeledURI.FieldNameSlice() + ".value").As(	mod_strings.F_labeledURI.String() + "_value").Tag().Separator(mod_strings.SliceSeparator).
 
