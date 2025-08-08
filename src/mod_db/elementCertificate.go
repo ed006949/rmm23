@@ -14,7 +14,7 @@ import (
 
 // Cert is the struct that represents an LDAP userPKCS12 attribute.
 //
-// when updating @src/mod_db/entry_type.go don't forget to update:
+// when updating @src/mod_db/elementEntry.go don't forget to update:
 //
 //	@src/mod_db/redis_field.go
 //	@src/mod_db/redis_*.go

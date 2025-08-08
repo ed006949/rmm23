@@ -3,6 +3,7 @@ package mod_crypto
 const (
 	__                   = " "
 	_EC                  = "EC"
+	_ECDH                = "ECDH"
 	_ED                  = "ED"
 	_RSA                 = "RSA"
 	_DSA                 = "DSA"
@@ -15,7 +16,6 @@ const (
 	__PRIVATE_KEY        = __ + _PRIVATE_KEY
 	_RSA_PRIVATE_KEY     = _RSA + __ + _PRIVATE_KEY
 	_EC_PRIVATE_KEY      = _EC + __ + _PRIVATE_KEY
-	_DSA_PRIVATE_KEY     = _DSA + __ + _PRIVATE_KEY
 	_CRL                 = "CRL"
 	_X500                = "X500"
 	_X509                = "X509"

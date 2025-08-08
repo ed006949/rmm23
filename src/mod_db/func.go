@@ -55,7 +55,7 @@ func GetFSCerts(ctx context.Context, inbound *mod_vfs.VFSDB, outbound *Conf) (er
 
 func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisRepository) (err error) {
 	type entryCerts struct {
-		UserPKCS12 mod_crypto.Certificates `json:"userPKCS12,omitempty" ldap:"userPKCS12"`
+		UserPKCS12 []*mod_crypto.Certificate `json:"userPKCS12,omitempty" ldap:"userPKCS12"`
 	}
 
 	var (
@@ -72,7 +72,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				var (
 					fnEntry = new(Entry)
 				)
-				switch e := mod_ldap.UnmarshalEntry(fnB, fnEntry); {
+				switch e := mod_ldap.UnmarshalLDAP(fnB, fnEntry); {
 				case e != nil:
 					l.Z{l.M: "mod_ldap.UnmarshalEntry", "DN": fnEntry.DN.String(), l.E: e}.Warning()
 
@@ -99,7 +99,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					cert    = new(entryCerts)
 					fnCerts []*Cert
 				)
-				switch e := mod_ldap.UnmarshalEntry(fnB, cert); {
+				switch e := mod_ldap.UnmarshalLDAP(fnB, cert); {
 				case e != nil:
 					l.Z{l.M: "mod_ldap.UnmarshalEntry", "DN": fnEntry.DN.String(), "cert": "all", l.E: e}.Warning()
 
@@ -159,7 +159,7 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 	var (
 		c          = make(map[string][][]byte)
 		fileExts   = 2
-		totalFiles = 5
+		totalFiles = 6
 
 		fn = func(name string, dirEntry fs.DirEntry, err error) (fnErr error) {
 			switch {
@@ -194,10 +194,12 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 				c[n][1], _ = vfsDB.VFS.ReadFile(name)
 			case "ca":
 				c[n][2], _ = vfsDB.VFS.ReadFile(name)
-			case "crl":
-				c[n][3], _ = vfsDB.VFS.ReadFile(name)
 			case "csr":
+				c[n][3], _ = vfsDB.VFS.ReadFile(name)
+			case "crl":
 				c[n][4], _ = vfsDB.VFS.ReadFile(name)
+			case "pem":
+				c[n][5], _ = vfsDB.VFS.ReadFile(name)
 			default:
 				return
 			}
@@ -216,7 +218,7 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 			forCert = new(Cert)
 		)
 
-		switch forErr = forCert.ParseDERs(b[0], b[1], b[2], b[3], b[4]); {
+		switch forErr = forCert.parseRaw(b[0], b[1], b[2], b[3], b[4], b[5]); {
 		case forErr != nil:
 			continue
 		}

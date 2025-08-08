@@ -9,35 +9,66 @@ import (
 	"rmm23/src/mod_net"
 )
 
-func (r *Cert) ParseDERs(key, crt, ca, crl, csr []byte) (err error) {
+// func (r *Cert) MarshalText() (outbound []byte, err error) {
+// 	var (
+// 		cert = new(Cert)
+// 	)
+//
+// 	switch err = cert.parseRaw(outbound); {
+// 	case err != nil:
+// 		return
+// 	}
+//
+// 	*r = *cert
+//
+// 	return
+// }
+
+// func (r *Cert) UnmarshalText(inbound []byte) (err error) {
+// 	var (
+// 		cert = new(Cert)
+// 	)
+//
+// 	switch err = cert.parseRaw(inbound); {
+// 	case err != nil:
+// 		return
+// 	}
+//
+// 	*r = *cert
+//
+// 	return
+// }
+
+func (r *Cert) parseRaw(inbound ...[]byte) (err error) {
 	var (
-		cert = new(mod_crypto.Certificate)
+		certificate = new(mod_crypto.Certificate)
 	)
 
-	switch err = cert.ParseDERs(key, crt, ca, crl, csr); {
+	switch err = certificate.ParseRaw(inbound...); {
 	case err != nil:
 		return
 	}
 
-	*r = Cert{
-		// Key:            "",
-		// Ver:            0,
-		Ext:            cert.Certificate.NotAfter,
-		UUID:           uuid.NewSHA1(uuid.NameSpaceOID, cert.Certificate.Raw),
-		SerialNumber:   cert.Certificate.SerialNumber,
-		Issuer:         mod_errors.StripErr1(parseDN(cert.Certificate.Issuer.String())),
-		Subject:        mod_errors.StripErr1(parseDN(cert.Certificate.Subject.String())),
-		NotBefore:      cert.Certificate.NotBefore,
-		NotAfter:       cert.Certificate.NotAfter,
-		DNSNames:       cert.Certificate.DNSNames,
-		EmailAddresses: cert.Certificate.EmailAddresses,
-		IPAddresses:    mod_errors.StripErr1(mod_net.ParseNetIPs(cert.Certificate.IPAddresses)),
-		URIs:           cert.Certificate.URIs,
-		IsCA:           mod_bools.AttrBool(cert.Certificate.IsCA),
-		Certificate:    cert,
-	}
+	var (
+		certUUID = uuid.NewSHA1(uuid.NameSpaceOID, certificate.Certificate.Raw)
+	)
 
-	r.Key = r.UUID.String()
+	*r = Cert{
+		Key:            certUUID.String(),
+		Ext:            certificate.Certificate.NotAfter,
+		UUID:           certUUID,
+		SerialNumber:   certificate.Certificate.SerialNumber,
+		Issuer:         mod_errors.StripErr1(parseDN(certificate.Certificate.Issuer.String())),
+		Subject:        mod_errors.StripErr1(parseDN(certificate.Certificate.Subject.String())),
+		NotBefore:      certificate.Certificate.NotBefore,
+		NotAfter:       certificate.Certificate.NotAfter,
+		DNSNames:       certificate.Certificate.DNSNames,
+		EmailAddresses: certificate.Certificate.EmailAddresses,
+		IPAddresses:    mod_errors.StripErr1(mod_net.ParseNetIPs(certificate.Certificate.IPAddresses)),
+		URIs:           certificate.Certificate.URIs,
+		IsCA:           mod_bools.AttrBool(certificate.Certificate.IsCA),
+		Certificate:    certificate,
+	}
 
 	return
 }
