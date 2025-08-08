@@ -2,6 +2,8 @@ package mod_db
 
 import (
 	"strconv"
+
+	"rmm23/src/mod_errors"
 )
 
 var (
@@ -27,3 +29,19 @@ var (
 		EntryTypeHost:   strconv.FormatInt(int64(EntryTypeHost), 10),
 	}
 )
+
+type attrEntryType int   //
+type attrEntryStatus int //
+
+func (r attrEntryType) String() (outbound string) { return entryTypeName[r] }
+func (r attrEntryType) Number() (outbound string) { return entryTypeNumber[r] }
+func (r *attrEntryType) Parse(inbound string) (err error) {
+	switch value, ok := entryTypeID[inbound]; {
+	case !ok:
+		return mod_errors.EUnknownType
+	default:
+		*r = value
+
+		return
+	}
+}

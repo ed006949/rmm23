@@ -51,6 +51,6 @@ type Cert struct {
 	// ModifyTimestamp attrTime `json:"modifyTimestamp,omitempty" msgpack:"modifyTimestamp"` //
 
 	// element data
-	Certificate *mod_crypto.Certificate `json:"certificate,omitempty" msgpack:"certificate"` //
+	Certificate *mod_crypto.Certificate `json:"certificate,omitempty" ldap:"userPKCS12" msgpack:"certificate"` //
 
 }

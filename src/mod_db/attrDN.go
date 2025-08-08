@@ -8,46 +8,18 @@ import (
 	"rmm23/src/mod_strings"
 )
 
-const (
-	dnSeparator     = "="
-	dnPathSeparator = ","
-)
-
 type attrDN struct {
-	dn []attrDNFV
+	dn []mod_strings.KV
 }
-
-type attrDNFV struct{ Field, Value string }
-
-// func (r *attrDN) MarshalJSON() (outbound []byte, err error) { return r.Time.MarshalJSON() }
-//
-// func (r *attrDN) UnmarshalJSON(inbound []byte) (err error) {
-// 	switch swInterim, swErr := ber.ParseGeneralizedTime(inbound); {
-// 	case swErr == nil:
-// 		r.Time = swInterim
-// 		return
-// 	}
-// 	var (
-// 		interim []time.Time
-// 	)
-// 	switch err = json.Unmarshal(inbound, &interim); {
-// 	case err != nil:
-// 		return
-// 	}
-//
-// 	r.Time = interim[0]
-//
-// 	return
-// }
 
 func (r *attrDN) UnmarshalText(inbound []byte) (err error) {
 	var (
-		interimFVs = mod_strings.Split(string(inbound), dnPathSeparator, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
-		interim    = make([]attrDNFV, len(interimFVs))
+		interimFVs = mod_strings.Split(string(inbound), mod_strings.DNPathSeparator, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
+		interim    = make([]mod_strings.KV, len(interimFVs))
 	)
 	for a, b := range interimFVs {
 		var (
-			interimElement = mod_strings.SplitN(b, dnSeparator, mod_slices.KVElements, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
+			interimElement = mod_strings.SplitN(b, mod_strings.DNKVSeparator, mod_slices.KVElements, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
 		)
 		switch {
 		case len(interimElement) != mod_slices.KVElements:
@@ -61,7 +33,7 @@ func (r *attrDN) UnmarshalText(inbound []byte) (err error) {
 			}
 		}
 
-		interim[a] = attrDNFV{interimElement[0], interimElement[1]}
+		interim[a] = mod_strings.KV{interimElement[0], interimElement[1]}
 	}
 
 	r.dn = interim
@@ -74,10 +46,10 @@ func (r *attrDN) MarshalText() (outbound []byte, err error) {
 		interim = make([]string, len(r.dn), len(r.dn))
 	)
 	for a, b := range r.dn {
-		interim[a] = strings.Join([]string{b.Field, b.Value}, dnSeparator)
+		interim[a] = strings.Join([]string{b.Key, b.Value}, mod_strings.DNKVSeparator)
 	}
 
-	return []byte(strings.Join(interim, dnPathSeparator)), nil
+	return []byte(strings.Join(interim, mod_strings.DNPathSeparator)), nil
 }
 
 func (r *attrDN) String() (outbound string) { return string(mod_errors.StripErr1(r.MarshalText())) }

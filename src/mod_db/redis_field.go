@@ -16,15 +16,10 @@ const (
 	enclosureCurly1  = "}"
 )
 
-type MFV []FV
-
-type FV struct {
-	Field mod_strings.EntryFieldName
-	Value string
-}
+type MFV []mod_strings.FV
 
 var (
-	EntryFieldMap = map[mod_strings.EntryFieldName]string{
+	entryFieldMap = map[mod_strings.EntryFieldName]string{
 		mod_strings.F_type:   redisearchTagTypeNumeric,
 		mod_strings.F_status: redisearchTagTypeNumeric,
 		mod_strings.F_baseDN: redisearchTagTypeTag,
@@ -97,9 +92,9 @@ func buildFVQuery(field mod_strings.EntryFieldName, value string) (outbound stri
 	return fmt.Sprintf(
 		"@%s:%s%v%s",
 		field.String(),
-		entryFieldValueEnclosure[EntryFieldMap[field]][0],
+		entryFieldValueEnclosure[entryFieldMap[field]][0],
 		escapeQueryValue(value),
-		entryFieldValueEnclosure[EntryFieldMap[field]][1],
+		entryFieldValueEnclosure[entryFieldMap[field]][1],
 	)
 }
 

@@ -5,6 +5,8 @@ const (
 	JSONPathHeader  = "$."
 	TagSeparator    = ","
 	HeaderSeparator = ":"
+	DNKVSeparator   = "="
+	DNPathSeparator = ","
 )
 
 const (

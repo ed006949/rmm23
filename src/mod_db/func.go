@@ -14,19 +14,10 @@ import (
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
 	"rmm23/src/mod_net"
-	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_vfs"
 )
 
 func GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
-	var (
-		a Entry
-		b Cert
-	)
-
-	mod_reflect.WalkStructFields(a, "ldap")
-	mod_reflect.WalkStructFields(b, "ldap")
-
 	switch err = outbound.Dial(ctx); {
 	case err != nil:
 		return
@@ -91,10 +82,10 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				fnEntry.Type = entryType
 				fnEntry.BaseDN = mod_errors.StripErr1(parseDN(fnBaseDN))
 				fnEntry.Status = entryStatusLoaded
-				tUUID := uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))
-				fnEntry.UUID = tUUID
+				// tUUID := uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))
+				// fnEntry.UUID = tUUID
 
-				fnEntry.Key = fnEntry.UUID.String()
+				fnEntry.Key = uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String())).String()
 
 				_ = repo.DeleteEntry(ctx, fnEntry.Key)
 				switch e := repo.SaveEntry(ctx, fnEntry); {

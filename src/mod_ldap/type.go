@@ -6,12 +6,6 @@ import (
 	"rmm23/src/mod_net"
 )
 
-// // LDAPAttributeUnmarshaler is the interface implemented by types
-// // that can UnmarshalEntry an LDAP attribute value representation of themselves.
-// type LDAPAttributeUnmarshaler interface {
-// 	UnmarshalLDAPAttr(values []string) (err error)
-// }
-
 type Conf struct {
 	URL      *mod_net.URL `json:"url,omitempty"`
 	Domains  []*domain    `json:"domain,omitempty"`

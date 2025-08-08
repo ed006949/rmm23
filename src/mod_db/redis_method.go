@@ -305,12 +305,6 @@ func (r *RedisRepository) DeleteCert(ctx context.Context, id string) (err error)
 
 //
 
-// func (r *RedisRepository) DropIndex(ctx context.Context) (err error) {
-// 	l.Z{l.M: "redis", "drop index": "entry", l.E: r.DropEntryIndex(ctx)}.Informational()
-// 	l.Z{l.M: "redis", "drop index": "cert", l.E: r.DropCertIndex(ctx)}.Informational()
-// 	return
-// }
-
 func (r *RedisRepository) DropEntryIndex(ctx context.Context) (err error) {
 	switch {
 	case l.Run.DryRunValue():

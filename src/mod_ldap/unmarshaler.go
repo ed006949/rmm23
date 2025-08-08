@@ -15,8 +15,13 @@ import (
 
 func UnmarshalEntry(e *ldap.Entry, out any) (err error) {
 	var (
-		structMap = mod_reflect.BuildStructMap(out, "ldap")
+		structMap map[string]mod_reflect.FieldTypeInfo
 	)
+
+	switch structMap, err = mod_reflect.BuildStructMap(out, TagName); {
+	case err != nil:
+		return
+	}
 
 	fmt.Print(structMap)
 
@@ -26,9 +31,22 @@ func UnmarshalEntry(e *ldap.Entry, out any) (err error) {
 		interim       []byte
 	)
 
+	interimEntry[mod_strings.F_dn.String()] = []string{e.DN}
+
 	for _, b := range e.Attributes {
-		switch b.Name {
-		case mod_strings.F_modifyTimestamp.String(), mod_strings.F_createTimestamp.String(): // LDAP <> time.Time workaround
+		var (
+			structElement, ok = structMap[b.Name]
+		)
+		switch {
+		case !ok:
+			continue
+		}
+
+		switch {
+		// Handle time.Time and []time.Time fields (LDAP GeneralizedTime)
+		case (structElement.Kind == reflect.Slice &&
+			structElement.ElemType == reflect.TypeOf(time.Time{})) ||
+			(structElement.Type == reflect.TypeOf(time.Time{})):
 			var (
 				interimValues = make([]string, len(b.Values), len(b.Values))
 			)
@@ -54,8 +72,6 @@ func UnmarshalEntry(e *ldap.Entry, out any) (err error) {
 		}
 	}
 
-	interimEntry[mod_strings.F_dn.String()] = []string{e.DN}
-
 	for a, b := range interimEntry {
 		switch {
 		case structMap[a].Kind == reflect.Slice:
@@ -80,26 +96,3 @@ func UnmarshalEntry(e *ldap.Entry, out any) (err error) {
 
 	return
 }
-
-// // UnmarshalText and all `attrTime` is for LDAP "specific" behavior
-//
-//	func (r *attrTime) UnmarshalText(inbound []byte) (err error) {
-//		switch swInterim, swErr := ber.ParseGeneralizedTime(inbound); {
-//		case swErr == nil:
-//			r.Time = swInterim
-//			return
-//		}
-//		var (
-//			interim time.Time
-//		)
-//		switch err = interim.UnmarshalBinary(inbound); {
-//		case err != nil:
-//			return
-//		}
-//
-//		r.Time = interim
-//
-//		return
-//	}
-//
-// Function to walk struct fields and print kind

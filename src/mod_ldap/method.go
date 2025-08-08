@@ -23,7 +23,7 @@ func (r *Conf) SearchFn(fn func(fnBaseDN string, fnSearchResultType string, fnSe
 	for _, b := range r.Domains {
 		for _, d := range r.Settings {
 			var (
-				requestDN     = mod_strings.JoinStrings([]string{d.DN, b.DN}, ",", mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
+				requestDN     = mod_strings.Join([]string{d.DN, b.DN}, ",", mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
 				searchRequest = ldap.NewSearchRequest(
 					requestDN,          // Base DN
 					d.Scope.Int(),      // Scope - search entire tree

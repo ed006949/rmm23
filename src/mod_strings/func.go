@@ -7,11 +7,11 @@ import (
 	"rmm23/src/mod_slices"
 )
 
-func Join[S ~[]E, E any](inbound S, sep string, flag mod_slices.FlagType) (outbound string) {
+func JoinAny[S ~[]E, E any](inbound S, sep string, flag mod_slices.FlagType) (outbound string) {
 	return strings.Join(ToStrings(inbound, flag), sep)
 }
 
-func JoinStrings(inbound []string, sep string, flag mod_slices.FlagType) (outbound string) {
+func Join(inbound []string, sep string, flag mod_slices.FlagType) (outbound string) {
 	return strings.Join(Normalize(inbound, flag), sep)
 }
 
