@@ -104,6 +104,11 @@ func (r *Certificate) ParseRaw(inbound ...[]byte) (err error) {
 // checkPrivateKey
 // We don't need to parse the public key for TLS, but we so do anyway to check that it looks sane and matches the private key.
 func (r *Certificate) checkPrivateKey() (err error) {
+	switch {
+	case r == nil:
+		return mod_errors.ENODATA
+	}
+
 	switch pub := r.Certificate.PublicKey.(type) {
 	case *rsa.PublicKey:
 		return r.checkPrivateKeyRSA(pub)
