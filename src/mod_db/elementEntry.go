@@ -40,7 +40,7 @@ type Entry struct {
 	Description          string         `json:"description,omitempty"          ldap:"description"          msgpack:"description"`          //
 	DestinationIndicator []string       `json:"destinationIndicator,omitempty" ldap:"destinationIndicator" msgpack:"destinationIndicator"` //
 	DisplayName          string         `json:"displayName,omitempty"          ldap:"displayName"          msgpack:"displayName"`          //
-	GIDNumber            uint64         `json:"gidNumber,omitempty,string"     ldap:"gidNumber"            msgpack:"gidNumber"`            //  Primary GIDNumber in user's context (ignore it), GIDNumber in group's context.
+	GIDNumber            uint64         `json:"gidNumber,omitempty"     ldap:"gidNumber"            msgpack:"gidNumber"`                   //  Primary GIDNumber in user's context (ignore it), GIDNumber in group's context.
 	HomeDirectory        string         `json:"homeDirectory,omitempty"        ldap:"homeDirectory"        msgpack:"homeDirectory"`        //
 	IPHostNumber         []netip.Prefix `json:"ipHostNumber,omitempty"         ldap:"ipHostNumber"         msgpack:"ipHostNumber"`         //
 	Mail                 []string       `json:"mail,omitempty"                 ldap:"mail"                 msgpack:"mail"`                 //
@@ -53,7 +53,7 @@ type Entry struct {
 	TelephoneNumber      []string       `json:"telephoneNumber,omitempty"      ldap:"telephoneNumber"      msgpack:"telephoneNumber"`      //
 	TelexNumber          []string       `json:"telexNumber,omitempty"          ldap:"telexNumber"          msgpack:"telexNumber"`          //
 	UID                  string         `json:"uid,omitempty"                  ldap:"uid"                  msgpack:"uid"`                  //  RDN in user's context
-	UIDNumber            uint64         `json:"uidNumber,omitempty,string"     ldap:"uidNumber"            msgpack:"uidNumber"`            //
+	UIDNumber            uint64         `json:"uidNumber,omitempty"     ldap:"uidNumber"            msgpack:"uidNumber"`                   //
 	UserPassword         string         `json:"userPassword,omitempty"         ldap:"userPassword"         msgpack:"userPassword"`         //
 	// UserPKCS12           mod_crypto.Certificates   `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           msgpack:"userPKCS12"`           //
 	// MemberOf             []*attrDN                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf"            ` //  don't trust LDAP
