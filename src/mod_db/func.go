@@ -147,7 +147,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 
 func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository) (err error) {
 	var (
-		c          = make(map[string][][]byte)
+		content    = make(map[string][][]byte)
 		fileExts   = 2
 		totalFiles = 6
 
@@ -168,27 +168,27 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 			var (
 				n = strings.Join(s[:len(s)-fileExts], ".")
 			)
-			switch _, ok := c[n]; {
+			switch _, ok := content[n]; {
 			case !ok:
-				c[n] = make([][]byte, totalFiles)
+				content[n] = make([][]byte, totalFiles)
 			}
 
 			switch s[len(s)-1] {
 			case "der":
 				switch s[len(s)-2] {
 				case "key":
-					c[n][0], _ = vfsDB.VFS.ReadFile(name)
+					content[n][0], _ = vfsDB.VFS.ReadFile(name)
 				case "crt":
-					c[n][1], _ = vfsDB.VFS.ReadFile(name)
+					content[n][1], _ = vfsDB.VFS.ReadFile(name)
 				case "ca":
-					c[n][2], _ = vfsDB.VFS.ReadFile(name)
+					content[n][2], _ = vfsDB.VFS.ReadFile(name)
 				case "csr":
-					c[n][3], _ = vfsDB.VFS.ReadFile(name)
+					content[n][3], _ = vfsDB.VFS.ReadFile(name)
 				case "crl":
-					c[n][4], _ = vfsDB.VFS.ReadFile(name)
+					content[n][4], _ = vfsDB.VFS.ReadFile(name)
 				}
 			case "pem":
-				c[n][5] = append(c[n][5], mod_errors.StripErr1(vfsDB.VFS.ReadFile(name))...)
+				content[n][5] = append(content[n][5], mod_errors.StripErr1(vfsDB.VFS.ReadFile(name))...)
 			}
 
 			return
@@ -199,13 +199,13 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 		l.Z{l.E: err}.Error()
 	}
 
-	for a, b := range c {
+	for a, b := range content {
 		var (
 			forErr  error
 			forCert = new(Cert)
 		)
 
-		switch forErr = forCert.parseRaw(b[0], b[1], b[2], b[3], b[4], b[5]); {
+		switch forErr = forCert.parseRaw(b...); {
 		case forErr != nil:
 			continue
 		}

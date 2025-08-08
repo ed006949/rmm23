@@ -13,6 +13,10 @@ import (
 )
 
 var (
+	RetryInterval = time.Duration(1) * time.Second
+)
+
+var (
 	buildName      string                       // to be set by builder
 	buildVerbosity = zerolog.InfoLevel.String() // defaults
 	buildDryRun    = "true"                     // defaults

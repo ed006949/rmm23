@@ -10,6 +10,7 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
+	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_strings"
 )
 
@@ -120,6 +121,8 @@ func (r *RedisRepository) waitIndexing(ctx context.Context, indexName string) (e
 		case forErr != nil:
 			return
 		}
+
+		_ = mod_reflect.WaitCtx(ctx, l.RetryInterval)
 	}
 
 	return

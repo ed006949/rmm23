@@ -62,7 +62,4 @@ const (
 	F_ipAddresses    EntryFieldName = "ipAddresses"
 	F_uris           EntryFieldName = "uris"
 	F_isCA           EntryFieldName = "isCA"
-
-	F_notBeforeUnix EntryFieldName = "notBeforeUnix"
-	F_notAfterUnix  EntryFieldName = "notAfterUnix"
 )

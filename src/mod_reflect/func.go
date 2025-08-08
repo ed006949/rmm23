@@ -1,8 +1,10 @@
 package mod_reflect
 
 import (
+	"context"
 	"reflect"
 	"strings"
+	"time"
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_slices"
@@ -29,6 +31,20 @@ func MakeSliceIfNil[S ~[]V, V any](s *S, size ...int) {
 		case makeParam2:
 			*s = make(S, size[0], size[1])
 		}
+	}
+}
+
+func WaitCtx(ctx context.Context, d time.Duration) (err error) {
+	var (
+		t = time.NewTimer(d)
+	)
+	defer t.Stop()
+
+	select {
+	case <-t.C:
+		return
+	case <-ctx.Done():
+		return ctx.Err()
 	}
 }
 
