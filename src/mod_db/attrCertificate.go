@@ -9,35 +9,20 @@ import (
 	"rmm23/src/mod_net"
 )
 
-// func (r *Cert) MarshalText() (outbound []byte, err error) {
-// 	var (
-// 		cert = new(Cert)
-// 	)
-//
-// 	switch err = cert.parseRaw(outbound); {
-// 	case err != nil:
-// 		return
-// 	}
-//
-// 	*r = *cert
-//
-// 	return
-// }
+func (r *Cert) UnmarshalText(inbound []byte) (err error) {
+	var (
+		cert = new(Cert)
+	)
 
-// func (r *Cert) UnmarshalText(inbound []byte) (err error) {
-// 	var (
-// 		cert = new(Cert)
-// 	)
-//
-// 	switch err = cert.parseRaw(inbound); {
-// 	case err != nil:
-// 		return
-// 	}
-//
-// 	*r = *cert
-//
-// 	return
-// }
+	switch err = cert.parseRaw(inbound); {
+	case err != nil:
+		return
+	}
+
+	*r = *cert
+
+	return
+}
 
 func (r *Cert) parseRaw(inbound ...[]byte) (err error) {
 	var (
@@ -49,26 +34,26 @@ func (r *Cert) parseRaw(inbound ...[]byte) (err error) {
 		return
 	}
 
-	var (
-		certUUID = uuid.NewSHA1(uuid.NameSpaceOID, certificate.Certificate.Raw)
-	)
-
-	*r = Cert{
-		Key:            certUUID.String(),
-		Ext:            certificate.Certificate.NotAfter,
-		UUID:           certUUID,
-		SerialNumber:   certificate.Certificate.SerialNumber,
-		Issuer:         mod_errors.StripErr1(parseDN(certificate.Certificate.Issuer.String())),
-		Subject:        mod_errors.StripErr1(parseDN(certificate.Certificate.Subject.String())),
-		NotBefore:      certificate.Certificate.NotBefore,
-		NotAfter:       certificate.Certificate.NotAfter,
-		DNSNames:       certificate.Certificate.DNSNames,
-		EmailAddresses: certificate.Certificate.EmailAddresses,
-		IPAddresses:    mod_errors.StripErr1(mod_net.ParseNetIPs(certificate.Certificate.IPAddresses)),
-		URIs:           certificate.Certificate.URIs,
-		IsCA:           mod_bools.AttrBool(certificate.Certificate.IsCA),
-		Certificate:    certificate,
-	}
+	r.normalize()
 
 	return
+}
+func (r *Cert) normalize() {
+	var (
+		certUUID = uuid.NewSHA1(uuid.NameSpaceOID, r.Certificate.Certificate.Raw)
+	)
+
+	r.Key = certUUID.String()
+	r.Ext = r.Certificate.Certificate.NotAfter
+	r.UUID = certUUID
+	r.SerialNumber = r.Certificate.Certificate.SerialNumber
+	r.Issuer = mod_errors.StripErr1(parseDN(r.Certificate.Certificate.Issuer.String()))
+	r.Subject = mod_errors.StripErr1(parseDN(r.Certificate.Certificate.Subject.String()))
+	r.NotBefore = attrTime{r.Certificate.Certificate.NotBefore}
+	r.NotAfter = attrTime{r.Certificate.Certificate.NotAfter}
+	r.DNSNames = r.Certificate.Certificate.DNSNames
+	r.EmailAddresses = r.Certificate.Certificate.EmailAddresses
+	r.IPAddresses = mod_errors.StripErr1(mod_net.ParseNetIPs(r.Certificate.Certificate.IPAddresses))
+	r.URIs = r.Certificate.Certificate.URIs
+	r.IsCA = mod_bools.AttrBool(r.Certificate.Certificate.IsCA)
 }

@@ -28,22 +28,9 @@ type Cert struct {
 	Ver int64     `redis:",ver"`  //
 	Ext time.Time `redis:",exat"` //
 
-	// element meta data
-	UUID           uuid.UUID          `json:"uuid"           msgpack:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
-	SerialNumber   *big.Int           `json:"serialNumber"   msgpack:"serialNumber"`   // (?) redis:",key"
-	Issuer         attrDN             `json:"issuer"         msgpack:"issuer"`         //
-	Subject        attrDN             `json:"subject"        msgpack:"subject"`        //
-	NotBefore      time.Time          `json:"notBefore"      msgpack:"notBefore"`      //
-	NotAfter       time.Time          `json:"notAfter"       msgpack:"notAfter"`       // redis:",exat"
-	DNSNames       []string           `json:"dnsNames"       msgpack:"dnsNames"`       //
-	EmailAddresses []string           `json:"emailAddresses" msgpack:"emailAddresses"` //
-	IPAddresses    []*netip.Addr      `json:"ipAddresses"    msgpack:"ipAddresses"`    //
-	URIs           []*url.URL         `json:"uris"           msgpack:"uris"`           //
-	IsCA           mod_bools.AttrBool `json:"isCA"           msgpack:"isCA"`           //
-
-	// // element specific meta data
-	// Type   attrEntryType   `json:"type,omitempty"   msgpack:"type"`   // (?) Certificate's type
-	// Status attrEntryStatus `json:"status,omitempty" msgpack:"status"` //
+	// element specific meta data
+	// Type   attrEntryType   `json:"type,omitempty"   msgpack:"type"`   //
+	Status attrEntryStatus `json:"status,omitempty" msgpack:"status"` //
 	// BaseDN attrDN          `json:"baseDN,omitempty" msgpack:"baseDN"` //
 
 	// // element meta data
@@ -54,6 +41,21 @@ type Cert struct {
 	// ModifiersName   attrDN   `json:"modifiersName,omitempty"   msgpack:"modifiersName"`   //
 	// ModifyTimestamp attrTime `json:"modifyTimestamp,omitempty" msgpack:"modifyTimestamp"` //
 
+	// element meta data
+	UUID           uuid.UUID          `json:"uuid"           msgpack:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
+	SerialNumber   *big.Int           `json:"serialNumber"   msgpack:"serialNumber"`   // (?) redis:",key". no - it can be non-uniq like LDAP's entryUUID - not trusted.
+	Issuer         attrDN             `json:"issuer"         msgpack:"issuer"`         //
+	Subject        attrDN             `json:"subject"        msgpack:"subject"`        //
+	NotBefore      attrTime           `json:"notBefore"      msgpack:"notBefore"`      //
+	NotAfter       attrTime           `json:"notAfter"       msgpack:"notAfter"`       // (?) redis:",exat"
+	DNSNames       []string           `json:"dnsNames"       msgpack:"dnsNames"`       //
+	EmailAddresses []string           `json:"emailAddresses" msgpack:"emailAddresses"` //
+	IPAddresses    []*netip.Addr      `json:"ipAddresses"    msgpack:"ipAddresses"`    //
+	URIs           []*url.URL         `json:"uris"           msgpack:"uris"`           //
+	IsCA           mod_bools.AttrBool `json:"isCA"           msgpack:"isCA"`           //
+	NotBeforeUnix  attrTime           `json:"notBeforeUnix"  msgpack:"notBeforeUnix"`  //
+	NotAfterUnix   attrTime           `json:"notAfterUnix"   msgpack:"notAfterUnix"`   // (?) redis:",exat"
+
 	// element data
 	Certificate *mod_crypto.Certificate `json:"certificate,omitempty" ldap:"userPKCS12" msgpack:"certificate"` //
 }
@@ -63,7 +65,7 @@ func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 	return r.cert.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
 			// FieldName(mod_strings.F_type.FieldName()).As(mod_strings.F_type.String()).Numeric().
-			// FieldName(mod_strings.F_status.FieldName()).As(mod_strings.F_status.String()).Numeric().
+			FieldName(mod_strings.F_status.FieldName()).As(mod_strings.F_status.String()).Numeric().
 			// FieldName(mod_strings.F_baseDN.FieldName()).As(mod_strings.F_baseDN.String()).Tag().Separator(mod_strings.SliceSeparator).
 
 			//
@@ -71,8 +73,8 @@ func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 			FieldName(mod_strings.F_serialNumber.FieldName()).As(mod_strings.F_serialNumber.String()).Numeric().
 			FieldName(mod_strings.F_issuer.FieldName()).As(mod_strings.F_issuer.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_subject.FieldName()).As(mod_strings.F_subject.String()).Tag().Separator(mod_strings.SliceSeparator).
-			FieldName(mod_strings.F_notBefore.FieldName()).As(mod_strings.F_notBefore.String()).Numeric().
-			FieldName(mod_strings.F_notAfter.FieldName()).As(mod_strings.F_notAfter.String()).Numeric().
+			// FieldName(mod_strings.F_notBefore.FieldName()).As(mod_strings.F_notBefore.String()).Numeric().
+			// FieldName(mod_strings.F_notAfter.FieldName()).As(mod_strings.F_notAfter.String()).Numeric().
 			FieldName(mod_strings.F_dnsNames.FieldNameSlice()).As(mod_strings.F_dnsNames.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_emailAddresses.FieldNameSlice()).As(mod_strings.F_emailAddresses.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_ipAddresses.FieldNameSlice()).As(mod_strings.F_ipAddresses.String()).Tag().Separator(mod_strings.SliceSeparator).

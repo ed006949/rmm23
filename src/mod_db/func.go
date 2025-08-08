@@ -63,7 +63,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				return
 			}
 
-			switch baseDN, fnErr = parseDN(fnBaseDN); {
+			switch fnErr = baseDN.parse(fnBaseDN); {
 			case fnErr != nil:
 				return
 			}
@@ -97,7 +97,8 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					for a, b := range e {
 						switch {
 						case b != nil:
-							l.Z{l.M: "repo.SaveMultiEntry", "key": fnEntry[a].Key, "DN": fnEntry[a].DN.String(), l.E: e}.Warning()
+							l.Z{l.M: "save", "key": fnEntry[a].Key, "DN": fnEntry[a].DN.String()}.Warning()
+							l.Z{l.M: "save", "key": fnEntry[a].Key, "DN": fnEntry[a].DN.String(), l.E: e}.Debug()
 						}
 					}
 				}
@@ -115,8 +116,8 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				for _, cert := range fnCerts {
 					// cert.Type = entryType
 					// cert.BaseDN = baseDN
-					// cert.Status = entryStatusLoaded
-					cert.Key = uuid.NewSHA1(uuid.Nil, cert.Certificate.Certificate.Raw).String()
+					cert.Status = entryStatusLoaded
+					cert.normalize()
 
 					_ = repo.DeleteEntry(ctx, cert.Key)
 				}
@@ -126,7 +127,8 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					for a, b := range e {
 						switch {
 						case b != nil:
-							l.Z{l.M: "repo.SaveMultiCert", "key": fnCerts[a].Key, "cert": fnCerts[a].Certificate.Certificate.Subject.String(), l.E: e}.Warning()
+							l.Z{l.M: "save", "key": fnCerts[a].Key, "cert": fnCerts[a].Certificate.Certificate.Subject.String()}.Warning()
+							l.Z{l.M: "save", "key": fnCerts[a].Key, "cert": fnCerts[a].Certificate.Certificate.Subject.String(), l.E: e}.Debug()
 						}
 					}
 				}
