@@ -62,21 +62,22 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 			case fnErr != nil:
 				return
 			}
+
 			switch baseDN, fnErr = parseDN(fnBaseDN); {
 			case fnErr != nil:
 				return
 			}
 
-			for en := 0; en < len(fnSearchResult.Entries); en += 16 {
+			for en := 0; en < len(fnSearchResult.Entries); en += l.BulkOpsSize {
 				var (
 					fnEntry     []*Entry
 					fnCerts     []*Cert
-					end         = min(en+16, len(fnSearchResult.Entries))
+					end         = min(en+l.BulkOpsSize, len(fnSearchResult.Entries))
 					bulkEntries = fnSearchResult.Entries[en:end]
 				)
 
 				// Parse LDAP Entries
-				switch fnErr = mod_ldap.WalkTags(bulkEntries, &fnEntry); {
+				switch fnErr = mod_ldap.UnmarshalLDAPEntries(bulkEntries, &fnEntry); {
 				case err != nil:
 					return
 				}
@@ -102,7 +103,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				}
 
 				// Parse LDAP Entries's Certificates
-				switch fnErr = mod_ldap.WalkTags(bulkEntries, &fnCerts); {
+				switch fnErr = mod_ldap.UnmarshalLDAPEntries(bulkEntries, &fnCerts); {
 				case err != nil:
 					return
 				}
@@ -115,7 +116,6 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					// cert.Type = entryType
 					// cert.BaseDN = baseDN
 					// cert.Status = entryStatusLoaded
-
 					cert.Key = uuid.NewSHA1(uuid.Nil, cert.Certificate.Certificate.Raw).String()
 
 					_ = repo.DeleteEntry(ctx, cert.Key)

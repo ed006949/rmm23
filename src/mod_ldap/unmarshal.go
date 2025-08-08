@@ -11,8 +11,8 @@ import (
 	"github.com/go-ldap/ldap/v3"
 )
 
-// WalkTags processes struct fields with encoding.TextUnmarshaler support and standard type fallbacks.
-func WalkTags(entries []*ldap.Entry, target interface{}) error {
+// UnmarshalLDAPEntries processes struct fields with encoding.TextUnmarshaler support and standard type fallbacks.
+func UnmarshalLDAPEntries(entries []*ldap.Entry, target interface{}) error {
 	targetValue := reflect.ValueOf(target)
 	if targetValue.Kind() != reflect.Ptr || targetValue.Elem().Kind() != reflect.Slice {
 		return fmt.Errorf("target must be pointer to slice")
@@ -33,10 +33,12 @@ func WalkTags(entries []*ldap.Entry, target interface{}) error {
 	return nil
 }
 
-// createAndFillItem creates the appropriate item type and fills it
+// createAndFillItem creates the appropriate item type and fills it.
 func createAndFillItem(entry *ldap.Entry, elemType reflect.Type) (reflect.Value, error) {
-	var structValue reflect.Value
-	var item reflect.Value
+	var (
+		structValue reflect.Value
+		item        reflect.Value
+	)
 
 	if elemType.Kind() == reflect.Ptr {
 		// Handle []*Entry
@@ -147,7 +149,9 @@ func setSingleValue(fieldValue reflect.Value, value string) error {
 		if err != nil {
 			return fmt.Errorf("invalid time: %w", err)
 		}
+
 		fieldValue.Set(reflect.ValueOf(timeVal))
+
 		return nil
 
 	case reflect.TypeOf(time.Duration(0)):
@@ -155,7 +159,9 @@ func setSingleValue(fieldValue reflect.Value, value string) error {
 		if err != nil {
 			return fmt.Errorf("invalid duration: %w", err)
 		}
+
 		fieldValue.SetInt(int64(d))
+
 		return nil
 	}
 
@@ -176,6 +182,7 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 	switch fieldValue.Kind() {
 	case reflect.String:
 		fieldValue.SetString(value)
+
 		return nil
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
@@ -183,7 +190,9 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 		if err != nil {
 			return fmt.Errorf("invalid integer: %w", err)
 		}
+
 		fieldValue.SetInt(intVal)
+
 		return nil
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
@@ -191,7 +200,9 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 		if err != nil {
 			return fmt.Errorf("invalid unsigned integer: %w", err)
 		}
+
 		fieldValue.SetUint(uintVal)
+
 		return nil
 
 	case reflect.Float32, reflect.Float64:
@@ -199,7 +210,9 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 		if err != nil {
 			return fmt.Errorf("invalid float: %w", err)
 		}
+
 		fieldValue.SetFloat(floatVal)
+
 		return nil
 
 	case reflect.Bool:
@@ -207,13 +220,16 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 		if err != nil {
 			return fmt.Errorf("invalid boolean: %w", err)
 		}
+
 		fieldValue.SetBool(boolVal)
+
 		return nil
 
 	case reflect.Ptr:
 		if fieldValue.IsNil() {
 			fieldValue.Set(reflect.New(fieldValue.Type().Elem()))
 		}
+
 		return setSingleValue(fieldValue.Elem(), value)
 
 	default:
@@ -221,7 +237,7 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 	}
 }
 
-// parseTimeValue with smart format detection based on string length and pattern
+// parseTimeValue with smart format detection based on string length and pattern.
 func parseTimeValue(value string) (t time.Time, err error) {
 	// Skip empty value
 	switch {

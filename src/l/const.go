@@ -32,3 +32,7 @@ const (
 //	Quiet         = verbosityValue(zerolog.NoLevel)
 //	Disabled      = verbosityValue(zerolog.Disabled)
 // )
+
+const (
+	BulkOpsSize = 16
+)
