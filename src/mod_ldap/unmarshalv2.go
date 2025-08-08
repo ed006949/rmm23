@@ -81,7 +81,7 @@ func walkStructFields(entry *ldap.Entry, structValue reflect.Value) error {
 		}
 
 		// Handle DN specially
-		if ldapTag == "dn" {
+		if ldapTag == "dn" { // just use entryDN attribute
 			if err := setFieldValue(fieldValue, []string{entry.DN}); err != nil {
 				return fmt.Errorf("failed to set DN field %s: %w", field.Name, err)
 			}

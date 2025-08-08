@@ -96,7 +96,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					for a, b := range e {
 						switch {
 						case b != nil:
-							l.Z{l.M: "repo.SaveMultiEntry", "DN": fnEntry[a].DN.String(), l.E: e}.Warning()
+							l.Z{l.M: "repo.SaveMultiEntry", "key": fnEntry[a].Key, "DN": fnEntry[a].DN.String(), l.E: e}.Warning()
 						}
 					}
 				}
@@ -126,7 +126,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					for a, b := range e {
 						switch {
 						case b != nil:
-							l.Z{l.M: "repo.SaveMultiEntry", "Cert": fnCerts[a].Subject.String(), l.E: e}.Warning()
+							l.Z{l.M: "repo.SaveMultiCert", "key": fnCerts[a].Key, "cert": fnCerts[a].Certificate.Certificate.Subject.String(), l.E: e}.Warning()
 						}
 					}
 				}
