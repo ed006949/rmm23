@@ -3,6 +3,7 @@ package mod_strings
 const (
 	SliceSeparator  = "\x1f"
 	LineSeparator   = "\n"
+	LURISeparator   = " "
 	JSONPathHeader  = "$."
 	TagSeparator    = ","
 	HeaderSeparator = ":"

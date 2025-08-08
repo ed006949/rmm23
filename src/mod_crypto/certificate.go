@@ -13,15 +13,14 @@ import (
 	"software.sslmate.com/src/go-pkcs12"
 
 	"rmm23/src/mod_errors"
-	"rmm23/src/mod_strings"
 )
 
 type Certificate struct {
-	P12 []byte `json:"p12,omitempty"`
+	P12 []byte `json:"-"`
 	DER []byte `json:"-"` // unwilling to perform
-	PEM []byte `json:"-"` // `json:"pem,omitempty"`
-	CRL []byte `json:"crl,omitempty"`
-	CSR []byte `json:"csr,omitempty"`
+	PEM []byte `json:"pem,omitempty"`
+	CRL []byte `json:"-"`
+	CSR []byte `json:"-"`
 
 	PrivateKeyDER         []byte   `json:"-"`
 	CertificateRequestDER []byte   `json:"-"`
@@ -45,7 +44,7 @@ type Certificate struct {
 func (r *Certificate) MarshalText() (outbound []byte, err error) {
 	switch {
 	case r == nil:
-		return nil, mod_errors.ENOTFOUND
+		return nil, mod_errors.ENODATA
 	case r.PEM == nil:
 		switch err = r.encodePEM(); {
 		case err != nil:
@@ -105,7 +104,7 @@ func (r *Certificate) ParseRaw(inbound ...[]byte) (err error) {
 // We don't need to parse the public key for TLS, but we so do anyway to check that it looks sane and matches the private key.
 func (r *Certificate) checkPrivateKey() (err error) {
 	switch {
-	case r == nil:
+	case r == nil || r.Certificate == nil:
 		return mod_errors.ENODATA
 	}
 
@@ -447,10 +446,10 @@ func (r *Certificate) encodePEM() (err error) {
 	r.PEM = bytes.Join([][]byte{
 		r.PrivateKeyPEM,
 		r.CertificatePEM,
-		func() []byte { return bytes.Join(r.CertificateCAChainPEM, []byte(mod_strings.LineSeparator)) }(),
+		func() []byte { return bytes.Join(r.CertificateCAChainPEM, nil) }(),
 		r.CertificateRequestPEM,
 		r.RevocationListPEM,
-	}, []byte(mod_strings.LineSeparator))
+	}, nil)
 
 	return
 }

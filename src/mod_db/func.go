@@ -187,18 +187,18 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 				c[n] = make([][]byte, totalFiles)
 			}
 
-			switch s[len(s)-2] {
-			case "key":
+			switch {
+			case strings.HasSuffix(name, ".crt.der"):
 				c[n][0], _ = vfsDB.VFS.ReadFile(name)
-			case "crt":
+			case strings.HasSuffix(name, ".ca.der"):
 				c[n][1], _ = vfsDB.VFS.ReadFile(name)
-			case "ca":
-				c[n][2], _ = vfsDB.VFS.ReadFile(name)
-			case "csr":
+			case strings.HasSuffix(name, ".key.der"), strings.HasSuffix(name, ".csr.der"):
+				c[n][0], _ = vfsDB.VFS.ReadFile(name)
+			case strings.HasSuffix(name, ".csr.der"):
 				c[n][3], _ = vfsDB.VFS.ReadFile(name)
-			case "crl":
+			case strings.HasSuffix(name, ".crl.der"):
 				c[n][4], _ = vfsDB.VFS.ReadFile(name)
-			case "pem":
+			case strings.HasSuffix(name, ".pem.der"):
 				c[n][5], _ = vfsDB.VFS.ReadFile(name)
 			default:
 				return

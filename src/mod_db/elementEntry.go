@@ -1,11 +1,16 @@
 package mod_db
 
 import (
+	"context"
 	"net/netip"
 	"net/url"
 	"time"
 
 	"github.com/google/uuid"
+	"github.com/redis/rueidis"
+	"github.com/redis/rueidis/om"
+
+	"rmm23/src/mod_strings"
 )
 
 // Entry is the struct that represents an LDAP-compatible Entry.
@@ -72,4 +77,63 @@ type Entry struct {
 
 	// specific data (space-separated KV DB stored as labeledURI)
 	LabeledURI attrLabeledURIs `json:"labeledURI,omitempty" ldap:"labeledURI" msgpack:"labeledURI"` //
+}
+
+// CreateEntryIndex creates the RediSearch index for the Entry struct.
+func (r *RedisRepository) CreateEntryIndex(ctx context.Context) (err error) {
+	return r.entry.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
+		return schema.
+			FieldName(mod_strings.F_type.FieldName()).As(mod_strings.F_type.String()).Numeric().
+			FieldName(mod_strings.F_status.FieldName()).As(mod_strings.F_status.String()).Numeric().
+			FieldName(mod_strings.F_baseDN.FieldName()).As(mod_strings.F_baseDN.String()).Tag().Separator(mod_strings.SliceSeparator).
+
+			//
+			FieldName(mod_strings.F_uuid.FieldName()).As(mod_strings.F_uuid.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_dn.FieldName()).As(mod_strings.F_dn.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_objectClass.FieldNameSlice()).As(mod_strings.F_objectClass.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_creatorsName.FieldName()).As(mod_strings.F_creatorsName.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_createTimestamp.FieldName()).As(	mod_strings.F_createTimestamp.String()).Numeric().
+			FieldName(mod_strings.F_modifiersName.FieldName()).As(mod_strings.F_modifiersName.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_modifyTimestamp.FieldName()).As(	mod_strings.F_modifyTimestamp.String()).Numeric().
+
+			//
+			FieldName(mod_strings.F_cn.FieldName()).As(mod_strings.F_cn.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_dc.FieldName()).As(mod_strings.F_dc.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_description.FieldName()).As(	mod_strings.F_description.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_destinationIndicator.FieldNameSlice()).As(mod_strings.F_destinationIndicator.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_displayName.FieldName()).As(	mod_strings.F_displayName.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_gidNumber.FieldName()).As(mod_strings.F_gidNumber.String()).Numeric().
+			// FieldName(	mod_strings.F_homeDirectory.FieldName()).As(	mod_strings.F_homeDirectory.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_ipHostNumber.FieldNameSlice()).As(mod_strings.F_ipHostNumber.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_mail.FieldNameSlice()).As(mod_strings.F_mail.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_member.FieldNameSlice()).As(mod_strings.F_member.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_o.FieldName()).As(	mod_strings.F_o.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_ou.FieldName()).As(	mod_strings.F_ou.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_owner.FieldNameSlice()).As(mod_strings.F_owner.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_sn.FieldName()).As(	mod_strings.F_sn.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_sshPublicKey.FieldNameSlice()).As(mod_strings.F_sshPublicKey.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_telephoneNumber.FieldNameSlice()).As(mod_strings.F_telephoneNumber.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_telexNumber.FieldNameSlice()).As(mod_strings.F_telexNumber.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_uid.FieldName()).As(mod_strings.F_uid.String()).Tag().Separator(mod_strings.SliceSeparator).
+			FieldName(mod_strings.F_uidNumber.FieldName()).As(mod_strings.F_uidNumber.String()).Numeric().
+			FieldName(mod_strings.F_userPKCS12.FieldNameSlice()).As(mod_strings.F_userPKCS12.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_userPassword.FieldName()).As(	mod_strings.F_userPassword.String()).Tag().Separator(mod_strings.SliceSeparator).
+
+			//
+			// FieldName(	mod_strings.F_host_aaa.FieldName()).As(	mod_strings.F_host_aaa.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_host_acl.FieldName()).As(	mod_strings.F_host_acl.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_host_type.FieldName()).As(	mod_strings.F_host_type.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_host_asn.FieldName()).As(	mod_strings.F_host_asn.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_host_upstream_asn.FieldName()).As(	mod_strings.F_host_upstream_asn.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_host_hosting_uuid.FieldName()).As(	mod_strings.F_host_hosting_uuid.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_host_url.FieldName()).As(	mod_strings.F_host_url.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(	mod_strings.F_host_listen.FieldName()).As(	mod_strings.F_host_listen.String()).Tag().Separator(mod_strings.SliceSeparator).
+
+			FieldName(mod_strings.F_labeledURI.FieldNameSlice()).As(mod_strings.F_labeledURI.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName( _labeledURI.FieldNameSlice() + ".key").As(	mod_strings.F_labeledURI.String() + "_key").Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName( _labeledURI.FieldNameSlice() + ".value").As(	mod_strings.F_labeledURI.String() + "_value").Tag().Separator(mod_strings.SliceSeparator).
+
+			//
+			Build()
+	})
 }

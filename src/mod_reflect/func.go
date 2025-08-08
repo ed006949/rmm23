@@ -9,6 +9,13 @@ import (
 	"rmm23/src/mod_strings"
 )
 
+func MakeMapIfNil[M ~map[K]V, K comparable, V any](m *M) {
+	switch {
+	case *m == nil:
+		*m = make(M)
+	}
+}
+
 type FieldTypeInfo struct {
 	Kind     reflect.Kind
 	Type     reflect.Type // The field's own type

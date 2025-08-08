@@ -34,7 +34,7 @@ func FilterEmpty(inbound [][]byte) (outbound [][]byte) {
 }
 
 func TrimSpace(inbound [][]byte) (outbound [][]byte) {
-	outbound = make([][]byte, 0, len(inbound))
+	outbound = make([][]byte, len(inbound), len(inbound))
 
 	for a, b := range inbound {
 		outbound[a] = bytes.TrimSpace(b)
@@ -44,7 +44,7 @@ func TrimSpace(inbound [][]byte) (outbound [][]byte) {
 }
 
 func ToBytes[S ~[]E, E any](inbound S, flag mod_slices.FlagType) (outbound [][]byte) {
-	outbound = make([][]byte, 0, len(inbound))
+	outbound = make([][]byte, len(inbound), len(inbound))
 
 	for a, b := range inbound {
 		outbound[a] = fmt.Append(nil, b)
