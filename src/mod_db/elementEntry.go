@@ -76,7 +76,7 @@ type Entry struct {
 	HostListen      netip.Addr `json:"host_listen,omitempty"       msgpack:"host_listen"`       //
 
 	// specific data (space-separated KV DB stored as labeledURI)
-	LabeledURI attrLabeledURIs `json:"labeledURI,omitempty" ldap:"labeledURI" msgpack:"labeledURI"` //
+	LabeledURI []string `json:"labeledURI,omitempty" ldap:"labeledURI" msgpack:"labeledURI"` //
 }
 
 // CreateEntryIndex creates the RediSearch index for the Entry struct.
