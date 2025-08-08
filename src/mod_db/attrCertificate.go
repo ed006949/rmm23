@@ -9,17 +9,14 @@ import (
 	"rmm23/src/mod_net"
 )
 
-func (r *Cert) UnmarshalText(inbound []byte) (err error) {
-	var (
-		cert = new(Cert)
-	)
-
-	switch err = cert.parseRaw(inbound); {
-	case err != nil:
-		return
+func (r *Cert) parseCertificate(inbound *mod_crypto.Certificate) (err error) {
+	switch {
+	case inbound == nil:
+		return mod_errors.ENODATA
 	}
 
-	*r = *cert
+	r.Certificate = inbound
+	r.normalize()
 
 	return
 }
@@ -34,10 +31,14 @@ func (r *Cert) parseRaw(inbound ...[]byte) (err error) {
 		return
 	}
 
-	r.normalize()
+	switch err = r.parseCertificate(certificate); {
+	case err != nil:
+		return
+	}
 
 	return
 }
+
 func (r *Cert) normalize() {
 	var (
 		certUUID = uuid.NewSHA1(uuid.NameSpaceOID, r.Certificate.Certificate.Raw)
@@ -56,4 +57,6 @@ func (r *Cert) normalize() {
 	r.IPAddresses = mod_errors.StripErr1(mod_net.ParseNetIPs(r.Certificate.Certificate.IPAddresses))
 	r.URIs = r.Certificate.Certificate.URIs
 	r.IsCA = mod_bools.AttrBool(r.Certificate.Certificate.IsCA)
+	// r.NotBeforeUnix.Set(r.NotBefore)
+	// r.NotAfterUnix.Set(r.NotAfter)
 }

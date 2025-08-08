@@ -3,7 +3,6 @@ package mod_db
 import (
 	"context"
 	"io/fs"
-	"slices"
 	"strings"
 
 	"github.com/go-ldap/ldap/v3"
@@ -12,6 +11,7 @@ import (
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
+	"rmm23/src/mod_strings"
 	"rmm23/src/mod_vfs"
 )
 
@@ -71,7 +71,6 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 			for en := 0; en < len(fnSearchResult.Entries); en += l.BulkOpsSize {
 				var (
 					fnEntry     []*Entry
-					fnCerts     []*Cert
 					end         = min(en+l.BulkOpsSize, len(fnSearchResult.Entries))
 					bulkEntries = fnSearchResult.Entries[en:end]
 				)
@@ -103,23 +102,24 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 					}
 				}
 
-				// Parse LDAP Entries's Certificates
-				switch fnErr = mod_ldap.UnmarshalLDAPEntries(bulkEntries, &fnCerts); {
-				case err != nil:
-					return
-				}
+				// Parse LDAP Entries's Certificates `userPKCS12`
+				var (
+					fnCerts []*Cert
+				)
 
-				fnCerts = slices.DeleteFunc(fnCerts, func(cert *Cert) bool {
-					return cert == nil || cert.Certificate == nil
-				})
+				for _, b := range bulkEntries {
+					for _, d := range b.GetRawAttributeValues(mod_strings.F_userPKCS12.String()) {
+						var (
+							fnCert = new(Cert)
+						)
+						switch forErr := fnCert.parseRaw(d); {
+						case forErr != nil:
+							continue
+						}
 
-				for _, cert := range fnCerts {
-					// cert.Type = entryType
-					// cert.BaseDN = baseDN
-					cert.Status = entryStatusLoaded
-					cert.normalize()
-
-					_ = repo.DeleteEntry(ctx, cert.Key)
+						fnCerts = append(fnCerts, fnCert)
+						_ = repo.DeleteCert(ctx, fnCert.Key)
+					}
 				}
 
 				switch e := repo.SaveMultiCert(ctx, fnCerts...); {

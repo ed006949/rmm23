@@ -35,9 +35,9 @@ type Entry struct {
 	DN              attrDN    `json:"dn,omitempty"              ldap:"entryDN"         msgpack:"dn"`              //  must be unique
 	ObjectClass     []string  `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass"`     //  Entry type
 	CreatorsName    attrDN    `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName"`    //
-	CreateTimestamp time.Time `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp"` //
+	CreateTimestamp attrTime  `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp"` //
 	ModifiersName   attrDN    `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName"`   //
-	ModifyTimestamp time.Time `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp"` //
+	ModifyTimestamp attrTime  `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp"` //
 
 	// element data
 	CN                   string         `json:"cn,omitempty"                   ldap:"cn"                   msgpack:"cn"`                   //  RDN in group's context
@@ -92,9 +92,9 @@ func (r *RedisRepository) CreateEntryIndex(ctx context.Context) (err error) {
 			FieldName(mod_strings.F_dn.FieldName()).As(mod_strings.F_dn.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_objectClass.FieldNameSlice()).As(mod_strings.F_objectClass.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_creatorsName.FieldName()).As(mod_strings.F_creatorsName.String()).Tag().Separator(mod_strings.SliceSeparator).
-			// FieldName(	mod_strings.F_createTimestamp.FieldName()).As(	mod_strings.F_createTimestamp.String()).Numeric().
+			FieldName(mod_strings.F_createTimestamp.FieldName()).As(mod_strings.F_createTimestamp.String()).Numeric().
 			FieldName(mod_strings.F_modifiersName.FieldName()).As(mod_strings.F_modifiersName.String()).Tag().Separator(mod_strings.SliceSeparator).
-			// FieldName(	mod_strings.F_modifyTimestamp.FieldName()).As(	mod_strings.F_modifyTimestamp.String()).Numeric().
+			FieldName(mod_strings.F_modifyTimestamp.FieldName()).As(mod_strings.F_modifyTimestamp.String()).Numeric().
 
 			//
 			FieldName(mod_strings.F_cn.FieldName()).As(mod_strings.F_cn.String()).Tag().Separator(mod_strings.SliceSeparator).
@@ -116,7 +116,7 @@ func (r *RedisRepository) CreateEntryIndex(ctx context.Context) (err error) {
 			FieldName(mod_strings.F_telexNumber.FieldNameSlice()).As(mod_strings.F_telexNumber.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_uid.FieldName()).As(mod_strings.F_uid.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_uidNumber.FieldName()).As(mod_strings.F_uidNumber.String()).Numeric().
-			FieldName(mod_strings.F_userPKCS12.FieldNameSlice()).As(mod_strings.F_userPKCS12.String()).Tag().Separator(mod_strings.SliceSeparator).
+			// FieldName(mod_strings.F_userPKCS12.FieldNameSlice()).As(mod_strings.F_userPKCS12.String()).Tag().Separator(mod_strings.SliceSeparator).
 			// FieldName(	mod_strings.F_userPassword.FieldName()).As(	mod_strings.F_userPassword.String()).Tag().Separator(mod_strings.SliceSeparator).
 
 			//

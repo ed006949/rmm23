@@ -16,28 +16,28 @@ import (
 )
 
 type Certificate struct {
-	P12 []byte `json:"-"`
+	P12 []byte `json:"p12,omitempty"`
 	DER []byte `json:"-"` // unwilling to perform
-	PEM []byte `json:"pem,omitempty"`
-	CRL []byte `json:"-"`
-	CSR []byte `json:"-"`
+	PEM []byte `json:"pem,omitempty" ldap:"userPKCS12"`
+	CSR []byte `json:"csr,omitempty"`
+	CRL []byte `json:"crl,omitempty"`
 
 	PrivateKeyDER         []byte   `json:"-"`
-	CertificateRequestDER []byte   `json:"-"`
 	CertificateDER        []byte   `json:"-"`
 	CertificateCAChainDER [][]byte `json:"-"`
+	CertificateRequestDER []byte   `json:"-"`
 	RevocationListDER     []byte   `json:"-"`
 
 	PrivateKeyPEM         []byte   `json:"-"`
-	CertificateRequestPEM []byte   `json:"-"`
 	CertificatePEM        []byte   `json:"-"`
 	CertificateCAChainPEM [][]byte `json:"-"`
+	CertificateRequestPEM []byte   `json:"-"`
 	RevocationListPEM     []byte   `json:"-"`
 
 	PrivateKey         crypto.PrivateKey        `json:"-"`
-	CertificateRequest *x509.CertificateRequest `json:"-"`
 	Certificate        *x509.Certificate        `json:"-"`
 	CertificateCAChain []*x509.Certificate      `json:"-"`
+	CertificateRequest *x509.CertificateRequest `json:"-"`
 	RevocationList     *x509.RevocationList     `json:"-"`
 }
 

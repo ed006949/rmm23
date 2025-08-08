@@ -53,8 +53,8 @@ type Cert struct {
 	IPAddresses    []*netip.Addr      `json:"ipAddresses"    msgpack:"ipAddresses"`    //
 	URIs           []*url.URL         `json:"uris"           msgpack:"uris"`           //
 	IsCA           mod_bools.AttrBool `json:"isCA"           msgpack:"isCA"`           //
-	NotBeforeUnix  attrTime           `json:"notBeforeUnix"  msgpack:"notBeforeUnix"`  //
-	NotAfterUnix   attrTime           `json:"notAfterUnix"   msgpack:"notAfterUnix"`   // (?) redis:",exat"
+	// NotBeforeUnix  attrTime           `json:"notBeforeUnix"  msgpack:"notBeforeUnix"`  // NUMERIC rediSearch
+	// NotAfterUnix   attrTime           `json:"notAfterUnix"   msgpack:"notAfterUnix"`   // NUMERIC rediSearch
 
 	// element data
 	Certificate *mod_crypto.Certificate `json:"certificate,omitempty" ldap:"userPKCS12" msgpack:"certificate"` //
@@ -64,6 +64,8 @@ type Cert struct {
 func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 	return r.cert.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
+
+			//
 			// FieldName(mod_strings.F_type.FieldName()).As(mod_strings.F_type.String()).Numeric().
 			FieldName(mod_strings.F_status.FieldName()).As(mod_strings.F_status.String()).Numeric().
 			// FieldName(mod_strings.F_baseDN.FieldName()).As(mod_strings.F_baseDN.String()).Tag().Separator(mod_strings.SliceSeparator).
@@ -73,8 +75,8 @@ func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 			FieldName(mod_strings.F_serialNumber.FieldName()).As(mod_strings.F_serialNumber.String()).Numeric().
 			FieldName(mod_strings.F_issuer.FieldName()).As(mod_strings.F_issuer.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_subject.FieldName()).As(mod_strings.F_subject.String()).Tag().Separator(mod_strings.SliceSeparator).
-			// FieldName(mod_strings.F_notBefore.FieldName()).As(mod_strings.F_notBefore.String()).Numeric().
-			// FieldName(mod_strings.F_notAfter.FieldName()).As(mod_strings.F_notAfter.String()).Numeric().
+			FieldName(mod_strings.F_notBefore.FieldName()).As(mod_strings.F_notBefore.String()).Numeric().
+			FieldName(mod_strings.F_notAfter.FieldName()).As(mod_strings.F_notAfter.String()).Numeric().
 			FieldName(mod_strings.F_dnsNames.FieldNameSlice()).As(mod_strings.F_dnsNames.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_emailAddresses.FieldNameSlice()).As(mod_strings.F_emailAddresses.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_ipAddresses.FieldNameSlice()).As(mod_strings.F_ipAddresses.String()).Tag().Separator(mod_strings.SliceSeparator).
