@@ -3,17 +3,15 @@ package mod_db
 import (
 	"context"
 	"io/fs"
+	"slices"
 	"strings"
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
 
 	"rmm23/src/l"
-	"rmm23/src/mod_bools"
-	"rmm23/src/mod_crypto"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
-	"rmm23/src/mod_net"
 	"rmm23/src/mod_vfs"
 )
 
@@ -54,92 +52,82 @@ func GetFSCerts(ctx context.Context, inbound *mod_vfs.VFSDB, outbound *Conf) (er
 }
 
 func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisRepository) (err error) {
-	type entryCerts struct {
-		UserPKCS12 []*mod_crypto.Certificate `json:"userPKCS12,omitempty" ldap:"userPKCS12"`
-	}
-
 	var (
 		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
 			var (
 				entryType attrEntryType
+				baseDN    attrDN
 			)
 			switch fnErr = entryType.Parse(fnSearchResultType); {
 			case fnErr != nil:
 				return
 			}
+			switch baseDN, fnErr = parseDN(fnBaseDN); {
+			case fnErr != nil:
+				return
+			}
 
-			for _, fnB := range fnSearchResult.Entries {
+			for en := 0; en < len(fnSearchResult.Entries); en += 16 {
 				var (
-					fnEntry = new(Entry)
+					fnEntry     []*Entry
+					fnCerts     []*Cert
+					end         = min(en+16, len(fnSearchResult.Entries))
+					bulkEntries = fnSearchResult.Entries[en:end]
 				)
-				switch e := mod_ldap.UnmarshalLDAP(fnB, fnEntry); {
-				case e != nil:
-					l.Z{l.M: "mod_ldap.UnmarshalEntry", "DN": fnEntry.DN.String(), l.E: e}.Warning()
 
+				// Parse LDAP Entries
+				switch fnErr = mod_ldap.WalkTags(bulkEntries, &fnEntry); {
+				case err != nil:
 					return
 				}
 
-				fnEntry.Type = entryType
-				fnEntry.BaseDN = mod_errors.StripErr1(parseDN(fnBaseDN))
-				fnEntry.Status = entryStatusLoaded
-				// tUUID := uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String()))
-				// fnEntry.UUID = tUUID
+				for _, entry := range fnEntry {
+					entry.Type = entryType
+					entry.BaseDN = baseDN
+					entry.Status = entryStatusLoaded
 
-				fnEntry.Key = uuid.NewSHA1(uuid.Nil, []byte(fnEntry.DN.String())).String()
+					entry.Key = uuid.NewSHA1(uuid.Nil, []byte(entry.DN.String())).String()
 
-				_ = repo.DeleteEntry(ctx, fnEntry.Key)
-				switch e := repo.SaveEntry(ctx, fnEntry); {
-				case e != nil:
-					l.Z{l.M: "repo.SaveEntry", "DN": fnEntry.DN.String(), l.E: e}.Warning()
-
-					continue
+					_ = repo.DeleteEntry(ctx, entry.Key)
 				}
 
-				var (
-					cert    = new(entryCerts)
-					fnCerts []*Cert
-				)
-				switch e := mod_ldap.UnmarshalLDAP(fnB, cert); {
+				switch e := repo.SaveMultiEntry(ctx, fnEntry...); {
 				case e != nil:
-					l.Z{l.M: "mod_ldap.UnmarshalEntry", "DN": fnEntry.DN.String(), "cert": "all", l.E: e}.Warning()
-
-					continue
-				}
-
-				for _, e := range cert.UserPKCS12 {
-					var (
-						fnCert = &Cert{
-							// Key:            "",
-							// Ver:            0,
-							Ext:            e.Certificate.NotAfter,
-							UUID:           uuid.NewSHA1(uuid.NameSpaceOID, e.Certificate.Raw),
-							SerialNumber:   e.Certificate.SerialNumber,
-							Issuer:         mod_errors.StripErr1(parseDN(e.Certificate.Issuer.String())),
-							Subject:        mod_errors.StripErr1(parseDN(e.Certificate.Subject.String())),
-							NotBefore:      e.Certificate.NotBefore,
-							NotAfter:       e.Certificate.NotAfter,
-							DNSNames:       e.Certificate.DNSNames,
-							EmailAddresses: e.Certificate.EmailAddresses,
-							IPAddresses:    mod_errors.StripErr1(mod_net.ParseNetIPs(e.Certificate.IPAddresses)),
-							URIs:           e.Certificate.URIs,
-							IsCA:           mod_bools.AttrBool(e.Certificate.IsCA),
-							Certificate:    e,
+					for a, b := range e {
+						switch {
+						case b != nil:
+							l.Z{l.M: "repo.SaveMultiEntry", "DN": fnEntry[a].DN.String(), l.E: e}.Warning()
 						}
-					)
-
-					fnCert.Key = fnCert.UUID.String()
-
-					// fnCert.Status = entryStatusLoaded
-
-					_ = repo.DeleteCert(ctx, fnCert.Key)
-
-					fnCerts = append(fnCerts, fnCert)
+					}
 				}
 
-				for a, e := range repo.SaveMultiCert(ctx, fnCerts...) {
-					switch {
-					case e != nil:
-						l.Z{l.M: "repo.SaveMultiCert", "DN": fnEntry.DN.String(), "cert": fnCerts[a].Key, l.E: e}.Warning()
+				// Parse LDAP Entries's Certificates
+				switch fnErr = mod_ldap.WalkTags(bulkEntries, &fnCerts); {
+				case err != nil:
+					return
+				}
+
+				fnCerts = slices.DeleteFunc(fnCerts, func(cert *Cert) bool {
+					return cert == nil || cert.Certificate == nil
+				})
+
+				for _, cert := range fnCerts {
+					// cert.Type = entryType
+					// cert.BaseDN = baseDN
+					// cert.Status = entryStatusLoaded
+
+					cert.Key = uuid.NewSHA1(uuid.Nil, cert.Certificate.Certificate.Raw).String()
+
+					_ = repo.DeleteEntry(ctx, cert.Key)
+				}
+
+				switch e := repo.SaveMultiCert(ctx, fnCerts...); {
+				case e != nil:
+					for a, b := range e {
+						switch {
+						case b != nil:
+							l.Z{l.M: "repo.SaveMultiEntry", "Cert": fnCerts[a].Subject.String(), l.E: e}.Warning()
+						}
 					}
 				}
 			}

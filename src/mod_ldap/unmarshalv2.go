@@ -7,6 +7,7 @@ import (
 	"strconv"
 	"time"
 
+	ber "github.com/go-asn1-ber/asn1-ber"
 	"github.com/go-ldap/ldap/v3"
 )
 
@@ -18,12 +19,11 @@ func WalkTags(entries []*ldap.Entry, target interface{}) error {
 	}
 
 	sliceValue := targetValue.Elem()
-	sliceType := sliceValue.Type().Elem()
+	elemType := sliceValue.Type().Elem()
 
 	for _, entry := range entries {
-		item := reflect.New(sliceType).Elem()
-
-		if err := walkStructFields(entry, item); err != nil {
+		item, err := createAndFillItem(entry, elemType)
+		if err != nil {
 			return fmt.Errorf("failed to process entry %s: %w", entry.DN, err)
 		}
 
@@ -31,6 +31,37 @@ func WalkTags(entries []*ldap.Entry, target interface{}) error {
 	}
 
 	return nil
+}
+
+// createAndFillItem creates the appropriate item type and fills it
+func createAndFillItem(entry *ldap.Entry, elemType reflect.Type) (reflect.Value, error) {
+	var structValue reflect.Value
+	var item reflect.Value
+
+	if elemType.Kind() == reflect.Ptr {
+		// Handle []*Entry
+		structType := elemType.Elem()
+		if structType.Kind() != reflect.Struct {
+			return reflect.Value{}, fmt.Errorf("pointer element must point to struct, got %v", structType)
+		}
+
+		item = reflect.New(structType) // Create *Entry
+		structValue = item.Elem()      // Get Entry for filling
+	} else {
+		// Handle []Entry
+		if elemType.Kind() != reflect.Struct {
+			return reflect.Value{}, fmt.Errorf("slice element must be struct, got %v", elemType)
+		}
+
+		item = reflect.New(elemType).Elem() // Create Entry
+		structValue = item                  // Use directly for filling
+	}
+
+	if err := walkStructFields(entry, structValue); err != nil {
+		return reflect.Value{}, err
+	}
+
+	return item, nil
 }
 
 func walkStructFields(entry *ldap.Entry, structValue reflect.Value) error {
@@ -109,7 +140,26 @@ func setSliceValue(fieldValue reflect.Value, values []string) error {
 
 // setSingleValue handles single values with TextUnmarshaler priority and standard type fallbacks.
 func setSingleValue(fieldValue reflect.Value, value string) error {
-	// Priority 1: Try encoding.TextUnmarshaler
+	// Handle special types first before TextUnmarshaler check
+	switch fieldValue.Type() {
+	case reflect.TypeOf(time.Time{}):
+		timeVal, err := parseTimeValue(value)
+		if err != nil {
+			return fmt.Errorf("invalid time: %w", err)
+		}
+		fieldValue.Set(reflect.ValueOf(timeVal))
+		return nil
+
+	case reflect.TypeOf(time.Duration(0)):
+		d, err := time.ParseDuration(value)
+		if err != nil {
+			return fmt.Errorf("invalid duration: %w", err)
+		}
+		fieldValue.SetInt(int64(d))
+		return nil
+	}
+
+	// Priority: Try encoding.TextUnmarshaler
 	if fieldValue.CanAddr() {
 		addr := fieldValue.Addr()
 		if unmarshaler, ok := addr.Interface().(encoding.TextUnmarshaler); ok {
@@ -117,7 +167,7 @@ func setSingleValue(fieldValue reflect.Value, value string) error {
 		}
 	}
 
-	// Priority 2: Handle standard types
+	// Fallback: Handle standard types
 	return setStandardType(fieldValue, value)
 }
 
@@ -126,29 +176,14 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 	switch fieldValue.Kind() {
 	case reflect.String:
 		fieldValue.SetString(value)
-
 		return nil
 
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
-		if fieldValue.Type() == reflect.TypeOf(time.Duration(0)) {
-			// Handle time.Duration specially
-			d, err := time.ParseDuration(value)
-			if err != nil {
-				return fmt.Errorf("invalid duration: %w", err)
-			}
-
-			fieldValue.SetInt(int64(d))
-
-			return nil
-		}
-
 		intVal, err := strconv.ParseInt(value, 10, 64)
 		if err != nil {
 			return fmt.Errorf("invalid integer: %w", err)
 		}
-
 		fieldValue.SetInt(intVal)
-
 		return nil
 
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
@@ -156,9 +191,7 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 		if err != nil {
 			return fmt.Errorf("invalid unsigned integer: %w", err)
 		}
-
 		fieldValue.SetUint(uintVal)
-
 		return nil
 
 	case reflect.Float32, reflect.Float64:
@@ -166,9 +199,7 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 		if err != nil {
 			return fmt.Errorf("invalid float: %w", err)
 		}
-
 		fieldValue.SetFloat(floatVal)
-
 		return nil
 
 	case reflect.Bool:
@@ -176,32 +207,13 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 		if err != nil {
 			return fmt.Errorf("invalid boolean: %w", err)
 		}
-
 		fieldValue.SetBool(boolVal)
-
-		return nil
-
-	case reflect.Struct:
-		if fieldValue.Type() == reflect.TypeOf(time.Time{}) {
-			// Handle time.Time
-			timeVal, err := parseTimeValue(value)
-			if err != nil {
-				return fmt.Errorf("invalid time: %w", err)
-			}
-
-			fieldValue.Set(reflect.ValueOf(timeVal))
-
-			return nil
-		}
-
 		return nil
 
 	case reflect.Ptr:
-		// Handle pointer types
 		if fieldValue.IsNil() {
 			fieldValue.Set(reflect.New(fieldValue.Type().Elem()))
 		}
-
 		return setSingleValue(fieldValue.Elem(), value)
 
 	default:
@@ -209,47 +221,27 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 	}
 }
 
-// parseTimeValue attempts multiple time formats.
-func parseTimeValue(value string) (time.Time, error) {
-	formats := []string{
-		time.RFC3339,
-		time.RFC3339Nano,
-		"2006-01-02T15:04:05Z",
-		"2006-01-02 15:04:05",
-		"2006-01-02",
-		"20060102150405Z", // LDAP timestamp format
+// parseTimeValue with smart format detection based on string length and pattern
+func parseTimeValue(value string) (t time.Time, err error) {
+	// Skip empty value
+	switch {
+	case len(value) == 0:
+		return time.Time{}, nil
 	}
 
-	for _, format := range formats {
-		if t, err := time.Parse(format, value); err == nil {
-			return t, nil
-		}
+	// Try BER GeneralizedTime first (handles LDAP timestamps)
+	switch t, err = ber.ParseGeneralizedTime([]byte(value)); {
+	case err == nil:
+		return
+	}
+
+	t = time.Time{}
+
+	// Try time.Time's built-in UnmarshalText (handles RFC3339, etc.)
+	switch err = t.UnmarshalText([]byte(value)); {
+	case err == nil:
+		return
 	}
 
 	return time.Time{}, fmt.Errorf("unable to parse time: %s", value)
-}
-
-// Nullable types example.
-type NullableInt struct {
-	Value int
-	Valid bool
-}
-
-func (n *NullableInt) UnmarshalText(text []byte) error {
-	str := string(text)
-	if str == "" || str == "null" {
-		n.Valid = false
-
-		return nil
-	}
-
-	val, err := strconv.Atoi(str)
-	if err != nil {
-		return err
-	}
-
-	n.Value = val
-	n.Valid = true
-
-	return nil
 }
