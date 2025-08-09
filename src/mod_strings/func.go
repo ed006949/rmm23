@@ -41,6 +41,15 @@ func Split(inbound string, sep string, flag mod_slices.FlagType) (outbound []str
 	return Normalize(strings.Split(inbound, sep), flag)
 }
 
+func MustSplitN(inbound string, sep string, n int, flag mod_slices.FlagType) (outbound []string) {
+	switch outbound = Normalize(strings.SplitN(inbound, sep, n), flag); {
+	case len(outbound) != n:
+		return nil
+	}
+
+	return
+}
+
 func SplitN(inbound string, sep string, n int, flag mod_slices.FlagType) (outbound []string) {
 	return Normalize(strings.SplitN(inbound, sep, n), flag)
 }

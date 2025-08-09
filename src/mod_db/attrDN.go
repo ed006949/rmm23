@@ -8,9 +8,7 @@ import (
 	"rmm23/src/mod_strings"
 )
 
-type attrDN struct {
-	dn []mod_strings.KV
-}
+type attrDN struct{ dn []mod_strings.KV }
 
 func (r *attrDN) UnmarshalText(inbound []byte) (err error) {
 	var (
@@ -24,13 +22,6 @@ func (r *attrDN) UnmarshalText(inbound []byte) (err error) {
 		switch {
 		case len(interimElement) != mod_slices.KVElements:
 			return mod_errors.EParse
-		}
-
-		for _, d := range interimElement {
-			switch {
-			case len(d) == 0:
-				return mod_errors.EParse
-			}
 		}
 
 		interim[a] = mod_strings.KV{interimElement[0], interimElement[1]}

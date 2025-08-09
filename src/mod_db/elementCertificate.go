@@ -43,7 +43,7 @@ type Cert struct {
 
 	// element meta data
 	UUID           uuid.UUID          `json:"uuid"           msgpack:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
-	SerialNumber   *big.Int           `json:"serialNumber"   msgpack:"serialNumber"`   // (?) redis:",key". no - it can be non-uniq like LDAP's entryUUID - not trusted.
+	SerialNumber   *big.Int           `json:"serialNumber"   msgpack:"serialNumber"`   // (?) redis:",key". it can be non-uniq like LDAP's entryUUID - not trusted.
 	Issuer         attrDN             `json:"issuer"         msgpack:"issuer"`         //
 	Subject        attrDN             `json:"subject"        msgpack:"subject"`        //
 	NotBefore      attrTime           `json:"notBefore"      msgpack:"notBefore"`      //
@@ -53,11 +53,9 @@ type Cert struct {
 	IPAddresses    []*netip.Addr      `json:"ipAddresses"    msgpack:"ipAddresses"`    //
 	URIs           []*url.URL         `json:"uris"           msgpack:"uris"`           //
 	IsCA           mod_bools.AttrBool `json:"isCA"           msgpack:"isCA"`           //
-	// NotBeforeUnix  attrTime           `json:"notBeforeUnix"  msgpack:"notBeforeUnix"`  // NUMERIC rediSearch
-	// NotAfterUnix   attrTime           `json:"notAfterUnix"   msgpack:"notAfterUnix"`   // NUMERIC rediSearch
 
 	// element data
-	Certificate *mod_crypto.Certificate `json:"certificate,omitempty" ldap:"userPKCS12" msgpack:"certificate"` //
+	Certificate *mod_crypto.Certificate `json:"certificate,omitempty" msgpack:"certificate"` //
 }
 
 // CreateCertIndex creates the RediSearch index for the Cert struct.
