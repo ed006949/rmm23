@@ -8,15 +8,14 @@ CA_CRL="${CA_NAME}.crl.pem"
 INDEX="index.txt"
 SERIAL="serial"
 CRLNUM="crlnumber"
-KEY_BITS=3072
-DAYS=825      # non-CA cert validity
-CA_DAYS=3650  # CA cert validity
+DAYS=3650      # non-CA cert validity
+CA_DAYS=9999  # CA cert validity
 VERBOSE=0
 
 log() { ((VERBOSE)) && echo "[*] $*"; }
 err() {
 	echo "ERROR: $*" >&2
-	exit              1
+	exit          1
 }
 
 ca_conf() {
@@ -86,8 +85,8 @@ op() {
 		((VERBOSE)) && echo "[res] ok"
 	else
 		((VERBOSE)) && {
-			echo       "[res] fail"
-			cat                          /tmp/pki.out
+			echo   "[res] fail"
+			cat                      /tmp/pki.out
 		}
 		rm -f /tmp/pki.out
 		return 1
@@ -170,37 +169,52 @@ cmd_delete() {
 
 cmd_list() {
 	ensure_ca
-	echo "=== CA Database Contents ==="
-	if [[ ! -s "$INDEX" ]]; then
-		echo "(no certificates issued)"
-		return
-	fi
-	# Columns as per OpenSSL index.txt
-	# V expiry revdate serial unknown /CN=alice
-	# R expiry revdate serial unknown /CN=alice
-	# E expiry ... etc
-	printf "%-9s %-12s %-30s %-24s %-24s\n" "STATUS" "SERIAL" "CN" "EXPIRY/REVOCATION" "NOTES"
-	awk -F'\t' '
-    function fmt_ts(ts) {
-        # OpenSSL gives YYMMDDHHMMSSZ; convert to ISO simple
-        if (ts == "") return "-"
-        if (match(ts, /../)) {
+	echo  "=== CA Database Contents ==="
+
+	# Table header
+	printf  "%-9s %-12s %-30s %-24s %-24s\n" \
+		"STATUS"     "SERIAL" "CN" "EXPIRY/REVOCATION" "NOTES"
+
+	if  [[ -s "$INDEX" ]]; then
+		awk     -F'\t' '
+        function fmt_ts(ts) {
+            if (ts == "") return "-"
             y=substr(ts,1,2); m=substr(ts,3,2); d=substr(ts,5,2)
             H=substr(ts,7,2); M=substr(ts,9,2); S=substr(ts,11,2)
             return "20"y"-"m"-"d" "H":"M":"S"Z"
-        } else return ts
-    }
-    {
-        stat=$1; expiry=$2; revdate=$3; serial=$4; cn=$6;
-        if (match(cn,/CN=([^\/]+)/,arr)) { cn=arr[1]; }
-        note=""
-        if (stat=="V") { status="VALID"; time=fmt_ts(expiry); }
-        else if (stat=="E") { status="EXPIRED"; time=fmt_ts(expiry); }
-        else if (stat=="R") { status="REVOKED"; time=fmt_ts(revdate); note="revoked on expiry="fmt_ts(expiry); }
-        else { status=stat; time="-"; }
-        printf "%-9s %-12s %-30s %-24s %-24s\n", status, serial, cn, time, note
-    }
-    ' "$INDEX"
+        }
+        {
+            stat=$1; expiry=$2; revdate=$3; serial=$4; cn=$6
+            if (match(cn, /CN=([^\/]+)/, arr)) cn=arr[1]
+            note=""
+            if (stat=="V")       { status="VALID";   time=fmt_ts(expiry) }
+            else if (stat=="E")  { status="EXPIRED"; time=fmt_ts(expiry) }
+            else if (stat=="R")  { status="REVOKED"; time=fmt_ts(revdate); note="revoked on expiry="fmt_ts(expiry) }
+            else                 { status=stat;     time="-" }
+            printf "%-9s %-12s %-30s %-24s %-24s\n", status, serial, cn, time, note
+        }
+        ' "$INDEX"
+	else
+		echo     "(no certificates issued)"
+	fi
+
+	# CA info
+	if  [[ -f "$CA_CRT" ]]; then
+		CA_EXPIRY=$(    openssl x509 -enddate -noout -in "$CA_CRT" | cut -d= -f2)
+	else
+		CA_EXPIRY="-"
+	fi
+
+	# CRL info
+	if  [[ -f "$CA_CRL" ]]; then
+		CRL_NEXT_UPDATE=$(    openssl crl -noout -text -in "$CA_CRL" |
+			grep          "Next Update:" | head -1 | sed -e 's/^ *Next Update: *//')
+	else
+		CRL_NEXT_UPDATE="-"
+	fi
+
+	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CA"  "-" "$CA_NAME" "$CA_EXPIRY" "-"
+	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CRL" "-" "CRL"      "$CRL_NEXT_UPDATE" "-"
 }
 
 usage() {
@@ -227,23 +241,23 @@ main() {
 		-verbose)
 			VERBOSE=1
 			shift
-			main                  "$@"
+			main              "$@"
 			;;
 		-verify)
 			shift
-			cmd_verify      "${1:-}"
+			cmd_verify  "${1:-}"
 			;;
 		-create)
 			shift
-			cmd_create      "${1:-}"
+			cmd_create  "${1:-}"
 			;;
 		-revoke)
 			shift
-			cmd_revoke      "${1:-}"
+			cmd_revoke  "${1:-}"
 			;;
 		-delete)
 			shift
-			cmd_delete      "${1:-}"
+			cmd_delete  "${1:-}"
 			;;
 		-list)
 			shift
