@@ -15,7 +15,7 @@ VERBOSE=0
 log() { ((VERBOSE)) && echo "[*] $*"; }
 err() {
 	echo "ERROR: $*" >&2
-	exit          1
+	exit    1
 }
 
 ca_conf() {
@@ -85,8 +85,8 @@ op() {
 		((VERBOSE)) && echo "[res] ok"
 	else
 		((VERBOSE)) && {
-			echo   "[res] fail"
-			cat                      /tmp/pki.out
+			echo "[res] fail"
+			cat                /tmp/pki.out
 		}
 		rm -f /tmp/pki.out
 		return 1
@@ -170,7 +170,6 @@ cmd_delete() {
 cmd_list() {
 	ensure_ca
 	echo  "=== CA Database Contents ==="
-
 	# Table header
 	printf  "%-9s %-12s %-30s %-24s %-24s\n" \
 		"STATUS"     "SERIAL" "CN" "EXPIRY/REVOCATION" "NOTES"
@@ -185,12 +184,21 @@ cmd_list() {
         }
         {
             stat=$1; expiry=$2; revdate=$3; serial=$4; cn=$6
-            if (match(cn, /CN=([^\/]+)/, arr)) cn=arr[1]
+            if (match(cn, /CN=([^/]+)/, arr)) cn=arr[1]
             note=""
-            if (stat=="V")       { status="VALID";   time=fmt_ts(expiry) }
-            else if (stat=="E")  { status="EXPIRED"; time=fmt_ts(expiry) }
-            else if (stat=="R")  { status="REVOKED"; time=fmt_ts(revdate); note="revoked on expiry="fmt_ts(expiry) }
-            else                 { status=stat;     time="-" }
+            if (stat=="V") {
+                status="VALID"; time=fmt_ts(expiry)
+            }
+            else if (stat=="E") {
+                status="EXPIRED"; time=fmt_ts(expiry)
+            }
+            else if (stat=="R") {
+                status="REVOKED"; time=fmt_ts(revdate)
+                note="revoked on expiry="fmt_ts(expiry)
+            }
+            else {
+                status=stat; time="-"
+            }
             printf "%-9s %-12s %-30s %-24s %-24s\n", status, serial, cn, time, note
         }
         ' "$INDEX"
@@ -200,21 +208,21 @@ cmd_list() {
 
 	# CA info
 	if  [[ -f "$CA_CRT" ]]; then
-		CA_EXPIRY=$(    openssl x509 -enddate -noout -in "$CA_CRT" | cut -d= -f2)
+		CA_EXPIRY=$(     openssl x509 -enddate -noout -in "$CA_CRT" | cut -d= -f2)
 	else
 		CA_EXPIRY="-"
 	fi
 
 	# CRL info
 	if  [[ -f "$CA_CRL" ]]; then
-		CRL_NEXT_UPDATE=$(    openssl crl -noout -text -in "$CA_CRL" |
-			grep          "Next Update:" | head -1 | sed -e 's/^ *Next Update: *//')
+		CRL_NEXT_UPDATE=$(     openssl crl -noout -text -in "$CA_CRL" |
+			grep        "Next Update:" | head -1 | sed -e 's/^ *Next Update: *//')
 	else
 		CRL_NEXT_UPDATE="-"
 	fi
 
-	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CA"  "-" "$CA_NAME" "$CA_EXPIRY" "-"
-	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CRL" "-" "CRL"      "$CRL_NEXT_UPDATE" "-"
+	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CA" "-" "$CA_NAME" "$CA_EXPIRY" "-"
+	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CRL" "-" "CRL" "$CRL_NEXT_UPDATE" "-"
 }
 
 usage() {
@@ -241,23 +249,23 @@ main() {
 		-verbose)
 			VERBOSE=1
 			shift
-			main              "$@"
+			main        "$@"
 			;;
 		-verify)
 			shift
-			cmd_verify  "${1:-}"
+			cmd_verify "${1:-}"
 			;;
 		-create)
 			shift
-			cmd_create  "${1:-}"
+			cmd_create "${1:-}"
 			;;
 		-revoke)
 			shift
-			cmd_revoke  "${1:-}"
+			cmd_revoke "${1:-}"
 			;;
 		-delete)
 			shift
-			cmd_delete  "${1:-}"
+			cmd_delete "${1:-}"
 			;;
 		-list)
 			shift
