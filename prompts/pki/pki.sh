@@ -9,13 +9,14 @@ INDEX="index.txt"
 SERIAL="serial"
 CRLNUM="crlnumber"
 DAYS=3650      # non-CA cert validity
+CRL_DAYS=3650      # CRL validity
 CA_DAYS=9999  # CA cert validity
 VERBOSE=0
 
 log() { ((VERBOSE)) && echo "[*] $*"; }
 err() {
 	echo "ERROR: $*" >&2
-	exit    1
+	exit  1
 }
 
 ca_conf() {
@@ -35,7 +36,7 @@ default_md        = sha256
 policy            = policy_any
 default_days      = $DAYS
 unique_subject    = no
-default_crl_days  = 365
+default_crl_days  = $CRL_DAYS
 x509_extensions   = v3_end
 
 [ policy_any ]
@@ -86,7 +87,7 @@ op() {
 	else
 		((VERBOSE)) && {
 			echo "[res] fail"
-			cat                /tmp/pki.out
+			cat              /tmp/pki.out
 		}
 		rm -f /tmp/pki.out
 		return 1
@@ -178,27 +179,47 @@ cmd_list() {
 		awk     -F'\t' '
         function fmt_ts(ts) {
             if (ts == "") return "-"
-            y=substr(ts,1,2); m=substr(ts,3,2); d=substr(ts,5,2)
-            H=substr(ts,7,2); M=substr(ts,9,2); S=substr(ts,11,2)
-            return "20"y"-"m"-"d" "H":"M":"S"Z"
+            # index.txt date format: YYMMDDHHMMSSZ
+            y = substr(ts, 1, 2)
+            m = substr(ts, 3, 2)
+            d = substr(ts, 5, 2)
+            H = substr(ts, 7, 2)
+            M = substr(ts, 9, 2)
+            S = substr(ts, 11, 2)
+            return "20" y "-" m "-" d " " H ":" M ":" S "Z"
         }
         {
-            stat=$1; expiry=$2; revdate=$3; serial=$4; cn=$6
-            if (match(cn, /CN=([^/]+)/, arr)) cn=arr[1]
-            note=""
-            if (stat=="V") {
-                status="VALID"; time=fmt_ts(expiry)
+            stat   = $1
+            expiry = $2
+            revdate= $3
+            serial = $4
+            cn     = $6
+
+            # Extract CN from DN safely without regex slashes
+            if (index(cn, "/CN=") > 0) {
+                sub(".*\\/CN=", "", cn)
+                sub("/.*", "", cn)
             }
-            else if (stat=="E") {
-                status="EXPIRED"; time=fmt_ts(expiry)
+
+            note = ""
+            if (stat == "V") {
+                status = "VALID"
+                time   = fmt_ts(expiry)
             }
-            else if (stat=="R") {
-                status="REVOKED"; time=fmt_ts(revdate)
-                note="revoked on expiry="fmt_ts(expiry)
+            else if (stat == "E") {
+                status = "EXPIRED"
+                time   = fmt_ts(expiry)
+            }
+            else if (stat == "R") {
+                status = "REVOKED"
+                time   = fmt_ts(revdate)
+                note   = "revoked on expiry=" fmt_ts(expiry)
             }
             else {
-                status=stat; time="-"
+                status = stat
+                time   = "-"
             }
+
             printf "%-9s %-12s %-30s %-24s %-24s\n", status, serial, cn, time, note
         }
         ' "$INDEX"
@@ -221,7 +242,7 @@ cmd_list() {
 		CRL_NEXT_UPDATE="-"
 	fi
 
-	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CA" "-" "$CA_NAME" "$CA_EXPIRY" "-"
+	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CA"  "-" "$CA_NAME" "$CA_EXPIRY" "-"
 	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CRL" "-" "CRL" "$CRL_NEXT_UPDATE" "-"
 }
 
@@ -249,7 +270,7 @@ main() {
 		-verbose)
 			VERBOSE=1
 			shift
-			main        "$@"
+			main      "$@"
 			;;
 		-verify)
 			shift
