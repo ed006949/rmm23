@@ -15,12 +15,12 @@ VERBOSE=0
 
 log() { ((VERBOSE)) && echo "[*] $*"; }
 err() {
-	echo    "ERROR: $*" >&2
-	exit                          1
+	echo "ERROR: $*" >&2
+	exit              1
 }
 
 ca_conf() {
-	cat <<EOF
+	cat << EOF
 [ ca ]
 default_ca = ca_local
 [ ca_local ]
@@ -59,21 +59,21 @@ EOF
 
 ensure_db() {
 	mkdir -p newcerts
-	[[ -f "$INDEX" ]] || : >"$INDEX"
-	[[ -f "$SERIAL" ]] || echo 1000 >"$SERIAL"
-	[[ -f "$CRLNUM" ]] || echo 1000 >"$CRLNUM"
+	[[ -f "$INDEX" ]] || : > "$INDEX"
+	[[ -f "$SERIAL" ]] || echo 1000 > "$SERIAL"
+	[[ -f "$CRLNUM" ]] || echo 1000 > "$CRLNUM"
 }
 
 ensure_ca() {
 	ensure_db
 	if [[ -f "$CA_KEY" && -f "$CA_CRT" ]]; then
-		log   "CA already exists"
+		log "CA already exists"
 		return
 	fi
 	log "Creating self-signed CA..."
-	openssl genrsa -out "$CA_KEY" "$KEY_BITS"
+	openssl ecparam -name prime256v1 -genkey -noout -out "$CA_KEY"
 	openssl req -x509 -new -key "$CA_KEY" -days "$CA_DAYS" -sha256 \
-		-subj   "/CN=$CA_NAME" -out "$CA_CRT" -extensions v3_ca -config <(ca_conf)
+		-subj "/CN=$CA_NAME" -out "$CA_CRT" -extensions v3_ca -config <(ca_conf)
 	chmod 600 "$CA_KEY"
 	chmod 644 "$CA_CRT"
 }
@@ -82,15 +82,15 @@ op() {
 	local desc="$1"
 	shift
 	if ((VERBOSE)); then echo "[op] $desc"; fi
-	if "$@" >/tmp/pki.out 2>&1; then
-		((VERBOSE))   && echo "[res] ok"
+	if "$@" > /tmp/pki.out 2>&1; then
+		((VERBOSE)) && echo "[res] ok"
 	else
-		((VERBOSE))   && {
-			echo                   "[res] fail"
-			cat                                      /tmp/pki.out
+		((VERBOSE)) && {
+			echo       "[res] fail"
+			cat                          /tmp/pki.out
 		}
-		rm   -f /tmp/pki.out
-		return   1
+		rm -f /tmp/pki.out
+		return 1
 	fi
 	rm -f /tmp/pki.out
 }
@@ -100,49 +100,50 @@ verify_key_cert_match() {
 }
 
 verify_cert_signed_by_ca() {
-	openssl verify -CAfile "$CA_CRT" "$1" >/dev/null
+	openssl verify -CAfile "$CA_CRT" "$1" > /dev/null
 }
 
 cmd_verify() {
 	local name="$1"
 	if [[ "$name" == "$CA_NAME" ]]; then
-		[[ -f "$CA_KEY" && -f "$CA_CRT"   ]] || err "CA key or cert missing"
-		op   "CA key matches cert" verify_key_cert_match "$CA_KEY" "$CA_CRT" || err "CA key and cert mismatch"
-		echo   "CA verification OK"
+		[[ -f "$CA_KEY" && -f "$CA_CRT" ]] || err "CA key or cert missing"
+		op "CA key matches cert" verify_key_cert_match "$CA_KEY" "$CA_CRT" || err "CA key and cert mismatch"
+		echo "CA verification OK"
 	else
 		ensure_ca
-		local   crt="${name}.crt.pem" key="${name}.key.pem"
-		[[ -f "$crt" && -f "$key"   ]] || err "Missing $crt or $key"
-		op   "key matches cert" verify_key_cert_match "$key" "$crt" || err "Mismatch key/cert"
-		op   "cert signed by CA" verify_cert_signed_by_ca "$crt" || err "Not signed by CA"
-		echo   "Verification OK for $name"
+		local crt="${name}.crt.pem" key="${name}.key.pem"
+		[[ -f "$crt" && -f "$key" ]] || err "Missing $crt or $key"
+		op "key matches cert" verify_key_cert_match "$key" "$crt" || err "Mismatch key/cert"
+		op "cert signed by CA" verify_cert_signed_by_ca "$crt" || err "Not signed by CA"
+		echo "Verification OK for $name"
 	fi
 }
 
 cmd_create() {
 	local name="$1"
 	if [[ "$name" == "$CA_NAME" ]]; then
-		[[ -f "$CA_CRT"   ]] && err "CA already exists"
-		op   "generate CA key" openssl genrsa -out "$CA_KEY" "$KEY_BITS"
-		op   "generate CA cert" openssl req -x509 -new -key "$CA_KEY" \
-			-days      "$CA_DAYS" -sha256 -subj "/CN=$CA_NAME" -out "$CA_CRT" \
-			-extensions      v3_ca -config <(ca_conf)
-		chmod   600 "$CA_KEY"
-		chmod   644 "$CA_CRT"
+		[[ -f "$CA_CRT" ]] && err "CA already exists"
+		op "generate CA key" openssl ecparam -name prime256v1 -genkey -noout -out "$CA_KEY"
+		op "generate CA cert" openssl req -x509 -new -key "$CA_KEY" \
+			-days "$CA_DAYS" -sha256 -subj "/CN=$CA_NAME" -out "$CA_CRT" \
+			-extensions v3_ca -config <(ca_conf)
+		chmod 600 "$CA_KEY"
+		chmod 644 "$CA_CRT"
 		ensure_db
-		echo   "CA created"
+		op "generate CRL" openssl ca -batch -config <(ca_conf) -gencrl -out "$CA_CRL"
+		echo "CA created"
 	else
 		ensure_ca
-		local   crt="${name}.crt.pem" key="${name}.key.pem"
-		[[ -f "$crt" || -f "$key"   ]] && err "Target already exists"
-		op   "generate key" openssl genrsa -out "$key" "$KEY_BITS"
-		op   "generate CSR" openssl req -new -key "$key" -subj "/CN=$name" -out "${name}.csr.pem"
-		op   "sign cert" openssl ca -batch -config <(ca_conf) \
-			-in      "${name}.csr.pem" -out "$crt" -extensions v3_end
-		rm   -f "${name}.csr.pem"
-		chmod   600 "$key"
-		chmod   644 "$crt"
-		echo   "Created $key and $crt"
+		local crt="${name}.crt.pem" key="${name}.key.pem"
+		[[ -f "$crt" || -f "$key" ]] && err "Target already exists"
+		op "generate key" openssl ecparam -name prime256v1 -genkey -noout -out "$key"
+		op "generate CSR" openssl req -new -key "$key" -subj "/CN=$name" -out "${name}.csr.pem"
+		op "sign cert" openssl ca -batch -config <(ca_conf) \
+			-in "${name}.csr.pem" -out "$crt" -extensions v3_end
+		rm -f "${name}.csr.pem"
+		chmod 600 "$key"
+		chmod 644 "$crt"
+		echo "Created $key and $crt"
 	fi
 }
 
@@ -171,7 +172,7 @@ cmd_list() {
 	ensure_ca
 	echo "=== CA Database Contents ==="
 	if [[ ! -s "$INDEX" ]]; then
-		echo   "(no certificates issued)"
+		echo "(no certificates issued)"
 		return
 	fi
 	# Columns as per OpenSSL index.txt
@@ -203,7 +204,7 @@ cmd_list() {
 }
 
 usage() {
-	cat <<EOF
+	cat << EOF
 Usage:
   $0 -verbose <command>
   $0 -verify <name>
@@ -226,29 +227,29 @@ main() {
 		-verbose)
 			VERBOSE=1
 			shift
-			main                              "$@"
+			main                  "$@"
 			;;
 		-verify)
 			shift
-			cmd_verify                  "${1:-}"
+			cmd_verify      "${1:-}"
 			;;
 		-create)
 			shift
-			cmd_create                  "${1:-}"
+			cmd_create      "${1:-}"
 			;;
 		-revoke)
 			shift
-			cmd_revoke                  "${1:-}"
+			cmd_revoke      "${1:-}"
 			;;
 		-delete)
 			shift
-			cmd_delete                  "${1:-}"
+			cmd_delete      "${1:-}"
 			;;
 		-list)
 			shift
 			cmd_list
 			;;
-		*)   usage ;;
+		*) usage ;;
 	esac
 }
 
