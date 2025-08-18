@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 
 	"github.com/avfs/avfs"
 	"github.com/avfs/avfs/vfs/memfs"
@@ -107,7 +108,7 @@ func main() {
 		[]mod_strings.FV{
 			{
 				mod_strings.F_isCA,
-				"1 1",
+				strconv.FormatBool(true),
 			},
 		},
 	)

@@ -48,3 +48,12 @@ func (r *AttrBool) Parse(inbound any) {
 		}
 	}
 }
+
+// func (r *AttrBool) String() (outbound string) {
+// 	switch *r {
+// 	case true:
+// 		return "true"
+// 	default:
+// 		return "false"
+// 	}
+// }

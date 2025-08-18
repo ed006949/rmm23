@@ -89,10 +89,19 @@ func (r *attrTime) UnmarshalText(inbound []byte) (err error) {
 	return mod_errors.EParse
 }
 
-// func (r *attrTime) MarshalText() (outbound []byte, err error) {
-// 	return fmt.Appendf(nil, "%d", r.Time.Unix()), nil
-// }
-
-// func (r *attrTime) Time() (outbound time.Time) { return time.Unix(int64(*r), 0) }
-
-// func (r *attrTime) Set(inbound time.Time) { *r = attrTime(inbound.Unix()) }
+// var (
+// 	timeToMillis = json.MarshalToFunc(func(enc *jsontext.Encoder, t time.Time) error { return enc.WriteToken(jsontext.Int(t.Unix())) })
+// 	millisToTime = json.UnmarshalFunc(
+// 		func(data []byte, dst *time.Time) error {
+// 			var (
+// 				seconds int64
+// 			)
+// 			switch err := json.Unmarshal(data, &seconds); {
+// 			case err != nil:
+// 				return err
+// 			}
+// 			*dst = time.Unix(seconds, 0)
+// 			return nil
+// 		},
+// 	)
+// )

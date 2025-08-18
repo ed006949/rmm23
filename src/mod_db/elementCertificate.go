@@ -11,7 +11,6 @@ import (
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
 
-	"rmm23/src/mod_bools"
 	"rmm23/src/mod_crypto"
 	"rmm23/src/mod_strings"
 )
@@ -42,17 +41,17 @@ type Cert struct {
 	// ModifyTimestamp attrTime `json:"modifyTimestamp,omitempty" msgpack:"modifyTimestamp"` //
 
 	// element meta data
-	UUID           uuid.UUID          `json:"uuid"           msgpack:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
-	SerialNumber   *big.Int           `json:"serialNumber"   msgpack:"serialNumber"`   // (?) redis:",key". it can be non-uniq like LDAP's entryUUID - not trusted.
-	Issuer         attrDN             `json:"issuer"         msgpack:"issuer"`         //
-	Subject        attrDN             `json:"subject"        msgpack:"subject"`        //
-	NotBefore      attrTime           `json:"notBefore"      msgpack:"notBefore"`      //
-	NotAfter       attrTime           `json:"notAfter"       msgpack:"notAfter"`       // (?) redis:",exat"
-	DNSNames       []string           `json:"dnsNames"       msgpack:"dnsNames"`       //
-	EmailAddresses []string           `json:"emailAddresses" msgpack:"emailAddresses"` //
-	IPAddresses    []*netip.Addr      `json:"ipAddresses"    msgpack:"ipAddresses"`    //
-	URIs           []*url.URL         `json:"uris"           msgpack:"uris"`           //
-	IsCA           mod_bools.AttrBool `json:"isCA"           msgpack:"isCA"`           //
+	UUID           uuid.UUID     `json:"uuid"           msgpack:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
+	SerialNumber   *big.Int      `json:"serialNumber"   msgpack:"serialNumber"`   // (?) redis:",key". it can be non-uniq like LDAP's entryUUID - not trusted.
+	Issuer         attrDN        `json:"issuer"         msgpack:"issuer"`         //
+	Subject        attrDN        `json:"subject"        msgpack:"subject"`        //
+	NotBefore      attrTime      `json:"notBefore"      msgpack:"notBefore"`      //
+	NotAfter       attrTime      `json:"notAfter"       msgpack:"notAfter"`       // (?) redis:",exat"
+	DNSNames       []string      `json:"dnsNames"       msgpack:"dnsNames"`       //
+	EmailAddresses []string      `json:"emailAddresses" msgpack:"emailAddresses"` //
+	IPAddresses    []*netip.Addr `json:"ipAddresses"    msgpack:"ipAddresses"`    //
+	URIs           []*url.URL    `json:"uris"           msgpack:"uris"`           //
+	IsCA           bool          `json:"isCA"           msgpack:"isCA"`           //
 
 	// element data
 	Certificate *mod_crypto.Certificate `json:"certificate,omitempty" msgpack:"certificate"` //
@@ -79,7 +78,7 @@ func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
 			FieldName(mod_strings.F_emailAddresses.FieldNameSlice()).As(mod_strings.F_emailAddresses.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_ipAddresses.FieldNameSlice()).As(mod_strings.F_ipAddresses.String()).Tag().Separator(mod_strings.SliceSeparator).
 			FieldName(mod_strings.F_uris.FieldNameSlice()).As(mod_strings.F_uris.String()).Tag().Separator(mod_strings.SliceSeparator).
-			FieldName(mod_strings.F_isCA.FieldName()).As(mod_strings.F_isCA.String()).Numeric().
+			FieldName(mod_strings.F_isCA.FieldName()).As(mod_strings.F_isCA.String()).Tag().Separator(mod_strings.SliceSeparator).
 
 			//
 			Build()

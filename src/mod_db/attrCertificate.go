@@ -3,7 +3,6 @@ package mod_db
 import (
 	"github.com/google/uuid"
 
-	"rmm23/src/mod_bools"
 	"rmm23/src/mod_crypto"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_net"
@@ -56,7 +55,7 @@ func (r *Cert) normalize() {
 	r.EmailAddresses = r.Certificate.Certificate.EmailAddresses
 	r.IPAddresses = mod_errors.StripErr1(mod_net.ParseNetIPs(r.Certificate.Certificate.IPAddresses))
 	r.URIs = r.Certificate.Certificate.URIs
-	r.IsCA = mod_bools.AttrBool(r.Certificate.Certificate.IsCA)
+	r.IsCA = r.Certificate.Certificate.IsCA
 	// r.NotBeforeUnix.Set(r.NotBefore)
 	// r.NotAfterUnix.Set(r.NotAfter)
 }

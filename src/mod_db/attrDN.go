@@ -37,6 +37,11 @@ func (r *attrDN) MarshalText() (outbound []byte, err error) {
 		interim = make([]string, len(r.dn), len(r.dn))
 	)
 	for a, b := range r.dn {
+		switch {
+		case len(b.Key) == 0 || len(b.Value) == 0:
+			return nil, mod_errors.EParse
+		}
+
 		interim[a] = strings.Join([]string{b.Key, b.Value}, mod_strings.DNKVSeparator)
 	}
 

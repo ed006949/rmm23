@@ -66,7 +66,7 @@ var (
 		mod_strings.F_emailAddresses: redisearchTagTypeTag,
 		mod_strings.F_ipAddresses:    redisearchTagTypeTag,
 		mod_strings.F_uris:           redisearchTagTypeTag,
-		mod_strings.F_isCA:           redisearchTagTypeNumeric,
+		mod_strings.F_isCA:           redisearchTagTypeTag,
 	}
 	entryFieldValueEnclosure = map[string][2]string{
 		redisearchTagTypeText:    {enclosureEmpty0, enclosureEmpty1},
