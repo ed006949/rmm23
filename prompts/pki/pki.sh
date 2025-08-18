@@ -12,11 +12,12 @@ DAYS=3650      # non-CA cert validity
 CRL_DAYS=3650      # CRL validity
 CA_DAYS=9999  # CA cert validity
 VERBOSE=0
+P12_PASSWORD="changeit"
 
 log() { ((VERBOSE)) && echo "[*] $*"; }
 err() {
 	echo "ERROR: $*" >&2
-	exit  1
+	exit 1
 }
 
 ca_conf() {
@@ -71,11 +72,7 @@ ensure_ca() {
 		return
 	fi
 	log "Creating self-signed CA..."
-	openssl ecparam -name prime256v1 -genkey -noout -out "$CA_KEY"
-	openssl req -x509 -new -key "$CA_KEY" -days "$CA_DAYS" -sha256 \
-		-subj "/CN=$CA_NAME" -out "$CA_CRT" -extensions v3_ca -config <(ca_conf)
-	chmod 600 "$CA_KEY"
-	chmod 644 "$CA_CRT"
+	cmd_create "CA"
 }
 
 op() {
@@ -87,7 +84,7 @@ op() {
 	else
 		((VERBOSE)) && {
 			echo "[res] fail"
-			cat              /tmp/pki.out
+			cat          /tmp/pki.out
 		}
 		rm -f /tmp/pki.out
 		return 1
@@ -136,14 +133,23 @@ cmd_create() {
 		ensure_ca
 		local crt="${name}.crt.pem" key="${name}.key.pem"
 		[[ -f "$crt" || -f "$key" ]] && err "Target already exists"
+
 		op "generate key" openssl ecparam -name prime256v1 -genkey -noout -out "$key"
 		op "generate CSR" openssl req -new -key "$key" -subj "/CN=$name" -out "${name}.csr.pem"
 		op "sign cert" openssl ca -batch -config <(ca_conf) \
-			-in "${name}.csr.pem" -out "$crt" -extensions v3_end
+			-in    "${name}.csr.pem" -out "$crt" -extensions v3_end
 		rm -f "${name}.csr.pem"
 		chmod 600 "$key"
 		chmod 644 "$crt"
-		echo "Created $key and $crt"
+
+		# NEW: Create PKCS#12 bundle with default password '${P12_PASSWORD}'
+		local p12="${name}.p12"
+		op "generate P12" openssl pkcs12 -export \
+			-inkey    "$key" -in "$crt" -certfile "$CA_CRT" \
+			-name    "$name" -out "$p12" -password pass:${P12_PASSWORD}
+		chmod 600 "$p12"
+
+		echo "Created $key, $crt, and $p12 (password: ${P12_PASSWORD})"
 	fi
 }
 
@@ -170,13 +176,13 @@ cmd_delete() {
 
 cmd_list() {
 	ensure_ca
-	echo  "=== CA Database Contents ==="
+	echo "=== CA Database Contents ==="
 	# Table header
-	printf  "%-9s %-12s %-30s %-24s %-24s\n" \
-		"STATUS"     "SERIAL" "CN" "EXPIRY/REVOCATION" "NOTES"
+	printf "%-9s %-12s %-30s %-24s %-24s\n" \
+		"STATUS"   "SERIAL" "CN" "EXPIRY/REVOCATION" "NOTES"
 
-	if  [[ -s "$INDEX" ]]; then
-		awk     -F'\t' '
+	if [[ -s "$INDEX" ]]; then
+		awk   -F'\t' '
         function fmt_ts(ts) {
             if (ts == "") return "-"
             # index.txt date format: YYMMDDHHMMSSZ
@@ -195,7 +201,7 @@ cmd_list() {
             serial = $4
             cn     = $6
 
-            # Extract CN from DN safely without regex slashes
+            # Extract CN from DN safely without regex delimiter issues
             if (index(cn, "/CN=") > 0) {
                 sub(".*\\/CN=", "", cn)
                 sub("/.*", "", cn)
@@ -224,26 +230,26 @@ cmd_list() {
         }
         ' "$INDEX"
 	else
-		echo     "(no certificates issued)"
+		echo   "(no certificates issued)"
 	fi
 
 	# CA info
-	if  [[ -f "$CA_CRT" ]]; then
-		CA_EXPIRY=$(     openssl x509 -enddate -noout -in "$CA_CRT" | cut -d= -f2)
+	if [[ -f "$CA_CRT" ]]; then
+		CA_EXPIRY=$(   openssl x509 -enddate -noout -in "$CA_CRT" | cut -d= -f2)
 	else
 		CA_EXPIRY="-"
 	fi
 
 	# CRL info
-	if  [[ -f "$CA_CRL" ]]; then
-		CRL_NEXT_UPDATE=$(     openssl crl -noout -text -in "$CA_CRL" |
-			grep        "Next Update:" | head -1 | sed -e 's/^ *Next Update: *//')
+	if [[ -f "$CA_CRL" ]]; then
+		CRL_NEXT_UPDATE=$(   openssl crl -noout -text -in "$CA_CRL" |
+			grep      "Next Update:" | head -1 | sed -e 's/^ *Next Update: *//')
 	else
 		CRL_NEXT_UPDATE="-"
 	fi
 
-	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CA"  "-" "$CA_NAME" "$CA_EXPIRY" "-"
-	printf  "%-9s %-12s %-30s %-24s %-24s\n" "CRL" "-" "CRL" "$CRL_NEXT_UPDATE" "-"
+	printf "%-9s %-12s %-30s %-24s %-24s\n" "CA" "-" "$CA_NAME" "$CA_EXPIRY" "-"
+	printf "%-9s %-12s %-30s %-24s %-24s\n" "CRL" "-" "CRL" "$CRL_NEXT_UPDATE" "-"
 }
 
 usage() {
@@ -270,7 +276,7 @@ main() {
 		-verbose)
 			VERBOSE=1
 			shift
-			main      "$@"
+			main  "$@"
 			;;
 		-verify)
 			shift

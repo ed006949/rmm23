@@ -1,7 +1,7 @@
 package mod_bools
 
 import (
-	"encoding/json"
+	"encoding/json/v2"
 	"strings"
 )
 

@@ -69,6 +69,9 @@ func (r *Certificate) UnmarshalText(inbound []byte) (err error) {
 	return
 }
 
+// ParseRaw parses any certificate data.
+//
+// * for PEM and DER: place the certificate before the chain!
 func (r *Certificate) ParseRaw(inbound ...[]byte) (err error) {
 	var (
 		interim = new(Certificate)
