@@ -17,6 +17,15 @@ const (
 )
 
 const (
+	enclosureEmpty0  = ""
+	enclosureEmpty1  = ""
+	enclosureSquare0 = "["
+	enclosureSquare1 = "]"
+	enclosureCurly0  = "{"
+	enclosureCurly1  = "}"
+)
+
+const (
 	entryTypeEmpty attrEntryType = iota
 	EntryTypeDomain
 	EntryTypeGroup

@@ -17,8 +17,7 @@ import (
 //
 // when updating @src/mod_db/elementEntry.go don't forget to update:
 //
-//	@src/mod_db/redis_field.go
-//	@src/mod_db/redis_*.go
+//	@src/mod_db/redisRepo.go
 type Entry struct {
 	// db data
 	Key string    `redis:",key"`  //
