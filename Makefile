@@ -12,6 +12,7 @@ all:	status
 build:
 	go build -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}" ./src/*.go
 	GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}-freebsd-amd64" ./src/*.go
+	go build -gcflags=all="-N -l" -ldflags="-X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}-delve" ./src/*.go
 
 clean:
 	-go clean -i -r -x -cache -testcache -modcache -fuzzcache
