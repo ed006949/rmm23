@@ -77,3 +77,22 @@ func Normalize(inbound []string, flag mod_slices.FlagType) (outbound []string) {
 
 	return inbound
 }
+
+func escapeRedisQueryValue(inbound string) (outbound string) {
+	replacer := strings.NewReplacer(
+		`=`, `\=`, //
+		`,`, `\,`, //
+		`(`, `\(`, //
+		`)`, `\)`, //
+		`{`, `\{`, //
+		`}`, `\}`, //
+		`[`, `\[`, //
+		`]`, `\]`, //
+		`"`, `\"`, //
+		`'`, `\'`, //
+		`~`, `\~`, //
+		`-`, `\-`, // (?)
+	)
+
+	return replacer.Replace(inbound)
+}

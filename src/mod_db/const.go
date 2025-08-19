@@ -6,36 +6,13 @@ import (
 )
 
 const (
-	redisTagName                = "redis"
-	redisearchTagName           = "redisearch"
-	redisearchTagTypeIgnore     = "-"
-	redisearchTagTypeTag        = "tag"
-	redisearchTagTypeGeo        = "geo"
-	redisearchTagTypeText       = "text"
-	redisearchTagTypeNumeric    = "numeric"
-	redisearchTagOptionSortable = "sortable"
-)
-
-const (
-	enclosureEmpty0  = ""
-	enclosureEmpty1  = ""
-	enclosureSquare0 = "["
-	enclosureSquare1 = "]"
-	enclosureCurly0  = "{"
-	enclosureCurly1  = "}"
-)
-
-const (
 	entryTypeEmpty attrEntryType = iota
-	EntryTypeDomain
-	EntryTypeGroup
-	EntryTypeUser
+	entryTypeDomain
+	entryTypeGroup
+	entryTypeUser
 	EntryTypeHost
 )
 
-const (
-	_PING = "PING"
-)
 const (
 	connMaxIdle         = 4
 	connMaxActive       = 4

@@ -9,23 +9,23 @@ import (
 var (
 	entryTypeName = map[attrEntryType]string{
 		entryTypeEmpty:  "",
-		EntryTypeDomain: "domain",
-		EntryTypeGroup:  "group",
-		EntryTypeUser:   "user",
+		entryTypeDomain: "domain",
+		entryTypeGroup:  "group",
+		entryTypeUser:   "user",
 		EntryTypeHost:   "host",
 	}
 	entryTypeID = map[string]attrEntryType{
 		entryTypeName[entryTypeEmpty]:  entryTypeEmpty,
-		entryTypeName[EntryTypeDomain]: EntryTypeDomain,
-		entryTypeName[EntryTypeGroup]:  EntryTypeGroup,
-		entryTypeName[EntryTypeUser]:   EntryTypeUser,
+		entryTypeName[entryTypeDomain]: entryTypeDomain,
+		entryTypeName[entryTypeGroup]:  entryTypeGroup,
+		entryTypeName[entryTypeUser]:   entryTypeUser,
 		entryTypeName[EntryTypeHost]:   EntryTypeHost,
 	}
 	entryTypeNumber = map[attrEntryType]string{
 		entryTypeEmpty:  strconv.FormatInt(int64(entryTypeEmpty), 10),
-		EntryTypeDomain: strconv.FormatInt(int64(EntryTypeDomain), 10),
-		EntryTypeGroup:  strconv.FormatInt(int64(EntryTypeGroup), 10),
-		EntryTypeUser:   strconv.FormatInt(int64(EntryTypeUser), 10),
+		entryTypeDomain: strconv.FormatInt(int64(entryTypeDomain), 10),
+		entryTypeGroup:  strconv.FormatInt(int64(entryTypeGroup), 10),
+		entryTypeUser:   strconv.FormatInt(int64(entryTypeUser), 10),
 		EntryTypeHost:   strconv.FormatInt(int64(EntryTypeHost), 10),
 	}
 )

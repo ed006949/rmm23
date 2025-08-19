@@ -76,7 +76,7 @@ func main() {
 
 	count, entries, err = config.Conf.DB.Repo.SearchEntryMFV(
 		ctx,
-		[]mod_strings.FV{
+		&mod_strings.FVs{
 			{
 				mod_strings.F_type,
 				mod_db.EntryTypeHost.Number() + " " + mod_db.EntryTypeHost.Number(),
@@ -87,7 +87,7 @@ func main() {
 
 	count, entries, err = config.Conf.DB.Repo.SearchEntryMFV(
 		ctx,
-		mod_db.MFV{
+		&mod_strings.FVs{
 			{
 				mod_strings.F_baseDN,
 				"dc=fabric,dc=domain,dc=tld",
@@ -105,7 +105,7 @@ func main() {
 
 	count, certs, err = config.Conf.DB.Repo.SearchCertMFV(
 		ctx,
-		[]mod_strings.FV{
+		&mod_strings.FVs{
 			{
 				mod_strings.F_isCA,
 				strconv.FormatBool(true),

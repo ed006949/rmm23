@@ -19,7 +19,7 @@ import (
 //
 // when updating @src/mod_db/elementEntry.go don't forget to update:
 //
-//	@src/mod_db/redisRepo.go
+//	@src/mod_db/elementRepository.go
 type Cert struct {
 	// db data
 	Key string    `redis:",key"`  //
