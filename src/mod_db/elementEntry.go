@@ -1,7 +1,6 @@
 package mod_db
 
 import (
-	"context"
 	"net/netip"
 	"net/url"
 	"time"
@@ -75,8 +74,8 @@ type Entry struct {
 }
 
 // CreateEntryIndex creates the RediSearch index for the Entry struct.
-func (r *RedisRepository) CreateEntryIndex(ctx context.Context) (err error) {
-	return r.entry.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
+func (r *RedisRepository) CreateEntryIndex() (err error) {
+	return r.entry.CreateIndex(r.ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
 			FieldName(mod_strings.F_type.FieldName()).As(mod_strings.F_type.String()).Numeric().
 			FieldName(mod_strings.F_status.FieldName()).As(mod_strings.F_status.String()).Numeric().

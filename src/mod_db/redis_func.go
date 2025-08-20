@@ -1,6 +1,8 @@
 package mod_db
 
 import (
+	"context"
+
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
 
@@ -8,8 +10,9 @@ import (
 )
 
 // NewRedisRepository creates a new RedisRepository.
-func NewRedisRepository(client rueidis.Client) *RedisRepository {
+func NewRedisRepository(ctx context.Context, client rueidis.Client) *RedisRepository {
 	return &RedisRepository{
+		ctx:    ctx,
 		client: client,
 		entry:  om.NewJSONRepository[Entry](entryKeyHeader, Entry{}, client, om.WithIndexName(entryKeyHeader)),
 		cert:   om.NewJSONRepository[Cert](certKeyHeader, Cert{}, client, om.WithIndexName(certKeyHeader)),

@@ -88,10 +88,10 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 
 					entry.Key = uuid.NewSHA1(uuid.Nil, []byte(entry.DN.String())).String()
 
-					_ = repo.DeleteEntry(ctx, entry.Key)
+					_ = repo.DeleteEntry(entry.Key)
 				}
 
-				switch e := repo.SaveMultiEntry(ctx, fnEntry...); {
+				switch e := repo.SaveMultiEntry(fnEntry...); {
 				case e != nil:
 					for a, b := range e {
 						switch {
@@ -118,11 +118,11 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 						}
 
 						fnCerts = append(fnCerts, fnCert)
-						_ = repo.DeleteCert(ctx, fnCert.Key)
+						_ = repo.DeleteCert(fnCert.Key)
 					}
 				}
 
-				switch e := repo.SaveMultiCert(ctx, fnCerts...); {
+				switch e := repo.SaveMultiCert(fnCerts...); {
 				case e != nil:
 					for a, b := range e {
 						switch {
@@ -210,9 +210,9 @@ func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository
 			continue
 		}
 
-		_ = repo.DeleteCert(ctx, forCert.Key)
+		_ = repo.DeleteCert(forCert.Key)
 
-		switch forErr = repo.SaveCert(ctx, forCert); {
+		switch forErr = repo.SaveCert(forCert); {
 		case forErr != nil:
 			l.Z{l.M: "repo.SaveCert", "cert": a, l.E: forErr}.Warning()
 		}

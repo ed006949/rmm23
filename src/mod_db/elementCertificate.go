@@ -1,7 +1,6 @@
 package mod_db
 
 import (
-	"context"
 	"math/big"
 	"net/netip"
 	"net/url"
@@ -53,8 +52,8 @@ type Cert struct {
 }
 
 // CreateCertIndex creates the RediSearch index for the Cert struct.
-func (r *RedisRepository) CreateCertIndex(ctx context.Context) (err error) {
-	return r.cert.CreateIndex(ctx, func(schema om.FtCreateSchema) rueidis.Completed {
+func (r *RedisRepository) CreateCertIndex() (err error) {
+	return r.cert.CreateIndex(r.ctx, func(schema om.FtCreateSchema) rueidis.Completed {
 		return schema.
 
 			//

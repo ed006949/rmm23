@@ -1,7 +1,6 @@
 package mod_strings
 
 type EntryFieldName string
-type EntryFieldMap map[EntryFieldName]string
 
 type FVs []FV
 type FV struct {

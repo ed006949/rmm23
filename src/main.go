@@ -75,7 +75,6 @@ func main() {
 	)
 
 	count, entries, err = config.Conf.DB.Repo.SearchEntryFVs(
-		ctx,
 		&mod_strings.FVs{
 			{
 				mod_strings.F_type,
@@ -86,7 +85,6 @@ func main() {
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
 	count, entries, err = config.Conf.DB.Repo.SearchEntryFVs(
-		ctx,
 		&mod_strings.FVs{
 			{
 				mod_strings.F_baseDN,
@@ -100,11 +98,10 @@ func main() {
 	)
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
-	count, entries, err = config.Conf.DB.Repo.SearchEntryQ(ctx, "*")
+	count, entries, err = config.Conf.DB.Repo.SearchEntryQ("*")
 	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
 
 	count, certs, err = config.Conf.DB.Repo.SearchCertFVs(
-		ctx,
 		&mod_strings.FVs{
 			{
 				mod_strings.F_isCA,
