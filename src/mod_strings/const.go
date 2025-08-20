@@ -1,26 +1,6 @@
 package mod_strings
 
 const (
-	redisTagName                = "redis"
-	redisearchTagName           = "redisearch"
-	redisearchTagTypeIgnore     = "-"
-	RedisearchTagTypeTag        = "tag"     // exact match. string, bool.
-	RedisearchTagTypeGeo        = "geo"     // ....
-	RedisearchTagTypeText       = "text"    // partial match. string.
-	RedisearchTagTypeNumeric    = "numeric" // numeric search. ints.
-	redisearchTagOptionSortable = "sortable"
-)
-
-const (
-	enclosureEmpty0  = ""
-	enclosureEmpty1  = ""
-	enclosureSquare0 = "["
-	enclosureSquare1 = "]"
-	enclosureCurly0  = "{"
-	enclosureCurly1  = "}"
-)
-
-const (
 	FTInfo_percent_indexed        = "percent_indexed"
 	FTInfo_index_name             = "index_name"
 	FTInfo_hash_indexing_failures = "hash_indexing_failures"

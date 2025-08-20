@@ -14,10 +14,6 @@ import (
 )
 
 // Entry is the struct that represents an LDAP-compatible Entry.
-//
-// when updating @src/mod_db/elementEntry.go don't forget to update:
-//
-//	@src/mod_db/elementRepository.go
 type Entry struct {
 	// db data
 	Key string    `redis:",key"`  //
