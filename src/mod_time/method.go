@@ -1,4 +1,4 @@
-package mod_db
+package mod_time
 
 import (
 	"encoding/json/v2"
@@ -10,9 +10,7 @@ import (
 	"rmm23/src/mod_errors"
 )
 
-type attrTime struct{ time.Time }
-
-func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
+func (r *Time) UnmarshalJSON(inbound []byte) (err error) {
 	var (
 		interim int64
 	)
@@ -21,12 +19,12 @@ func (r *attrTime) UnmarshalJSON(inbound []byte) (err error) {
 		return
 	}
 
-	*r = attrTime{time.Unix(interim, 0)}
+	*r = Time{time.Unix(interim, 0)}
 
 	return
 }
 
-func (r *attrTime) MarshalJSON() (outbound []byte, err error) {
+func (r *Time) MarshalJSON() (outbound []byte, err error) {
 	var (
 		interim = r.Time.Unix()
 	)
@@ -38,7 +36,7 @@ func (r *attrTime) MarshalJSON() (outbound []byte, err error) {
 	return
 }
 
-func (r *attrTime) UnmarshalText(inbound []byte) (err error) {
+func (r *Time) UnmarshalText(inbound []byte) (err error) {
 	var (
 		t time.Time
 		i int64
@@ -88,20 +86,3 @@ func (r *attrTime) UnmarshalText(inbound []byte) (err error) {
 
 	return mod_errors.EParse
 }
-
-// var (
-// 	timeToMillis = json.MarshalToFunc(func(enc *jsontext.Encoder, t time.Time) error { return enc.WriteToken(jsontext.Int(t.Unix())) })
-// 	millisToTime = json.UnmarshalFunc(
-// 		func(data []byte, dst *time.Time) error {
-// 			var (
-// 				seconds int64
-// 			)
-// 			switch err := json.Unmarshal(data, &seconds); {
-// 			case err != nil:
-// 				return err
-// 			}
-// 			*dst = time.Unix(seconds, 0)
-// 			return nil
-// 		},
-// 	)
-// )

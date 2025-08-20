@@ -1,4 +1,4 @@
-package mod_db
+package mod_dn
 
 import (
 	"strings"
@@ -8,9 +8,7 @@ import (
 	"rmm23/src/mod_strings"
 )
 
-type attrDN struct{ dn []mod_strings.KV }
-
-func (r *attrDN) UnmarshalText(inbound []byte) (err error) {
+func (r *DN) UnmarshalText(inbound []byte) (err error) {
 	var (
 		interimFVs = mod_strings.Split(string(inbound), mod_strings.DNPathSeparator, mod_slices.FlagFilterEmpty|mod_slices.FlagTrimSpace)
 		interim    = make([]mod_strings.KV, len(interimFVs))
@@ -32,7 +30,7 @@ func (r *attrDN) UnmarshalText(inbound []byte) (err error) {
 	return
 }
 
-func (r *attrDN) MarshalText() (outbound []byte, err error) {
+func (r *DN) MarshalText() (outbound []byte, err error) {
 	var (
 		interim = make([]string, len(r.dn), len(r.dn))
 	)
@@ -48,23 +46,11 @@ func (r *attrDN) MarshalText() (outbound []byte, err error) {
 	return []byte(strings.Join(interim, mod_strings.DNPathSeparator)), nil
 }
 
-func (r *attrDN) String() (outbound string) { return string(mod_errors.StripErr1(r.MarshalText())) }
+func (r *DN) String() (outbound string) { return string(mod_errors.StripErr1(r.MarshalText())) }
 
-func parseDN(inbound string) (outbound attrDN, err error) {
+func (r *DN) Parse(inbound string) (err error) {
 	var (
-		interim = new(attrDN)
-	)
-	switch err = interim.UnmarshalText([]byte(inbound)); {
-	case err != nil:
-		return
-	}
-
-	return *interim, err
-}
-
-func (r *attrDN) parse(inbound string) (err error) {
-	var (
-		interim = new(attrDN)
+		interim = new(DN)
 	)
 
 	switch err = interim.UnmarshalText([]byte(inbound)); {

@@ -11,7 +11,9 @@ import (
 	"github.com/redis/rueidis/om"
 
 	"rmm23/src/mod_crypto"
+	"rmm23/src/mod_dn"
 	"rmm23/src/mod_strings"
+	"rmm23/src/mod_time"
 )
 
 // Cert is the struct that represents an LDAP userPKCS12 attribute.
@@ -37,10 +39,10 @@ type Cert struct {
 	// element meta data
 	UUID           uuid.UUID     `json:"uuid"           msgpack:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
 	SerialNumber   *big.Int      `json:"serialNumber"   msgpack:"serialNumber"`   // (?) redis:",key". it can be non-uniq like LDAP's entryUUID - not trusted.
-	Issuer         attrDN        `json:"issuer"         msgpack:"issuer"`         //
-	Subject        attrDN        `json:"subject"        msgpack:"subject"`        //
-	NotBefore      attrTime      `json:"notBefore"      msgpack:"notBefore"`      //
-	NotAfter       attrTime      `json:"notAfter"       msgpack:"notAfter"`       // (?) redis:",exat"
+	Issuer         mod_dn.DN     `json:"issuer"         msgpack:"issuer"`         //
+	Subject        mod_dn.DN     `json:"subject"        msgpack:"subject"`        //
+	NotBefore      mod_time.Time `json:"notBefore"      msgpack:"notBefore"`      //
+	NotAfter       mod_time.Time `json:"notAfter"       msgpack:"notAfter"`       // (?) redis:",exat"
 	DNSNames       []string      `json:"dnsNames"       msgpack:"dnsNames"`       //
 	EmailAddresses []string      `json:"emailAddresses" msgpack:"emailAddresses"` //
 	IPAddresses    []*netip.Addr `json:"ipAddresses"    msgpack:"ipAddresses"`    //

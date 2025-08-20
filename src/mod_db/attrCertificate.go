@@ -4,8 +4,10 @@ import (
 	"github.com/google/uuid"
 
 	"rmm23/src/mod_crypto"
+	"rmm23/src/mod_dn"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_net"
+	"rmm23/src/mod_time"
 )
 
 func (r *Cert) parseCertificate(inbound *mod_crypto.Certificate) (err error) {
@@ -47,10 +49,10 @@ func (r *Cert) normalize() {
 	r.Ext = r.Certificate.Certificate.NotAfter
 	r.UUID = certUUID
 	r.SerialNumber = r.Certificate.Certificate.SerialNumber
-	r.Issuer = mod_errors.StripErr1(parseDN(r.Certificate.Certificate.Issuer.String()))
-	r.Subject = mod_errors.StripErr1(parseDN(r.Certificate.Certificate.Subject.String()))
-	r.NotBefore = attrTime{r.Certificate.Certificate.NotBefore}
-	r.NotAfter = attrTime{r.Certificate.Certificate.NotAfter}
+	r.Issuer = mod_errors.StripErr1(mod_dn.UnmarshalText([]byte(r.Certificate.Certificate.Issuer.String())))
+	r.Subject = mod_errors.StripErr1(mod_dn.UnmarshalText([]byte(r.Certificate.Certificate.Subject.String())))
+	r.NotBefore = mod_time.Time{r.Certificate.Certificate.NotBefore}
+	r.NotAfter = mod_time.Time{r.Certificate.Certificate.NotAfter}
 	r.DNSNames = r.Certificate.Certificate.DNSNames
 	r.EmailAddresses = r.Certificate.Certificate.EmailAddresses
 	r.IPAddresses = mod_errors.StripErr1(mod_net.ParseNetIPs(r.Certificate.Certificate.IPAddresses))

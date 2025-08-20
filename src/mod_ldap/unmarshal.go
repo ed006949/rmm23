@@ -7,8 +7,9 @@ import (
 	"strconv"
 	"time"
 
-	ber "github.com/go-asn1-ber/asn1-ber"
 	"github.com/go-ldap/ldap/v3"
+
+	"rmm23/src/mod_time"
 )
 
 // UnmarshalLDAPEntries processes struct fields with encoding.TextUnmarshaler support and standard type fallbacks.
@@ -145,12 +146,12 @@ func setSingleValue(fieldValue reflect.Value, value string) error {
 	// Handle special types first before TextUnmarshaler check
 	switch fieldValue.Type() {
 	case reflect.TypeOf(time.Time{}):
-		timeVal, err := parseTimeValue(value)
+		timeVal, err := mod_time.UnmarshalText([]byte(value))
 		if err != nil {
 			return fmt.Errorf("invalid time: %w", err)
 		}
 
-		fieldValue.Set(reflect.ValueOf(timeVal))
+		fieldValue.Set(reflect.ValueOf(timeVal.Time))
 
 		return nil
 
@@ -235,29 +236,4 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 	default:
 		return fmt.Errorf("unsupported field type: %v", fieldValue.Type())
 	}
-}
-
-// parseTimeValue with smart format detection based on string length and pattern.
-func parseTimeValue(value string) (t time.Time, err error) {
-	// Skip empty value
-	switch {
-	case len(value) == 0:
-		return time.Time{}, nil
-	}
-
-	// Try BER GeneralizedTime first (handles LDAP timestamps)
-	switch t, err = ber.ParseGeneralizedTime([]byte(value)); {
-	case err == nil:
-		return
-	}
-
-	t = time.Time{}
-
-	// Try time.Time's built-in UnmarshalText (handles RFC3339, etc.)
-	switch err = t.UnmarshalText([]byte(value)); {
-	case err == nil:
-		return
-	}
-
-	return time.Time{}, fmt.Errorf("unable to parse time: %s", value)
 }

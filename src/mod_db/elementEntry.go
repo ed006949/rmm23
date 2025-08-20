@@ -9,7 +9,9 @@ import (
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
 
+	"rmm23/src/mod_dn"
 	"rmm23/src/mod_strings"
+	"rmm23/src/mod_time"
 )
 
 // Entry is the struct that represents an LDAP-compatible Entry.
@@ -22,16 +24,16 @@ type Entry struct {
 	// element specific meta data
 	Type   attrEntryType   `json:"type,omitempty"   msgpack:"type"`   //  Entry's type `(domain|group|user|host)`
 	Status attrEntryStatus `json:"status,omitempty" msgpack:"status"` //
-	BaseDN attrDN          `json:"baseDN,omitempty" msgpack:"baseDN"` //
+	BaseDN mod_dn.DN       `json:"baseDN,omitempty" msgpack:"baseDN"` //
 
 	// element meta data
-	UUID            uuid.UUID `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid"`            //  must be unique
-	DN              attrDN    `json:"dn,omitempty"              ldap:"entryDN"         msgpack:"dn"`              //  must be unique
-	ObjectClass     []string  `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass"`     //  Entry type
-	CreatorsName    attrDN    `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName"`    //
-	CreateTimestamp attrTime  `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp"` //
-	ModifiersName   attrDN    `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName"`   //
-	ModifyTimestamp attrTime  `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp"` //
+	UUID            uuid.UUID     `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid"`            //  must be unique
+	DN              mod_dn.DN     `json:"dn,omitempty"              ldap:"entryDN"         msgpack:"dn"`              //  must be unique
+	ObjectClass     []string      `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass"`     //  Entry type
+	CreatorsName    mod_dn.DN     `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName"`    //
+	CreateTimestamp mod_time.Time `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp"` //
+	ModifiersName   mod_dn.DN     `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName"`   //
+	ModifyTimestamp mod_time.Time `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp"` //
 
 	// element data
 	CN                   string         `json:"cn,omitempty"                   ldap:"cn"                   msgpack:"cn"`                   //  RDN in group's context
@@ -43,10 +45,10 @@ type Entry struct {
 	HomeDirectory        string         `json:"homeDirectory,omitempty"        ldap:"homeDirectory"        msgpack:"homeDirectory"`        //
 	IPHostNumber         []netip.Prefix `json:"ipHostNumber,omitempty"         ldap:"ipHostNumber"         msgpack:"ipHostNumber"`         //
 	Mail                 []string       `json:"mail,omitempty"                 ldap:"mail"                 msgpack:"mail"`                 //
-	Member               []attrDN       `json:"member,omitempty"               ldap:"member"               msgpack:"member"`               //
+	Member               []mod_dn.DN    `json:"member,omitempty"               ldap:"member"               msgpack:"member"`               //
 	O                    string         `json:"o,omitempty"                    ldap:"o"                    msgpack:"o"`                    //
 	OU                   string         `json:"ou,omitempty"                   ldap:"ou"                   msgpack:"ou"`                   //
-	Owner                []attrDN       `json:"owner,omitempty"                ldap:"owner"                msgpack:"owner"`                //
+	Owner                []mod_dn.DN    `json:"owner,omitempty"                ldap:"owner"                msgpack:"owner"`                //
 	SN                   string         `json:"sn,omitempty"                   ldap:"sn"                   msgpack:"sn"`                   //
 	SSHPublicKey         []string       `json:"sshPublicKey,omitempty"         ldap:"sshPublicKey"         msgpack:"sshPublicKey"`         //
 	TelephoneNumber      []string       `json:"telephoneNumber,omitempty"      ldap:"telephoneNumber"      msgpack:"telephoneNumber"`      //
@@ -55,7 +57,7 @@ type Entry struct {
 	UIDNumber            uint64         `json:"uidNumber,omitempty"            ldap:"uidNumber"            msgpack:"uidNumber"`            //
 	UserPassword         string         `json:"userPassword,omitempty"         ldap:"userPassword"         msgpack:"userPassword"`         //
 	// UserPKCS12           mod_crypto.Certificates   `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           msgpack:"userPKCS12"`           //
-	// MemberOf             []*attrDN                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf"            ` //  don't trust LDAP
+	// MemberOf             []mod_dn.DN                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf"            ` //  don't trust LDAP
 
 	// specific data
 	AAA string `json:"host_aaa,omitempty" msgpack:"host_aaa"` //  Entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`

@@ -9,6 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	"rmm23/src/l"
+	"rmm23/src/mod_dn"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_ldap"
 	"rmm23/src/mod_strings"
@@ -56,14 +57,14 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
 			var (
 				entryType attrEntryType
-				baseDN    attrDN
+				baseDN    mod_dn.DN
 			)
 			switch fnErr = entryType.Parse(fnSearchResultType); {
 			case fnErr != nil:
 				return
 			}
 
-			switch fnErr = baseDN.parse(fnBaseDN); {
+			switch fnErr = baseDN.UnmarshalText([]byte(fnBaseDN)); {
 			case fnErr != nil:
 				return
 			}
