@@ -26,7 +26,7 @@ func searchQueryCommand(search om.FtSearchIndex, query string) rueidis.Completed
 }
 
 func parseRedisMessages(messages map[string]rueidis.RedisMessage) (outbound map[string]any, err error) {
-	outbound = make(map[string]any)
+	outbound = make(map[string]any, len(messages))
 
 	for c, message := range messages {
 		switch outbound[c], err = parseRedisMessage(message); {
@@ -40,32 +40,8 @@ func parseRedisMessages(messages map[string]rueidis.RedisMessage) (outbound map[
 
 func parseRedisMessage(message rueidis.RedisMessage) (outbound any, err error) {
 	switch {
-	// case message.IsCacheHit():
 	case message.IsArray():
-		switch messages, swErr := message.AsMap(); {
-		case swErr == nil:
-			return parseRedisMessages(messages)
-		}
-
-		switch messages, swErr := message.ToArray(); {
-		case swErr == nil:
-			var (
-				interim []any
-			)
-
-			for _, b := range messages {
-				switch message2, swErr2 := parseRedisMessage(b); {
-				case swErr2 != nil:
-					return nil, swErr2
-				default:
-					interim = append(interim, message2)
-				}
-			}
-
-			return interim, nil
-		}
-
-		return nil, mod_errors.EParse
+		return parseRedisMessageArray(message)
 
 	case message.IsBool():
 		return message.AsBool()
@@ -88,4 +64,33 @@ func parseRedisMessage(message rueidis.RedisMessage) (outbound any, err error) {
 	default:
 		return message.ToAny()
 	}
+}
+
+func parseRedisMessageArray(message rueidis.RedisMessage) (outbound any, err error) {
+	// Try as map first (for Redis hash responses)
+	switch messages, mapErr := message.AsMap(); {
+	case mapErr == nil:
+		return parseRedisMessages(messages)
+	}
+
+	// Parse as regular array
+	switch messages, arrErr := message.ToArray(); {
+	case arrErr == nil:
+		var (
+			interim = make([]any, 0, len(messages))
+		)
+
+		for _, b := range messages {
+			switch message2, forErr := parseRedisMessage(b); {
+			case forErr != nil:
+				return nil, forErr
+			default:
+				interim = append(interim, message2)
+			}
+		}
+
+		return interim, nil
+	}
+
+	return nil, mod_errors.EParse
 }

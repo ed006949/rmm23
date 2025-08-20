@@ -121,7 +121,7 @@ func (r *RedisRepository) waitIndexing(indexName string) (err error) {
 		return mod_errors.ENODATA
 	}
 
-	for err = r.getInfo(); r.info[indexName].PercentIndexed != 1; err = r.getInfo() {
+	for err = r.getInfo(); r.info[indexName].Indexing != 0; err = r.getInfo() {
 		switch {
 		case err != nil:
 			return
