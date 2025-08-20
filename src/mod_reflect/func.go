@@ -19,7 +19,6 @@ func MakeMapIfNil[M ~map[K]V, K comparable, V any](m *M, size ...int) {
 			*m = make(M)
 		case makeParam1:
 			*m = make(M, size[0])
-		default:
 		}
 	}
 }
@@ -32,7 +31,6 @@ func MakeSliceIfNil[S ~[]V, V any](s *S, size ...int) {
 			*s = make(S, size[0])
 		case makeParam2:
 			*s = make(S, size[0], size[1])
-		default:
 		}
 	}
 }
