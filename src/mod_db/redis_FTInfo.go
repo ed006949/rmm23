@@ -4,14 +4,15 @@ import (
 	"encoding/json/v2"
 
 	"rmm23/src/mod_reflect"
+	"rmm23/src/mod_strings"
 )
 
-// FTInfo mirrors the logical FT.INFO reply (RediSearch ≥ 2.0).
-type FTInfo struct {
+// ftInfo mirrors the logical FT.INFO reply (RediSearch ≥ 2.0).
+type ftInfo struct {
 	IndexName       string                `json:"index_name"`
 	IndexOptions    map[string]any        `json:"index_options"`
-	IndexDefinition FTInfoIndexDefinition `json:"index_definition"`
-	Attributes      FTInfoAttributes      `json:"attributes"`
+	IndexDefinition ftInfoIndexDefinition `json:"index_definition"`
+	Attributes      ftInfoAttributes      `json:"attributes"`
 
 	/* Counters */
 	NumDocs    int64 `json:"num_docs"`
@@ -37,26 +38,24 @@ type FTInfo struct {
 	PercentIndexed       float64 `json:"percent_indexed"`
 
 	/* Sub-objects */
-	GCStats     FTInfoGCStats     `json:"gc_stats"`
-	CursorStats FTInfoCursorStats `json:"cursor_stats"`
+	GCStats     ftInfoGCStats     `json:"gc_stats"`
+	CursorStats ftInfoCursorStats `json:"cursor_stats"`
 }
 
-type FTInfoIndexDefinition struct {
+type ftInfoIndexDefinition struct {
 	KeyType      string   `json:"key_type"`      // "JSON"
 	Prefixes     []string `json:"prefixes"`      // ["certificate:"]
 	DefaultScore float64  `json:"default_score"` // 1
 }
 
-type FTInfoAttributes map[string]*FTInfoAttribute
-
-type FTInfoAttribute struct {
+type ftInfoAttribute struct {
 	Identifier string `json:"identifier"`          // $.status, $.uuid, …
 	Attribute  string `json:"attribute"`           // alias (status, uuid …)
 	Type       string `json:"type"`                // NUMERIC | TAG | …
 	Separator  string `json:"separator,omitempty"` // TAG only
 }
 
-type FTInfoGCStats struct {
+type ftInfoGCStats struct {
 	BytesCollected       int64  `json:"bytes_collected"`
 	TotalMsRun           int64  `json:"total_ms_run"`
 	TotalCycles          int64  `json:"total_cycles"`
@@ -66,18 +65,20 @@ type FTInfoGCStats struct {
 	GCBlocksDenied       int64  `json:"gc_blocks_denied"`
 }
 
-type FTInfoCursorStats struct {
+type ftInfoCursorStats struct {
 	GlobalIdle    int64 `json:"global_idle"`
 	GlobalTotal   int64 `json:"global_total"`
 	IndexCapacity int64 `json:"index_capacity"`
 	IndexTotal    int64 `json:"index_total"`
 }
 
-func (r *FTInfoAttributes) UnmarshalJSON(data []byte) (err error) {
+type ftInfoAttributes map[mod_strings.EntryFieldName]*ftInfoAttribute
+
+func (r *ftInfoAttributes) UnmarshalJSON(data []byte) (err error) {
 	mod_reflect.MakeMapIfNil(r)
 
 	var (
-		interim []*FTInfoAttribute
+		interim []*ftInfoAttribute
 	)
 	switch err = json.Unmarshal(data, &interim); {
 	case err != nil:
@@ -85,7 +86,7 @@ func (r *FTInfoAttributes) UnmarshalJSON(data []byte) (err error) {
 	}
 
 	for _, b := range interim {
-		(*r)[b.Attribute] = b
+		(*r)[mod_strings.EntryFieldName(b.Attribute)] = b
 	}
 
 	return

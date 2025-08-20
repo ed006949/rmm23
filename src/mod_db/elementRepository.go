@@ -11,12 +11,8 @@ import (
 type RedisRepository struct {
 	ctx    context.Context
 	client rueidis.Client
-	info   map[string]*FTInfo
+	info   map[string]*ftInfo
 	entry  om.Repository[Entry]
 	cert   om.Repository[Cert]
 	// issued    om.Repository[Cert]
 }
-
-// type REntries om.Repository[Entry]
-// type RCerts om.Repository[Cert]
-// type RIssued om.Repository[Cert]

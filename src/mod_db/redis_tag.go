@@ -55,17 +55,17 @@ func escapeRedisQueryValue(inbound string) (outbound string) {
 	return replacer.Replace(inbound)
 }
 
-func (r *FTInfoAttributes) buildFVQuery(field mod_strings.EntryFieldName, value string) (outbound string) {
+func (r *ftInfoAttributes) buildFVQuery(field mod_strings.EntryFieldName, value string) (outbound string) {
 	return fmt.Sprintf(
 		"@%s:%s%v%s",
 		field.String(),
-		fvEnclosure[(*r)[field.String()].Type][0],
+		fvEnclosure[(*r)[field].Type][0],
 		escapeRedisQueryValue(value),
-		fvEnclosure[(*r)[field.String()].Type][1],
+		fvEnclosure[(*r)[field].Type][1],
 	)
 }
 
-func (r *FTInfoAttributes) buildQuery(inbound *mod_strings.FVs) (outbound string) {
+func (r *ftInfoAttributes) buildQuery(inbound *mod_strings.FVs) (outbound string) {
 	var (
 		interim = make([]string, len(*r), len(*r))
 	)

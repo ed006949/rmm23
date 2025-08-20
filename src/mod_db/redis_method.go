@@ -69,7 +69,7 @@ func (r *RedisRepository) getInfo(ctx context.Context) (err error) {
 			redisResultMap map[string]rueidis.RedisMessage
 			redisResultAny map[string]any
 			bytes          []byte
-			ftInfo         = new(FTInfo)
+			interim        = new(ftInfo)
 		)
 		switch redisResultMap, err = redisResult.AsMap(); {
 		case err != nil:
@@ -86,19 +86,18 @@ func (r *RedisRepository) getInfo(ctx context.Context) (err error) {
 			return
 		}
 
-		switch err = json.Unmarshal(bytes, ftInfo); {
+		switch err = json.Unmarshal(bytes, interim); {
 		case err != nil:
 			return
 		}
 
-		r.info[b] = ftInfo
+		r.info[b] = interim
 	}
 
 	for a, b := range r.info {
-		switch value := b.HashIndexingFailures; value {
-		case 0:
-		default:
-			l.Z{l.M: "redis", "index": a, mod_strings.FTInfo_hash_indexing_failures: value}.Warning()
+		switch value := b.HashIndexingFailures; {
+		case value != 0:
+			l.Z{l.M: redisearchTagName, "index": a, "failures": value}.Warning()
 		}
 	}
 
@@ -114,14 +113,6 @@ func (r *Conf) Close() (err error) {
 	r.Repo.client.Close()
 
 	return
-}
-
-func (r *RedisRepository) waitEntryIndexing(ctx context.Context) (err error) {
-	return r.waitIndexing(ctx, r.entry.IndexName())
-}
-
-func (r *RedisRepository) waitCertIndexing(ctx context.Context) (err error) {
-	return r.waitIndexing(ctx, r.cert.IndexName())
 }
 
 func (r *RedisRepository) waitIndexing(ctx context.Context, indexName string) (err error) {
@@ -256,7 +247,7 @@ func (r *RedisRepository) DropCertIndex(ctx context.Context) (err error) {
 //
 
 func (r *RedisRepository) SearchEntryQ(ctx context.Context, query string) (count int64, entries []*Entry, err error) {
-	_ = r.waitEntryIndexing(ctx)
+	_ = r.waitIndexing(ctx, r.entry.IndexName())
 
 	return r.entry.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query(query).
@@ -266,7 +257,7 @@ func (r *RedisRepository) SearchEntryQ(ctx context.Context, query string) (count
 }
 
 func (r *RedisRepository) SearchCertQ(ctx context.Context, query string) (count int64, entries []*Cert, err error) {
-	_ = r.waitCertIndexing(ctx)
+	_ = r.waitIndexing(ctx, r.cert.IndexName())
 
 	return r.cert.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query(query).
@@ -276,32 +267,32 @@ func (r *RedisRepository) SearchCertQ(ctx context.Context, query string) (count 
 }
 
 func (r *RedisRepository) SearchEntryFV(ctx context.Context, field mod_strings.EntryFieldName, value string) (count int64, entries []*Entry, err error) {
-	return r.SearchEntryMFV(ctx, &mod_strings.FVs{{field, value}})
+	return r.SearchEntryFVs(ctx, &mod_strings.FVs{{field, value}})
 }
 
 func (r *RedisRepository) SearchCertFV(ctx context.Context, field mod_strings.EntryFieldName, value string) (count int64, entries []*Cert, err error) {
-	return r.SearchCertMFV(ctx, &mod_strings.FVs{{field, value}})
+	return r.SearchCertFVs(ctx, &mod_strings.FVs{{field, value}})
 }
 
-func (r *RedisRepository) SearchEntryMFV(ctx context.Context, mfv *mod_strings.FVs) (count int64, entries []*Entry, err error) {
-	return r.SearchEntryQ(ctx, r.info[_entry].Attributes.buildQuery(mfv))
+func (r *RedisRepository) SearchEntryFVs(ctx context.Context, fvs *mod_strings.FVs) (count int64, entries []*Entry, err error) {
+	return r.SearchEntryQ(ctx, r.info[_entry].Attributes.buildQuery(fvs))
 }
 
-func (r *RedisRepository) SearchCertMFV(ctx context.Context, mfv *mod_strings.FVs) (count int64, entries []*Cert, err error) {
-	return r.SearchCertQ(ctx, r.info[_certificate].Attributes.buildQuery(mfv))
+func (r *RedisRepository) SearchCertFVs(ctx context.Context, fvs *mod_strings.FVs) (count int64, entries []*Cert, err error) {
+	return r.SearchCertQ(ctx, r.info[_certificate].Attributes.buildQuery(fvs))
 }
 
-// SearchEntryMFVField is not working:
+// SearchEntryFVsField is not working:
 //
 // err is `unexpected end of JSON input`
 //
 // JSONRepository receives empty JSON stream.
-func (r *RedisRepository) SearchEntryMFVField(ctx context.Context, mfv *mod_strings.FVs, field mod_strings.EntryFieldName) (count int64, entries []*Entry, err error) {
-	_ = r.waitEntryIndexing(ctx)
+func (r *RedisRepository) SearchEntryFVsField(ctx context.Context, fvs *mod_strings.FVs, field mod_strings.EntryFieldName) (count int64, entries []*Entry, err error) {
+	_ = r.waitIndexing(ctx, r.entry.IndexName())
 
 	return r.entry.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		var (
-			command = search.Query(r.info[_entry].Attributes.buildQuery(mfv)).
+			command = search.Query(r.info[_entry].Attributes.buildQuery(fvs)).
 				Return(strconv.FormatInt(1, 10)).
 				Identifier(field.String()).
 				Limit().OffsetNum(0, connMaxPaging).

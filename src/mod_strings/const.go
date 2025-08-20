@@ -1,13 +1,6 @@
 package mod_strings
 
 const (
-	FTInfo_percent_indexed        = "percent_indexed"
-	FTInfo_index_name             = "index_name"
-	FTInfo_hash_indexing_failures = "hash_indexing_failures"
-	FTInfo_attributes             = "attributes"
-)
-
-const (
 	SliceSeparator  = "\x1f"
 	LineSeparator   = "\n"
 	LURISeparator   = " "
