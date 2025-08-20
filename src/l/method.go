@@ -9,8 +9,6 @@ import (
 
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
-
-	"rmm23/src/mod_bools"
 )
 
 func (r Z) MarshalZerologObject(e *zerolog.Event) {
@@ -83,7 +81,7 @@ func (r *runType) dryRunSetString(inbound string) (err error) {
 	var (
 		interim bool
 	)
-	switch interim, err = mod_bools.Parse(inbound); {
+	switch interim, err = strconv.ParseBool(inbound); {
 	case err != nil:
 		return
 	}

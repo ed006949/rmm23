@@ -8,7 +8,6 @@ import (
 
 	"github.com/rs/zerolog"
 
-	"rmm23/src/mod_bools"
 	"rmm23/src/mod_errors"
 )
 
@@ -89,9 +88,9 @@ var (
 		dryRun: func() bool {
 			switch value := daemonEnvDefined[daemonDryRun]; {
 			case len(value) != 0:
-				return mod_errors.PanicErr1(mod_bools.Parse(value))
+				return mod_errors.PanicErr1(strconv.ParseBool(value))
 			default:
-				return mod_errors.PanicErr1(mod_bools.Parse(buildDryRun))
+				return mod_errors.PanicErr1(strconv.ParseBool(buildDryRun))
 			}
 		}(),
 		mode: func() int {

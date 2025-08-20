@@ -3,11 +3,11 @@ package mod_ldap
 import (
 	"github.com/go-ldap/ldap/v3"
 
-	"rmm23/src/mod_net"
+	"rmm23/src/mod_url"
 )
 
 type Conf struct {
-	URL      *mod_net.URL `json:"url,omitempty"`
+	URL      *mod_url.URL `json:"url,omitempty"`
 	Domains  []*domain    `json:"domain,omitempty"`
 	Settings []*settings  `json:"settings,omitempty"`
 	conn     *ldap.Conn

@@ -1,11 +1,11 @@
 package mod_db
 
 import (
-	"rmm23/src/mod_net"
+	"rmm23/src/mod_url"
 )
 
 type Conf struct {
-	URL  *mod_net.URL     `json:"url,omitempty"`
+	URL  *mod_url.URL     `json:"url,omitempty"`
 	Repo *RedisRepository `json:"-"`
 }
 
