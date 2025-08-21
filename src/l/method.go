@@ -14,17 +14,13 @@ import (
 func (r Z) MarshalZerologObject(e *zerolog.Event) {
 	for a, b := range r {
 		switch value := b.(type) {
+		case nil:
 		case error:
 			e.AnErr(a, value)
 		case []error:
 			e.Errs(a, value)
 		default:
-			switch a {
-			case T:
-				e.Type(a, b)
-			default:
-				e.Interface(a, value)
-			}
+			e.Interface(a, value)
 		}
 	}
 

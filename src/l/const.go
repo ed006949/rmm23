@@ -3,7 +3,7 @@ package l
 const (
 	E = "error"   // zerolog.ErrorFieldName hook
 	M = "message" // zerolog.MessageFieldName hook
-	T = "type"    // zerolog.TypeFieldName hook
+	// T = "type"    // zerolog.TypeFieldName hook.
 )
 
 const (
