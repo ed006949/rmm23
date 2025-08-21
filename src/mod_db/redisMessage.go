@@ -1,29 +1,10 @@
 package mod_db
 
 import (
-	"context"
-
 	"github.com/redis/rueidis"
-	"github.com/redis/rueidis/om"
 
 	"rmm23/src/mod_errors"
 )
-
-// NewRedisRepository creates a new RedisRepository.
-func NewRedisRepository(ctx context.Context, client rueidis.Client) *RedisRepository {
-	return &RedisRepository{
-		ctx:    ctx,
-		client: client,
-		entry:  om.NewJSONRepository[Entry](entryKeyHeader, Entry{}, client, om.WithIndexName(entryKeyHeader)),
-		cert:   om.NewJSONRepository[Cert](certKeyHeader, Cert{}, client, om.WithIndexName(certKeyHeader)),
-	}
-}
-
-func searchQueryCommand(search om.FtSearchIndex, query string) rueidis.Completed {
-	return search.Query(query).
-		Limit().OffsetNum(0, connMaxPaging).
-		Build()
-}
 
 func parseRedisMessages(messages map[string]rueidis.RedisMessage) (outbound map[string]any, err error) {
 	outbound = make(map[string]any, len(messages))
@@ -44,13 +25,13 @@ func parseRedisMessage(message rueidis.RedisMessage) (outbound any, err error) {
 		return parseRedisMessageArray(message)
 
 	case message.IsBool():
-		return message.AsBool()
+		return message.ToBool()
 
 	case message.IsFloat64():
-		return message.AsFloat64()
+		return message.ToFloat64()
 
 	case message.IsInt64():
-		return message.AsInt64()
+		return message.ToInt64()
 
 	case message.IsNil():
 		return nil, nil
