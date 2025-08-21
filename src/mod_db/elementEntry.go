@@ -22,57 +22,57 @@ type Entry struct {
 	Ext time.Time `redis:",exat"` //
 
 	// element specific meta data
-	Type   attrEntryType   `json:"type,omitempty"   msgpack:"type"`   //  Entry's type `(domain|group|user|host)`
-	Status attrEntryStatus `json:"status,omitempty" msgpack:"status"` //
-	BaseDN mod_dn.DN       `json:"baseDN,omitempty" msgpack:"baseDN"` //
+	Type   attrEntryType   `json:"type,omitempty"`   //  Entry's type `(domain|group|user|host)`
+	Status attrEntryStatus `json:"status,omitempty"` //
+	BaseDN mod_dn.DN       `json:"baseDN,omitempty"` //
 
 	// element meta data
-	UUID            uuid.UUID     `json:"uuid,omitempty"            ldap:"entryUUID"       msgpack:"uuid"`            //  must be unique
-	DN              mod_dn.DN     `json:"dn,omitempty"              ldap:"entryDN"         msgpack:"dn"`              //  must be unique
-	ObjectClass     []string      `json:"objectClass,omitempty"     ldap:"objectClass"     msgpack:"objectClass"`     //  Entry type
-	CreatorsName    mod_dn.DN     `json:"creatorsName,omitempty"    ldap:"creatorsName"    msgpack:"creatorsName"`    //
-	CreateTimestamp mod_time.Time `json:"createTimestamp,omitempty" ldap:"createTimestamp" msgpack:"createTimestamp"` //
-	ModifiersName   mod_dn.DN     `json:"modifiersName,omitempty"   ldap:"modifiersName"   msgpack:"modifiersName"`   //
-	ModifyTimestamp mod_time.Time `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp" msgpack:"modifyTimestamp"` //
+	UUID            uuid.UUID     `json:"uuid,omitempty"            ldap:"entryUUID"`       //  must be unique
+	DN              mod_dn.DN     `json:"dn,omitempty"              ldap:"entryDN"`         //  must be unique
+	ObjectClass     []string      `json:"objectClass,omitempty"     ldap:"objectClass"`     //  Entry type
+	CreatorsName    mod_dn.DN     `json:"creatorsName,omitempty"    ldap:"creatorsName"`    //
+	CreateTimestamp mod_time.Time `json:"createTimestamp,omitempty" ldap:"createTimestamp"` //
+	ModifiersName   mod_dn.DN     `json:"modifiersName,omitempty"   ldap:"modifiersName"`   //
+	ModifyTimestamp mod_time.Time `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp"` //
 
 	// element data
-	CN                   string         `json:"cn,omitempty"                   ldap:"cn"                   msgpack:"cn"`                   //  RDN in group's context
-	DC                   string         `json:"dc,omitempty"                   ldap:"dc"                   msgpack:"dc"`                   //
-	Description          string         `json:"description,omitempty"          ldap:"description"          msgpack:"description"`          //
-	DestinationIndicator []string       `json:"destinationIndicator,omitempty" ldap:"destinationIndicator" msgpack:"destinationIndicator"` //
-	DisplayName          string         `json:"displayName,omitempty"          ldap:"displayName"          msgpack:"displayName"`          //
-	GIDNumber            uint64         `json:"gidNumber,omitempty"            ldap:"gidNumber"            msgpack:"gidNumber"`            //  Primary GIDNumber in user's context (ignore it), GIDNumber in group's context.
-	HomeDirectory        string         `json:"homeDirectory,omitempty"        ldap:"homeDirectory"        msgpack:"homeDirectory"`        //
-	IPHostNumber         []netip.Prefix `json:"ipHostNumber,omitempty"         ldap:"ipHostNumber"         msgpack:"ipHostNumber"`         //
-	Mail                 []string       `json:"mail,omitempty"                 ldap:"mail"                 msgpack:"mail"`                 //
-	Member               []mod_dn.DN    `json:"member,omitempty"               ldap:"member"               msgpack:"member"`               //
-	O                    string         `json:"o,omitempty"                    ldap:"o"                    msgpack:"o"`                    //
-	OU                   string         `json:"ou,omitempty"                   ldap:"ou"                   msgpack:"ou"`                   //
-	Owner                []mod_dn.DN    `json:"owner,omitempty"                ldap:"owner"                msgpack:"owner"`                //
-	SN                   string         `json:"sn,omitempty"                   ldap:"sn"                   msgpack:"sn"`                   //
-	SSHPublicKey         []string       `json:"sshPublicKey,omitempty"         ldap:"sshPublicKey"         msgpack:"sshPublicKey"`         //
-	TelephoneNumber      []string       `json:"telephoneNumber,omitempty"      ldap:"telephoneNumber"      msgpack:"telephoneNumber"`      //
-	TelexNumber          []string       `json:"telexNumber,omitempty"          ldap:"telexNumber"          msgpack:"telexNumber"`          //
-	UID                  string         `json:"uid,omitempty"                  ldap:"uid"                  msgpack:"uid"`                  //  RDN in user's context
-	UIDNumber            uint64         `json:"uidNumber,omitempty"            ldap:"uidNumber"            msgpack:"uidNumber"`            //
-	UserPassword         string         `json:"userPassword,omitempty"         ldap:"userPassword"         msgpack:"userPassword"`         //
-	// UserPKCS12           mod_crypto.Certificates   `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           msgpack:"userPKCS12"`           //
-	// MemberOf             []mod_dn.DN                   `json:"memberOf,omitempty"             ldap:"memberOf"             msgpack:"memberOf"            ` //  don't trust LDAP
+	CN                   string         `json:"cn,omitempty"                   ldap:"cn"`                   //  RDN in group's context
+	DC                   string         `json:"dc,omitempty"                   ldap:"dc"`                   //
+	Description          string         `json:"description,omitempty"          ldap:"description"`          //
+	DestinationIndicator []string       `json:"destinationIndicator,omitempty" ldap:"destinationIndicator"` //
+	DisplayName          string         `json:"displayName,omitempty"          ldap:"displayName"`          //
+	GIDNumber            uint64         `json:"gidNumber,omitempty"            ldap:"gidNumber"`            //  Primary GIDNumber in user's context (ignore it), GIDNumber in group's context.
+	HomeDirectory        string         `json:"homeDirectory,omitempty"        ldap:"homeDirectory"`        //
+	IPHostNumber         []netip.Prefix `json:"ipHostNumber,omitempty"         ldap:"ipHostNumber"`         //
+	Mail                 []string       `json:"mail,omitempty"                 ldap:"mail"`                 //
+	Member               []mod_dn.DN    `json:"member,omitempty"               ldap:"member"`               //
+	O                    string         `json:"o,omitempty"                    ldap:"o"`                    //
+	OU                   string         `json:"ou,omitempty"                   ldap:"ou"`                   //
+	Owner                []mod_dn.DN    `json:"owner,omitempty"                ldap:"owner"`                //
+	SN                   string         `json:"sn,omitempty"                   ldap:"sn"`                   //
+	SSHPublicKey         []string       `json:"sshPublicKey,omitempty"         ldap:"sshPublicKey"`         //
+	TelephoneNumber      []string       `json:"telephoneNumber,omitempty"      ldap:"telephoneNumber"`      //
+	TelexNumber          []string       `json:"telexNumber,omitempty"          ldap:"telexNumber"`          //
+	UID                  string         `json:"uid,omitempty"                  ldap:"uid"`                  //  RDN in user's context
+	UIDNumber            uint64         `json:"uidNumber,omitempty"            ldap:"uidNumber"`            //
+	UserPassword         string         `json:"userPassword,omitempty"         ldap:"userPassword"`         //
+	// UserPKCS12           mod_crypto.Certificates   `json:"userPKCS12,omitempty"           ldap:"userPKCS12"           `           //
+	// MemberOf             []mod_dn.DN                   `json:"memberOf,omitempty"             ldap:"memberOf"                         ` //  don't trust LDAP
 
 	// specific data
-	AAA string `json:"host_aaa,omitempty" msgpack:"host_aaa"` //  Entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`
-	ACL string `json:"host_acl,omitempty" msgpack:"host_acl"` //  Entry's ACL
+	AAA string `json:"host_aaa,omitempty"` //  Entry's AAA (?) `(UserPKCS12|UserPassword|SSHPublicKey|etc)`
+	ACL string `json:"host_acl,omitempty"` //  Entry's ACL
 
 	// host specific data
-	HostType        string     `json:"host_type,omitempty"         msgpack:"host_type"`         //  host type `(provider|interim|openvpn|ciscovpn)`
-	HostASN         uint32     `json:"host_asn,omitempty"          msgpack:"host_asn"`          //
-	HostUpstreamASN uint32     `json:"host_upstream_asn,omitempty" msgpack:"host_upstream_asn"` //  upstream route
-	HostHostingUUID uuid.UUID  `json:"host_hosting_uuid,omitempty" msgpack:"host_hosting_uuid"` //  (?) replace with member/memberOf
-	HostURL         *url.URL   `json:"host_url,omitempty"          msgpack:"host_url"`          //
-	HostListen      netip.Addr `json:"host_listen,omitempty"       msgpack:"host_listen"`       //
+	HostType        string     `json:"host_type,omitempty"`         //  host type `(provider|interim|openvpn|ciscovpn)`
+	HostASN         uint32     `json:"host_asn,omitempty"`          //
+	HostUpstreamASN uint32     `json:"host_upstream_asn,omitempty"` //  upstream route
+	HostHostingUUID uuid.UUID  `json:"host_hosting_uuid,omitempty"` //  (?) replace with member/memberOf
+	HostURL         *url.URL   `json:"host_url,omitempty"`          //
+	HostListen      netip.Addr `json:"host_listen,omitempty"`       //
 
 	// specific data (space-separated KV DB stored as labeledURI)
-	LabeledURI []string `json:"labeledURI,omitempty" ldap:"labeledURI" msgpack:"labeledURI"` //
+	LabeledURI []string `json:"labeledURI,omitempty" ldap:"labeledURI"` //
 }
 
 // CreateEntryIndex creates the RediSearch index for the Entry struct.

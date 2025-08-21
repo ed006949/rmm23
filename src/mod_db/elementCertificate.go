@@ -24,33 +24,33 @@ type Cert struct {
 	Ext time.Time `redis:",exat"` //
 
 	// element specific meta data
-	// Type   attrEntryType   `json:"type,omitempty"   msgpack:"type"`   //
-	Status attrEntryStatus `json:"status,omitempty" msgpack:"status"` //
-	// BaseDN attrDN          `json:"baseDN,omitempty" msgpack:"baseDN"` //
+	// Type   attrEntryType   `json:"type,omitempty"   `   //
+	Status attrEntryStatus `json:"status,omitempty"` //
+	// BaseDN attrDN          `json:"baseDN,omitempty" ` //
 
 	// // element meta data
-	// UUID            attrUUID `json:"uuid,omitempty"            msgpack:"uuid"`            //  must be unique
-	// DN              attrDN   `json:"dn,omitempty"              msgpack:"dn"`              //  must be unique
-	// CreatorsName    attrDN   `json:"creatorsName,omitempty"    msgpack:"creatorsName"`    //
-	// CreateTimestamp attrTime `json:"createTimestamp,omitempty" msgpack:"createTimestamp"` //
-	// ModifiersName   attrDN   `json:"modifiersName,omitempty"   msgpack:"modifiersName"`   //
-	// ModifyTimestamp attrTime `json:"modifyTimestamp,omitempty" msgpack:"modifyTimestamp"` //
+	// UUID            attrUUID `json:"uuid,omitempty"            `            //  must be unique
+	// DN              attrDN   `json:"dn,omitempty"              `              //  must be unique
+	// CreatorsName    attrDN   `json:"creatorsName,omitempty"    `    //
+	// CreateTimestamp attrTime `json:"createTimestamp,omitempty" ` //
+	// ModifiersName   attrDN   `json:"modifiersName,omitempty"   `   //
+	// ModifyTimestamp attrTime `json:"modifyTimestamp,omitempty" ` //
 
 	// element meta data
-	UUID           uuid.UUID     `json:"uuid"           msgpack:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
-	SerialNumber   *big.Int      `json:"serialNumber"   msgpack:"serialNumber"`   // (?) redis:",key". it can be non-uniq like LDAP's entryUUID - not trusted.
-	Issuer         mod_dn.DN     `json:"issuer"         msgpack:"issuer"`         //
-	Subject        mod_dn.DN     `json:"subject"        msgpack:"subject"`        //
-	NotBefore      mod_time.Time `json:"notBefore"      msgpack:"notBefore"`      //
-	NotAfter       mod_time.Time `json:"notAfter"       msgpack:"notAfter"`       // (?) redis:",exat"
-	DNSNames       []string      `json:"dnsNames"       msgpack:"dnsNames"`       //
-	EmailAddresses []string      `json:"emailAddresses" msgpack:"emailAddresses"` //
-	IPAddresses    []*netip.Addr `json:"ipAddresses"    msgpack:"ipAddresses"`    //
-	URIs           []*url.URL    `json:"uris"           msgpack:"uris"`           //
-	IsCA           bool          `json:"isCA"           msgpack:"isCA"`           //
+	UUID           uuid.UUID     `json:"uuid"`           // x509.Certificate.Raw() hash `redis:",key"`
+	SerialNumber   *big.Int      `json:"serialNumber"`   // (?) redis:",key". it can be non-uniq like LDAP's entryUUID - not trusted.
+	Issuer         mod_dn.DN     `json:"issuer"`         //
+	Subject        mod_dn.DN     `json:"subject"`        //
+	NotBefore      mod_time.Time `json:"notBefore"`      //
+	NotAfter       mod_time.Time `json:"notAfter"`       // (?) redis:",exat"
+	DNSNames       []string      `json:"dnsNames"`       //
+	EmailAddresses []string      `json:"emailAddresses"` //
+	IPAddresses    []*netip.Addr `json:"ipAddresses"`    //
+	URIs           []*url.URL    `json:"uris"`           //
+	IsCA           bool          `json:"isCA"`           //
 
 	// element data
-	Certificate *mod_crypto.Certificate `json:"certificate,omitempty" msgpack:"certificate"` //
+	Certificate *mod_crypto.Certificate `json:"certificate,omitempty"` //
 }
 
 // CreateCertIndex creates the RediSearch index for the Cert struct.
