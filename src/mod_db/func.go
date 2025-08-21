@@ -16,43 +16,7 @@ import (
 	"rmm23/src/mod_vfs"
 )
 
-func GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, outbound *Conf) (err error) {
-	switch err = outbound.Dial(ctx); {
-	case err != nil:
-		return
-	}
-
-	defer func() {
-		_ = outbound.Close()
-	}()
-
-	switch err = getLDAPDocs(ctx, inbound, outbound.Repo); {
-	case err != nil:
-		return
-	}
-
-	return
-}
-
-func GetFSCerts(ctx context.Context, inbound *mod_vfs.VFSDB, outbound *Conf) (err error) {
-	switch err = outbound.Dial(ctx); {
-	case err != nil:
-		return
-	}
-
-	defer func() {
-		_ = outbound.Close()
-	}()
-
-	switch err = getFSCerts(ctx, inbound, outbound.Repo); {
-	case err != nil:
-		return
-	}
-
-	return
-}
-
-func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisRepository) (err error) {
+func GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisRepository) (err error) {
 	var (
 		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
 			var (
@@ -146,7 +110,7 @@ func getLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 	return
 }
 
-func getFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository) (err error) {
+func GetFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB, repo *RedisRepository) (err error) {
 	var (
 		content    = make(map[string][][]byte)
 		fileExts   = 2

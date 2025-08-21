@@ -55,7 +55,7 @@ func (r *runType) verbositySet(inbound zerolog.Level) {
 		Out:        os.Stderr,
 		NoColor:    false,
 		TimeFormat: time.RFC3339,
-		// FormatFieldValue: func(i interface{}) string { return fmt.Sprintf("\"%s\"", i) },
+		// FormatFieldValue: func(i any) string { return fmt.Sprintf("\"%s\"", i) },
 	})
 }
 

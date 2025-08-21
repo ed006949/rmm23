@@ -15,7 +15,7 @@ import (
 	"rmm23/src/mod_strings"
 )
 
-func (r *RedisRepository) getInfo() (err error) {
+func (r *RedisRepository) getInfo(indexes ...string) (err error) {
 	mod_reflect.MakeMapIfNil(&r.info)
 
 	var (
@@ -62,6 +62,24 @@ func (r *RedisRepository) getInfo() (err error) {
 		case value != 0:
 			l.Z{l.M: redisearchTagName, "index": a, "failures": value}.Warning()
 		}
+	}
+
+	var (
+		fail bool
+	)
+
+	for _, b := range indexes {
+		switch _, ok := r.info[b]; {
+		case !ok:
+			fail = true
+
+			l.Z{l.M: redisearchTagName, "index": b, l.E: mod_errors.ENOTFOUND}.Error()
+		}
+	}
+
+	switch {
+	case fail:
+		return mod_errors.EUnwilling
 	}
 
 	return

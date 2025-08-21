@@ -38,7 +38,7 @@ func (r *Conf) Dial(ctx context.Context) (err error) {
 		}
 	}
 
-	switch err = r.Repo.getInfo(); {
+	switch err = r.Repo.getInfo(_entry, _certificate); {
 	case err != nil:
 		return
 	}

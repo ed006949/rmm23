@@ -38,9 +38,18 @@ func main() {
 		os.Exit(1)
 	}
 
+	switch err = config.Conf.DB.Dial(ctx); {
+	case err != nil:
+		return
+	}
+
+	defer func() {
+		_ = config.Conf.DB.Close()
+	}()
+
 	switch {
 	case !l.Run.DryRunValue():
-		switch err = mod_db.GetLDAPDocs(ctx, config.Conf.LDAP, config.Conf.DB); {
+		switch err = mod_db.GetLDAPDocs(ctx, config.Conf.LDAP, config.Conf.DB.Repo); {
 		case err != nil:
 			l.Z{l.E: err}.Critical()
 		}
@@ -53,20 +62,11 @@ func main() {
 
 	switch {
 	case !l.Run.DryRunValue():
-		switch err = mod_db.GetFSCerts(ctx, vfsDB, config.Conf.DB); {
+		switch err = mod_db.GetFSCerts(ctx, vfsDB, config.Conf.DB.Repo); {
 		case err != nil:
 			l.Z{l.E: err}.Critical()
 		}
 	}
-
-	switch err = config.Conf.DB.Dial(ctx); {
-	case err != nil:
-		return
-	}
-
-	defer func() {
-		_ = config.Conf.DB.Close()
-	}()
 
 	var (
 		count   int64

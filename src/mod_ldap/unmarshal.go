@@ -13,7 +13,7 @@ import (
 )
 
 // UnmarshalLDAPEntries processes struct fields with encoding.TextUnmarshaler support and standard type fallbacks.
-func UnmarshalLDAPEntries(entries []*ldap.Entry, target interface{}) error {
+func UnmarshalLDAPEntries(entries []*ldap.Entry, target any) error {
 	targetValue := reflect.ValueOf(target)
 	if targetValue.Kind() != reflect.Ptr || targetValue.Elem().Kind() != reflect.Slice {
 		return fmt.Errorf("target must be pointer to slice")
@@ -78,7 +78,7 @@ func walkStructFields(entry *ldap.Entry, structValue reflect.Value) error {
 			continue
 		}
 
-		ldapTag := field.Tag.Get("ldap")
+		ldapTag := field.Tag.Get(TagName)
 		if ldapTag == "" {
 			continue
 		}

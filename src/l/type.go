@@ -7,7 +7,7 @@ import (
 	"github.com/rs/zerolog"
 )
 
-type Z map[string]interface{}
+type Z map[string]any
 
 type DaemonConfig struct {
 	Verbosity zerolog.Level `json:"verbosity,omitempty"` //
