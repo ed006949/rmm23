@@ -15,20 +15,20 @@ import (
 	"rmm23/src/mod_strings"
 )
 
-func (r *RedisRepository) getInfo(indexes ...string) (err error) {
+func (r *RedisRepository) getInfo(indexNames ...string) (err error) {
 	mod_reflect.MakeMapIfNil(&r.info)
 
-	var (
-		repos []string
-	)
-	switch repos, err = r.client.Do(r.ctx, r.client.B().FtList().Build()).AsStrSlice(); {
-	case err != nil:
-		return
+	switch {
+	case len(indexNames) == 0:
+		switch indexNames, err = r.client.Do(r.ctx, r.client.B().FtList().Build()).AsStrSlice(); {
+		case err != nil:
+			return
+		}
 	}
 
-	for _, b := range repos {
+	for _, indexName := range indexNames {
 		var (
-			redisResult    = r.client.Do(r.ctx, r.client.B().FtInfo().Index(b).Build())
+			redisResult    = r.client.Do(r.ctx, r.client.B().FtInfo().Index(indexName).Build())
 			redisResultMap map[string]rueidis.RedisMessage
 			redisResultAny map[string]any
 			bytes          []byte
@@ -54,45 +54,53 @@ func (r *RedisRepository) getInfo(indexes ...string) (err error) {
 			return
 		}
 
-		r.info[b] = interim
+		r.info[indexName] = interim
 	}
 
-	for a, b := range r.info {
-		switch value := b.HashIndexingFailures; {
+	_ = r.checkIndexFailure()
+
+	return
+	// return r.checkIndexExist(indexNames...)
+}
+
+func (r *RedisRepository) checkIndexFailure() (err error) {
+	for indexName, indexInfo := range r.info {
+		switch value := indexInfo.HashIndexingFailures; {
 		case value != 0:
-			l.Z{l.M: redisearchTagName, "index": a, "failures": value}.Warning()
+			err = mod_errors.EINVAL
+
+			l.Z{l.M: redisearchTagName, "index": indexName, "failures": value}.Warning()
 		}
-	}
-
-	var (
-		fail bool
-	)
-
-	for _, b := range indexes {
-		switch _, ok := r.info[b]; {
-		case !ok:
-			fail = true
-
-			l.Z{l.M: redisearchTagName, "index": b, l.E: mod_errors.ENOTFOUND}.Error()
-		}
-	}
-
-	switch {
-	case fail:
-		return mod_errors.EUnwilling
 	}
 
 	return
 }
 
-func (r *RedisRepository) waitIndexing(indexName string) (err error) {
-	switch _, ok := r.info[indexName]; {
-	case !ok:
-		return mod_errors.ENODATA
+func (r *RedisRepository) checkIndexExist(indexNames ...string) (err error) {
+	for _, indexName := range indexNames {
+		switch _, ok := r.info[indexName]; {
+		case !ok:
+			err = mod_errors.EUnwilling
+			l.Z{l.M: redisearchTagName, "index": indexName, l.E: mod_errors.ENOTFOUND}.Error()
+		}
 	}
 
-	for err = r.getInfo(); r.info[indexName].Indexing != 0 || r.info[indexName].PercentIndexed != 1; err = r.getInfo() {
-		switch {
+	return
+}
+
+func (r *RedisRepository) waitIndex(indexName string) (err error) {
+	// switch err = r.checkIndexExist(indexName); {
+	// case err != nil:
+	// 	return
+	// }
+	switch err = r.getInfo(indexName); {
+	case err != nil:
+		return
+	}
+
+	// for err = r.getInfo(indexName); r.info[indexName].Indexing != 0 || r.info[indexName].PercentIndexed != 1; err = r.getInfo(indexName) {
+	for r.info[indexName].Indexing != 0 || r.info[indexName].PercentIndexed != 1 {
+		switch err = r.getInfo(indexName); {
 		case err != nil:
 			return
 		}
@@ -217,7 +225,7 @@ func (r *RedisRepository) DropCertIndex() (err error) {
 //
 
 func (r *RedisRepository) SearchEntryQ(query string) (count int64, entries []*Entry, err error) {
-	_ = r.waitIndexing(r.entry.IndexName())
+	_ = r.waitIndex(r.entry.IndexName())
 
 	return r.entry.Search(r.ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query(query).
@@ -227,7 +235,7 @@ func (r *RedisRepository) SearchEntryQ(query string) (count int64, entries []*En
 }
 
 func (r *RedisRepository) SearchCertQ(query string) (count int64, entries []*Cert, err error) {
-	_ = r.waitIndexing(r.cert.IndexName())
+	_ = r.waitIndex(r.cert.IndexName())
 
 	return r.cert.Search(r.ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		return search.Query(query).
@@ -258,7 +266,7 @@ func (r *RedisRepository) SearchCertFVs(fvs *mod_strings.FVs) (count int64, entr
 //
 // JSONRepository receives empty JSON stream.
 func (r *RedisRepository) SearchEntryFVsField(ctx context.Context, fvs *mod_strings.FVs, field mod_strings.EntryFieldName) (count int64, entries []*Entry, err error) {
-	_ = r.waitIndexing(r.entry.IndexName())
+	_ = r.waitIndex(r.entry.IndexName())
 
 	return r.entry.Search(ctx, func(search om.FtSearchIndex) rueidis.Completed {
 		var (
