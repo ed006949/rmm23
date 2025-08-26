@@ -117,7 +117,7 @@ func main() {
 
 	var (
 		vlans        = []int{0, 1, 2001, 4094, 4095}
-		vlansSubnets []netip.Prefix
+		vlansSubnets map[int]netip.Prefix
 	)
 
 	switch err = vlanSubnets.GenerateSubnets(netip.MustParseAddr("10.240.192.0"), mod_vlan.MaxIPv4Bits-mod_vlan.HostSubnetSize); {
@@ -131,10 +131,10 @@ func main() {
 	}
 
 	for a, b := range vlansSubnets {
-		fmt.Printf("VLAN%04d: %18s\n", vlans[a], b)
+		fmt.Printf("VLAN%04d: %18s\n", a, b)
 	}
 
-	// switch vlansSubnets, err = vlanSubnets.Subnets(netip.MustParseAddr("10.240.192.0")); {
+	// switch vlansSubnets, err = vlanSubnets.SubnetsAll(netip.MustParseAddr("10.240.192.0")); {
 	// case err != nil:
 	// 	l.Z{l.E: err}.Critical()
 	// }

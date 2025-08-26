@@ -4,7 +4,7 @@ import (
 	"net/netip"
 )
 
-type subnetMap [MaxVLAN]netip.Prefix
+type subnetMap map[int]netip.Prefix
 type subnetMaps struct {
-	subnet map[netip.Addr]*subnetMap
+	subnet map[netip.Addr]subnetMap
 }

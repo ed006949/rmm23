@@ -9,27 +9,29 @@ import (
 	"rmm23/src/mod_reflect"
 )
 
-func (r *subnetMaps) Subnets(baseIPAddr netip.Addr, targetVLANs ...int) (outbound []netip.Prefix, err error) {
+func (r *subnetMaps) Subnets(baseIPAddr netip.Addr, targetVLANs ...int) (outbound subnetMap, err error) {
 	switch value, ok := r.subnet[baseIPAddr]; {
 	case !ok:
 		return nil, mod_errors.ENOTFOUND
 	case len(targetVLANs) == 0:
-		return /*value[:], nil*/
+		return
 	default:
-		outbound = make([]netip.Prefix, len(targetVLANs), len(targetVLANs))
-		for a, targetVLAN := range targetVLANs {
-			outbound[a] = value[targetVLAN]
+		mod_reflect.MakeMapIfNil(&outbound, len(targetVLANs))
+
+		for _, targetVLAN := range targetVLANs {
+			outbound[targetVLAN] = value[targetVLAN]
 		}
 
 		return
 	}
 }
-func (r *subnetMaps) SubnetsAll(baseIPAddr netip.Addr) (outbound []netip.Prefix, err error) {
+
+func (r *subnetMaps) SubnetsAll(baseIPAddr netip.Addr) (outbound subnetMap, err error) {
 	switch value, ok := r.subnet[baseIPAddr]; {
 	case !ok:
 		return nil, mod_errors.ENOTFOUND
 	default:
-		return value[:], nil
+		return value, nil
 	}
 }
 
@@ -41,7 +43,7 @@ func (r *subnetMaps) GenerateSubnets(baseIPAddr netip.Addr, subnetPrefixLen int)
 
 	mod_reflect.MakeMapIfNil(&r.subnet)
 
-	r.subnet[baseIPAddr] = new(subnetMap)
+	r.subnet[baseIPAddr] = make(subnetMap, MaxVLAN)
 	switch {
 	case baseIPAddr.Is4():
 		return r.generateSubnetsIPv4(baseIPAddr, subnetPrefixLen)
