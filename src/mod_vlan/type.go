@@ -5,4 +5,4 @@ import (
 )
 
 type subnetMap [MaxVLAN]netip.Prefix
-type subnets map[netip.Addr]*subnetMap
+type subnetMaps map[netip.Addr]*subnetMap
