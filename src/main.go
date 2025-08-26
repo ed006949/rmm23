@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+	"net/netip"
 	"os"
 	"strconv"
 
@@ -11,6 +13,7 @@ import (
 	"rmm23/src/mod_db"
 	"rmm23/src/mod_strings"
 	"rmm23/src/mod_vfs"
+	"rmm23/src/mod_vlan"
 )
 
 func main() {
@@ -32,6 +35,7 @@ func main() {
 				SystemDirs: nil,
 			}),
 		}
+		vlanSubnets = mod_vlan.NewSubnets()
 	)
 	switch err = l.Run.ConfigUnmarshal(&config); {
 	case err != nil:
@@ -110,6 +114,25 @@ func main() {
 		},
 	)
 	l.Z{l.M: count, l.E: err, "entries": len(certs)}.Warning()
+
+	var (
+		vlans        = []int{0, 1, 2001, 4094, 4095}
+		vlansSubnets []netip.Prefix
+	)
+
+	switch err = vlanSubnets.GenerateSubnet(netip.MustParseAddr("10.240.192.0"), mod_vlan.MaxIPv4Bits-mod_vlan.HostSubnetSize); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+	}
+
+	switch vlansSubnets, err = vlanSubnets.GetSubnets(netip.MustParseAddr("10.240.192.0"), vlans...); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+	}
+
+	for a, b := range vlans {
+		fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
+	}
 
 	os.Exit(1)
 }
