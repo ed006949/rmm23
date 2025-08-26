@@ -5,4 +5,6 @@ import (
 )
 
 type subnetMap [MaxVLAN]netip.Prefix
-type subnetMaps map[netip.Addr]*subnetMap
+type subnetMaps struct {
+	subnet map[netip.Addr]*subnetMap
+}

@@ -1,3 +1,3 @@
 package mod_vlan
 
-func NewSubnets() (outbound subnetMaps) { return make(subnetMaps) }
+func NewSubnets() (outbound *subnetMaps) { return new(subnetMaps) }
