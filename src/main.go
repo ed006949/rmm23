@@ -11,9 +11,9 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_db"
+	"rmm23/src/mod_net"
 	"rmm23/src/mod_strings"
 	"rmm23/src/mod_vfs"
-	"rmm23/src/mod_vlan"
 )
 
 func main() {
@@ -35,7 +35,7 @@ func main() {
 				SystemDirs: nil,
 			}),
 		}
-		vlanSubnets = mod_vlan.NewSubnets()
+		subnets = mod_net.NewSubnets()
 	)
 	switch err = l.Run.ConfigUnmarshal(&config); {
 	case err != nil:
@@ -117,38 +117,38 @@ func main() {
 
 	var (
 		vlans        = []int{0, 1, 55, 66, 2001, 4094, 4095}
-		vlansSubnets map[int]netip.Prefix
+		vlansSubnets []netip.Prefix
 	)
 
-	switch err = vlanSubnets.GenerateSubnets(netip.MustParseAddr("10.240.192.0"), mod_vlan.MaxIPv4Bits-mod_vlan.HostSubnetSize); {
+	switch err = subnets.GenerateSubnets(netip.MustParsePrefix("10.240.192.0/18"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
 
-	switch vlansSubnets, err = vlanSubnets.Subnets(netip.MustParseAddr("10.240.192.0"), vlans...); {
+	switch vlansSubnets, err = subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/18"), vlans...); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+	}
+
+	for a, b := range vlans {
+		fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
+	}
+
+	switch err = subnets.GenerateSubnets(netip.MustParsePrefix("10.92.0.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+	}
+
+	switch vlansSubnets, err = subnets.Subnets(netip.MustParsePrefix("10.92.0.0/16")); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
 
 	for a, b := range vlansSubnets {
-		fmt.Printf("VLAN%04d: %18s\n", a, b)
+		fmt.Printf("TI%05d: %18s\n", a, b)
 	}
 
-	switch err = vlanSubnets.GenerateSubnets(netip.MustParseAddr("10.92.0.0"), mod_vlan.MaxIPv4Bits-mod_vlan.HostSubnetSize); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
-	}
-
-	switch vlansSubnets, err = vlanSubnets.Subnets(netip.MustParseAddr("10.92.0.0"), vlans...); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
-	}
-
-	for a, b := range vlansSubnets {
-		fmt.Printf("VLAN%04d: %18s\n", a, b)
-	}
-
-	// switch vlansSubnets, err = vlanSubnets.SubnetsAll(netip.MustParseAddr("10.240.192.0")); {
+	// switch vlansSubnets, err = subnets.SubnetsAll(netip.MustParseAddr("10.240.192.0")); {
 	// case err != nil:
 	// 	l.Z{l.E: err}.Critical()
 	// }

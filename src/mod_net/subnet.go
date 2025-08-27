@@ -26,8 +26,8 @@ func (r *subnetMaps) SubnetList(basePrefix netip.Prefix, subnetIDs ...int) (outb
 	default:
 		mod_reflect.MakeSliceIfNil(&outbound, len(subnetIDs), len(subnetIDs))
 
-		for _, subnetID := range subnetIDs {
-			outbound[subnetID] = value[subnetID]
+		for a, subnetID := range subnetIDs {
+			outbound[a] = value[subnetID]
 		}
 
 		return
