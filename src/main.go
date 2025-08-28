@@ -35,7 +35,6 @@ func main() {
 				SystemDirs: nil,
 			}),
 		}
-		subnets = mod_net.NewSubnets()
 	)
 	switch err = l.Run.ConfigUnmarshal(&config); {
 	case err != nil:
@@ -120,12 +119,7 @@ func main() {
 		vlansSubnets []netip.Prefix
 	)
 
-	switch err = subnets.GenerateSubnets(netip.MustParsePrefix("10.240.192.0/18"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
-	}
-
-	switch vlansSubnets, err = subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/18"), vlans...); {
+	switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/18"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize, vlans...); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
@@ -134,26 +128,31 @@ func main() {
 		fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
 	}
 
-	switch err = subnets.GenerateSubnets(netip.MustParsePrefix("10.92.0.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize); {
+	switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize, vlans...); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
 
-	switch vlansSubnets, err = subnets.Subnets(netip.MustParsePrefix("10.92.0.0/16")); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
+	for a, b := range vlans {
+		fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
 	}
 
-	for a, b := range vlansSubnets {
-		fmt.Printf("TI%05d: %18s\n", a, b)
-	}
-
-	// switch vlansSubnets, err = subnets.SubnetsAll(netip.MustParseAddr("10.240.192.0")); {
+	// switch vlansSubnets, err = mod_net.Subnets.Subnets(netip.MustParsePrefix("10.240.192.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize-2); {
 	// case err != nil:
 	// 	l.Z{l.E: err}.Critical()
 	// }
+	//
 	// for a, b := range vlansSubnets {
-	// 	fmt.Printf("VLAN%04d: %18s\n", a, b)
+	// 	fmt.Printf("ID%010d: %18s\n", a, b)
+	// }
+
+	// switch vlansSubnets, err = mod_net.Subnets.Subnets(netip.MustParsePrefix("10.92.0.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize); {
+	// case err != nil:
+	// 	l.Z{l.E: err}.Critical()
+	// }
+	//
+	// for a, b := range vlansSubnets {
+	// 	fmt.Printf("TI%05d: %18s\n", a, b)
 	// }
 
 	os.Exit(1)

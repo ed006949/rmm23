@@ -11,31 +11,64 @@ import (
 	"rmm23/src/mod_strings"
 )
 
-func MakeMapIfNil[M ~map[K]V, K comparable, V any](m *M, size ...int) {
+func InitIfZero[T any](ptr *T) bool {
+	var zeroValue T
+	if reflect.DeepEqual(*ptr, zeroValue) {
+		*ptr = zeroValue
+
+		return true
+	}
+
+	return false
+}
+
+func NewPointerIfNil[T any](ptr **T) bool {
+	if *ptr == nil {
+		*ptr = new(T)
+
+		return true
+	}
+
+	return false
+}
+
+func MakeMapIfNil[M ~map[K]V, K comparable, V any](m *M, size ...int) bool {
 	switch {
 	case *m != nil:
-		return
+		return false
 	}
 
 	switch len(size) {
 	case makeParam0:
 		*m = make(M)
+
+		return true
 	case makeParam1:
 		*m = make(M, size[0])
+
+		return true
+	default:
+		panic(mod_errors.EUnwilling)
 	}
 }
 
-func MakeSliceIfNil[S ~[]V, V any](s *S, size ...int) {
+func MakeSliceIfNil[S ~[]V, V any](s *S, size ...int) bool {
 	switch {
 	case *s != nil:
-		return
+		return false
 	}
 
 	switch len(size) {
 	case makeParam1:
 		*s = make(S, size[0])
+
+		return true
 	case makeParam2:
 		*s = make(S, size[0], size[1])
+
+		return true
+	default:
+		panic(mod_errors.EUnwilling)
 	}
 }
 

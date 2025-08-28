@@ -4,79 +4,93 @@ import (
 	"encoding/binary"
 	"math"
 	"net/netip"
+	"sync"
 
 	"rmm23/src/mod_errors"
-	"rmm23/src/mod_reflect"
 )
 
-type subnetMaps struct {
-	subnet map[netip.Prefix]subnetMap
+var Subnets = new(subnetsStruct)
+
+type subnetsStruct struct {
+	mu      sync.Mutex
+	subnets map[netip.Prefix]map[int][]netip.Prefix
 }
 
-type subnetMap []netip.Prefix
+func (r *subnetsStruct) SubnetList(basePrefix netip.Prefix, subnetPrefixLen int, subnetIDs ...int) (outbound []netip.Prefix, err error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
 
-func NewSubnets() (outbound *subnetMaps) { return new(subnetMaps) }
-
-func (r *subnetMaps) SubnetList(basePrefix netip.Prefix, subnetIDs ...int) (outbound subnetMap, err error) {
-	switch value, ok := r.subnet[basePrefix]; {
-	case !ok:
-		return nil, mod_errors.ENOTFOUND
-	case len(subnetIDs) == 0:
-		return
-	default:
-		mod_reflect.MakeSliceIfNil(&outbound, len(subnetIDs), len(subnetIDs))
-
-		for a, subnetID := range subnetIDs {
-			outbound[a] = value[subnetID]
-		}
-
-		return
-	}
-}
-
-func (r *subnetMaps) Subnet(basePrefix netip.Prefix, subnetID int) (outbound netip.Prefix, err error) {
-	switch _, ok := r.subnet[basePrefix]; {
-	case !ok:
-		return outbound, mod_errors.ENOTFOUND
-	default:
-		return r.subnet[basePrefix][subnetID], nil
-	}
-}
-
-func (r *subnetMaps) Subnets(basePrefix netip.Prefix) (outbound subnetMap, err error) {
-	switch value, ok := r.subnet[basePrefix]; {
-	case !ok:
-		return nil, mod_errors.ENOTFOUND
-	default:
-		return value, nil
-	}
-}
-
-func (r *subnetMaps) GenerateSubnets(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
-	switch _, ok := r.subnet[basePrefix]; {
-	case ok:
+	switch err = r.validate(basePrefix, subnetPrefixLen); {
+	case err != nil:
 		return
 	}
 
-	mod_reflect.MakeMapIfNil(&r.subnet)
+	outbound = make([]netip.Prefix, len(subnetIDs), len(subnetIDs))
+	for a, subnetID := range subnetIDs {
+		outbound[a] = r.subnets[basePrefix][subnetPrefixLen][subnetID]
+	}
 
+	return
+}
+
+func (r *subnetsStruct) Subnet(basePrefix netip.Prefix, subnetPrefixLen int, subnetID int) (outbound netip.Prefix, err error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	switch err = r.validate(basePrefix, subnetPrefixLen); {
+	case err != nil:
+		return
+	}
+
+	return r.subnets[basePrefix][subnetPrefixLen][subnetID], nil
+}
+
+func (r *subnetsStruct) Subnets(basePrefix netip.Prefix, subnetPrefixLen int) (outbound []netip.Prefix, err error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	switch err = r.validate(basePrefix, subnetPrefixLen); {
+	case err != nil:
+		return
+	}
+
+	return r.subnets[basePrefix][subnetPrefixLen], nil
+}
+
+func (r *subnetsStruct) validate(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
+	switch {
+	case subnetPrefixLen < basePrefix.Bits():
+		return mod_errors.EUnwilling
+	case r.subnets == nil:
+		r.subnets = make(map[netip.Prefix]map[int][]netip.Prefix)
+
+		fallthrough
+	case r.subnets[basePrefix] == nil:
+		r.subnets[basePrefix] = make(map[int][]netip.Prefix)
+
+		fallthrough
+	case r.subnets[basePrefix][subnetPrefixLen] == nil:
+		return r.generate(basePrefix, subnetPrefixLen)
+	default:
+		return
+	}
+}
+
+func (r *subnetsStruct) generate(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
+	var (
+		totalIDs = 1 << (subnetPrefixLen - basePrefix.Bits())
+	)
 	switch {
 	case basePrefix.Addr().Is4():
-		return r.generateSubnetsIPv4(basePrefix, subnetPrefixLen)
+		return r.generateIPv4(basePrefix, subnetPrefixLen, totalIDs)
 	case basePrefix.Addr().Is6():
-		return r.generateSubnetsIPv6(basePrefix, subnetPrefixLen)
+		return r.generateIPv6(basePrefix, subnetPrefixLen, totalIDs)
 	default:
 		return mod_errors.EUnwilling
 	}
 }
 
-func (r *subnetMaps) generateSubnetsIPv4(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
-	var (
-		totalIDs = 1 << (subnetPrefixLen - basePrefix.Bits())
-	)
-
-	r.subnet[basePrefix] = make(subnetMap, totalIDs, totalIDs)
-
+func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) (err error) {
 	var (
 		baseAddrAsInt  = int(binary.BigEndian.Uint32(basePrefix.Addr().AsSlice()[:]))
 		baseAddrOffset = 1 << (MaxIPv4Bits - subnetPrefixLen)
@@ -86,17 +100,18 @@ func (r *subnetMaps) generateSubnetsIPv4(basePrefix netip.Prefix, subnetPrefixLe
 		return mod_errors.EUnwilling
 	}
 
+	r.subnets[basePrefix][subnetPrefixLen] = make([]netip.Prefix, totalIDs)
 	for currentID := 0; currentID <= totalIDs-1; currentID++ {
 		var (
 			currentAddrBytes [4]byte
 		)
 		binary.BigEndian.PutUint32(currentAddrBytes[:], uint32(baseAddrAsInt+currentID*baseAddrOffset))
-		r.subnet[basePrefix][currentID] = netip.PrefixFrom(netip.AddrFrom4(currentAddrBytes), subnetPrefixLen)
+		r.subnets[basePrefix][subnetPrefixLen][currentID] = netip.PrefixFrom(netip.AddrFrom4(currentAddrBytes), subnetPrefixLen)
 	}
 
 	return
 }
 
-func (r *subnetMaps) generateSubnetsIPv6(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
+func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) (err error) {
 	return mod_errors.EUnwilling
 }
