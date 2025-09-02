@@ -114,6 +114,11 @@ func main() {
 	)
 	l.Z{l.M: count, l.E: err, "entries": len(certs)}.Warning()
 
+	// switch err = mod_net.Subnets.Generate(netip.MustParsePrefix("100.64.0.0/10"), mod_net.MaxIPv4Bits); {
+	// case err != nil:
+	// 	l.Z{l.E: err}.Critical()
+	// }
+
 	var (
 		vlans        = []int{0, 1, 55, 66, 2001, 4094, 4095}
 		vlansSubnets []netip.Prefix

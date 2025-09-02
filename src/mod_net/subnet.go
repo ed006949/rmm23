@@ -16,6 +16,13 @@ type subnetsStruct struct {
 	subnets map[netip.Prefix]map[int][]netip.Prefix
 }
 
+func (r *subnetsStruct) Generate(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	return r.validate(basePrefix, subnetPrefixLen)
+}
+
 func (r *subnetsStruct) SubnetList(basePrefix netip.Prefix, subnetPrefixLen int, subnetIDs ...int) (outbound []netip.Prefix, err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
