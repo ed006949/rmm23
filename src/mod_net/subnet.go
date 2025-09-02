@@ -6,6 +6,7 @@ import (
 	"sync"
 
 	"rmm23/src/mod_errors"
+	"rmm23/src/mod_slices"
 )
 
 var Subnets = new(subnetsStruct)
@@ -29,12 +30,15 @@ func (r *subnetsStruct) SubnetList(basePrefix netip.Prefix, subnetPrefixLen int,
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
 	case err != nil:
 		return
-	case len(r.subnets[basePrefix][subnetPrefixLen]) < len(subnetIDs):
-		return nil, mod_errors.EUnwilling
 	}
 
 	outbound = make([]netip.Prefix, len(subnetIDs), len(subnetIDs))
 	for a, subnetID := range subnetIDs {
+		switch {
+		case !mod_slices.HasIndex(r.subnets[basePrefix][subnetPrefixLen], subnetID):
+			return nil, mod_errors.EUnwilling
+		}
+
 		outbound[a] = r.subnets[basePrefix][subnetPrefixLen][subnetID]
 	}
 
@@ -85,23 +89,25 @@ func (r *subnetsStruct) validate(basePrefix netip.Prefix, subnetPrefixLen int) (
 		r.subnets[basePrefix][subnetPrefixLen] = make([]netip.Prefix, totalIDs)
 
 		return r.generate(basePrefix, subnetPrefixLen, totalIDs)
-	default:
-		return
 	}
+
+	return
 }
 
 func (r *subnetsStruct) generate(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) (err error) {
 	switch {
 	case basePrefix.Addr().Is4():
-		return r.generateIPv4(basePrefix, subnetPrefixLen, totalIDs)
+		r.generateIPv4(basePrefix, subnetPrefixLen, totalIDs)
 	case basePrefix.Addr().Is6():
-		return r.generateIPv6(basePrefix, subnetPrefixLen, totalIDs)
+		r.generateIPv6(basePrefix, subnetPrefixLen, totalIDs)
 	default:
 		return mod_errors.EUnwilling
 	}
+
+	return
 }
 
-func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) (err error) {
+func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) {
 	var (
 		baseAddrAsInt  = int(binary.BigEndian.Uint32(basePrefix.Addr().AsSlice()[:]))
 		baseAddrOffset = 1 << (MaxIPv4Bits - subnetPrefixLen)
@@ -113,10 +119,6 @@ func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen in
 		binary.BigEndian.PutUint32(currentAddrBytes[:], uint32(currentOffset))
 		r.subnets[basePrefix][subnetPrefixLen][currentID] = netip.PrefixFrom(netip.AddrFrom4(currentAddrBytes), subnetPrefixLen)
 	}
-
-	return
 }
 
-func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) (err error) {
-	return mod_errors.EUnwilling
-}
+func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) {}

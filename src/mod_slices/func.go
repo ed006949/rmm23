@@ -30,6 +30,9 @@ func Index[S ~[]E, E comparable, M map[E]struct{}](inbound S) (outbound M) {
 
 	return
 }
+func HasIndex[T any](s []T, n int) bool {
+	return n >= 0 && n < len(s)
+}
 
 func Sort[S ~[]E, E cmp.Ordered](inbound S) { slices.Sort(inbound) }
 
