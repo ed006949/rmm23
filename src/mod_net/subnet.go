@@ -84,21 +84,19 @@ func (r *subnetsStruct) validate(basePrefix netip.Prefix, subnetPrefixLen int) (
 }
 
 func (r *subnetsStruct) generate(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
-	var (
-		totalIDs = 1 << (subnetPrefixLen - basePrefix.Bits())
-	)
 	switch {
 	case basePrefix.Addr().Is4():
-		return r.generateIPv4(basePrefix, subnetPrefixLen, totalIDs)
+		return r.generateIPv4(basePrefix, subnetPrefixLen)
 	case basePrefix.Addr().Is6():
-		return r.generateIPv6(basePrefix, subnetPrefixLen, totalIDs)
+		return r.generateIPv6(basePrefix, subnetPrefixLen)
 	default:
 		return mod_errors.EUnwilling
 	}
 }
 
-func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) (err error) {
+func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
 	var (
+		totalIDs       = 1 << (subnetPrefixLen - basePrefix.Bits())
 		baseAddrAsInt  = int(binary.BigEndian.Uint32(basePrefix.Addr().AsSlice()[:]))
 		baseAddrOffset = 1 << (MaxIPv4Bits - subnetPrefixLen)
 	)
@@ -119,6 +117,6 @@ func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen in
 	return
 }
 
-func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) (err error) {
+func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
 	return mod_errors.EUnwilling
 }
