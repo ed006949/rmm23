@@ -133,7 +133,7 @@ func main() {
 		fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
 	}
 
-	switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize, vlans...); {
+	switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/30"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize, vlans...); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}

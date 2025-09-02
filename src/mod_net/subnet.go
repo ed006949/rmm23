@@ -2,7 +2,6 @@ package mod_net
 
 import (
 	"encoding/binary"
-	"math"
 	"net/netip"
 	"sync"
 
@@ -30,6 +29,8 @@ func (r *subnetsStruct) SubnetList(basePrefix netip.Prefix, subnetPrefixLen int,
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
 	case err != nil:
 		return
+	case len(r.subnets[basePrefix][subnetPrefixLen]) < len(subnetIDs):
+		return nil, mod_errors.EUnwilling
 	}
 
 	outbound = make([]netip.Prefix, len(subnetIDs), len(subnetIDs))
@@ -82,16 +83,21 @@ func (r *subnetsStruct) validate(basePrefix netip.Prefix, subnetPrefixLen int) (
 		)
 
 		r.subnets[basePrefix][subnetPrefixLen] = make([]netip.Prefix, totalIDs)
-		switch {
-		case basePrefix.Addr().Is4():
-			return r.generateIPv4(basePrefix, subnetPrefixLen, totalIDs)
-		case basePrefix.Addr().Is6():
-			return r.generateIPv6(basePrefix, subnetPrefixLen, totalIDs)
-		default:
-			return mod_errors.EUnwilling
-		}
+
+		return r.generate(basePrefix, subnetPrefixLen, totalIDs)
 	default:
 		return
+	}
+}
+
+func (r *subnetsStruct) generate(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) (err error) {
+	switch {
+	case basePrefix.Addr().Is4():
+		return r.generateIPv4(basePrefix, subnetPrefixLen, totalIDs)
+	case basePrefix.Addr().Is6():
+		return r.generateIPv6(basePrefix, subnetPrefixLen, totalIDs)
+	default:
+		return mod_errors.EUnwilling
 	}
 }
 
@@ -100,16 +106,11 @@ func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen in
 		baseAddrAsInt  = int(binary.BigEndian.Uint32(basePrefix.Addr().AsSlice()[:]))
 		baseAddrOffset = 1 << (MaxIPv4Bits - subnetPrefixLen)
 	)
-	switch {
-	case baseAddrAsInt+((totalIDs-1)*baseAddrOffset) > math.MaxUint32:
-		return mod_errors.EUnwilling
-	}
-
-	for currentID := 0; currentID <= totalIDs-1; currentID++ {
+	for currentID, currentOffset := 0, baseAddrAsInt; currentID <= totalIDs-1; currentID, currentOffset = currentID+1, currentOffset+baseAddrOffset {
 		var (
 			currentAddrBytes [4]byte
 		)
-		binary.BigEndian.PutUint32(currentAddrBytes[:], uint32(baseAddrAsInt+currentID*baseAddrOffset))
+		binary.BigEndian.PutUint32(currentAddrBytes[:], uint32(currentOffset))
 		r.subnets[basePrefix][subnetPrefixLen][currentID] = netip.PrefixFrom(netip.AddrFrom4(currentAddrBytes), subnetPrefixLen)
 	}
 
