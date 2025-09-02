@@ -77,26 +77,26 @@ func (r *subnetsStruct) validate(basePrefix netip.Prefix, subnetPrefixLen int) (
 
 		fallthrough
 	case r.subnets[basePrefix][subnetPrefixLen] == nil:
-		return r.generate(basePrefix, subnetPrefixLen)
+		var (
+			totalIDs = 1 << (subnetPrefixLen - basePrefix.Bits())
+		)
+
+		r.subnets[basePrefix][subnetPrefixLen] = make([]netip.Prefix, totalIDs)
+		switch {
+		case basePrefix.Addr().Is4():
+			return r.generateIPv4(basePrefix, subnetPrefixLen, totalIDs)
+		case basePrefix.Addr().Is6():
+			return r.generateIPv6(basePrefix, subnetPrefixLen, totalIDs)
+		default:
+			return mod_errors.EUnwilling
+		}
 	default:
 		return
 	}
 }
 
-func (r *subnetsStruct) generate(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
-	switch {
-	case basePrefix.Addr().Is4():
-		return r.generateIPv4(basePrefix, subnetPrefixLen)
-	case basePrefix.Addr().Is6():
-		return r.generateIPv6(basePrefix, subnetPrefixLen)
-	default:
-		return mod_errors.EUnwilling
-	}
-}
-
-func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
+func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) (err error) {
 	var (
-		totalIDs       = 1 << (subnetPrefixLen - basePrefix.Bits())
 		baseAddrAsInt  = int(binary.BigEndian.Uint32(basePrefix.Addr().AsSlice()[:]))
 		baseAddrOffset = 1 << (MaxIPv4Bits - subnetPrefixLen)
 	)
@@ -105,7 +105,6 @@ func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen in
 		return mod_errors.EUnwilling
 	}
 
-	r.subnets[basePrefix][subnetPrefixLen] = make([]netip.Prefix, totalIDs)
 	for currentID := 0; currentID <= totalIDs-1; currentID++ {
 		var (
 			currentAddrBytes [4]byte
@@ -117,6 +116,6 @@ func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen in
 	return
 }
 
-func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
+func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) (err error) {
 	return mod_errors.EUnwilling
 }
