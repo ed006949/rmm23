@@ -2,6 +2,7 @@ package mod_net
 
 import (
 	"encoding/binary"
+	"math"
 	"net/netip"
 	"sync"
 
@@ -121,4 +122,58 @@ func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen in
 	}
 }
 
-func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) {}
+func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) {
+	var (
+		baseAddrBytes = basePrefix.Addr().AsSlice()[:] // 16 bytes
+		// We add offset in the subnet bit position range [basePrefix.Bits(), subnetPrefixLen)
+		shift = uint(MaxIPv6Bits - subnetPrefixLen)
+	)
+	// Prepare a working 16-byte array for arithmetic
+	var base [16]byte
+	copy(base[:], baseAddrBytes)
+
+	for currentID := 0; currentID < totalIDs; currentID++ {
+		// offset = currentID << shift
+		var offset [16]byte
+
+		if shift >= MaxIPv6Bits/2 {
+			// Only high 64 bits affected
+			hi := uint64(currentID) << (shift - MaxIPv6Bits/2)
+			binary.BigEndian.PutUint64(offset[0:8], hi)
+		} else {
+			// Both high and/or low 64 bits can be affected
+			var ohi, olo uint64
+
+			olo = uint64(currentID) << shift
+			// carry to high if shift caused bits to overflow from low into high
+			if shift > 0 {
+				ohi = uint64(currentID) >> (MaxIPv6Bits/2 - shift)
+			}
+
+			binary.BigEndian.PutUint64(offset[0:8], ohi)
+			binary.BigEndian.PutUint64(offset[8:16], olo)
+		}
+
+		// current = base + offset (big-endian 128-bit add)
+		var (
+			cur   [16]byte
+			carry uint16
+		)
+
+		for i := 15; i >= 0; i-- {
+			sum := uint16(base[i]) + uint16(offset[i]) + carry
+			cur[i] = byte(sum & math.MaxUint8)
+			// use named constant instead of magic number
+			const byteBits = 8
+
+			carry = sum >> byteBits
+
+			if i == 0 {
+				break
+			}
+		}
+
+		addr := netip.AddrFrom16(cur)
+		r.subnets[basePrefix][subnetPrefixLen][currentID] = netip.PrefixFrom(addr, subnetPrefixLen)
+	}
+}

@@ -34,6 +34,7 @@ const (
 	certKeyHeader = _certificate
 )
 
+// entry status.
 const (
 	entryStatusUnknown attrEntryStatus = iota
 	entryStatusLoaded
@@ -43,5 +44,7 @@ const (
 	entryStatusInvalid
 	entryStatusParsed
 	entryStatusSanitized
+)
+const (
 	entryStatusReady = math.MaxInt
 )
