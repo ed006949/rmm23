@@ -7,6 +7,7 @@ import (
 	"sync"
 
 	"rmm23/src/mod_errors"
+	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_slices"
 )
 
@@ -163,10 +164,8 @@ func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen in
 		for i := 15; i >= 0; i-- {
 			sum := uint16(base[i]) + uint16(offset[i]) + carry
 			cur[i] = byte(sum & math.MaxUint8)
-			// use named constant instead of magic number
-			const byteBits = 8
 
-			carry = sum >> byteBits
+			carry = sum >> mod_reflect.BitsPerByte
 
 			if i == 0 {
 				break

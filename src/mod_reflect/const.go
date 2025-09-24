@@ -5,3 +5,6 @@ const (
 	makeParam1
 	makeParam2
 )
+const (
+	BitsPerByte = 8
+)
