@@ -128,26 +128,26 @@ func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen in
 		baseAddrBytes = basePrefix.Addr().AsSlice()[:] // 16 bytes
 		// We add offset in the subnet bit position range [basePrefix.Bits(), subnetPrefixLen)
 		shift = uint(MaxIPv6Bits - subnetPrefixLen)
+		// Prepare a working 16-byte array for arithmetic
+		base [16]byte
 	)
-	// Prepare a working 16-byte array for arithmetic
-	var base [16]byte
 	copy(base[:], baseAddrBytes)
 
 	for currentID := 0; currentID < totalIDs; currentID++ {
-		// offset = currentID << shift
-		var offset [16]byte
+		var (
+			// offset = currentID << shift
+			offset [16]byte
+		)
 
-		if shift >= MaxIPv6Bits/2 {
-			// Only high 64 bits affected
-			hi := uint64(currentID) << (shift - MaxIPv6Bits/2)
-			binary.BigEndian.PutUint64(offset[0:8], hi)
-		} else {
-			// Both high and/or low 64 bits can be affected
-			var ohi, olo uint64
-
-			olo = uint64(currentID) << shift
-			// carry to high if shift caused bits to overflow from low into high
-			if shift > 0 {
+		switch {
+		case shift >= MaxIPv6Bits/2:
+			binary.BigEndian.PutUint64(offset[0:8], uint64(currentID)<<(shift-MaxIPv6Bits/2))
+		default:
+			var (
+				ohi, olo uint64 = 0, uint64(currentID) << shift
+			)
+			switch {
+			case shift > 0:
 				ohi = uint64(currentID) >> (MaxIPv6Bits/2 - shift)
 			}
 
@@ -162,17 +162,20 @@ func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen in
 		)
 
 		for i := 15; i >= 0; i-- {
-			sum := uint16(base[i]) + uint16(offset[i]) + carry
+			var (
+				sum = uint16(base[i]) + uint16(offset[i]) + carry
+			)
+
 			cur[i] = byte(sum & math.MaxUint8)
 
 			carry = sum >> mod_reflect.BitsPerByte
 
-			if i == 0 {
+			switch {
+			case i == 0:
 				break
 			}
 		}
 
-		addr := netip.AddrFrom16(cur)
-		r.subnets[basePrefix][subnetPrefixLen][currentID] = netip.PrefixFrom(addr, subnetPrefixLen)
+		r.subnets[basePrefix][subnetPrefixLen][currentID] = netip.PrefixFrom(netip.AddrFrom16(cur), subnetPrefixLen)
 	}
 }
