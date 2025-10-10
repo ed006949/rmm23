@@ -124,7 +124,7 @@ func main() {
 		vlansSubnets []netip.Prefix
 	)
 
-	switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/18"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize, vlans...); {
+	switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/18"), mod_net.MaxIPv4Bits-mod_net.HostSubnetBits, vlans...); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
@@ -133,7 +133,7 @@ func main() {
 		fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
 	}
 
-	switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/30"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize, 0, 0, 0); {
+	switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/30"), mod_net.MaxIPv4Bits-mod_net.HostSubnetBits, 0, 0, 0); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
@@ -142,7 +142,7 @@ func main() {
 		fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
 	}
 
-	// switch vlansSubnets, err = mod_net.Subnets.Subnets(netip.MustParsePrefix("10.240.192.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize-2); {
+	// switch vlansSubnets, err = mod_net.Subnets.Subnets(netip.MustParsePrefix("10.240.192.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetBits-2); {
 	// case err != nil:
 	// 	l.Z{l.E: err}.Critical()
 	// }
@@ -151,7 +151,7 @@ func main() {
 	// 	fmt.Printf("ID%010d: %18s\n", a, b)
 	// }
 
-	// switch vlansSubnets, err = mod_net.Subnets.Subnets(netip.MustParsePrefix("10.92.0.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetSize); {
+	// switch vlansSubnets, err = mod_net.Subnets.Subnets(netip.MustParsePrefix("10.92.0.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetBits); {
 	// case err != nil:
 	// 	l.Z{l.E: err}.Critical()
 	// }
