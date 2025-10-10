@@ -14,7 +14,38 @@ import (
 var Subnets = new(subnetsStruct)
 
 type subnetsStruct struct {
-	mu      sync.Mutex
+	// mu provides thread-safe access to the subnets map.
+	// It's locked before any read/write operation to prevent race conditions
+	// when multiple goroutines attempt to generate or retrieve subnets simultaneously.
+	mu sync.Mutex
+
+	// subnets is a three-level nested map that caches generated subnet divisions.
+	//
+	// Structure: map[basePrefix]map[subnetPrefixLen][]subnet
+	//
+	// Level 1 - map[netip.Prefix]: The base network prefix (e.g., "192.168.0.0/16")
+	//   - Key: The original network that will be subdivided
+	//   - Value: A map of all subnet configurations for this base network
+	//
+	// Level 2 - map[int]: The desired subnet prefix length (e.g., 24 for /24 subnets)
+	//   - Key: The prefix length of the subdivided subnets (must be >= base prefix length)
+	//   - Value: A slice containing all possible subnets of this size
+	//
+	// Level 3 - []netip.Prefix: The actual list of generated subnets
+	//   - Index: The subnet ID (0-based sequential identifier)
+	//   - Value: The subnet prefix with its network address and mask
+	//
+	// Example:
+	//   Base network: 10.0.0.0/16
+	//   Desired subnet size: /24
+	//   Result: subnets[10.0.0.0/16][24] = [10.0.0.0/24, 10.0.1.0/24, ..., 10.0.255.0/24]
+	//            Total of 256 subnets (2^(24-16) = 2^8 = 256)
+	//
+	// This structure allows:
+	//   - Lazy generation: Subnets are only computed when first requested
+	//   - Efficient reuse: Once generated, subnets are cached for future lookups
+	//   - Multiple configurations: Different base networks and subnet sizes can coexist
+	//   - Fast retrieval: O(1) lookup time for any specific subnet by ID
 	subnets map[netip.Prefix]map[int][]netip.Prefix
 }
 
