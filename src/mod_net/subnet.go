@@ -55,6 +55,69 @@ type subnetsIndex struct {
 	used  map[int]struct{}
 }
 
+func (r *subnetsStruct) PrefixIsFree(basePrefix netip.Prefix, subnetPrefixLen int, prefix netip.Prefix) (flag bool, err error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	switch err = r.validate(basePrefix, subnetPrefixLen); {
+	case err != nil:
+		return
+	}
+
+	var (
+		index int
+	)
+	switch index, err = r.indexByPrefix(basePrefix, subnetPrefixLen, prefix); {
+	case err != nil:
+		return
+	}
+
+	return r.indexIsFree(basePrefix, subnetPrefixLen, index), nil
+}
+
+func (r *subnetsStruct) PrefixFree(basePrefix netip.Prefix, subnetPrefixLen int, prefix netip.Prefix) (err error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	switch err = r.validate(basePrefix, subnetPrefixLen); {
+	case err != nil:
+		return
+	}
+
+	var (
+		index int
+	)
+	switch index, err = r.indexByPrefix(basePrefix, subnetPrefixLen, prefix); {
+	case err != nil:
+		return
+	}
+
+	r.indexFree(basePrefix, subnetPrefixLen, index)
+
+	return
+}
+func (r *subnetsStruct) PrefixUse(basePrefix netip.Prefix, subnetPrefixLen int, prefix netip.Prefix) (err error) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	switch err = r.validate(basePrefix, subnetPrefixLen); {
+	case err != nil:
+		return
+	}
+
+	var (
+		index int
+	)
+	switch index, err = r.indexByPrefix(basePrefix, subnetPrefixLen, prefix); {
+	case err != nil:
+		return
+	}
+
+	r.indexUse(basePrefix, subnetPrefixLen, index)
+
+	return
+}
+
 func (r *subnetsStruct) Generate(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
 	r.mu.Lock()
 	defer r.mu.Unlock()
@@ -226,4 +289,30 @@ func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen in
 	}
 
 	r.index[basePrefix][subnetPrefixLen].index = mod_slices.Index(r.subnets[basePrefix][subnetPrefixLen])
+}
+
+func (r *subnetsStruct) indexByPrefix(basePrefix netip.Prefix, subnetPrefixLen int, prefix netip.Prefix) (index int, err error) {
+	var (
+		ok bool
+	)
+	switch index, ok = r.index[basePrefix][subnetPrefixLen].index[prefix]; {
+	case !ok:
+		return 0, mod_errors.ENOTFOUND
+	}
+
+	return index, err
+}
+
+func (r *subnetsStruct) indexIsFree(basePrefix netip.Prefix, subnetPrefixLen int, index int) (flag bool) {
+	_, flag = r.index[basePrefix][subnetPrefixLen].used[index]
+
+	return
+}
+
+func (r *subnetsStruct) indexFree(basePrefix netip.Prefix, subnetPrefixLen int, index int) {
+	delete(r.index[basePrefix][subnetPrefixLen].used, index)
+}
+
+func (r *subnetsStruct) indexUse(basePrefix netip.Prefix, subnetPrefixLen int, index int) {
+	r.index[basePrefix][subnetPrefixLen].used[index] = struct{}{}
 }
