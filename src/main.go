@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 	"net/netip"
 	"os"
@@ -11,6 +12,7 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_db"
+	"rmm23/src/mod_errors"
 	"rmm23/src/mod_net"
 	"rmm23/src/mod_strings"
 	"rmm23/src/mod_vfs"
@@ -142,6 +144,11 @@ func main() {
 		fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
 	}
 
+	switch err = mod_net.Subnets.Generate(netip.MustParsePrefix("172.16.0.0/12"), mod_net.MaxIPv4Bits-mod_net.UserSubnetBits); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+	}
+
 	// switch vlansSubnets, err = mod_net.Subnets.Subnets(netip.MustParsePrefix("10.240.192.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetBits-2); {
 	// case err != nil:
 	// 	l.Z{l.E: err}.Critical()
@@ -173,8 +180,18 @@ func main() {
 	}
 
 	for _, b := range entries {
-		switch {
-		case len(b.IPHostNumber) == 0:
+		switch len(b.IPHostNumber) {
+		case 0:
+			l.Z{l.E: fmt.Errorf("no prefix in '%v'", b.DN.String())}.Warning()
+		case 1:
+			switch err = mod_net.Subnets.PrefixUse(netip.MustParsePrefix("172.16.0.0/12"), mod_net.MaxIPv4Bits-mod_net.UserSubnetBits, b.IPHostNumber[0]); {
+			case errors.Is(err, mod_errors.EEXIST):
+				l.Z{l.E: fmt.Errorf("prefix '%v' in '%v' is already used", b.IPHostNumber[0].String(), b.DN.String())}.Warning()
+			case err != nil:
+				l.Z{l.E: fmt.Errorf("invalid prefix '%v' in '%v'", b.IPHostNumber[0].String(), b.DN.String())}.Warning()
+			}
+		default:
+			l.Z{l.E: fmt.Errorf("too many prefixes '%v' in '%v'", b.IPHostNumber, b.DN.String())}.Warning()
 		}
 	}
 

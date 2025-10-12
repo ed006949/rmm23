@@ -56,7 +56,6 @@ type subnetsIndex struct {
 }
 
 func (r *subnetsStruct) PrefixIsFree(basePrefix netip.Prefix, subnetPrefixLen int, prefix netip.Prefix) (flag bool, err error) {
-	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
@@ -76,7 +75,6 @@ func (r *subnetsStruct) PrefixIsFree(basePrefix netip.Prefix, subnetPrefixLen in
 }
 
 func (r *subnetsStruct) PrefixFree(basePrefix netip.Prefix, subnetPrefixLen int, prefix netip.Prefix) (err error) {
-	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
@@ -97,7 +95,6 @@ func (r *subnetsStruct) PrefixFree(basePrefix netip.Prefix, subnetPrefixLen int,
 	return
 }
 func (r *subnetsStruct) PrefixUse(basePrefix netip.Prefix, subnetPrefixLen int, prefix netip.Prefix) (err error) {
-	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
@@ -111,6 +108,8 @@ func (r *subnetsStruct) PrefixUse(basePrefix netip.Prefix, subnetPrefixLen int, 
 	switch index, err = r.indexByPrefix(basePrefix, subnetPrefixLen, prefix); {
 	case err != nil:
 		return
+	case !r.indexIsFree(basePrefix, subnetPrefixLen, index):
+		return mod_errors.EEXIST
 	}
 
 	r.indexUse(basePrefix, subnetPrefixLen, index)
@@ -119,14 +118,12 @@ func (r *subnetsStruct) PrefixUse(basePrefix netip.Prefix, subnetPrefixLen int, 
 }
 
 func (r *subnetsStruct) Generate(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
-	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	return r.validate(basePrefix, subnetPrefixLen)
 }
 
 func (r *subnetsStruct) SubnetList(basePrefix netip.Prefix, subnetPrefixLen int, subnetIDs ...int) (outbound []netip.Prefix, err error) {
-	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
@@ -148,7 +145,6 @@ func (r *subnetsStruct) SubnetList(basePrefix netip.Prefix, subnetPrefixLen int,
 }
 
 func (r *subnetsStruct) Subnet(basePrefix netip.Prefix, subnetPrefixLen int, subnetID int) (outbound netip.Prefix, err error) {
-	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
@@ -160,7 +156,6 @@ func (r *subnetsStruct) Subnet(basePrefix netip.Prefix, subnetPrefixLen int, sub
 }
 
 func (r *subnetsStruct) Subnets(basePrefix netip.Prefix, subnetPrefixLen int) (outbound []netip.Prefix, err error) {
-	r.mu.Lock()
 	defer r.mu.Unlock()
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
@@ -172,6 +167,8 @@ func (r *subnetsStruct) Subnets(basePrefix netip.Prefix, subnetPrefixLen int) (o
 }
 
 func (r *subnetsStruct) validate(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
+	r.mu.Lock()
+
 	switch {
 	case subnetPrefixLen < basePrefix.Bits():
 		return mod_errors.EUnwilling
@@ -306,7 +303,7 @@ func (r *subnetsStruct) indexByPrefix(basePrefix netip.Prefix, subnetPrefixLen i
 func (r *subnetsStruct) indexIsFree(basePrefix netip.Prefix, subnetPrefixLen int, index int) (flag bool) {
 	_, flag = r.index[basePrefix][subnetPrefixLen].used[index]
 
-	return
+	return !flag
 }
 
 func (r *subnetsStruct) indexFree(basePrefix netip.Prefix, subnetPrefixLen int, index int) {
