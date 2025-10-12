@@ -6,10 +6,10 @@ import (
 )
 
 const (
-	entryTypeEmpty attrEntryType = iota
-	entryTypeDomain
-	entryTypeGroup
-	entryTypeUser
+	EntryTypeEmpty attrEntryType = iota
+	EntryTypeDomain
+	EntryTypeGroup
+	EntryTypeUser
 	EntryTypeHost
 )
 

@@ -160,5 +160,23 @@ func main() {
 	// 	fmt.Printf("TI%05d: %18s\n", a, b)
 	// }
 
+	switch _, entries, err = config.Conf.DB.Repo.SearchEntryFVs(
+		&mod_strings.FVs{
+			{
+				mod_strings.F_type,
+				mod_db.EntryTypeUser.Number() + " " + mod_db.EntryTypeUser.Number(),
+			},
+		},
+	); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+	}
+
+	for _, b := range entries {
+		switch {
+		case len(b.IPHostNumber) == 0:
+		}
+	}
+
 	os.Exit(1)
 }

@@ -2,6 +2,7 @@ package mod_slices
 
 import (
 	"cmp"
+	"math/rand/v2"
 	"slices"
 )
 
@@ -35,6 +36,12 @@ func HasIndex[T any](s []T, n int) bool {
 }
 
 func Sort[S ~[]E, E cmp.Ordered](inbound S) { slices.Sort(inbound) }
+
+func Randomize[S ~[]E, E any](inbound S) {
+	rand.Shuffle(len(inbound), func(i, j int) {
+		inbound[i], inbound[j] = inbound[j], inbound[i]
+	})
+}
 
 func Compact[S ~[]E, E comparable](inbound S) (outbound S) { return slices.Compact(inbound) }
 
