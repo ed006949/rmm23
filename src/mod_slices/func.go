@@ -23,10 +23,10 @@ func Filter[S ~[]E, E comparable](inbound S, filter ...E) (outbound S) {
 	return
 }
 
-func Index[S ~[]E, E comparable, M map[E]struct{}](inbound S) (outbound M) {
+func Index[S ~[]E, E comparable, M map[E]int](inbound S) (outbound M) {
 	outbound = make(M)
-	for _, b := range inbound {
-		outbound[b] = struct{}{}
+	for a, b := range inbound {
+		outbound[b] = a
 	}
 
 	return

@@ -47,6 +47,12 @@ type subnetsStruct struct {
 	//   - Multiple configurations: Different base networks and subnet sizes can coexist
 	//   - Fast retrieval: O(1) lookup time for any specific subnet by ID
 	subnets map[netip.Prefix]map[int][]netip.Prefix
+
+	index map[netip.Prefix]map[int]*subnetsIndex
+}
+type subnetsIndex struct {
+	index map[netip.Prefix]int
+	used  map[int]struct{}
 }
 
 func (r *subnetsStruct) Generate(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
@@ -108,10 +114,12 @@ func (r *subnetsStruct) validate(basePrefix netip.Prefix, subnetPrefixLen int) (
 		return mod_errors.EUnwilling
 	case r.subnets == nil:
 		r.subnets = make(map[netip.Prefix]map[int][]netip.Prefix)
+		r.index = make(map[netip.Prefix]map[int]*subnetsIndex)
 
 		fallthrough
 	case r.subnets[basePrefix] == nil:
 		r.subnets[basePrefix] = make(map[int][]netip.Prefix)
+		r.index[basePrefix] = make(map[int]*subnetsIndex)
 
 		fallthrough
 	case r.subnets[basePrefix][subnetPrefixLen] == nil:
@@ -120,6 +128,11 @@ func (r *subnetsStruct) validate(basePrefix netip.Prefix, subnetPrefixLen int) (
 		)
 
 		r.subnets[basePrefix][subnetPrefixLen] = make([]netip.Prefix, totalIDs)
+		// r.index[basePrefix][subnetPrefixLen] = new(subnetsIndex)
+		r.index[basePrefix][subnetPrefixLen] = &subnetsIndex{
+			index: make(map[netip.Prefix]int, totalIDs),
+			used:  make(map[int]struct{}, totalIDs),
+		}
 
 		return r.generate(basePrefix, subnetPrefixLen, totalIDs)
 	}
@@ -152,6 +165,8 @@ func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen in
 		binary.BigEndian.PutUint32(currentAddrBytes[:], uint32(currentOffset))
 		r.subnets[basePrefix][subnetPrefixLen][currentID] = netip.PrefixFrom(netip.AddrFrom4(currentAddrBytes), subnetPrefixLen)
 	}
+
+	r.index[basePrefix][subnetPrefixLen].index = mod_slices.Index(r.subnets[basePrefix][subnetPrefixLen])
 }
 
 func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) {
@@ -209,4 +224,6 @@ func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen in
 
 		r.subnets[basePrefix][subnetPrefixLen][currentID] = netip.PrefixFrom(netip.AddrFrom16(cur), subnetPrefixLen)
 	}
+
+	r.index[basePrefix][subnetPrefixLen].index = mod_slices.Index(r.subnets[basePrefix][subnetPrefixLen])
 }
