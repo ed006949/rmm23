@@ -49,7 +49,7 @@ func GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Conf, repo *RedisReposit
 				for _, entry := range fnEntry {
 					entry.Type = entryType
 					entry.BaseDN = baseDN
-					entry.Status = entryStatusLoaded
+					entry.Status = EntryStatusLoaded
 
 					entry.Key = uuid.NewSHA1(uuid.Nil, []byte(entry.DN.String())).String()
 

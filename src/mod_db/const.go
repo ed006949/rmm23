@@ -36,14 +36,14 @@ const (
 
 // entry status.
 const (
-	entryStatusUnknown attrEntryStatus = iota
-	entryStatusLoaded
-	entryStatusCreated
-	entryStatusUpdated
-	entryStatusDeleted
-	entryStatusInvalid
-	entryStatusParsed
-	entryStatusSanitized
+	EntryStatusUnknown attrEntryStatus = iota
+	EntryStatusLoaded
+	EntryStatusCreated
+	EntryStatusUpdated
+	EntryStatusDeleted
+	EntryStatusInvalid
+	EntryStatusParsed
+	EntryStatusSanitized
 )
 const (
 	entryStatusReady = math.MaxInt

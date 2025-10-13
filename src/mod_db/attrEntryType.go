@@ -45,3 +45,5 @@ func (r *attrEntryType) Parse(inbound string) (err error) {
 		return
 	}
 }
+
+func (r attrEntryStatus) Number() (outbound string) { return strconv.FormatInt(int64(r), 10) }

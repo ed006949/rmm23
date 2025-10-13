@@ -11,45 +11,62 @@ import (
 
 func CheckIPHostNumber(entries []*Entry, usersSubnet netip.Prefix, userBits int) {
 	for _, b := range entries {
-		switch len(b.IPHostNumber) {
-		case 0:
-		case 1:
+		switch {
+		case len(b.IPHostNumber) == 1:
 			switch swErr := mod_net.Subnets.PrefixUse(usersSubnet, userBits, b.IPHostNumber[0]); {
 			case errors.Is(swErr, mod_errors.EEXIST):
 				l.Z{l.E: "prefix already in use", "DN": b.DN.String(), "prefix": b.IPHostNumber[0].String()}.Informational()
 				b.IPHostNumber = b.IPHostNumber[:0]
-				b.Ver++
+				b.Status = EntryStatusUpdated
 			case swErr != nil:
 				l.Z{l.E: "invalid prefix", "DN": b.DN.String(), "prefix": b.IPHostNumber[0].String()}.Informational()
 				b.IPHostNumber = b.IPHostNumber[:0]
-				b.Ver++
+				b.Status = EntryStatusUpdated
 			}
-		default:
 		}
 	}
 
 	for _, b := range entries {
-		switch len(b.IPHostNumber) {
-		case 0:
-		case 1:
-		default:
+		switch {
+		case len(b.IPHostNumber) > 1:
 			l.Z{l.E: "prefixes are >1", "DN": b.DN.String(), "prefix": b.IPHostNumber}.Informational()
+
+			var (
+				prefixes = b.IPHostNumber
+			)
+
+			b.IPHostNumber = b.IPHostNumber[:0]
+			b.Status = EntryStatusUpdated
+
+			for _, d := range prefixes {
+				switch swErr := mod_net.Subnets.PrefixUse(usersSubnet, userBits, d); {
+				case errors.Is(swErr, mod_errors.EEXIST):
+					l.Z{l.E: "prefix already in use", "DN": b.DN.String(), "prefix": b.IPHostNumber[0].String()}.Informational()
+
+					continue
+				case swErr != nil:
+					l.Z{l.E: "invalid prefix", "DN": b.DN.String(), "prefix": b.IPHostNumber[0].String()}.Informational()
+
+					continue
+				default:
+					b.IPHostNumber = []netip.Prefix{d}
+					// b.Status = EntryStatusUpdated
+				}
+			}
 		}
 	}
 
 	for _, b := range entries {
-		switch len(b.IPHostNumber) {
-		case 0:
+		switch {
+		case len(b.IPHostNumber) == 0:
 			switch prefix, swErr := mod_net.Subnets.PrefixUseFree(usersSubnet, userBits); {
 			case swErr != nil:
 				l.Z{l.E: "no free prefix", "DN": b.DN.String()}.Warning()
 			default:
 				l.Z{l.M: "use new prefix", "DN": b.DN.String(), "prefix": prefix.String()}.Informational()
-				b.IPHostNumber = append(b.IPHostNumber, prefix)
-				b.Ver++
+				b.IPHostNumber = []netip.Prefix{prefix}
+				b.Status = EntryStatusUpdated
 			}
-		case 1:
-		default:
 		}
 	}
 }

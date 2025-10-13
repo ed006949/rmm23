@@ -70,7 +70,7 @@ func main() {
 	}
 
 	var (
-		// count       int64
+		// count   int64
 		entries []*mod_db.Entry
 		// certs       []*mod_db.Cert
 		usersSubnet = netip.MustParsePrefix("172.16.0.0/12")
@@ -178,6 +178,19 @@ func main() {
 	}
 
 	mod_db.CheckIPHostNumber(entries, usersSubnet, userBits)
+
+	for _, b := range entries {
+		switch {
+		case b.Status == mod_db.EntryStatusUpdated:
+			l.Z{l.M: "updated entry", "DN": b.DN.String()}.Informational()
+
+			b.Ver++
+			switch err = config.Conf.DB.Repo.SaveEntry(b); {
+			case err != nil:
+				l.Z{l.E: err, "DN": b.DN.String()}.Warning()
+			}
+		}
+	}
 
 	os.Exit(1)
 }
