@@ -1,10 +1,8 @@
 package main
 
 import (
-	"fmt"
 	"net/netip"
 	"os"
-	"strconv"
 
 	"github.com/avfs/avfs"
 	"github.com/avfs/avfs/vfs/memfs"
@@ -72,80 +70,82 @@ func main() {
 	}
 
 	var (
-		count   int64
+		// count       int64
 		entries []*mod_db.Entry
-		certs   []*mod_db.Cert
+		// certs       []*mod_db.Cert
+		usersSubnet = netip.MustParsePrefix("172.16.0.0/12")
+		userBits    = mod_net.MaxIPv4Bits - mod_net.UserSubnetBits
 	)
 
-	count, entries, err = config.Conf.DB.Repo.SearchEntryFVs(
-		&mod_strings.FVs{
-			{
-				mod_strings.F_type,
-				mod_db.EntryTypeHost.Number() + " " + mod_db.EntryTypeHost.Number(),
-			},
-		},
-	)
-	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
-
-	count, entries, err = config.Conf.DB.Repo.SearchEntryFVs(
-		&mod_strings.FVs{
-			{
-				mod_strings.F_baseDN,
-				"dc=fabric,dc=domain,dc=tld",
-			},
-			{
-				mod_strings.F_objectClass,
-				"posixAccount",
-			},
-		},
-	)
-	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
-
-	count, entries, err = config.Conf.DB.Repo.SearchEntryQ("*")
-	l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
-
-	count, certs, err = config.Conf.DB.Repo.SearchCertFVs(
-		&mod_strings.FVs{
-			{
-				mod_strings.F_isCA,
-				strconv.FormatBool(true),
-			},
-		},
-	)
-	l.Z{l.M: count, l.E: err, "entries": len(certs)}.Warning()
+	// count, entries, err = config.Conf.DB.Repo.SearchEntryFVs(
+	// 	&mod_strings.FVs{
+	// 		{
+	// 			mod_strings.F_type,
+	// 			mod_db.EntryTypeHost.Number() + " " + mod_db.EntryTypeHost.Number(),
+	// 		},
+	// 	},
+	// )
+	// l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
+	//
+	// count, entries, err = config.Conf.DB.Repo.SearchEntryFVs(
+	// 	&mod_strings.FVs{
+	// 		{
+	// 			mod_strings.F_baseDN,
+	// 			"dc=fabric,dc=domain,dc=tld",
+	// 		},
+	// 		{
+	// 			mod_strings.F_objectClass,
+	// 			"posixAccount",
+	// 		},
+	// 	},
+	// )
+	// l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
+	//
+	// count, entries, err = config.Conf.DB.Repo.SearchEntryQ("*")
+	// l.Z{l.M: count, l.E: err, "entries": len(entries)}.Warning()
+	//
+	// count, certs, err = config.Conf.DB.Repo.SearchCertFVs(
+	// 	&mod_strings.FVs{
+	// 		{
+	// 			mod_strings.F_isCA,
+	// 			strconv.FormatBool(true),
+	// 		},
+	// 	},
+	// )
+	// l.Z{l.M: count, l.E: err, "entries": len(certs)}.Warning()
 
 	// switch err = mod_net.Subnets.Generate(netip.MustParsePrefix("100.64.0.0/10"), mod_net.MaxIPv4Bits); {
 	// case err != nil:
 	// 	l.Z{l.E: err}.Critical()
 	// }
 
-	var (
-		vlans        = []int{0, 1, 55, 66, 2001, 4094, 4095}
-		vlansSubnets []netip.Prefix
-	)
-
-	switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/18"), mod_net.MaxIPv4Bits-mod_net.HostSubnetBits, vlans...); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
-	}
-
-	for a, b := range vlans {
-		fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
-	}
-
-	switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/30"), mod_net.MaxIPv4Bits-mod_net.HostSubnetBits, 0, 0, 0); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
-	}
-
-	for a, b := range []int{0, 0, 0} {
-		fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
-	}
-
-	switch err = mod_net.Subnets.Generate(netip.MustParsePrefix("172.16.0.0/12"), mod_net.MaxIPv4Bits-mod_net.UserSubnetBits); {
-	case err != nil:
-		l.Z{l.E: err}.Critical()
-	}
+	// var (
+	// 	vlans        = []int{0, 1, 55, 66, 2001, 4094, 4095}
+	// 	vlansSubnets []netip.Prefix
+	// )
+	//
+	// switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/18"), mod_net.MaxIPv4Bits-mod_net.HostSubnetBits, vlans...); {
+	// case err != nil:
+	// 	l.Z{l.E: err}.Critical()
+	// }
+	//
+	// for a, b := range vlans {
+	// 	fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
+	// }
+	//
+	// switch vlansSubnets, err = mod_net.Subnets.SubnetList(netip.MustParsePrefix("10.240.192.0/30"), mod_net.MaxIPv4Bits-mod_net.HostSubnetBits, 0, 0, 0); {
+	// case err != nil:
+	// 	l.Z{l.E: err}.Critical()
+	// }
+	//
+	// for a, b := range []int{0, 0, 0} {
+	// 	fmt.Printf("VLAN%04d: %18s\n", b, vlansSubnets[a])
+	// }
+	//
+	// switch err = mod_net.Subnets.Generate(usersSubnet, userBits); {
+	// case err != nil:
+	// 	l.Z{l.E: err}.Critical()
+	// }
 
 	// switch vlansSubnets, err = mod_net.Subnets.Subnets(netip.MustParsePrefix("10.240.192.0/16"), mod_net.MaxIPv4Bits-mod_net.HostSubnetBits-2); {
 	// case err != nil:
@@ -177,7 +177,7 @@ func main() {
 		l.Z{l.E: err}.Critical()
 	}
 
-	mod_db.CheckIPHostNumber(entries)
+	mod_db.CheckIPHostNumber(entries, usersSubnet, userBits)
 
 	os.Exit(1)
 }

@@ -9,12 +9,12 @@ import (
 	"rmm23/src/mod_net"
 )
 
-func CheckIPHostNumber(entries []*Entry) {
+func CheckIPHostNumber(entries []*Entry, usersSubnet netip.Prefix, userBits int) {
 	for _, b := range entries {
 		switch len(b.IPHostNumber) {
 		case 0:
 		case 1:
-			switch swErr := mod_net.Subnets.PrefixUse(netip.MustParsePrefix("172.16.0.0/12"), mod_net.MaxIPv4Bits-mod_net.UserSubnetBits, b.IPHostNumber[0]); {
+			switch swErr := mod_net.Subnets.PrefixUse(usersSubnet, userBits, b.IPHostNumber[0]); {
 			case errors.Is(swErr, mod_errors.EEXIST):
 				l.Z{l.E: "prefix already in use", "DN": b.DN.String(), "prefix": b.IPHostNumber[0].String()}.Informational()
 				b.IPHostNumber = b.IPHostNumber[:0]
@@ -40,7 +40,7 @@ func CheckIPHostNumber(entries []*Entry) {
 	for _, b := range entries {
 		switch len(b.IPHostNumber) {
 		case 0:
-			switch prefix, swErr := mod_net.Subnets.PrefixUseFree(netip.MustParsePrefix("172.16.0.0/12"), mod_net.MaxIPv4Bits-mod_net.UserSubnetBits); {
+			switch prefix, swErr := mod_net.Subnets.PrefixUseFree(usersSubnet, userBits); {
 			case swErr != nil:
 				l.Z{l.E: "no free prefix", "DN": b.DN.String()}.Warning()
 			default:
