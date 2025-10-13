@@ -52,6 +52,7 @@ type subnetsStruct struct {
 }
 type subnetsIndex struct {
 	index map[netip.Prefix]int
+	free  map[int]struct{}
 	used  map[int]struct{}
 }
 
@@ -94,6 +95,7 @@ func (r *subnetsStruct) PrefixFree(basePrefix netip.Prefix, subnetPrefixLen int,
 
 	return
 }
+
 func (r *subnetsStruct) PrefixUse(basePrefix netip.Prefix, subnetPrefixLen int, prefix netip.Prefix) (err error) {
 	defer r.mu.Unlock()
 
@@ -115,6 +117,25 @@ func (r *subnetsStruct) PrefixUse(basePrefix netip.Prefix, subnetPrefixLen int, 
 	r.indexUse(basePrefix, subnetPrefixLen, index)
 
 	return
+}
+
+func (r *subnetsStruct) PrefixUseFree(basePrefix netip.Prefix, subnetPrefixLen int) (prefix netip.Prefix, err error) {
+	defer r.mu.Unlock()
+
+	switch err = r.validate(basePrefix, subnetPrefixLen); {
+	case err != nil:
+		return
+	}
+
+	var (
+		index int
+	)
+	switch index, err = r.indexUseFree(basePrefix, subnetPrefixLen); {
+	case err != nil:
+		return
+	}
+
+	return r.subnets[basePrefix][subnetPrefixLen][index], nil
 }
 
 func (r *subnetsStruct) Generate(basePrefix netip.Prefix, subnetPrefixLen int) (err error) {
@@ -191,6 +212,7 @@ func (r *subnetsStruct) validate(basePrefix netip.Prefix, subnetPrefixLen int) (
 		// r.index[basePrefix][subnetPrefixLen] = new(subnetsIndex)
 		r.index[basePrefix][subnetPrefixLen] = &subnetsIndex{
 			index: make(map[netip.Prefix]int, totalIDs),
+			free:  make(map[int]struct{}, totalIDs),
 			used:  make(map[int]struct{}, totalIDs),
 		}
 
@@ -226,7 +248,7 @@ func (r *subnetsStruct) generateIPv4(basePrefix netip.Prefix, subnetPrefixLen in
 		r.subnets[basePrefix][subnetPrefixLen][currentID] = netip.PrefixFrom(netip.AddrFrom4(currentAddrBytes), subnetPrefixLen)
 	}
 
-	r.index[basePrefix][subnetPrefixLen].index = mod_slices.Index(r.subnets[basePrefix][subnetPrefixLen])
+	r.indexCreate(basePrefix, subnetPrefixLen)
 }
 
 func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen int, totalIDs int) {
@@ -285,7 +307,14 @@ func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen in
 		r.subnets[basePrefix][subnetPrefixLen][currentID] = netip.PrefixFrom(netip.AddrFrom16(cur), subnetPrefixLen)
 	}
 
+	r.indexCreate(basePrefix, subnetPrefixLen)
+}
+
+func (r *subnetsStruct) indexCreate(basePrefix netip.Prefix, subnetPrefixLen int) {
 	r.index[basePrefix][subnetPrefixLen].index = mod_slices.Index(r.subnets[basePrefix][subnetPrefixLen])
+	for a := range r.subnets[basePrefix][subnetPrefixLen] {
+		r.index[basePrefix][subnetPrefixLen].free[a] = struct{}{}
+	}
 }
 
 func (r *subnetsStruct) indexByPrefix(basePrefix netip.Prefix, subnetPrefixLen int, prefix netip.Prefix) (index int, err error) {
@@ -301,15 +330,33 @@ func (r *subnetsStruct) indexByPrefix(basePrefix netip.Prefix, subnetPrefixLen i
 }
 
 func (r *subnetsStruct) indexIsFree(basePrefix netip.Prefix, subnetPrefixLen int, index int) (flag bool) {
-	_, flag = r.index[basePrefix][subnetPrefixLen].used[index]
+	// _, flag = r.index[basePrefix][subnetPrefixLen].used[index]
+	_, flag = r.index[basePrefix][subnetPrefixLen].free[index]
 
-	return !flag
+	return flag
 }
 
 func (r *subnetsStruct) indexFree(basePrefix netip.Prefix, subnetPrefixLen int, index int) {
 	delete(r.index[basePrefix][subnetPrefixLen].used, index)
+	r.index[basePrefix][subnetPrefixLen].free[index] = struct{}{}
 }
 
 func (r *subnetsStruct) indexUse(basePrefix netip.Prefix, subnetPrefixLen int, index int) {
+	delete(r.index[basePrefix][subnetPrefixLen].free, index)
 	r.index[basePrefix][subnetPrefixLen].used[index] = struct{}{}
+}
+
+func (r *subnetsStruct) indexUseFree(basePrefix netip.Prefix, subnetPrefixLen int) (index int, err error) {
+	switch {
+	case len(r.index[basePrefix][subnetPrefixLen].free) == 0:
+		return 0, mod_errors.ENOTFOUND
+	}
+
+	for index = range r.index[basePrefix][subnetPrefixLen].free {
+		break
+	}
+
+	r.indexUse(basePrefix, subnetPrefixLen, index)
+
+	return
 }

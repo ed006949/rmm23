@@ -183,6 +183,14 @@ func main() {
 		switch len(b.IPHostNumber) {
 		case 0:
 			l.Z{l.E: fmt.Errorf("no prefix in '%v'", b.DN.String())}.Warning()
+
+			switch prefix, swErr := mod_net.Subnets.PrefixUseFree(netip.MustParsePrefix("172.16.0.0/12"), mod_net.MaxIPv4Bits-mod_net.UserSubnetBits); {
+			case swErr != nil:
+				l.Z{l.E: fmt.Errorf("PrefixUseFree error: '%v' in '%v'", err, b.DN.String())}.Warning()
+			default:
+				l.Z{l.M: "use new prefix", "DN": b.DN.String(), "prefix": prefix.String()}.Informational()
+				b.IPHostNumber = append(b.IPHostNumber, prefix)
+			}
 		case 1:
 			switch err = mod_net.Subnets.PrefixUse(netip.MustParsePrefix("172.16.0.0/12"), mod_net.MaxIPv4Bits-mod_net.UserSubnetBits, b.IPHostNumber[0]); {
 			case errors.Is(err, mod_errors.EEXIST):
