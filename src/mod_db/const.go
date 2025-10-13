@@ -1,16 +1,7 @@
 package mod_db
 
 import (
-	"math"
 	"time"
-)
-
-const (
-	EntryTypeEmpty attrEntryType = iota
-	EntryTypeDomain
-	EntryTypeGroup
-	EntryTypeUser
-	EntryTypeHost
 )
 
 const (
@@ -32,19 +23,4 @@ const (
 	entryKeyHeader = _entry
 	// entryKeyHeader = _ldap + HeaderSeparator + _entry.
 	certKeyHeader = _certificate
-)
-
-// entry status.
-const (
-	EntryStatusUnknown attrEntryStatus = iota
-	EntryStatusLoaded
-	EntryStatusCreated
-	EntryStatusUpdated
-	EntryStatusDeleted
-	EntryStatusInvalid
-	EntryStatusParsed
-	EntryStatusSanitized
-)
-const (
-	entryStatusReady = math.MaxInt
 )

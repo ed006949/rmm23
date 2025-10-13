@@ -6,6 +6,16 @@ import (
 	"rmm23/src/mod_errors"
 )
 
+type attrEntryType int //
+
+const (
+	EntryTypeEmpty attrEntryType = iota
+	EntryTypeDomain
+	EntryTypeGroup
+	EntryTypeUser
+	EntryTypeHost
+)
+
 var (
 	entryTypeName = map[attrEntryType]string{
 		EntryTypeEmpty:  "",
@@ -30,9 +40,6 @@ var (
 	}
 )
 
-type attrEntryType int   //
-type attrEntryStatus int //
-
 func (r attrEntryType) String() (outbound string) { return entryTypeName[r] }
 func (r attrEntryType) Number() (outbound string) { return entryTypeNumber[r] }
 func (r *attrEntryType) Parse(inbound string) (err error) {
@@ -45,5 +52,3 @@ func (r *attrEntryType) Parse(inbound string) (err error) {
 		return
 	}
 }
-
-func (r attrEntryStatus) Number() (outbound string) { return strconv.FormatInt(int64(r), 10) }
