@@ -1,7 +1,6 @@
 package main
 
 import (
-	"net/netip"
 	"os"
 
 	"github.com/avfs/avfs"
@@ -9,7 +8,6 @@ import (
 
 	"rmm23/src/l"
 	"rmm23/src/mod_db"
-	"rmm23/src/mod_net"
 	"rmm23/src/mod_vfs"
 )
 
@@ -72,11 +70,9 @@ func main() {
 		// count   int64
 		entries []*mod_db.Entry
 		// certs       []*mod_db.Cert
-		usersSubnet = netip.MustParsePrefix("172.16.0.0/12")
-		userBits    = mod_net.MaxIPv4Bits - mod_net.UserSubnetBits
 	)
 
-	switch entries, err = config.Conf.DB.Repo.CheckIPHostNumber(usersSubnet, userBits); {
+	switch entries, err = config.Conf.DB.Repo.CheckIPHostNumber(config.Conf.Networking.User.Subnet, config.Conf.Networking.User.Bits); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
