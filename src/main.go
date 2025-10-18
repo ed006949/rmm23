@@ -50,7 +50,7 @@ func main() {
 
 	switch {
 	case !l.Run.DryRunValue():
-		switch err = mod_db.GetLDAPDocs(ctx, config.Conf.LDAP, config.Conf.DB.Repo); {
+		switch err = config.Conf.DB.Repo.GetLDAPDocs(ctx, config.Conf.LDAP); {
 		case err != nil:
 			l.Z{l.E: err}.Critical()
 		}
@@ -63,7 +63,7 @@ func main() {
 
 	switch {
 	case !l.Run.DryRunValue():
-		switch err = mod_db.GetFSCerts(ctx, vfsDB, config.Conf.DB.Repo); {
+		switch err = config.Conf.DB.Repo.GetFSCerts(ctx, vfsDB); {
 		case err != nil:
 			l.Z{l.E: err}.Critical()
 		}
