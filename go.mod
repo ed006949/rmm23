@@ -11,6 +11,7 @@ require (
 	github.com/go-ini/ini v1.67.0
 	github.com/go-ldap/ldap/v3 v3.4.12
 	github.com/google/uuid v1.6.0
+	github.com/mitchellh/mapstructure v1.5.0
 	github.com/redis/rueidis v1.0.66
 	github.com/redis/rueidis/om v1.0.66
 	github.com/rs/zerolog v1.34.0
