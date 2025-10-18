@@ -2,10 +2,10 @@ package mod_db
 
 import (
 	"context"
+	"encoding/json/v2"
 	"strconv"
 	"strings"
 
-	"github.com/mitchellh/mapstructure"
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
 
@@ -31,15 +31,9 @@ func (r *RedisRepository) getInfo(indexNames ...string) (err error) {
 			redisResult    = r.client.Do(r.ctx, r.client.B().FtInfo().Index(indexName).Build())
 			redisResultMap map[string]rueidis.RedisMessage
 			redisResultAny map[string]any
-			// bytes          []byte
-			interim  = new(ftInfo)
-			msConfig = &mapstructure.DecoderConfig{
-				Result:  interim,
-				TagName: "json",
-			}
-			msDecoder *mapstructure.Decoder
+			bytes          []byte
+			interim        = new(ftInfo)
 		)
-
 		switch redisResultMap, err = redisResult.AsMap(); {
 		case err != nil:
 			return
@@ -50,12 +44,12 @@ func (r *RedisRepository) getInfo(indexNames ...string) (err error) {
 			return
 		}
 
-		switch msDecoder, err = mapstructure.NewDecoder(msConfig); {
+		switch bytes, err = json.Marshal(redisResultAny); {
 		case err != nil:
 			return
 		}
 
-		switch err = msDecoder.Decode(redisResultAny); {
+		switch err = json.Unmarshal(bytes, interim); {
 		case err != nil:
 			return
 		}
