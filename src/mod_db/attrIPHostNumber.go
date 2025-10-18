@@ -7,9 +7,24 @@ import (
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_net"
+	"rmm23/src/mod_strings"
 )
 
-func CheckIPHostNumber(entries []*Entry, usersSubnet netip.Prefix, userBits int) {
+func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits int) (entries []*Entry, err error) {
+	switch _, entries, err = r.SearchEntryFVs(
+		&mod_strings.FVs{
+			{
+				mod_strings.F_type,
+				EntryTypeUser.Number() + " " + EntryTypeUser.Number(),
+			},
+		},
+	); {
+	case err != nil:
+		l.Z{l.E: err}.Critical()
+
+		return
+	}
+
 	for _, b := range entries {
 		switch {
 		case len(b.IPHostNumber) == 1:
@@ -69,4 +84,6 @@ func CheckIPHostNumber(entries []*Entry, usersSubnet netip.Prefix, userBits int)
 			}
 		}
 	}
+
+	return
 }
