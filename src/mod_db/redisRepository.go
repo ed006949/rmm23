@@ -5,6 +5,7 @@ import (
 	"encoding/json/v2"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
@@ -120,8 +121,26 @@ func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
 		return
 	}
 
-	err = r.entry.Save(r.ctx, e)
+	err = r.saveEntryWithRetry(r.ctx, e, 0, l.RetryInterval)
 	_ = r.getInfo()
+
+	return
+}
+
+func (r *RedisRepository) saveEntryWithRetry(ctx context.Context, e *Entry, maxTries int, interval time.Duration) (err error) {
+	for attempt := 1; maxTries == 0 || attempt <= maxTries; attempt++ {
+		switch err = r.entry.Save(ctx, e); {
+		case err != nil:
+			l.Z{l.M: "entry", "action": "save", "attempt": attempt, "max": maxTries, l.E: err}.Warning()
+
+			switch err = mod_reflect.WaitCtx(ctx, interval); {
+			case err != nil:
+				return
+			}
+		default:
+			return
+		}
+	}
 
 	return
 }
