@@ -73,18 +73,18 @@ func MakeSliceIfNil[S ~[]V, V any](s *S, size ...int) bool {
 	}
 }
 
-func RetryWithCtx(ctx context.Context, maxTries int, interval time.Duration, message string, fn func() error) (err error) {
+func RetryWithCtx(ctx context.Context, maxTries int, interval time.Duration, fn func() error) (err error) {
 	for attempt := 1; maxTries == 0 || attempt <= maxTries; attempt++ {
 		switch err = fn(); {
-		case err == nil:
-			return
-		default:
-			l.Z{l.M: message, "attempt": attempt, "max": maxTries, l.E: err}.Warning()
+		case err != nil:
+			l.Z{l.M: "retry", "attempt": attempt, "max": maxTries, l.E: err}.Warning()
 
 			switch err = WaitWithCtx(ctx, interval); {
 			case err != nil:
 				return
 			}
+		default:
+			return
 		}
 	}
 
