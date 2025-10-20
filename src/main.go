@@ -7,7 +7,6 @@ import (
 	"github.com/avfs/avfs/vfs/memfs"
 
 	"rmm23/src/l"
-	"rmm23/src/mod_db"
 	"rmm23/src/mod_vfs"
 )
 
@@ -67,28 +66,20 @@ func main() {
 	}
 
 	var (
-		// count   int64
-		entries []*mod_db.Entry
-		// certs       []*mod_db.Cert
+	// count   int64
+	// entries []*mod_db.Entry
+	// certs       []*mod_db.Cert
 	)
 
-	switch entries, err = config.Conf.DB.Repo.CheckIPHostNumber(config.Conf.Networking.User.Subnet, config.Conf.Networking.User.Bits); {
+	switch _, err = config.Conf.DB.Repo.CheckIPHostNumber(config.Conf.Networking.User.Subnet, config.Conf.Networking.User.Bits); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
 
-	for _, b := range entries {
-		switch {
-		case b.Status == mod_db.EntryStatusUpdated:
-			l.Z{l.M: "updated entry", "DN": b.DN.String()}.Informational()
-
-			b.Ver++
-			switch err = config.Conf.DB.Repo.SaveEntry(b); {
-			case err != nil:
-				l.Z{l.E: err, "DN": b.DN.String()}.Warning()
-			}
-		}
-	}
+	// switch errs := config.Conf.DB.Repo.UpdateMultiEntry(entries...); {
+	// case errs != nil:
+	// 	l.Z{l.E: err}.Critical()
+	// }
 
 	os.Exit(1)
 }

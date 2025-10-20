@@ -33,6 +33,17 @@ var (
 		EntryStatusParsed:    strconv.FormatInt(int64(EntryStatusParsed), 10),
 		EntryStatusSanitized: strconv.FormatInt(int64(EntryStatusSanitized), 10),
 	}
+	entryStatusString = map[attrEntryStatus]string{
+		EntryStatusUnknown:   "unknown",
+		EntryStatusLoaded:    "loaded",
+		EntryStatusCreated:   "created",
+		EntryStatusUpdated:   "updated",
+		EntryStatusDeleted:   "deleted",
+		EntryStatusInvalid:   "invalid",
+		EntryStatusParsed:    "parsed",
+		EntryStatusSanitized: "sanitized",
+	}
 )
 
 func (r attrEntryStatus) Number() (outbound string) { return entryStatusNumber[r] }
+func (r attrEntryStatus) String() (outbound string) { return entryStatusString[r] }

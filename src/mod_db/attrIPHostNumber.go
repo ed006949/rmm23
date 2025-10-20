@@ -33,10 +33,12 @@ func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits i
 				l.Z{l.E: "prefix already in use", "DN": b.DN.String(), "prefix": b.IPHostNumber[0].String()}.Informational()
 				b.IPHostNumber = b.IPHostNumber[:0]
 				b.Status = EntryStatusUpdated
+				_ = r.UpdateEntry(b)
 			case swErr != nil:
 				l.Z{l.E: "invalid prefix", "DN": b.DN.String(), "prefix": b.IPHostNumber[0].String()}.Informational()
 				b.IPHostNumber = b.IPHostNumber[:0]
 				b.Status = EntryStatusUpdated
+				_ = r.UpdateEntry(b)
 			}
 		}
 	}
@@ -51,7 +53,7 @@ func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits i
 			)
 
 			b.IPHostNumber = b.IPHostNumber[:0]
-			b.Status = EntryStatusUpdated
+			// b.Status = EntryStatusUpdated
 
 			for _, d := range prefixes {
 				switch swErr := mod_net.Subnets.PrefixUse(usersSubnet, userBits, d); {
@@ -65,7 +67,8 @@ func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits i
 					continue
 				default:
 					b.IPHostNumber = []netip.Prefix{d}
-					// b.Status = EntryStatusUpdated
+					b.Status = EntryStatusUpdated
+					_ = r.UpdateEntry(b)
 				}
 			}
 		}
@@ -81,6 +84,7 @@ func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits i
 				l.Z{l.M: "use new prefix", "DN": b.DN.String(), "prefix": prefix.String()}.Informational()
 				b.IPHostNumber = []netip.Prefix{prefix}
 				b.Status = EntryStatusUpdated
+				_ = r.UpdateEntry(b)
 			}
 		}
 	}
