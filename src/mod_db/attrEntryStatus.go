@@ -11,51 +11,51 @@ type attrEntryStatus int //
 
 // entry status.
 const (
-	EntryStatusUnknown attrEntryStatus = iota
-	EntryStatusLoad
-	EntryStatusCreate
-	EntryStatusUpdate
-	EntryStatusDelete
-	EntryStatusInvalid
-	EntryStatusParse
-	EntryStatusSanitize
+	entryStatusUnknown attrEntryStatus = iota
+	entryStatusLoad
+	entryStatusCreate
+	entryStatusUpdate
+	entryStatusDelete
+	entryStatusInvalid
+	entryStatusParse
+	entryStatusSanitize
 )
 const (
-	EntryStatusReady = math.MaxInt
+	entryStatusReady = math.MaxInt
 )
 
 var (
 	entryStatusMap = []mod_strings.MDMap{
-		EntryStatusUnknown: {
-			Number: strconv.FormatInt(int64(EntryStatusUnknown), 10),
+		entryStatusUnknown: {
+			Number: strconv.FormatInt(int64(entryStatusUnknown), 10),
 			String: "unknown",
 		},
-		EntryStatusLoad: {
-			Number: strconv.FormatInt(int64(EntryStatusLoad), 10),
+		entryStatusLoad: {
+			Number: strconv.FormatInt(int64(entryStatusLoad), 10),
 			String: "load",
 		},
-		EntryStatusCreate: {
-			Number: strconv.FormatInt(int64(EntryStatusCreate), 10),
+		entryStatusCreate: {
+			Number: strconv.FormatInt(int64(entryStatusCreate), 10),
 			String: "create",
 		},
-		EntryStatusUpdate: {
-			Number: strconv.FormatInt(int64(EntryStatusUpdate), 10),
+		entryStatusUpdate: {
+			Number: strconv.FormatInt(int64(entryStatusUpdate), 10),
 			String: "update",
 		},
-		EntryStatusDelete: {
-			Number: strconv.FormatInt(int64(EntryStatusDelete), 10),
+		entryStatusDelete: {
+			Number: strconv.FormatInt(int64(entryStatusDelete), 10),
 			String: "delete",
 		},
-		EntryStatusInvalid: {
-			Number: strconv.FormatInt(int64(EntryStatusInvalid), 10),
+		entryStatusInvalid: {
+			Number: strconv.FormatInt(int64(entryStatusInvalid), 10),
 			String: "invalid",
 		},
-		EntryStatusParse: {
-			Number: strconv.FormatInt(int64(EntryStatusParse), 10),
+		entryStatusParse: {
+			Number: strconv.FormatInt(int64(entryStatusParse), 10),
 			String: "parse",
 		},
-		EntryStatusSanitize: {
-			Number: strconv.FormatInt(int64(EntryStatusSanitize), 10),
+		entryStatusSanitize: {
+			Number: strconv.FormatInt(int64(entryStatusSanitize), 10),
 			String: "sanitize",
 		},
 	}

@@ -124,7 +124,7 @@ func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
 
 	switch err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, func() error { return r.entry.Save(r.ctx, e) }); {
 	case err == nil:
-		e.Status = EntryStatusReady
+		e.Status = entryStatusReady
 	}
 
 	_ = r.getInfo()
@@ -292,10 +292,10 @@ func (r *RedisRepository) SearchEntryFVsField(ctx context.Context, fvs *mod_stri
 
 func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
 	switch e.Status {
-	case EntryStatusUpdate:
+	case entryStatusUpdate:
 		e.Ver++
 		err = r.SaveEntry(e)
-	case EntryStatusDelete:
+	case entryStatusDelete:
 		err = r.DeleteEntry(e.Key)
 	default:
 	}
@@ -323,7 +323,7 @@ func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
 // 		)
 //
 // 		switch b.Status {
-// 		case EntryStatusUpdate:
+// 		case entryStatusUpdate:
 // 			l.Z{l.M: "updated entry", "DN": b.DN.String()}.Informational()
 // 			b.Ver++
 // 			forErr = r.SaveEntry(b)
@@ -332,7 +332,7 @@ func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
 // 			// 	fErr[a] = swErr
 // 			// 	l.Z{l.E: swErr, "DN": b.DN.String()}.Warning()
 // 			// }
-// 		case EntryStatusDelete:
+// 		case entryStatusDelete:
 // 			l.Z{l.M: "deleted entry", "DN": b.DN.String()}.Informational()
 // 			forErr = r.DeleteEntry(b.Key)
 // 			// switch swErr := r.DeleteEntry(b.Key); {
