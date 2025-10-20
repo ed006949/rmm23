@@ -286,10 +286,10 @@ func (r *RedisRepository) SearchEntryFVsField(ctx context.Context, fvs *mod_stri
 
 func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
 	switch e.Status {
-	case EntryStatusUpdated:
+	case EntryStatusUpdate:
 		e.Ver++
 		err = r.SaveEntry(e)
-	case EntryStatusDeleted:
+	case EntryStatusDelete:
 		err = r.DeleteEntry(e.Key)
 	default:
 	}
@@ -317,7 +317,7 @@ func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
 // 		)
 //
 // 		switch b.Status {
-// 		case EntryStatusUpdated:
+// 		case EntryStatusUpdate:
 // 			l.Z{l.M: "updated entry", "DN": b.DN.String()}.Informational()
 // 			b.Ver++
 // 			forErr = r.SaveEntry(b)
@@ -326,7 +326,7 @@ func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
 // 			// 	fErr[a] = swErr
 // 			// 	l.Z{l.E: swErr, "DN": b.DN.String()}.Warning()
 // 			// }
-// 		case EntryStatusDeleted:
+// 		case EntryStatusDelete:
 // 			l.Z{l.M: "deleted entry", "DN": b.DN.String()}.Informational()
 // 			forErr = r.DeleteEntry(b.Key)
 // 			// switch swErr := r.DeleteEntry(b.Key); {

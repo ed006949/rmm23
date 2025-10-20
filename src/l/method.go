@@ -32,18 +32,22 @@ func (r Z) MarshalZerologObject(e *zerolog.Event) {
 	e.Str("daemon", Run.NameValue())
 }
 
-func (r Z) Emergency()     { log.Fatal().EmbedObject(r).Send() } // rfc3164 ----
-func (r Z) Alert()         { log.Fatal().EmbedObject(r).Send() } // rfc3164 ----
-func (r Z) Critical()      { log.Fatal().EmbedObject(r).Send() } // rfc3164 ----
-func (r Z) Error()         { log.Error().EmbedObject(r).Send() } // rfc3164 +
-func (r Z) Warning()       { log.Warn().EmbedObject(r).Send() }  // rfc3164 +
-func (r Z) Notice()        { log.Info().EmbedObject(r).Send() }  // rfc3164 ----
-func (r Z) Informational() { log.Info().EmbedObject(r).Send() }  // rfc3164 +
-func (r Z) Debug()         { log.Debug().EmbedObject(r).Send() } // rfc3164 +
-func (r Z) Trace()         { log.Trace().EmbedObject(r).Send() } // specific +
-func (r Z) Panic()         { log.Panic().EmbedObject(r).Send() } // specific +
-func (r Z) Quiet()         {}                                    // specific ----
-func (r Z) Disabled()      {}                                    // specific ----
+func (r Z) Emergency()     { r.log(log.Fatal()) }
+func (r Z) Alert()         { r.log(log.Fatal()) }
+func (r Z) Critical()      { r.log(log.Fatal()) }
+func (r Z) Error()         { r.log(log.Error()) }
+func (r Z) Warning()       { r.log(log.Warn()) }
+func (r Z) Notice()        { r.log(log.Info()) }
+func (r Z) Informational() { r.log(log.Info()) }
+func (r Z) Debug()         { r.log(log.Debug()) }
+func (r Z) Trace()         { r.log(log.Trace()) }
+func (r Z) Panic()         { r.log(log.Panic()) }
+func (r Z) Quiet()         {}
+func (r Z) Disabled()      {}
+
+func (r Z) log(event *zerolog.Event) {
+	event.EmbedObject(r).Send()
+}
 
 func (r *runType) verbositySet(inbound zerolog.Level) {
 	r.verbosity = inbound

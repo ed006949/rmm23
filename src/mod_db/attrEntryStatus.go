@@ -10,13 +10,13 @@ type attrEntryStatus int //
 // entry status.
 const (
 	EntryStatusUnknown attrEntryStatus = iota
-	EntryStatusLoaded
-	EntryStatusCreated
-	EntryStatusUpdated
-	EntryStatusDeleted
+	EntryStatusLoad
+	EntryStatusCreate
+	EntryStatusUpdate
+	EntryStatusDelete
 	EntryStatusInvalid
-	EntryStatusParsed
-	EntryStatusSanitized
+	EntryStatusParse
+	EntryStatusSanitize
 )
 const (
 	entryStatusReady = math.MaxInt
@@ -24,24 +24,24 @@ const (
 
 var (
 	entryStatusNumber = map[attrEntryStatus]string{
-		EntryStatusUnknown:   strconv.FormatInt(int64(EntryStatusUnknown), 10),
-		EntryStatusLoaded:    strconv.FormatInt(int64(EntryStatusLoaded), 10),
-		EntryStatusCreated:   strconv.FormatInt(int64(EntryStatusCreated), 10),
-		EntryStatusUpdated:   strconv.FormatInt(int64(EntryStatusUpdated), 10),
-		EntryStatusDeleted:   strconv.FormatInt(int64(EntryStatusDeleted), 10),
-		EntryStatusInvalid:   strconv.FormatInt(int64(EntryStatusInvalid), 10),
-		EntryStatusParsed:    strconv.FormatInt(int64(EntryStatusParsed), 10),
-		EntryStatusSanitized: strconv.FormatInt(int64(EntryStatusSanitized), 10),
+		EntryStatusUnknown:  strconv.FormatInt(int64(EntryStatusUnknown), 10),
+		EntryStatusLoad:     strconv.FormatInt(int64(EntryStatusLoad), 10),
+		EntryStatusCreate:   strconv.FormatInt(int64(EntryStatusCreate), 10),
+		EntryStatusUpdate:   strconv.FormatInt(int64(EntryStatusUpdate), 10),
+		EntryStatusDelete:   strconv.FormatInt(int64(EntryStatusDelete), 10),
+		EntryStatusInvalid:  strconv.FormatInt(int64(EntryStatusInvalid), 10),
+		EntryStatusParse:    strconv.FormatInt(int64(EntryStatusParse), 10),
+		EntryStatusSanitize: strconv.FormatInt(int64(EntryStatusSanitize), 10),
 	}
 	entryStatusString = map[attrEntryStatus]string{
-		EntryStatusUnknown:   "unknown",
-		EntryStatusLoaded:    "loaded",
-		EntryStatusCreated:   "created",
-		EntryStatusUpdated:   "updated",
-		EntryStatusDeleted:   "deleted",
-		EntryStatusInvalid:   "invalid",
-		EntryStatusParsed:    "parsed",
-		EntryStatusSanitized: "sanitized",
+		EntryStatusUnknown:  "unknown",
+		EntryStatusLoad:     "load",
+		EntryStatusCreate:   "create",
+		EntryStatusUpdate:   "update",
+		EntryStatusDelete:   "delete",
+		EntryStatusInvalid:  "invalid",
+		EntryStatusParse:    "parse",
+		EntryStatusSanitize: "sanitize",
 	}
 )
 

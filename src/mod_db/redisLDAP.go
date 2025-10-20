@@ -45,7 +45,7 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 				for _, entry := range fnEntry {
 					entry.Type = entryType
 					entry.BaseDN = baseDN
-					entry.Status = EntryStatusLoaded
+					entry.Status = EntryStatusLoad
 
 					entry.Key = uuid.NewSHA1(uuid.Nil, []byte(entry.DN.String())).String()
 
