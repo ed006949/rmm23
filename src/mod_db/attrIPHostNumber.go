@@ -15,7 +15,7 @@ func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits i
 		&mod_strings.FVs{
 			{
 				mod_strings.F_type,
-				EntryTypeUser.Number() + " " + EntryTypeUser.Number(),
+				entryTypeUser.Number() + " " + entryTypeUser.Number(),
 			},
 		},
 	); {
