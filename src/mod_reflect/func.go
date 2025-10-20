@@ -6,6 +6,7 @@ import (
 	"strings"
 	"time"
 
+	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_slices"
 	"rmm23/src/mod_strings"
@@ -72,7 +73,25 @@ func MakeSliceIfNil[S ~[]V, V any](s *S, size ...int) bool {
 	}
 }
 
-func WaitCtx(ctx context.Context, d time.Duration) (err error) {
+func RetryWithCtx(ctx context.Context, maxTries int, interval time.Duration, message string, fn func() error) (err error) {
+	for attempt := 1; maxTries == 0 || attempt <= maxTries; attempt++ {
+		switch err = fn(); {
+		case err == nil:
+			return
+		default:
+			l.Z{l.M: message, "attempt": attempt, "max": maxTries, l.E: err}.Warning()
+
+			switch err = WaitWithCtx(ctx, interval); {
+			case err != nil:
+				return
+			}
+		}
+	}
+
+	return
+}
+
+func WaitWithCtx(ctx context.Context, d time.Duration) (err error) {
 	var (
 		t = time.NewTimer(d)
 	)

@@ -5,7 +5,6 @@ import (
 	"encoding/json/v2"
 	"strconv"
 	"strings"
-	"time"
 
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
@@ -106,7 +105,7 @@ func (r *RedisRepository) waitIndex(indexName string) (err error) {
 			return
 		}
 
-		switch err = mod_reflect.WaitCtx(r.ctx, l.RetryInterval); {
+		switch err = mod_reflect.WaitWithCtx(r.ctx, l.RetryInterval); {
 		case err != nil:
 			return
 		}
@@ -121,26 +120,8 @@ func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
 		return
 	}
 
-	err = r.saveEntryWithRetry(r.ctx, e, 0, l.RetryInterval)
+	err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, "save", func() error { return r.entry.Save(r.ctx, e) })
 	_ = r.getInfo()
-
-	return
-}
-
-func (r *RedisRepository) saveEntryWithRetry(ctx context.Context, e *Entry, maxTries int, interval time.Duration) (err error) {
-	for attempt := 1; maxTries == 0 || attempt <= maxTries; attempt++ {
-		switch err = r.entry.Save(ctx, e); {
-		case err != nil:
-			l.Z{l.M: "entry", "action": "save", "attempt": attempt, "max": maxTries, l.E: err}.Warning()
-
-			switch err = mod_reflect.WaitCtx(ctx, interval); {
-			case err != nil:
-				return
-			}
-		default:
-			return
-		}
-	}
 
 	return
 }
