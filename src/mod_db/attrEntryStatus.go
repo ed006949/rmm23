@@ -19,7 +19,7 @@ const (
 	EntryStatusSanitize
 )
 const (
-	entryStatusReady = math.MaxInt
+	EntryStatusReady = math.MaxInt
 )
 
 var (

@@ -115,14 +115,18 @@ func (r *RedisRepository) waitIndex(indexName string) (err error) {
 }
 
 func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
-	l.Z{l.M: "save", "DN": e.DN}.Informational()
+	l.Z{l.M: "save", "DN": e.DN.String()}.Informational()
 
 	switch {
 	case l.Run.DryRunValue():
 		return
 	}
 
-	err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, func() error { return r.entry.Save(r.ctx, e) })
+	switch err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, func() error { return r.entry.Save(r.ctx, e) }); {
+	case err == nil:
+		e.Status = EntryStatusReady
+	}
+
 	_ = r.getInfo()
 
 	return
