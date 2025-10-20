@@ -13,3 +13,8 @@ type KV struct {
 	Key   string
 	Value string
 }
+
+type MDMap struct {
+	String string
+	Number string
+}

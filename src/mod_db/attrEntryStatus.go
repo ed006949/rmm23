@@ -3,6 +3,8 @@ package mod_db
 import (
 	"math"
 	"strconv"
+
+	"rmm23/src/mod_strings"
 )
 
 type attrEntryStatus int //
@@ -23,27 +25,41 @@ const (
 )
 
 var (
-	entryStatusNumber = map[attrEntryStatus]string{
-		EntryStatusUnknown:  strconv.FormatInt(int64(EntryStatusUnknown), 10),
-		EntryStatusLoad:     strconv.FormatInt(int64(EntryStatusLoad), 10),
-		EntryStatusCreate:   strconv.FormatInt(int64(EntryStatusCreate), 10),
-		EntryStatusUpdate:   strconv.FormatInt(int64(EntryStatusUpdate), 10),
-		EntryStatusDelete:   strconv.FormatInt(int64(EntryStatusDelete), 10),
-		EntryStatusInvalid:  strconv.FormatInt(int64(EntryStatusInvalid), 10),
-		EntryStatusParse:    strconv.FormatInt(int64(EntryStatusParse), 10),
-		EntryStatusSanitize: strconv.FormatInt(int64(EntryStatusSanitize), 10),
-	}
-	entryStatusString = map[attrEntryStatus]string{
-		EntryStatusUnknown:  "unknown",
-		EntryStatusLoad:     "load",
-		EntryStatusCreate:   "create",
-		EntryStatusUpdate:   "update",
-		EntryStatusDelete:   "delete",
-		EntryStatusInvalid:  "invalid",
-		EntryStatusParse:    "parse",
-		EntryStatusSanitize: "sanitize",
+	entryStatusMap = []mod_strings.MDMap{
+		EntryStatusUnknown: {
+			Number: strconv.FormatInt(int64(EntryStatusUnknown), 10),
+			String: "unknown",
+		},
+		EntryStatusLoad: {
+			Number: strconv.FormatInt(int64(EntryStatusLoad), 10),
+			String: "load",
+		},
+		EntryStatusCreate: {
+			Number: strconv.FormatInt(int64(EntryStatusCreate), 10),
+			String: "create",
+		},
+		EntryStatusUpdate: {
+			Number: strconv.FormatInt(int64(EntryStatusUpdate), 10),
+			String: "update",
+		},
+		EntryStatusDelete: {
+			Number: strconv.FormatInt(int64(EntryStatusDelete), 10),
+			String: "delete",
+		},
+		EntryStatusInvalid: {
+			Number: strconv.FormatInt(int64(EntryStatusInvalid), 10),
+			String: "invalid",
+		},
+		EntryStatusParse: {
+			Number: strconv.FormatInt(int64(EntryStatusParse), 10),
+			String: "parse",
+		},
+		EntryStatusSanitize: {
+			Number: strconv.FormatInt(int64(EntryStatusSanitize), 10),
+			String: "sanitize",
+		},
 	}
 )
 
-func (r attrEntryStatus) Number() (outbound string) { return entryStatusNumber[r] }
-func (r attrEntryStatus) String() (outbound string) { return entryStatusString[r] }
+func (r attrEntryStatus) Number() (outbound string) { return entryStatusMap[r].Number }
+func (r attrEntryStatus) String() (outbound string) { return entryStatusMap[r].String }
