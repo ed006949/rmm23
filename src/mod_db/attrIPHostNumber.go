@@ -10,7 +10,11 @@ import (
 	"rmm23/src/mod_strings"
 )
 
-func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits int) (entries []*Entry, err error) {
+func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits int) (err error) {
+	var (
+		entries []*Entry
+	)
+
 	switch _, entries, err = r.SearchEntryFVs(
 		&mod_strings.FVs{
 			{

@@ -65,21 +65,10 @@ func main() {
 		}
 	}
 
-	var (
-	// count   int64
-	// entries []*mod_db.Entry
-	// certs       []*mod_db.Cert
-	)
-
-	switch _, err = config.Conf.DB.Repo.CheckIPHostNumber(config.Conf.Networking.User.Subnet, config.Conf.Networking.User.Bits); {
+	switch err = config.Conf.DB.Repo.CheckIPHostNumber(config.Conf.Networking.User.Subnet, config.Conf.Networking.User.Bits); {
 	case err != nil:
 		l.Z{l.E: err}.Critical()
 	}
-
-	// switch errs := config.Conf.DB.Repo.UpdateMultiEntry(entries...); {
-	// case errs != nil:
-	// 	l.Z{l.E: err}.Critical()
-	// }
 
 	os.Exit(1)
 }
