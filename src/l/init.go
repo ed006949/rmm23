@@ -7,8 +7,7 @@ import (
 )
 
 func Initialize() {
-	// l.log function call nesting depth is 1+1
-	zerolog.CallerSkipFrameCount = zerolog.CallerSkipFrameCount + 1 + 1
+	zerolog.CallerSkipFrameCount = zerolog.CallerSkipFrameCount + 1 /* level method */ + 1 /* log method */
 
 	Run.verbositySet(Run.verbosity)
 
