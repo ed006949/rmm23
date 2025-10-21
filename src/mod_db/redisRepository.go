@@ -231,71 +231,10 @@ func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
 	default:
 	}
 
-	switch err {
-	case nil:
-		l.Z{l.M: "entry", "flag": e.Status.String(), "DN": e.DN.String()}.Informational()
-	default:
+	switch {
+	case err != nil:
 		l.Z{l.M: "entry", "flag": e.Status.String(), l.E: err, "DN": e.DN.String()}.Warning()
 	}
 
 	return
 }
-
-// func (r *RedisRepository) UpdateMultiEntry(e ...*Entry) (err []error) {
-// 	var (
-// 		fErr  = make([]error, len(e), len(e))
-// 		isErr bool
-// 	)
-// 	mod_reflect.MakeSliceIfNil(&err, len(e))
-//
-// 	for a, b := range e {
-// 		var (
-// 			forErr error
-// 		)
-//
-// 		switch b.Status {
-// 		case entryStatusUpdate:
-// 			l.Z{l.M: "updated entry", "DN": b.DN.String()}.Informational()
-// 			b.Ver++
-// 			forErr = r.SaveEntry(b)
-// 			// switch forErr = r.SaveEntry(b); {
-// 			// case swErr != nil:
-// 			// 	fErr[a] = swErr
-// 			// 	l.Z{l.E: swErr, "DN": b.DN.String()}.Warning()
-// 			// }
-// 		case entryStatusDelete:
-// 			l.Z{l.M: "deleted entry", "DN": b.DN.String()}.Informational()
-// 			forErr = r.DeleteEntry(b.Key)
-// 			// switch swErr := r.DeleteEntry(b.Key); {
-// 			// case swErr != nil:
-// 			// 	fErr[a] = swErr
-// 			// 	l.Z{l.E: swErr, "DN": b.DN.String()}.Warning()
-// 			// }
-// 		default:
-// 		}
-//
-// 		switch {
-// 		case forErr != nil:
-// 			fErr[a] = forErr
-// 			isErr = true
-//
-// 			l.Z{l.M: b.Status.String(), l.E: forErr, "DN": b.DN.String()}.Warning()
-// 		}
-// 	}
-//
-// 	switch {
-// 	case isErr:
-// 		return fErr
-// 	}
-//
-// 	return
-// }
-
-// func (r *RedisRepository) UpdateMultiCert(e ...*Cert) (err []error) {
-// 	err = r.cert.SaveMulti(r.ctx, e...)
-// 	_ = r.getInfo()
-//
-// 	return
-// }
-
-//
