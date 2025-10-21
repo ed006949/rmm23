@@ -21,7 +21,11 @@ func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
 		return
 	}
 
-	switch err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, func() error { return r.entry.Save(r.ctx, e) }); {
+	var (
+		fn = func() error { return r.entry.Save(r.ctx, e) }
+	)
+
+	switch err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, fn); {
 	case err == nil:
 		e.Status = entryStatusReady
 	}
@@ -39,7 +43,11 @@ func (r *RedisRepository) SaveCert(e *Cert) (err error) {
 		return
 	}
 
-	switch err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, func() error { return r.cert.Save(r.ctx, e) }); {
+	var (
+		fn = func() error { return r.cert.Save(r.ctx, e) }
+	)
+
+	switch err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, fn); {
 	case err == nil:
 		e.Status = entryStatusReady
 	}
@@ -99,7 +107,11 @@ func (r *RedisRepository) DeleteEntry(id string) (err error) {
 		return
 	}
 
-	err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, func() error { return r.entry.Remove(r.ctx, id) })
+	var (
+		fn = func() error { return r.entry.Remove(r.ctx, id) }
+	)
+
+	err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, fn)
 
 	return
 }
@@ -112,7 +124,11 @@ func (r *RedisRepository) DeleteCert(id string) (err error) {
 		return
 	}
 
-	err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, func() error { return r.cert.Remove(r.ctx, id) })
+	var (
+		fn = func() error { return r.cert.Remove(r.ctx, id) }
+	)
+
+	err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, fn)
 
 	return
 }
