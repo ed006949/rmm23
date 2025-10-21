@@ -138,7 +138,11 @@ func (r *RedisRepository) SaveCert(e *Cert) (err error) {
 		return
 	}
 
-	err = r.cert.Save(r.ctx, e)
+	switch err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, func() error { return r.cert.Save(r.ctx, e) }); {
+	case err == nil:
+		e.Status = entryStatusReady
+	}
+
 	_ = r.getInfo()
 
 	return
@@ -188,7 +192,7 @@ func (r *RedisRepository) DeleteEntry(id string) (err error) {
 		return
 	}
 
-	err = r.entry.Remove(r.ctx, id)
+	err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, func() error { return r.entry.Remove(r.ctx, id) })
 
 	return
 }
@@ -199,7 +203,7 @@ func (r *RedisRepository) DeleteCert(id string) (err error) {
 		return
 	}
 
-	err = r.cert.Remove(r.ctx, id)
+	err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, func() error { return r.cert.Remove(r.ctx, id) })
 
 	return
 }
