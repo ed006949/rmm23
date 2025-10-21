@@ -2,7 +2,6 @@ package mod_db
 
 import (
 	"context"
-	"encoding/json/v2"
 	"strconv"
 	"strings"
 
@@ -10,109 +9,9 @@ import (
 	"github.com/redis/rueidis/om"
 
 	"rmm23/src/l"
-	"rmm23/src/mod_errors"
 	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_strings"
 )
-
-func (r *RedisRepository) getInfo(indexNames ...string) (err error) {
-	mod_reflect.MakeMapIfNil(&r.info)
-
-	switch {
-	case len(indexNames) == 0:
-		switch indexNames, err = r.client.Do(r.ctx, r.client.B().FtList().Build()).AsStrSlice(); {
-		case err != nil:
-			return
-		}
-	}
-
-	for _, indexName := range indexNames {
-		var (
-			redisResult    = r.client.Do(r.ctx, r.client.B().FtInfo().Index(indexName).Build())
-			redisResultMap map[string]rueidis.RedisMessage
-			redisResultAny map[string]any
-			bytes          []byte
-			interim        = new(ftInfo)
-		)
-		switch redisResultMap, err = redisResult.AsMap(); {
-		case err != nil:
-			return
-		}
-
-		switch redisResultAny, err = parseRedisMessages(redisResultMap); {
-		case err != nil:
-			return
-		}
-
-		switch bytes, err = json.Marshal(redisResultAny); {
-		case err != nil:
-			return
-		}
-
-		switch err = json.Unmarshal(bytes, interim); {
-		case err != nil:
-			return
-		}
-
-		r.info[indexName] = interim
-	}
-
-	_ = r.checkIndexFailure()
-
-	return
-	// return r.checkIndexExist(indexNames...)
-}
-
-func (r *RedisRepository) checkIndexFailure() (err error) {
-	for indexName, indexInfo := range r.info {
-		switch value := indexInfo.HashIndexingFailures; {
-		case value != 0:
-			err = mod_errors.EINVAL
-
-			l.Z{l.M: redisearchTagName, "index": indexName, "failures": value}.Warning()
-		}
-	}
-
-	return
-}
-
-func (r *RedisRepository) checkIndexExist(indexNames ...string) (err error) {
-	for _, indexName := range indexNames {
-		switch _, ok := r.info[indexName]; {
-		case !ok:
-			err = mod_errors.EUnwilling
-			l.Z{l.M: redisearchTagName, "index": indexName, l.E: mod_errors.ENOTFOUND}.Error()
-		}
-	}
-
-	return
-}
-
-func (r *RedisRepository) waitIndex(indexName string) (err error) {
-	// switch err = r.checkIndexExist(indexName); {
-	// case err != nil:
-	// 	return
-	// }
-	switch err = r.getInfo(indexName); {
-	case err != nil:
-		return
-	}
-
-	// for err = r.getInfo(indexName); r.info[indexName].Indexing != 0 || r.info[indexName].PercentIndexed != 1; err = r.getInfo(indexName) {
-	for r.info[indexName].Indexing != 0 || r.info[indexName].PercentIndexed != 1 {
-		switch err = r.getInfo(indexName); {
-		case err != nil:
-			return
-		}
-
-		switch err = mod_reflect.WaitWithCtx(r.ctx, l.RetryInterval); {
-		case err != nil:
-			return
-		}
-	}
-
-	return
-}
 
 func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
 	l.Z{l.M: "save", "DN": e.DN.String()}.Informational()
@@ -133,6 +32,8 @@ func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
 }
 
 func (r *RedisRepository) SaveCert(e *Cert) (err error) {
+	l.Z{l.M: "save", "DN": e.Subject.String()}.Informational()
+
 	switch {
 	case l.Run.DryRunValue():
 		return
@@ -177,16 +78,22 @@ func (r *RedisRepository) SaveMultiCert(e ...*Cert) (err []error) {
 //
 
 func (r *RedisRepository) FindEntry(id string) (entry *Entry, err error) {
+	l.Z{l.M: "find", "DN": id}.Informational()
+
 	return r.entry.Fetch(r.ctx, id)
 }
 
 func (r *RedisRepository) FindCert(id string) (cert *Cert, err error) {
+	l.Z{l.M: "find", "DN": id}.Informational()
+
 	return r.cert.Fetch(r.ctx, id)
 }
 
 //
 
 func (r *RedisRepository) DeleteEntry(id string) (err error) {
+	l.Z{l.M: "delete", "DN": id}.Informational()
+
 	switch {
 	case l.Run.DryRunValue():
 		return
@@ -198,6 +105,8 @@ func (r *RedisRepository) DeleteEntry(id string) (err error) {
 }
 
 func (r *RedisRepository) DeleteCert(id string) (err error) {
+	l.Z{l.M: "delete", "DN": id}.Informational()
+
 	switch {
 	case l.Run.DryRunValue():
 		return
@@ -295,6 +204,8 @@ func (r *RedisRepository) SearchEntryFVsField(ctx context.Context, fvs *mod_stri
 //
 
 func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
+	l.Z{l.M: "update", "DN": e.DN.String()}.Informational()
+
 	switch e.Status {
 	case entryStatusUpdate:
 		e.Ver++

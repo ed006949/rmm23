@@ -2,8 +2,8 @@ package mod_db
 
 import (
 	"encoding/json/v2"
-	"fmt"
-	"strings"
+
+	"github.com/redis/rueidis"
 
 	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_strings"
@@ -94,42 +94,50 @@ func (r *ftInfoAttributes) UnmarshalJSON(data []byte) (err error) {
 	return
 }
 
-const (
-	enclosureEmpty0  = ""
-	enclosureEmpty1  = ""
-	enclosureSquare0 = "["
-	enclosureSquare1 = "]"
-	enclosureCurly0  = "{"
-	enclosureCurly1  = "}"
-)
+func (r *RedisRepository) getInfo(indexNames ...string) (err error) {
+	mod_reflect.MakeMapIfNil(&r.info)
 
-var (
-	fvEnclosure = map[string][2]string{
-		redisearchTagTypeText:    {enclosureEmpty0, enclosureEmpty1},
-		redisearchTagTypeTag:     {enclosureCurly0, enclosureCurly1},
-		redisearchTagTypeNumeric: {enclosureSquare0, enclosureSquare1},
-		redisearchTagTypeGeo:     {enclosureSquare0, enclosureSquare1},
-	}
-)
-
-func (r *ftInfoAttributes) buildFVQuery(field mod_strings.EntryFieldName, value string) (outbound string) {
-	return fmt.Sprintf(
-		"@%s:%s%v%s",
-		field.String(),
-		fvEnclosure[(*r)[field].Type][0],
-		escapeRedisQueryValue(value),
-		fvEnclosure[(*r)[field].Type][1],
-	)
-}
-
-func (r *ftInfoAttributes) buildQuery(inbound *mod_strings.FVs) (outbound string) {
-	var (
-		interim = make([]string, len(*r), len(*r))
-	)
-
-	for i, fv := range *inbound {
-		interim[i] = r.buildFVQuery(fv.Field, fv.Value)
+	switch {
+	case len(indexNames) == 0:
+		switch indexNames, err = r.client.Do(r.ctx, r.client.B().FtList().Build()).AsStrSlice(); {
+		case err != nil:
+			return
+		}
 	}
 
-	return strings.Join(interim, " ")
+	for _, indexName := range indexNames {
+		var (
+			redisResult    = r.client.Do(r.ctx, r.client.B().FtInfo().Index(indexName).Build())
+			redisResultMap map[string]rueidis.RedisMessage
+			redisResultAny map[string]any
+			bytes          []byte
+			interim        = new(ftInfo)
+		)
+		switch redisResultMap, err = redisResult.AsMap(); {
+		case err != nil:
+			return
+		}
+
+		switch redisResultAny, err = parseRedisMessages(redisResultMap); {
+		case err != nil:
+			return
+		}
+
+		switch bytes, err = json.Marshal(redisResultAny); {
+		case err != nil:
+			return
+		}
+
+		switch err = json.Unmarshal(bytes, interim); {
+		case err != nil:
+			return
+		}
+
+		r.info[indexName] = interim
+	}
+
+	_ = r.checkIndexFailure()
+
+	return
+	// return r.checkIndexExist(indexNames...)
 }
