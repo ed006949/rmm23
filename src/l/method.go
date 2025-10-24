@@ -11,27 +11,6 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
-func (r Z) MarshalZerologObject(e *zerolog.Event) {
-	for a, b := range r {
-		switch value := b.(type) {
-		case nil:
-		case error:
-			e.AnErr(a, value)
-		case []error:
-			e.Errs(a, value)
-		default:
-			e.Interface(a, value)
-		}
-	}
-
-	switch {
-	case Run.DryRunValue():
-		e.Bool(Run.DryRunName(), Run.DryRunValue())
-	}
-
-	e.Str("daemon", Run.NameValue())
-}
-
 func (r *runType) verbositySet(inbound zerolog.Level) {
 	r.verbosity = inbound
 	log.Logger = log.Level(r.verbosity).With().Timestamp().Caller().Logger().Output(zerolog.ConsoleWriter{
@@ -55,7 +34,7 @@ func (r *runType) dbSetString(inbound string) (err error) {
 	case err != nil:
 		log.Error().Err(err).Send()
 
-		return err
+		return
 	}
 
 	Run.db = interim
@@ -85,7 +64,7 @@ func (r *runType) modeSetString(inbound string) (err error) {
 	case err != nil:
 		log.Error().Err(err).Send()
 
-		return err
+		return
 	}
 
 	Run.mode = interim
@@ -100,7 +79,7 @@ func (r *runType) nodeSetString(inbound string) (err error) {
 	case err != nil:
 		log.Error().Err(err).Send()
 
-		return err
+		return
 	}
 
 	Run.node = interim

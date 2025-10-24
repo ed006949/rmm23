@@ -15,7 +15,7 @@ import (
 )
 
 func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
-	log.Info().Str("DN", e.DN.String()).Msgf("save")
+	log.Info().Str("DN", e.DN.String()).Msg("save")
 
 	switch {
 	case l.Run.DryRunValue():
@@ -37,7 +37,7 @@ func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
 }
 
 func (r *RedisRepository) SaveCert(e *Cert) (err error) {
-	log.Info().Str("DN", e.Subject.String()).Msgf("save")
+	log.Info().Str("DN", e.Subject.String()).Msg("save")
 
 	switch {
 	case l.Run.DryRunValue():
@@ -87,13 +87,13 @@ func (r *RedisRepository) SaveMultiCert(e ...*Cert) (err []error) {
 //
 
 func (r *RedisRepository) FindEntry(id string) (entry *Entry, err error) {
-	log.Info().Str("DN", id).Msgf("find")
+	log.Info().Str("DN", id).Msg("find")
 
 	return r.entry.Fetch(r.ctx, id)
 }
 
 func (r *RedisRepository) FindCert(id string) (cert *Cert, err error) {
-	log.Info().Str("DN", id).Msgf("find")
+	log.Info().Str("DN", id).Msg("find")
 
 	return r.cert.Fetch(r.ctx, id)
 }
@@ -101,7 +101,7 @@ func (r *RedisRepository) FindCert(id string) (cert *Cert, err error) {
 //
 
 func (r *RedisRepository) DeleteEntry(id string) (err error) {
-	log.Info().Str("DN", id).Msgf("delete")
+	log.Info().Str("DN", id).Msg("delete")
 
 	switch {
 	case l.Run.DryRunValue():
@@ -118,7 +118,7 @@ func (r *RedisRepository) DeleteEntry(id string) (err error) {
 }
 
 func (r *RedisRepository) DeleteCert(id string) (err error) {
-	log.Info().Str("DN", id).Msgf("delete")
+	log.Info().Str("DN", id).Msg("delete")
 
 	switch {
 	case l.Run.DryRunValue():
@@ -212,7 +212,7 @@ func (r *RedisRepository) SearchEntryFVsField(ctx context.Context, fvs *mod_stri
 				Limit().OffsetNum(0, connMaxPaging).
 				Build()
 		)
-		log.Info().Str("command", strings.Join(command.Commands(), " ")).Msgf("redis")
+		log.Info().Str("command", strings.Join(command.Commands(), " ")).Msg("redis")
 
 		return command
 	})
@@ -221,7 +221,7 @@ func (r *RedisRepository) SearchEntryFVsField(ctx context.Context, fvs *mod_stri
 //
 
 func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
-	log.Info().Str("DN", e.DN.String()).Msgf("update")
+	log.Info().Str("DN", e.DN.String()).Msg("update")
 
 	switch e.Status {
 	case entryStatusUpdate:
@@ -234,7 +234,7 @@ func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
 
 	switch {
 	case err != nil:
-		log.Warn().Str("flag", e.Status.String()).Err(err).Str("DN", e.DN.String()).Msgf("entry")
+		log.Warn().Str("flag", e.Status.String()).Err(err).Str("DN", e.DN.String()).Msg("entry")
 	}
 
 	return

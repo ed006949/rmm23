@@ -35,12 +35,12 @@ func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits i
 		case len(b.IPHostNumber) == 1:
 			switch swErr := mod_net.Subnets.PrefixUse(usersSubnet, userBits, b.IPHostNumber[0]); {
 			case errors.Is(swErr, mod_errors.EEXIST):
-				log.Info().Str("DN", b.DN.String()).Str("prefix", b.IPHostNumber[0].String()).Msgf("prefix already in use")
+				log.Info().Str("DN", b.DN.String()).Str("prefix", b.IPHostNumber[0].String()).Msg("prefix already in use")
 				b.IPHostNumber = b.IPHostNumber[:0]
 				b.Status = entryStatusUpdate
 				_ = r.UpdateEntry(b)
 			case swErr != nil:
-				log.Info().Str("DN", b.DN.String()).Str("prefix", b.IPHostNumber[0].String()).Msgf("invalid prefix")
+				log.Info().Str("DN", b.DN.String()).Str("prefix", b.IPHostNumber[0].String()).Msg("invalid prefix")
 				b.IPHostNumber = b.IPHostNumber[:0]
 				b.Status = entryStatusUpdate
 				_ = r.UpdateEntry(b)
@@ -51,7 +51,7 @@ func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits i
 	for _, b := range entries {
 		switch {
 		case len(b.IPHostNumber) > 1:
-			log.Info().Str("DN", b.DN.String()).Any("prefix", b.IPHostNumber).Msgf("prefixes are >1")
+			log.Info().Str("DN", b.DN.String()).Any("prefix", b.IPHostNumber).Msg("prefixes are >1")
 
 			var (
 				prefixes = b.IPHostNumber
@@ -63,11 +63,11 @@ func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits i
 			for _, d := range prefixes {
 				switch swErr := mod_net.Subnets.PrefixUse(usersSubnet, userBits, d); {
 				case errors.Is(swErr, mod_errors.EEXIST):
-					log.Info().Str("DN", b.DN.String()).Str("prefix", b.IPHostNumber[0].String()).Msgf("prefix already in use")
+					log.Info().Str("DN", b.DN.String()).Str("prefix", b.IPHostNumber[0].String()).Msg("prefix already in use")
 
 					continue
 				case swErr != nil:
-					log.Info().Str("DN", b.DN.String()).Str("prefix", b.IPHostNumber[0].String()).Msgf("invalid prefix")
+					log.Info().Str("DN", b.DN.String()).Str("prefix", b.IPHostNumber[0].String()).Msg("invalid prefix")
 
 					continue
 				default:
@@ -84,9 +84,9 @@ func (r *RedisRepository) CheckIPHostNumber(usersSubnet netip.Prefix, userBits i
 		case len(b.IPHostNumber) == 0:
 			switch prefix, swErr := mod_net.Subnets.PrefixUseFree(usersSubnet, userBits); {
 			case swErr != nil:
-				log.Warn().Str("DN", b.DN.String()).Msgf("no free prefix")
+				log.Warn().Str("DN", b.DN.String()).Msg("no free prefix")
 			default:
-				log.Info().Str("DN", b.DN.String()).Str("prefix", prefix.String()).Msgf("use new prefix")
+				log.Info().Str("DN", b.DN.String()).Str("prefix", prefix.String()).Msg("use new prefix")
 				b.IPHostNumber = []netip.Prefix{prefix}
 				b.Status = entryStatusUpdate
 				_ = r.UpdateEntry(b)

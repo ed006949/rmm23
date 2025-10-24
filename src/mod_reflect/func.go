@@ -78,7 +78,7 @@ func RetryWithCtx(ctx context.Context, maxTries int, interval time.Duration, fn 
 	for attempt := 1; maxTries == 0 || attempt <= maxTries; attempt++ {
 		switch err = fn(); {
 		case err != nil:
-			log.Warn().Int("attempt", attempt).Int("max", maxTries).Err(err).Msgf("retry")
+			log.Warn().Int("attempt", attempt).Int("max", maxTries).Err(err).Msg("retry")
 
 			switch err = WaitWithCtx(ctx, interval); {
 			case err != nil:

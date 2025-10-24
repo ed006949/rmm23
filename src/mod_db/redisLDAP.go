@@ -64,8 +64,8 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 					for a, b := range e {
 						switch {
 						case b != nil:
-							log.Warn().Str("key", fnEntry[a].Key).Str("DN", fnEntry[a].DN.String()).Msgf("save")
-							log.Debug().Str("key", fnEntry[a].Key).Str("DN", fnEntry[a].DN.String()).Errs("errors", e).Msgf("save")
+							log.Warn().Str("key", fnEntry[a].Key).Str("DN", fnEntry[a].DN.String()).Msg("save")
+							log.Debug().Str("key", fnEntry[a].Key).Str("DN", fnEntry[a].DN.String()).Errs("errors", e).Msg("save")
 						}
 					}
 				}
@@ -97,8 +97,8 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 					for a, b := range e {
 						switch {
 						case b != nil:
-							log.Warn().Str("key", fnCerts[a].Key).Str("cert", fnCerts[a].Certificate.Certificate.Subject.String()).Msgf("save")
-							log.Debug().Str("key", fnCerts[a].Key).Str("cert", fnCerts[a].Certificate.Certificate.Subject.String()).Errs("errors", e).Msgf("save")
+							log.Warn().Str("key", fnCerts[a].Key).Str("cert", fnCerts[a].Certificate.Certificate.Subject.String()).Msg("save")
+							log.Debug().Str("key", fnCerts[a].Key).Str("cert", fnCerts[a].Certificate.Certificate.Subject.String()).Errs("errors", e).Msg("save")
 						}
 					}
 				}

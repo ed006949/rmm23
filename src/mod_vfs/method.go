@@ -65,7 +65,7 @@ func (r *VFSDB) CopyFromFS(name string) (err error) {
 
 				return err
 			default: // 													already exists
-				log.Warn().Err(fs.ErrExist).Str("dirEntry", name).Msgf("skip entry")
+				log.Warn().Err(fs.ErrExist).Str("dirEntry", name).Msg("skip entry")
 
 				return
 			}

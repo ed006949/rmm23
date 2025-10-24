@@ -16,7 +16,7 @@ func main() {
 		err error
 	)
 
-	log.Info().Str("commit", l.Run.CommitHashValue()).Str("built", l.Run.BuildTimeValue()).Msgf("main")
+	log.Info().Str("commit", l.Run.CommitHashValue()).Str("built", l.Run.BuildTimeValue()).Bool(l.Run.DryRunName(), l.Run.DryRunValue()).Msg("main")
 
 	defer func() {
 		switch err {

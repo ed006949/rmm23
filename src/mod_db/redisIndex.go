@@ -14,7 +14,7 @@ func (r *RedisRepository) checkIndexFailure() (err error) {
 		case value != 0:
 			err = mod_errors.EINVAL
 
-			log.Warn().Str("index", indexName).Int64("failures", value).Msgf(redisearchTagName)
+			log.Warn().Str("index", indexName).Int64("failures", value).Msg(redisearchTagName)
 		}
 	}
 
@@ -26,7 +26,7 @@ func (r *RedisRepository) checkIndexExist(indexNames ...string) (err error) {
 		switch _, ok := r.info[indexName]; {
 		case !ok:
 			err = mod_errors.EUnwilling
-			log.Error().Str("index", indexName).Err(mod_errors.ENOTFOUND).Msgf(redisearchTagName)
+			log.Error().Str("index", indexName).Err(mod_errors.ENOTFOUND).Msg(redisearchTagName)
 		}
 	}
 

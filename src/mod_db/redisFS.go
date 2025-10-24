@@ -64,7 +64,7 @@ func (r *RedisRepository) GetFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB) 
 	)
 	switch err = vfsDB.VFS.WalkDir("/", fn); {
 	case err != nil:
-		log.Error().Err(err).Msgf("vfsDB.VFS.WalkDir")
+		log.Error().Err(err).Msg("vfsDB.VFS.WalkDir")
 	}
 
 	for a, b := range content {
