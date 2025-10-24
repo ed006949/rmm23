@@ -1,6 +1,8 @@
 package mod_db
 
 import (
+	"github.com/rs/zerolog/log"
+
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_reflect"
@@ -12,7 +14,7 @@ func (r *RedisRepository) checkIndexFailure() (err error) {
 		case value != 0:
 			err = mod_errors.EINVAL
 
-			l.Z{l.M: redisearchTagName, "index": indexName, "failures": value}.Warning()
+			log.Warn().Str("index", indexName).Int64("failures", value).Msgf(redisearchTagName)
 		}
 	}
 
@@ -24,7 +26,7 @@ func (r *RedisRepository) checkIndexExist(indexNames ...string) (err error) {
 		switch _, ok := r.info[indexName]; {
 		case !ok:
 			err = mod_errors.EUnwilling
-			l.Z{l.M: redisearchTagName, "index": indexName, l.E: mod_errors.ENOTFOUND}.Error()
+			log.Error().Str("index", indexName).Err(mod_errors.ENOTFOUND).Msgf(redisearchTagName)
 		}
 	}
 

@@ -10,6 +10,7 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 
+	"github.com/rs/zerolog/log"
 	"software.sslmate.com/src/go-pkcs12"
 
 	"rmm23/src/mod_errors"
@@ -48,6 +49,8 @@ func (r *Certificate) MarshalText() (outbound []byte, err error) {
 	case r.PEM == nil:
 		switch err = r.encodePEM(); {
 		case err != nil:
+			log.Error().Err(err).Send()
+
 			return
 		}
 	}
@@ -61,6 +64,8 @@ func (r *Certificate) UnmarshalText(inbound []byte) (err error) {
 	)
 	switch err = interim.ParseRaw(inbound); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -238,6 +243,8 @@ func (r *Certificate) parseDER(inbound ...[]byte) (err error) {
 
 	switch err = interim.checkPrivateKey(); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -292,6 +299,8 @@ func (r *Certificate) parsePEM(inbound ...[]byte) (err error) {
 
 	switch err = interim.parseDER(key, crt, ca, csr, crl); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -306,6 +315,8 @@ func (r *Certificate) parseP12(p12 []byte) (err error) {
 	)
 	switch interim.PrivateKey, interim.Certificate, interim.CertificateCAChain, err = pkcs12.DecodeChain(p12, pkcs12.DefaultPassword); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -323,6 +334,8 @@ func (r *Certificate) encodeDER() (err error) {
 	case r.PrivateKey != nil:
 		switch interim.PrivateKeyDER, err = x509.MarshalPKCS8PrivateKey(r.PrivateKey); {
 		case err != nil:
+			log.Error().Err(err).Send()
+
 			return
 		}
 	}
@@ -371,6 +384,8 @@ func (r *Certificate) encodePEM() (err error) {
 		)
 		switch der, err = x509.MarshalPKCS8PrivateKey(r.PrivateKey); {
 		case err != nil:
+			log.Error().Err(err).Send()
+
 			return
 		}
 
@@ -463,6 +478,8 @@ func (r *Certificate) encodeP12() (err error) {
 	)
 	switch interim, err = pkcs12.LegacyRC2.Encode(r.PrivateKey, r.Certificate, r.CertificateCAChain, pkcs12.DefaultPassword); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 

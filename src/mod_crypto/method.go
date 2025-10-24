@@ -4,6 +4,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport"
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 	"github.com/go-git/go-git/v5/plumbing/transport/ssh"
+	"github.com/rs/zerolog/log"
 
 	"rmm23/src/mod_errors"
 )
@@ -19,6 +20,8 @@ func (r *AuthDB) WriteSSH(name string, user string, pemBytes []byte, password st
 	)
 	switch sshPublicKeys, err = ssh.NewPublicKeys(user, pemBytes, password); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	default:
 		(*r)[name] = sshPublicKeys

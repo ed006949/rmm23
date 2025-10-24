@@ -6,7 +6,8 @@ import (
 	"strings"
 	"time"
 
-	"rmm23/src/l"
+	"github.com/rs/zerolog/log"
+
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_slices"
 	"rmm23/src/mod_strings"
@@ -77,7 +78,7 @@ func RetryWithCtx(ctx context.Context, maxTries int, interval time.Duration, fn 
 	for attempt := 1; maxTries == 0 || attempt <= maxTries; attempt++ {
 		switch err = fn(); {
 		case err != nil:
-			l.Z{l.M: "retry", "attempt": attempt, "max": maxTries, l.E: err}.Warning()
+			log.Warn().Int("attempt", attempt).Int("max", maxTries).Err(err).Msgf("retry")
 
 			switch err = WaitWithCtx(ctx, interval); {
 			case err != nil:

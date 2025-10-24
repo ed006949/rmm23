@@ -5,6 +5,7 @@ import (
 
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_dn"
@@ -21,11 +22,15 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 			)
 			switch fnErr = entryType.Parse(fnSearchResultType); {
 			case fnErr != nil:
+				log.Error().Err(fnErr).Send()
+
 				return
 			}
 
 			switch fnErr = baseDN.UnmarshalText([]byte(fnBaseDN)); {
 			case fnErr != nil:
+				log.Error().Err(fnErr).Send()
+
 				return
 			}
 
@@ -38,7 +43,9 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 
 				// Parse LDAP Entries
 				switch fnErr = mod_ldap.UnmarshalLDAPEntries(bulkEntries, &fnEntry); {
-				case err != nil:
+				case fnErr != nil:
+					log.Error().Err(fnErr).Send()
+
 					return
 				}
 
@@ -57,8 +64,8 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 					for a, b := range e {
 						switch {
 						case b != nil:
-							l.Z{l.M: "save", "key": fnEntry[a].Key, "DN": fnEntry[a].DN.String()}.Warning()
-							l.Z{l.M: "save", "key": fnEntry[a].Key, "DN": fnEntry[a].DN.String(), l.E: e}.Debug()
+							log.Warn().Str("key", fnEntry[a].Key).Str("DN", fnEntry[a].DN.String()).Msgf("save")
+							log.Debug().Str("key", fnEntry[a].Key).Str("DN", fnEntry[a].DN.String()).Errs("errors", e).Msgf("save")
 						}
 					}
 				}
@@ -75,6 +82,8 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 						)
 						switch forErr := fnCert.parseRaw(d); {
 						case forErr != nil:
+							log.Error().Err(fnErr).Send()
+
 							continue
 						}
 
@@ -88,8 +97,8 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 					for a, b := range e {
 						switch {
 						case b != nil:
-							l.Z{l.M: "save", "key": fnCerts[a].Key, "cert": fnCerts[a].Certificate.Certificate.Subject.String()}.Warning()
-							l.Z{l.M: "save", "key": fnCerts[a].Key, "cert": fnCerts[a].Certificate.Certificate.Subject.String(), l.E: e}.Debug()
+							log.Warn().Str("key", fnCerts[a].Key).Str("cert", fnCerts[a].Certificate.Certificate.Subject.String()).Msgf("save")
+							log.Debug().Str("key", fnCerts[a].Key).Str("cert", fnCerts[a].Certificate.Certificate.Subject.String()).Errs("errors", e).Msgf("save")
 						}
 					}
 				}
@@ -100,6 +109,8 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 	)
 	switch err = inbound.SearchFn(ldap2doc); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 

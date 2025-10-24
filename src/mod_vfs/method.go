@@ -9,8 +9,8 @@ import (
 
 	"github.com/avfs/avfs"
 	"github.com/go-ini/ini"
+	"github.com/rs/zerolog/log"
 
-	"rmm23/src/l"
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_fs"
 )
@@ -18,7 +18,7 @@ import (
 func (r *VFSDB) MustReadlink(name string) string {
 	switch outbound, err := r.VFS.Readlink(name); {
 	case err != nil:
-		l.Z{l.E: err}.Critical()
+		log.Error().Err(err).Send()
 
 		return ""
 	default:
@@ -30,6 +30,8 @@ func (r *VFSDB) LoadFromFS() (err error) {
 	for a, b := range r.List {
 		switch r.List[a], err = filepath.Abs(b); {
 		case err != nil:
+			log.Error().Err(err).Send()
+
 			return
 		}
 	}
@@ -37,6 +39,8 @@ func (r *VFSDB) LoadFromFS() (err error) {
 	for _, b := range r.List {
 		switch err = r.CopyFromFS(b); {
 		case err != nil:
+			log.Error().Err(err).Send()
+
 			return
 		}
 	}
@@ -49,23 +53,29 @@ func (r *VFSDB) CopyFromFS(name string) (err error) {
 		fn = func(name string, dirEntry fs.DirEntry, fnErr error) (err error) {
 			switch {
 			case fnErr != nil:
+				log.Error().Err(fnErr).Send()
+
 				return fnErr
 			}
 
 			switch _, err = r.VFS.Lstat(name); {
 			case errors.Is(err, fs.ErrNotExist): //							not exist
 			case err != nil: //												error
+				log.Error().Err(err).Send()
+
 				return err
 			default: // 													already exists
-				l.Z{l.E: fs.ErrExist, "dirEntry": name, l.M: "skip entry"}.Warning()
+				log.Warn().Err(fs.ErrExist).Str("dirEntry", name).Msgf("skip entry")
 
-				return nil
+				return
 			}
 
 			switch dirEntry.Type() {
 			case fs.ModeDir:
 				switch err = r.VFS.MkdirAll(name, avfs.DefaultDirPerm); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
@@ -75,11 +85,15 @@ func (r *VFSDB) CopyFromFS(name string) (err error) {
 				)
 				switch target, err = os.Readlink(name); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
 				switch err = r.VFS.Symlink(target, name); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
@@ -93,17 +107,23 @@ func (r *VFSDB) CopyFromFS(name string) (err error) {
 				// "What could have gone wrong?!"
 				switch err = r.CopyFromFS(target); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
 			case 0:
 				switch err = r.VFS.MkdirAll(filepath.Dir(name), avfs.DefaultDirPerm); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
 				switch err = r.CopyFileFromFS(name); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
@@ -115,11 +135,15 @@ func (r *VFSDB) CopyFromFS(name string) (err error) {
 	)
 	switch name, err = filepath.Abs(name); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
 	switch err = filepath.WalkDir(name, fn); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -133,6 +157,8 @@ func (r *VFSDB) WriteVFS() (err error) {
 		orphanFn   = func(name string, dirEntry fs.DirEntry, fnErr error) (err error) {
 			switch {
 			case fnErr != nil:
+				log.Error().Err(fnErr).Send()
+
 				return fnErr
 			}
 
@@ -143,6 +169,8 @@ func (r *VFSDB) WriteVFS() (err error) {
 			case errors.Is(err, fs.ErrNotExist): //							not exist
 				orphanList[name] = struct{}{}
 			case err != nil: //												error
+				log.Error().Err(err).Send()
+
 				return err
 
 			case dirEntry.Type() != orphanFileInfo.Mode().Type(): //				exist but different type
@@ -155,11 +183,15 @@ func (r *VFSDB) WriteVFS() (err error) {
 				)
 				switch linkVFS, err = r.VFS.Readlink(name); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
 				switch linkFS, err = os.Readlink(name); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
@@ -176,12 +208,14 @@ func (r *VFSDB) WriteVFS() (err error) {
 	for _, b := range r.List {
 		switch err = r.VFS.WalkDir(b, orphanFn); {
 		case err != nil:
+			log.Error().Err(err).Send()
+
 			return
 		}
 	}
 
 	for a := range orphanList {
-		l.Z{l.E: mod_errors.EORPHANED, "name": a}.Notice()
+		log.Info().Err(mod_errors.EORPHANED).Str("name", a).Msg("")
 	}
 
 	// compare and sync VFS to FS
@@ -189,6 +223,8 @@ func (r *VFSDB) WriteVFS() (err error) {
 		syncFn = func(name string, dirEntry fs.DirEntry, fnErr error) (err error) {
 			switch {
 			case fnErr != nil:
+				log.Error().Err(fnErr).Send()
+
 				return fnErr
 			}
 
@@ -197,6 +233,8 @@ func (r *VFSDB) WriteVFS() (err error) {
 				switch err = os.Mkdir(name, avfs.DefaultDirPerm); {
 				case errors.Is(err, fs.ErrExist):
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
@@ -206,17 +244,23 @@ func (r *VFSDB) WriteVFS() (err error) {
 				)
 				switch linkVFS, err = r.VFS.Readlink(name); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
 				switch err = mod_fs.Symlink(linkVFS, name); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
 			case 0:
 				switch err = r.CompareAndCopyFileToFS(name); {
 				case err != nil:
+					log.Error().Err(err).Send()
+
 					return
 				}
 
@@ -231,6 +275,8 @@ func (r *VFSDB) WriteVFS() (err error) {
 	)
 	switch err = r.VFS.WalkDir("/", syncFn); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -243,11 +289,15 @@ func (r *VFSDB) CopyFileFromFS(name string) (err error) {
 	)
 	switch data, err = os.ReadFile(name); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
 	switch err = r.VFS.WriteFile(name, data, avfs.DefaultFilePerm); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -259,11 +309,15 @@ func (r *VFSDB) CopyFileToFS(name string) (err error) {
 	)
 	switch data, err = r.VFS.ReadFile(name); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
 	switch err = os.WriteFile(name, data, avfs.DefaultFilePerm); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -276,12 +330,16 @@ func (r *VFSDB) CompareAndCopyFileToFS(name string) (err error) {
 	)
 	switch dataVFS, err = r.VFS.ReadFile(name); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
 	switch dataFS, err = os.ReadFile(name); {
 	case errors.Is(err, fs.ErrNotExist):
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	case bytes.Equal(dataVFS, dataFS):
 		return
@@ -289,6 +347,8 @@ func (r *VFSDB) CompareAndCopyFileToFS(name string) (err error) {
 
 	switch err = os.WriteFile(name, dataVFS, avfs.DefaultFilePerm); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -325,6 +385,8 @@ func (r *VFSDB) LoadIniMapTo(v any, source string) (err error) {
 	)
 	switch data, err = r.VFS.ReadFile(source); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 

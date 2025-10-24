@@ -32,23 +32,6 @@ func (r Z) MarshalZerologObject(e *zerolog.Event) {
 	e.Str("daemon", Run.NameValue())
 }
 
-func (r Z) Emergency()     { r.log(log.Fatal()) }
-func (r Z) Alert()         { r.log(log.Fatal()) }
-func (r Z) Critical()      { r.log(log.Fatal()) }
-func (r Z) Error()         { r.log(log.Error()) }
-func (r Z) Warning()       { r.log(log.Warn()) }
-func (r Z) Notice()        { r.log(log.Info()) }
-func (r Z) Informational() { r.log(log.Info()) }
-func (r Z) Debug()         { r.log(log.Debug()) }
-func (r Z) Trace()         { r.log(log.Trace()) }
-func (r Z) Panic()         { r.log(log.Panic()) }
-func (r Z) Quiet()         {}
-func (r Z) Disabled()      {}
-
-func (r Z) log(event *zerolog.Event) {
-	event.EmbedObject(r).Send()
-}
-
 func (r *runType) verbositySet(inbound zerolog.Level) {
 	r.verbosity = inbound
 	log.Logger = log.Level(r.verbosity).With().Timestamp().Caller().Logger().Output(zerolog.ConsoleWriter{
@@ -70,6 +53,8 @@ func (r *runType) dbSetString(inbound string) (err error) {
 	)
 	switch interim, err = url.Parse(inbound); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return err
 	}
 
@@ -83,6 +68,8 @@ func (r *runType) dryRunSetString(inbound string) (err error) {
 	)
 	switch interim, err = strconv.ParseBool(inbound); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -96,6 +83,8 @@ func (r *runType) modeSetString(inbound string) (err error) {
 	)
 	switch interim, err = strconv.Atoi(inbound); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return err
 	}
 
@@ -109,6 +98,8 @@ func (r *runType) nodeSetString(inbound string) (err error) {
 	)
 	switch interim, err = strconv.Atoi(inbound); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return err
 	}
 
@@ -122,6 +113,8 @@ func (r *runType) verbositySetString(inbound string) (err error) {
 	)
 	switch interim, err = zerolog.ParseLevel(inbound); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -136,6 +129,8 @@ func (r *runType) ConfigUnmarshal(inbound any) (err error) {
 	)
 	switch content, err = os.ReadFile(r.config); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 

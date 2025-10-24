@@ -5,6 +5,8 @@ import (
 	"net/url"
 	"strings"
 
+	"github.com/rs/zerolog/log"
+
 	"rmm23/src/mod_errors"
 )
 
@@ -15,6 +17,8 @@ func (r *URL) UnmarshalText(inbound []byte) (err error) {
 
 	switch interim, err = url.Parse(string(inbound)); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 

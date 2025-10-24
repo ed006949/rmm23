@@ -6,6 +6,7 @@ import (
 	"time"
 
 	ber "github.com/go-asn1-ber/asn1-ber"
+	"github.com/rs/zerolog/log"
 
 	"rmm23/src/mod_errors"
 )
@@ -16,6 +17,8 @@ func (r *Time) UnmarshalJSON(inbound []byte) (err error) {
 	)
 	switch err = json.Unmarshal(inbound, &interim); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -30,6 +33,8 @@ func (r *Time) MarshalJSON() (outbound []byte, err error) {
 	)
 	switch outbound, err = json.Marshal(&interim); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 

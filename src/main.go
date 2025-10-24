@@ -1,10 +1,9 @@
 package main
 
 import (
-	"os"
-
 	"github.com/avfs/avfs"
 	"github.com/avfs/avfs/vfs/memfs"
+	"github.com/rs/zerolog/log"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_vfs"
@@ -13,12 +12,23 @@ import (
 func main() {
 	l.Initialize()
 
-	l.Z{l.M: "main", "commit": l.Run.CommitHashValue(), "built": l.Run.BuildTimeValue()}.Informational()
-	defer l.Z{l.M: "exit"}.Informational()
+	var (
+		err error
+	)
+
+	log.Info().Str("commit", l.Run.CommitHashValue()).Str("built", l.Run.BuildTimeValue()).Msgf("main")
+
+	defer func() {
+		switch err {
+		case nil:
+			log.Info().Msg("exit")
+		default:
+			log.Fatal().Err(err).Msg("exited with error")
+		}
+	}()
 
 	var (
 		config = new(ConfigRoot)
-		err    error
 		vfsDB  = &mod_vfs.VFSDB{
 			List: make(map[string]string),
 			VFS: memfs.NewWithOptions(&memfs.Options{
@@ -32,7 +42,7 @@ func main() {
 	)
 	switch err = l.Run.ConfigUnmarshal(&config); {
 	case err != nil:
-		os.Exit(1)
+		return
 	}
 
 	switch err = config.Conf.DB.Dial(ctx); {
@@ -48,27 +58,27 @@ func main() {
 	case !l.Run.DryRunValue():
 		switch err = config.Conf.DB.Repo.GetLDAPDocs(ctx, config.Conf.LDAP); {
 		case err != nil:
-			l.Z{l.E: err}.Critical()
+			return
 		}
 	}
 
 	switch err = vfsDB.CopyFromFS("./etc/legacy/"); {
 	case err != nil:
-		l.Z{l.E: err}.Critical()
+		return
 	}
 
 	switch {
 	case !l.Run.DryRunValue():
 		switch err = config.Conf.DB.Repo.GetFSCerts(ctx, vfsDB); {
 		case err != nil:
-			l.Z{l.E: err}.Critical()
+			return
 		}
 	}
 
 	switch err = config.Conf.DB.Repo.CheckIPHostNumber(config.Conf.Networking.User.Subnet, config.Conf.Networking.User.Bits); {
 	case err != nil:
-		l.Z{l.E: err}.Critical()
+		return
 	}
 
-	os.Exit(1)
+	return
 }

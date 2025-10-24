@@ -6,6 +6,8 @@ import (
 	"net/netip"
 	"sync"
 
+	"github.com/rs/zerolog/log"
+
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_slices"
@@ -61,6 +63,8 @@ func (r *subnetsStruct) PrefixIsFree(basePrefix netip.Prefix, subnetPrefixLen in
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -69,6 +73,8 @@ func (r *subnetsStruct) PrefixIsFree(basePrefix netip.Prefix, subnetPrefixLen in
 	)
 	switch index, err = r.indexByPrefix(basePrefix, subnetPrefixLen, prefix); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -80,6 +86,8 @@ func (r *subnetsStruct) PrefixFree(basePrefix netip.Prefix, subnetPrefixLen int,
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -88,6 +96,8 @@ func (r *subnetsStruct) PrefixFree(basePrefix netip.Prefix, subnetPrefixLen int,
 	)
 	switch index, err = r.indexByPrefix(basePrefix, subnetPrefixLen, prefix); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -101,6 +111,8 @@ func (r *subnetsStruct) PrefixUse(basePrefix netip.Prefix, subnetPrefixLen int, 
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -109,6 +121,8 @@ func (r *subnetsStruct) PrefixUse(basePrefix netip.Prefix, subnetPrefixLen int, 
 	)
 	switch index, err = r.indexByPrefix(basePrefix, subnetPrefixLen, prefix); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	case !r.indexIsFree(basePrefix, subnetPrefixLen, index):
 		return mod_errors.EEXIST
@@ -124,6 +138,8 @@ func (r *subnetsStruct) PrefixUseFree(basePrefix netip.Prefix, subnetPrefixLen i
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -132,6 +148,8 @@ func (r *subnetsStruct) PrefixUseFree(basePrefix netip.Prefix, subnetPrefixLen i
 	)
 	switch index, err = r.indexUseFree(basePrefix, subnetPrefixLen); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -149,6 +167,8 @@ func (r *subnetsStruct) SubnetList(basePrefix netip.Prefix, subnetPrefixLen int,
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -170,6 +190,8 @@ func (r *subnetsStruct) Subnet(basePrefix netip.Prefix, subnetPrefixLen int, sub
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
@@ -181,6 +203,8 @@ func (r *subnetsStruct) Subnets(basePrefix netip.Prefix, subnetPrefixLen int) (o
 
 	switch err = r.validate(basePrefix, subnetPrefixLen); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 

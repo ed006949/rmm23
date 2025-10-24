@@ -5,7 +5,8 @@ import (
 	"io/fs"
 	"strings"
 
-	"rmm23/src/l"
+	"github.com/rs/zerolog/log"
+
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_vfs"
 )
@@ -19,6 +20,8 @@ func (r *RedisRepository) GetFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB) 
 		fn = func(name string, dirEntry fs.DirEntry, err error) (fnErr error) {
 			switch {
 			case err != nil:
+				log.Error().Err(err).Send()
+
 				return err
 			}
 
@@ -61,7 +64,7 @@ func (r *RedisRepository) GetFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB) 
 	)
 	switch err = vfsDB.VFS.WalkDir("/", fn); {
 	case err != nil:
-		l.Z{l.E: err}.Error()
+		log.Error().Err(err).Msgf("vfsDB.VFS.WalkDir")
 	}
 
 	for a, b := range content {
@@ -79,7 +82,7 @@ func (r *RedisRepository) GetFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB) 
 
 		switch forErr = r.SaveCert(forCert); {
 		case forErr != nil:
-			l.Z{l.M: "r.SaveCert", "cert": a, l.E: forErr}.Warning()
+			log.Error().Err(forErr).Str("certificate", a).Send()
 		}
 	}
 

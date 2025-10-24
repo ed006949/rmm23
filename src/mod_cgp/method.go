@@ -7,6 +7,8 @@ import (
 	"strings"
 
 	"github.com/fatih/structs"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_errors"
@@ -36,7 +38,7 @@ func (r *Token) command(payload string) (outbound []string, err error) {
 
 	switch {
 	case response.StatusCode != http.StatusOK:
-		l.Z{l.E: mod_errors.EINVALRESPONSE, l.M: response.Body}.Error()
+		log.Warn().Err(mod_errors.EINVALRESPONSE).Msgf("response.StatusCode %v", response.StatusCode)
 
 		return nil, mod_errors.EINVALRESPONSE
 	}
@@ -63,14 +65,15 @@ func (r *Token) command(payload string) (outbound []string, err error) {
 // Command will execute only first command found.
 func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 	var (
-		o             = make(l.Z)
+		logEvent      = new(zerolog.Event)
 		payload       string
 		emptyResponse bool // check if response must be empty
 	)
 
 	switch {
 	case inbound != nil:
-		o["server"] = r.Name
+		logEvent.Str("server", r.Name)
+
 		payload += "command"
 		payload += "="
 
@@ -78,19 +81,20 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 		case inbound.Domain_Administration != nil:
 			switch {
 			case inbound.GETDOMAINALIASES != nil:
-				o["command"] = "GETDOMAINALIASES"
-				o["domain"] = inbound.GETDOMAINALIASES.DomainName
+				logEvent.Str("command", "GETDOMAINALIASES")
+				logEvent.Str("domain", inbound.GETDOMAINALIASES.DomainName)
 				payload += inbound.GETDOMAINALIASES.compile()
 
 			case inbound.UPDATEDOMAINSETTINGS != nil:
-				o["command"] = "UPDATEDOMAINSETTINGS"
-				o["domain"] = inbound.UPDATEDOMAINSETTINGS.DomainName
+				logEvent.Str("command", "UPDATEDOMAINSETTINGS")
+				logEvent.Str("domain", inbound.UPDATEDOMAINSETTINGS.DomainName)
+
 				emptyResponse = true
 				payload += inbound.UPDATEDOMAINSETTINGS.compile()
 
 				switch {
 				case l.Run.DryRunValue():
-					o["payloadLen"] = len(payload)
+					logEvent.Int("payloadLen", len(payload))
 					payload = ""
 				}
 
@@ -101,11 +105,13 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 		case inbound.Domain_Set_Administration != nil:
 			switch {
 			case inbound.MAINDOMAINNAME != nil:
-				o["command"] = "MAINDOMAINNAME"
+				logEvent.Str("command", "MAINDOMAINNAME")
+
 				payload += inbound.MAINDOMAINNAME.compile()
 
 			case inbound.LISTDOMAINS != nil:
-				o["command"] = "LISTDOMAINS"
+				logEvent.Str("command", "LISTDOMAINS")
+
 				payload += inbound.LISTDOMAINS.compile()
 
 			default:
@@ -116,23 +122,19 @@ func (r *Token) Command(inbound *Command) (outbound []string, err error) {
 			return nil, mod_errors.EComSet
 		}
 
-		o[l.M] = "do"
-		o.Debug()
+		log.Debug().Str("server", r.Name).Int("payloadLen", len(payload)).Msg("do")
 
 		switch outbound, err = r.command(payload); {
 		case err != nil:
-			o[l.E] = err
-			o.Error()
+			log.Error().Str("server", r.Name).Int("payloadLen", len(payload)).Err(err).Send()
 
 			return
 		case emptyResponse && outbound != nil:
-			o[l.E] = mod_errors.EINVALRESPONSE
-			o.Warning()
+			log.Warn().Str("server", r.Name).Int("payloadLen", len(payload)).Err(mod_errors.EINVALRESPONSE).Send()
 
 			return outbound, mod_errors.EINVALRESPONSE
 		default:
-			o[l.M] = "done"
-			o.Informational()
+			log.Info().Str("server", r.Name).Int("payloadLen", len(payload)).Msg("done")
 
 			return
 		}

@@ -7,6 +7,7 @@ import (
 
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
+	"github.com/rs/zerolog/log"
 
 	"rmm23/src/l"
 	"rmm23/src/mod_reflect"
@@ -14,7 +15,7 @@ import (
 )
 
 func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
-	l.Z{l.M: "save", "DN": e.DN.String()}.Informational()
+	log.Info().Str("DN", e.DN.String()).Msgf("save")
 
 	switch {
 	case l.Run.DryRunValue():
@@ -36,7 +37,7 @@ func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
 }
 
 func (r *RedisRepository) SaveCert(e *Cert) (err error) {
-	l.Z{l.M: "save", "DN": e.Subject.String()}.Informational()
+	log.Info().Str("DN", e.Subject.String()).Msgf("save")
 
 	switch {
 	case l.Run.DryRunValue():
@@ -86,13 +87,13 @@ func (r *RedisRepository) SaveMultiCert(e ...*Cert) (err []error) {
 //
 
 func (r *RedisRepository) FindEntry(id string) (entry *Entry, err error) {
-	l.Z{l.M: "find", "DN": id}.Informational()
+	log.Info().Str("DN", id).Msgf("find")
 
 	return r.entry.Fetch(r.ctx, id)
 }
 
 func (r *RedisRepository) FindCert(id string) (cert *Cert, err error) {
-	l.Z{l.M: "find", "DN": id}.Informational()
+	log.Info().Str("DN", id).Msgf("find")
 
 	return r.cert.Fetch(r.ctx, id)
 }
@@ -100,7 +101,7 @@ func (r *RedisRepository) FindCert(id string) (cert *Cert, err error) {
 //
 
 func (r *RedisRepository) DeleteEntry(id string) (err error) {
-	l.Z{l.M: "delete", "DN": id}.Informational()
+	log.Info().Str("DN", id).Msgf("delete")
 
 	switch {
 	case l.Run.DryRunValue():
@@ -117,7 +118,7 @@ func (r *RedisRepository) DeleteEntry(id string) (err error) {
 }
 
 func (r *RedisRepository) DeleteCert(id string) (err error) {
-	l.Z{l.M: "delete", "DN": id}.Informational()
+	log.Info().Str("DN", id).Msgf("delete")
 
 	switch {
 	case l.Run.DryRunValue():
@@ -211,7 +212,7 @@ func (r *RedisRepository) SearchEntryFVsField(ctx context.Context, fvs *mod_stri
 				Limit().OffsetNum(0, connMaxPaging).
 				Build()
 		)
-		l.Z{l.M: "redis", "command": strings.Join(command.Commands(), " ")}.Informational()
+		log.Info().Str("command", strings.Join(command.Commands(), " ")).Msgf("redis")
 
 		return command
 	})
@@ -220,7 +221,7 @@ func (r *RedisRepository) SearchEntryFVsField(ctx context.Context, fvs *mod_stri
 //
 
 func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
-	l.Z{l.M: "update", "DN": e.DN.String()}.Informational()
+	log.Info().Str("DN", e.DN.String()).Msgf("update")
 
 	switch e.Status {
 	case entryStatusUpdate:
@@ -233,7 +234,7 @@ func (r *RedisRepository) UpdateEntry(e *Entry) (err error) {
 
 	switch {
 	case err != nil:
-		l.Z{l.M: "entry", "flag": e.Status.String(), l.E: err, "DN": e.DN.String()}.Warning()
+		log.Warn().Str("flag", e.Status.String()).Err(err).Str("DN", e.DN.String()).Msgf("entry")
 	}
 
 	return

@@ -2,6 +2,7 @@ package mod_db
 
 import (
 	"github.com/google/uuid"
+	"github.com/rs/zerolog/log"
 
 	"rmm23/src/mod_crypto"
 	"rmm23/src/mod_dn"
@@ -29,11 +30,15 @@ func (r *Cert) parseRaw(inbound ...[]byte) (err error) {
 
 	switch err = certificate.ParseRaw(inbound...); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 
 	switch err = r.parseCertificate(certificate); {
 	case err != nil:
+		log.Error().Err(err).Send()
+
 		return
 	}
 

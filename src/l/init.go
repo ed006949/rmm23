@@ -2,13 +2,10 @@ package l
 
 import (
 	"flag"
-
-	"github.com/rs/zerolog"
 )
 
 func Initialize() {
-	zerolog.CallerSkipFrameCount = zerolog.CallerSkipFrameCount + 1 /* level method */ + 1 /* log method */
-
+	// zerolog.CallerSkipFrameCount = zerolog.CallerSkipFrameCount + 1 /* level method */ + 1 /* log method */
 	Run.verbositySet(Run.verbosity)
 
 	flag.Func(daemonFlagName[daemonConfig], daemonEnvDescription[daemonConfig], Run.configSetString)

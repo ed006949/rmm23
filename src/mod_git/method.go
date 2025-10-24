@@ -10,8 +10,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/go-git/go-git/v5/plumbing/object"
 	"github.com/go-git/go-git/v5/plumbing/transport"
-
-	"rmm23/src/l"
+	"github.com/rs/zerolog/log"
 )
 
 func (r *GitDB) Load(path string, auth transport.AuthMethod, signKey *openpgp.Entity) (err error) {
@@ -88,24 +87,26 @@ func (r *GitDB) Commit(msg string) (err error) {
 		return
 	}
 
+	log.Info().Str("repo", r.Path).Str("plumbingHash", plumbingHash.String()).Msg("add")
+
 	switch plumbingHash, err = r.Worktree.Add("."); {
 	case err != nil:
 		return
 	}
-
-	l.Z{"repo": r.Path, "plumbingHash": plumbingHash.String()}.Informational()
 
 	switch {
 	case r.CommitOptions != nil && r.CommitOptions.Committer != nil:
 		r.CommitOptions.Committer.When = time.Now() // and again, wtf????
 	}
 
+	log.Info().Str("repo", r.Path).Str("plumbingHash", plumbingHash.String()).Msg("commit")
+
 	switch plumbingHash, err = r.Worktree.Commit(msg, r.CommitOptions); {
 	case err != nil:
 		return
 	}
 
-	l.Z{"repo": r.Path, "plumbingHash": plumbingHash.String()}.Informational()
+	log.Info().Str("repo", r.Path).Str("plumbingHash", plumbingHash.String()).Msg("push")
 
 	switch err = r.Repository.Push(r.PushOptions); {
 	case errors.Is(err, git.NoErrAlreadyUpToDate):
