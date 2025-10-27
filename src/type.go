@@ -17,8 +17,12 @@ type Conf struct {
 	DB         *mod_db.Conf    `json:"db,omitempty"`
 	Networking *ConfNetworking `json:"networking,omitempty"`
 	LDAP       *mod_ldap.Conf  `json:"ldap,omitempty"`
+	Legacy     *ConfLegacy     `json:"legacy,omitempty"`
 }
 
+type ConfLegacy struct {
+	PKI string `json:"PKI,omitempty"`
+}
 type ConfNetworking struct {
 	User *ConfNetworkingUser `json:"user,omitempty"`
 }

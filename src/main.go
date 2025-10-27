@@ -62,7 +62,7 @@ func main() {
 		}
 	}
 
-	switch err = vfsDB.CopyFromFS("./etc/legacy/"); {
+	switch err = vfsDB.CopyFromFS(config.Conf.Legacy.PKI); {
 	case err != nil:
 		return
 	}
