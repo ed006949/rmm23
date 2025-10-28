@@ -1,10 +1,13 @@
 package l
 
 import (
+	"context"
 	"flag"
 )
 
-func Initialize() {
+func Initialize(ctx context.Context) {
+	Run.ctx = ctx
+
 	// zerolog.CallerSkipFrameCount = zerolog.CallerSkipFrameCount + 1 /* level method */ + 1 /* log method */
 	Run.verbositySet(Run.verbosity)
 

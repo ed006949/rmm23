@@ -13,7 +13,7 @@ import (
 
 func (r *runType) verbositySet(inbound zerolog.Level) {
 	r.verbosity = inbound
-	log.Logger = log.Level(r.verbosity).With().Timestamp().Caller().Logger().Output(zerolog.ConsoleWriter{
+	log.Logger = log.Level(r.verbosity).With().Timestamp().Caller().Ctx(r.ctx).Logger().Output(zerolog.ConsoleWriter{
 		Out:        os.Stderr,
 		NoColor:    false,
 		TimeFormat: time.RFC3339,

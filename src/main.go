@@ -10,7 +10,7 @@ import (
 )
 
 func main() {
-	l.Initialize()
+	l.Initialize(ctx)
 
 	var (
 		err error
