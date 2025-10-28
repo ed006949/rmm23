@@ -10,17 +10,9 @@ import (
 )
 
 func main() {
-	l.Initialize(ctx)
-
 	var (
 		err error
 	)
-
-	log.Info().
-		Str("commit", l.Run.CommitHashValue()).
-		Str("built", l.Run.BuildTimeValue()).
-		Bool(l.Run.DryRunName(), l.Run.DryRunValue()).
-		Msg("main")
 
 	defer func() {
 		ctxCancel()
@@ -30,12 +22,19 @@ func main() {
 			log.Info().
 				Msg("exit")
 		default:
-			ctxCancel()
 			log.Fatal().
 				Err(err).
 				Msg("exited with error")
 		}
 	}()
+
+	l.Initialize(ctx)
+
+	log.Info().
+		Str("commit", l.Run.CommitHashValue()).
+		Str("built", l.Run.BuildTimeValue()).
+		Bool(l.Run.DryRunName(), l.Run.DryRunValue()).
+		Msg("main")
 
 	var (
 		config = new(ConfigRoot)
