@@ -16,14 +16,21 @@ func main() {
 		err error
 	)
 
-	log.Info().Str("commit", l.Run.CommitHashValue()).Str("built", l.Run.BuildTimeValue()).Bool(l.Run.DryRunName(), l.Run.DryRunValue()).Msg("main")
+	log.Info().
+		Str("commit", l.Run.CommitHashValue()).
+		Str("built", l.Run.BuildTimeValue()).
+		Bool(l.Run.DryRunName(), l.Run.DryRunValue()).
+		Msg("main")
 
 	defer func() {
 		switch err {
 		case nil:
-			log.Info().Msg("exit")
+			log.Info().
+				Msg("exit")
 		default:
-			log.Fatal().Err(err).Msg("exited with error")
+			log.Fatal().
+				Err(err).
+				Msg("exited with error")
 		}
 	}()
 
@@ -31,13 +38,15 @@ func main() {
 		config = new(ConfigRoot)
 		vfsDB  = &mod_vfs.VFSDB{
 			List: make(map[string]string),
-			VFS: memfs.NewWithOptions(&memfs.Options{
-				Idm:        avfs.NotImplementedIdm,
-				User:       nil,
-				Name:       "",
-				OSType:     avfs.CurrentOSType(),
-				SystemDirs: nil,
-			}),
+			VFS: memfs.NewWithOptions(
+				&memfs.Options{
+					Idm:        avfs.NotImplementedIdm,
+					User:       nil,
+					Name:       "",
+					OSType:     avfs.CurrentOSType(),
+					SystemDirs: nil,
+				},
+			),
 		}
 	)
 	switch err = l.Run.ConfigUnmarshal(&config); {
