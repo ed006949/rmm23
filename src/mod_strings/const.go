@@ -63,7 +63,3 @@ const (
 	F_uris           EntryFieldName = "uris"
 	F_isCA           EntryFieldName = "isCA"
 )
-
-const (
-	_PING = "PING"
-)
