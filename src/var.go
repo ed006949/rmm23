@@ -5,5 +5,5 @@ import (
 )
 
 var (
-	ctx    = context.Background()
+	ctx, ctxCancel = context.WithCancel(context.Background())
 )

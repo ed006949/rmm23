@@ -23,11 +23,14 @@ func main() {
 		Msg("main")
 
 	defer func() {
+		ctxCancel()
+
 		switch err {
 		case nil:
 			log.Info().
 				Msg("exit")
 		default:
+			ctxCancel()
 			log.Fatal().
 				Err(err).
 				Msg("exited with error")
