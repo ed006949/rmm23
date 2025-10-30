@@ -26,6 +26,7 @@ func (r *RedisRepository) checkIndexExist(indexNames ...string) (err error) {
 		switch _, ok := r.info[indexName]; {
 		case !ok:
 			err = mod_errors.EUnwilling
+
 			log.Error().Str("index", indexName).Err(mod_errors.ENOTFOUND).Msg(redisearchTagName)
 		}
 	}
