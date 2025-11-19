@@ -91,5 +91,13 @@ func main() {
 		return
 	}
 
+	// a, _ := mod_net.Subnets.Subnets(netip.MustParsePrefix("10.92.0.0/16"), config.Conf.Networking.User.Bits)
+	// for c, d := range a {
+	// 	switch {
+	// 	case c >= (8192-64) && c < (8192+64):
+	// 		log.Info().Msgf("%05d %18s", c, d)
+	// 	}
+	// }
+
 	return
 }
