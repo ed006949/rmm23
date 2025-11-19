@@ -97,7 +97,6 @@ func main() {
 	// 	case c >= (8192-64) && c < (8192+64):
 	// 		log.Info().Msgf("%05d %18s", c, d)
 	// 	}
-
 	// }
 
 	return
