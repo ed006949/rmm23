@@ -11,8 +11,8 @@ require (
 	github.com/go-ini/ini v1.67.0
 	github.com/go-ldap/ldap/v3 v3.4.12
 	github.com/google/uuid v1.6.0
-	github.com/redis/rueidis v1.0.69
-	github.com/redis/rueidis/om v1.0.69
+	github.com/redis/rueidis v1.0.70
+	github.com/redis/rueidis/om v1.0.70
 	github.com/rs/zerolog v1.34.0
 	software.sslmate.com/src/go-pkcs12 v0.7.0
 )
