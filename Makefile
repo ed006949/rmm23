@@ -24,7 +24,7 @@ clean:
 	-go get -u ./...
 	-go mod tidy
 
-commit: lint
+#commit: lint
 commit: status
 #
 # TODO

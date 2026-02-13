@@ -2,6 +2,7 @@ package mod_db
 
 import (
 	"encoding/json/v2"
+	"math"
 
 	"github.com/redis/rueidis"
 
@@ -32,7 +33,7 @@ type ftInfo struct {
 	// RecordsPerDocAvg         float64 `json:"records_per_doc_avg"`
 	// BytesPerRecordAvg        float64 `json:"bytes_per_record_avg"`
 	// OffsetsPerTermAvg        float64 `json:"offsets_per_term_avg"`
-	// OffsetBitsPerRecordAvg   any     `json:"offset_bits_per_record_avg"` // can be "NaN"
+	// OffsetBitsPerRecordAvg   any     `json:"offset_bits_per_record_avg"` // can be NaN
 
 	/* Indexing progress */
 	HashIndexingFailures int64   `json:"hash_indexing_failures"`
@@ -61,7 +62,7 @@ type ftInfoAttribute struct {
 // 	BytesCollected       int64 `json:"bytes_collected"`
 // 	TotalMsRun           int64 `json:"total_ms_run"`
 // 	TotalCycles          int64 `json:"total_cycles"`
-// 	AverageCycleTimeMs   any   `json:"average_cycle_time_ms"` // can be "NaN"
+// 	AverageCycleTimeMs   any   `json:"average_cycle_time_ms"` // can be NaN
 // 	LastRunTimeMs        int64 `json:"last_run_time_ms"`
 // 	GCNumericTreesMissed int64 `json:"gc_numeric_trees_missed"`
 // 	GCBlocksDenied       int64 `json:"gc_blocks_denied"`
@@ -123,7 +124,16 @@ func (r *RedisRepository) getInfo(indexNames ...string) (err error) {
 			return
 		}
 
-		switch bytes, err = json.Marshal(redisResultAny); {
+		switch bytes, err = json.Marshal(redisResultAny, json.WithMarshalers(
+			json.MarshalFunc(func(f float64) ([]byte, error) {
+				switch {
+				case math.IsNaN(f):
+					return []byte(`"NaN"`), nil
+				}
+
+				return json.Marshal(f)
+			}),
+		)); {
 		case err != nil:
 			return
 		}
