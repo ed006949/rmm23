@@ -8,8 +8,8 @@ import (
 	"path/filepath"
 
 	"github.com/avfs/avfs"
-	"github.com/go-ini/ini"
 	"github.com/rs/zerolog/log"
+	"gopkg.in/ini.v1"
 
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_fs"
