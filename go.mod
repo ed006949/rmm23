@@ -10,7 +10,7 @@ require (
 	github.com/go-git/go-git/v5 v5.16.5
 	github.com/go-ldap/ldap/v3 v3.4.12
 	github.com/google/uuid v1.6.0
-	github.com/redis/rueidis v1.0.71
+	github.com/redis/rueidis v1.0.72
 	github.com/redis/rueidis/om v1.0.71
 	github.com/rs/zerolog v1.34.0
 	gopkg.in/ini.v1 v1.67.1
