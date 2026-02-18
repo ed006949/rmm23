@@ -123,9 +123,9 @@ func BuildStructMap(inbound any, targetTag string) (outbound map[string]FieldTyp
 		return
 	}
 
-	for i := 0; i < rt.NumField(); i++ {
+	for field := range rt.Fields() {
 		var (
-			field  = rt.Field(i)
+			field  = field
 			tagStr = field.Tag.Get(targetTag)
 			tag    = strings.SplitN(tagStr, mod_strings.TagSeparator, mod_slices.KVElements)
 		)
@@ -156,7 +156,7 @@ func getStructRT(inbound any) (outboundRT reflect.Type, err error) {
 		rt = reflect.TypeOf(inbound)
 	)
 	switch {
-	case rt.Kind() == reflect.Ptr:
+	case rt.Kind() == reflect.Pointer:
 		rt = rt.Elem()
 	}
 
@@ -173,7 +173,7 @@ func getStructRV(inbound any) (outboundRV reflect.Value, err error) {
 		rv = reflect.ValueOf(inbound)
 	)
 	switch {
-	case rv.Kind() == reflect.Ptr:
+	case rv.Kind() == reflect.Pointer:
 		rv = rv.Elem()
 	}
 
@@ -187,7 +187,7 @@ func getStructRV(inbound any) (outboundRV reflect.Value, err error) {
 
 func getStructSVST(inbound any) (outboundSV reflect.Value, outboundST reflect.Type, err error) {
 	switch {
-	case reflect.ValueOf(inbound).Kind() != reflect.Ptr:
+	case reflect.ValueOf(inbound).Kind() != reflect.Pointer:
 		return outboundSV, outboundST, mod_errors.ENotPtr
 	}
 

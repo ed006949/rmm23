@@ -24,16 +24,16 @@ type Entry struct {
 	// element specific meta data
 	Type   attrEntryType   `json:"type,omitempty"`   //  Entry's type `(domain|group|user|host)`
 	Status attrEntryStatus `json:"status,omitempty"` //
-	BaseDN mod_dn.DN       `json:"baseDN,omitempty"` //
+	BaseDN mod_dn.DN       `json:"baseDN"`           //
 
 	// element meta data
-	UUID            uuid.UUID     `json:"uuid,omitempty"            ldap:"entryUUID"`       //  must be unique
-	DN              mod_dn.DN     `json:"dn,omitempty"              ldap:"entryDN"`         //  must be unique
-	ObjectClass     []string      `json:"objectClass,omitempty"     ldap:"objectClass"`     //  Entry type
-	CreatorsName    mod_dn.DN     `json:"creatorsName,omitempty"    ldap:"creatorsName"`    //
-	CreateTimestamp mod_time.Time `json:"createTimestamp,omitempty" ldap:"createTimestamp"` //
-	ModifiersName   mod_dn.DN     `json:"modifiersName,omitempty"   ldap:"modifiersName"`   //
-	ModifyTimestamp mod_time.Time `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp"` //
+	UUID            uuid.UUID     `json:"uuid,omitempty"            ldap:"entryUUID"`   //  must be unique
+	DN              mod_dn.DN     `json:"dn"              ldap:"entryDN"`               //  must be unique
+	ObjectClass     []string      `json:"objectClass,omitempty"     ldap:"objectClass"` //  Entry type
+	CreatorsName    mod_dn.DN     `json:"creatorsName"    ldap:"creatorsName"`          //
+	CreateTimestamp mod_time.Time `json:"createTimestamp" ldap:"createTimestamp"`       //
+	ModifiersName   mod_dn.DN     `json:"modifiersName"   ldap:"modifiersName"`         //
+	ModifyTimestamp mod_time.Time `json:"modifyTimestamp" ldap:"modifyTimestamp"`       //
 
 	// element data
 	CN                   string         `json:"cn,omitempty"                   ldap:"cn"`                   //  RDN in group's context
@@ -69,7 +69,7 @@ type Entry struct {
 	HostUpstreamASN uint32     `json:"host_upstream_asn,omitempty"` //  upstream route
 	HostHostingUUID uuid.UUID  `json:"host_hosting_uuid,omitempty"` //  (?) replace with member/memberOf
 	HostURL         *url.URL   `json:"host_url,omitempty"`          //
-	HostListen      netip.Addr `json:"host_listen,omitempty"`       //
+	HostListen      netip.Addr `json:"host_listen"`                 //
 
 	// specific data (space-separated KV DB stored as labeledURI)
 	LabeledURI []string `json:"labeledURI,omitempty" ldap:"labeledURI"` //

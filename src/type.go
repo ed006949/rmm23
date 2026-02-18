@@ -9,7 +9,7 @@ import (
 )
 
 type ConfigRoot struct {
-	Conf Conf `json:"conf,omitempty"`
+	Conf Conf `json:"conf"`
 }
 
 type Conf struct {
@@ -27,6 +27,6 @@ type ConfNetworking struct {
 	User *ConfNetworkingUser `json:"user,omitempty"`
 }
 type ConfNetworkingUser struct {
-	Subnet netip.Prefix `json:"subnet,omitempty"`
+	Subnet netip.Prefix `json:"subnet"`
 	Bits   int          `json:"bits,omitempty"`
 }

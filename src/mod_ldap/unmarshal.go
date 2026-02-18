@@ -15,7 +15,7 @@ import (
 // UnmarshalLDAPEntries processes struct fields with encoding.TextUnmarshaler support and standard type fallbacks.
 func UnmarshalLDAPEntries(entries []*ldap.Entry, target any) error {
 	targetValue := reflect.ValueOf(target)
-	if targetValue.Kind() != reflect.Ptr || targetValue.Elem().Kind() != reflect.Slice {
+	if targetValue.Kind() != reflect.Pointer || targetValue.Elem().Kind() != reflect.Slice {
 		return fmt.Errorf("target must be pointer to slice")
 	}
 
@@ -41,7 +41,7 @@ func createAndFillItem(entry *ldap.Entry, elemType reflect.Type) (reflect.Value,
 		item        reflect.Value
 	)
 
-	if elemType.Kind() == reflect.Ptr {
+	if elemType.Kind() == reflect.Pointer {
 		// Handle []*Entry
 		structType := elemType.Elem()
 		if structType.Kind() != reflect.Struct {
@@ -145,7 +145,7 @@ func setSliceValue(fieldValue reflect.Value, values []string) error {
 func setSingleValue(fieldValue reflect.Value, value string) error {
 	// Handle special types first before TextUnmarshaler check
 	switch fieldValue.Type() {
-	case reflect.TypeOf(time.Time{}):
+	case reflect.TypeFor[time.Time]():
 		timeVal, err := mod_time.UnmarshalText([]byte(value))
 		if err != nil {
 			return fmt.Errorf("invalid time: %w", err)
@@ -155,7 +155,7 @@ func setSingleValue(fieldValue reflect.Value, value string) error {
 
 		return nil
 
-	case reflect.TypeOf(time.Duration(0)):
+	case reflect.TypeFor[time.Duration]():
 		d, err := time.ParseDuration(value)
 		if err != nil {
 			return fmt.Errorf("invalid duration: %w", err)
@@ -226,7 +226,7 @@ func setStandardType(fieldValue reflect.Value, value string) error {
 
 		return nil
 
-	case reflect.Ptr:
+	case reflect.Pointer:
 		if fieldValue.IsNil() {
 			fieldValue.Set(reflect.New(fieldValue.Type().Elem()))
 		}

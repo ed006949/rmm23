@@ -22,14 +22,14 @@ type DBEntry struct {
 	Status attrEntryStatus `json:"status,omitempty"` //
 
 	// db operational
-	BaseDN          mod_dn.DN     `json:"baseDN,omitempty"`                                 //
-	ObjectClass     []string      `json:"objectClass,omitempty"     ldap:"objectClass"`     //
-	UUID            uuid.UUID     `json:"uuid,omitempty"            ldap:"entryUUID"`       //  must be unique
-	DN              mod_dn.DN     `json:"dn,omitempty"              ldap:"entryDN"`         //  must be unique
-	CreatorsName    mod_dn.DN     `json:"creatorsName,omitempty"    ldap:"creatorsName"`    //
-	CreateTimestamp mod_time.Time `json:"createTimestamp,omitempty" ldap:"createTimestamp"` //
-	ModifiersName   mod_dn.DN     `json:"modifiersName,omitempty"   ldap:"modifiersName"`   //
-	ModifyTimestamp mod_time.Time `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp"` //
+	BaseDN          mod_dn.DN     `json:"baseDN"`                                       //
+	ObjectClass     []string      `json:"objectClass,omitempty"     ldap:"objectClass"` //
+	UUID            uuid.UUID     `json:"uuid,omitempty"            ldap:"entryUUID"`   //  must be unique
+	DN              mod_dn.DN     `json:"dn"              ldap:"entryDN"`               //  must be unique
+	CreatorsName    mod_dn.DN     `json:"creatorsName"    ldap:"creatorsName"`          //
+	CreateTimestamp mod_time.Time `json:"createTimestamp" ldap:"createTimestamp"`       //
+	ModifiersName   mod_dn.DN     `json:"modifiersName"   ldap:"modifiersName"`         //
+	ModifyTimestamp mod_time.Time `json:"modifyTimestamp" ldap:"modifyTimestamp"`       //
 }
 
 func (r *RedisRepository) CreateDBEntryIndex() (err error) {

@@ -120,7 +120,7 @@ func (s *SearchV2) SearchByMultipleObjectClasses(classNames []string) (count int
 // This is a two-step process:
 // 1. Search by objectClass
 // 2. Filter results by objectClass-specific attribute in application layer.
-func (s *SearchV2) SearchByObjectClassAttribute(className, attrName string, attrValue interface{}) (filteredEntries []*Entry, err error) {
+func (s *SearchV2) SearchByObjectClassAttribute(className, attrName string, attrValue any) (filteredEntries []*Entry, err error) {
 	// Step 1: Get all entries with this objectClass
 	_, entries, err := s.SearchByObjectClass(className)
 	if err != nil {
@@ -157,10 +157,10 @@ type SearchCriteria struct {
 func (s *SearchV2) SearchByComplex(criteria SearchCriteria) (count int64, entries []*Entry, err error) {
 	queryParts := make([]string, 0,
 		len(criteria.RedisAttrs)+
-		len(criteria.OperationalAttrs)+
-		len(criteria.ObjectClasses)+
-		len(criteria.StandardAttrs)+
-		len(criteria.RangeAttrs))
+			len(criteria.OperationalAttrs)+
+			len(criteria.ObjectClasses)+
+			len(criteria.StandardAttrs)+
+			len(criteria.RangeAttrs))
 
 	// Redis attributes
 	for attr, value := range criteria.RedisAttrs {

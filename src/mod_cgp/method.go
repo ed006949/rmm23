@@ -48,7 +48,7 @@ func (r *Token) command(payload string) (outbound []string, err error) {
 		return nil, err
 	}
 
-	for _, b := range strings.Fields(buffer.String()) {
+	for b := range strings.FieldsSeq(buffer.String()) {
 		for _, d := range re_output_delim.Split(b, -1) {
 			switch {
 			case len(d) == 0:

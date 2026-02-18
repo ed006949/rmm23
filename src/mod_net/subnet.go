@@ -285,7 +285,7 @@ func (r *subnetsStruct) generateIPv6(basePrefix netip.Prefix, subnetPrefixLen in
 	)
 	copy(base[:], baseAddrBytes)
 
-	for currentID := 0; currentID < totalIDs; currentID++ {
+	for currentID := range totalIDs {
 		var (
 			// offset = currentID << shift
 			offset [16]byte

@@ -2,14 +2,15 @@ package mod_db
 
 import (
 	"encoding/json"
+	"maps"
 	"strings"
 )
 
 // ObjectClassEntry represents an objectClass with its schema-specific attributes
 // Supports RFC 2307bis and other objectClass-specific attributes.
 type ObjectClassEntry struct {
-	Name       string                 `json:"name"`       // objectClass name (e.g., "posixAccount", "inetOrgPerson")
-	Attributes map[string]interface{} `json:"attributes"` // objectClass-specific attributes
+	Name       string         `json:"name"`       // objectClass name (e.g., "posixAccount", "inetOrgPerson")
+	Attributes map[string]any `json:"attributes"` // objectClass-specific attributes
 }
 
 // ObjectClassList is a slice of ObjectClassEntry that can be stored in Redis.
@@ -48,7 +49,7 @@ func (ocl ObjectClassList) GetClass(name string) *ObjectClassEntry {
 }
 
 // GetAttribute retrieves an attribute from any objectClass.
-func (ocl ObjectClassList) GetAttribute(className, attrName string) (interface{}, bool) {
+func (ocl ObjectClassList) GetAttribute(className, attrName string) (any, bool) {
 	if oc := ocl.GetClass(className); oc != nil {
 		val, ok := oc.Attributes[attrName]
 
@@ -82,18 +83,16 @@ func (ocl ObjectClassList) ToRedisTagValue() string {
 }
 
 // FromLDAPObjectClass creates ObjectClassList from LDAP objectClass attribute.
-func FromLDAPObjectClass(classes []string, attributeMap map[string]map[string]interface{}) ObjectClassList {
+func FromLDAPObjectClass(classes []string, attributeMap map[string]map[string]any) ObjectClassList {
 	list := make(ObjectClassList, 0, len(classes))
 	for _, className := range classes {
 		entry := ObjectClassEntry{
 			Name:       className,
-			Attributes: make(map[string]interface{}),
+			Attributes: make(map[string]any),
 		}
 		// Copy class-specific attributes if provided
 		if attrs, ok := attributeMap[className]; ok {
-			for k, v := range attrs {
-				entry.Attributes[k] = v
-			}
+			maps.Copy(entry.Attributes, attrs)
 		}
 
 		list = append(list, entry)

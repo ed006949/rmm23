@@ -32,18 +32,18 @@ type EntryV2 struct {
 	// LDAP Operational Attributes (RFC 4512)
 	// ========================================
 	// Distinguished Name and UUID
-	EntryDN   mod_dn.DN `json:"entryDN,omitempty"   ldap:"entryDN"`   // DN of the entry
+	EntryDN   mod_dn.DN `json:"entryDN"   ldap:"entryDN"`             // DN of the entry
 	EntryUUID uuid.UUID `json:"entryUUID,omitempty" ldap:"entryUUID"` // UUID of the entry
 
 	// Timestamps and creators (operational attributes)
-	CreateTimestamp mod_time.Time `json:"createTimestamp,omitempty" ldap:"createTimestamp"` // Creation time
-	ModifyTimestamp mod_time.Time `json:"modifyTimestamp,omitempty" ldap:"modifyTimestamp"` // Last modification time
-	CreatorsName    mod_dn.DN     `json:"creatorsName,omitempty"    ldap:"creatorsName"`    // Creator DN
-	ModifiersName   mod_dn.DN     `json:"modifiersName,omitempty"   ldap:"modifiersName"`   // Last modifier DN
+	CreateTimestamp mod_time.Time `json:"createTimestamp" ldap:"createTimestamp"` // Creation time
+	ModifyTimestamp mod_time.Time `json:"modifyTimestamp" ldap:"modifyTimestamp"` // Last modification time
+	CreatorsName    mod_dn.DN     `json:"creatorsName"    ldap:"creatorsName"`    // Creator DN
+	ModifiersName   mod_dn.DN     `json:"modifiersName"   ldap:"modifiersName"`   // Last modifier DN
 
 	// Structural information (operational attributes)
 	StructuralObjectClass string    `json:"structuralObjectClass,omitempty" ldap:"structuralObjectClass"` // Structural objectClass
-	SubschemaSubentry     mod_dn.DN `json:"subschemaSubentry,omitempty"     ldap:"subschemaSubentry"`     // Schema entry DN
+	SubschemaSubentry     mod_dn.DN `json:"subschemaSubentry"     ldap:"subschemaSubentry"`               // Schema entry DN
 	HasSubordinates       bool      `json:"hasSubordinates,omitempty"       ldap:"hasSubordinates"`       // Has children
 	SubordinateCount      int64     `json:"subordinateCount,omitempty"      ldap:"subordinateCount"`      // Number of children
 
@@ -106,7 +106,7 @@ type EntryV2 struct {
 	// Entry metadata
 	Type   attrEntryType   `json:"type,omitempty"`   // Entry type (domain|group|user|host)
 	Status attrEntryStatus `json:"status,omitempty"` // Entry status
-	BaseDN mod_dn.DN       `json:"baseDN,omitempty"` // Base DN
+	BaseDN mod_dn.DN       `json:"baseDN"`           // Base DN
 
 	// Authentication/Authorization
 	AAA string `json:"host_aaa,omitempty"` // Authentication method
@@ -118,7 +118,7 @@ type EntryV2 struct {
 	HostUpstreamASN uint32     `json:"host_upstream_asn,omitempty"` // Upstream AS Number
 	HostHostingUUID uuid.UUID  `json:"host_hosting_uuid,omitempty"` // Hosting UUID
 	HostURL         *url.URL   `json:"host_url,omitempty"`          // Host URL
-	HostListen      netip.Addr `json:"host_listen,omitempty"`       // Listen address
+	HostListen      netip.Addr `json:"host_listen"`                 // Listen address
 }
 
 // CreateEntryV2Index creates the RediSearch index for EntryV2 with full attribute support.
@@ -188,7 +188,7 @@ func (e *EntryV2) SyncObjectClass() {
 }
 
 // AddObjectClass adds a new objectClass with optional attributes.
-func (e *EntryV2) AddObjectClass(className string, attrs map[string]interface{}) {
+func (e *EntryV2) AddObjectClass(className string, attrs map[string]any) {
 	if e.ObjectClassData == nil {
 		e.ObjectClassData = make(ObjectClassList, 0)
 	}
@@ -198,7 +198,7 @@ func (e *EntryV2) AddObjectClass(className string, attrs map[string]interface{})
 		Attributes: attrs,
 	}
 	if entry.Attributes == nil {
-		entry.Attributes = make(map[string]interface{})
+		entry.Attributes = make(map[string]any)
 	}
 
 	e.ObjectClassData = append(e.ObjectClassData, entry)
@@ -206,12 +206,12 @@ func (e *EntryV2) AddObjectClass(className string, attrs map[string]interface{})
 }
 
 // GetObjectClassAttribute retrieves an attribute from a specific objectClass.
-func (e *EntryV2) GetObjectClassAttribute(className, attrName string) (interface{}, bool) {
+func (e *EntryV2) GetObjectClassAttribute(className, attrName string) (any, bool) {
 	return e.ObjectClassData.GetAttribute(className, attrName)
 }
 
 // SetObjectClassAttribute sets an attribute in a specific objectClass.
-func (e *EntryV2) SetObjectClassAttribute(className, attrName string, value interface{}) {
+func (e *EntryV2) SetObjectClassAttribute(className, attrName string, value any) {
 	if oc := e.ObjectClassData.GetClass(className); oc != nil {
 		oc.Attributes[attrName] = value
 	}
