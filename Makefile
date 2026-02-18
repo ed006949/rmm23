@@ -26,6 +26,7 @@ clean:
 
 #commit: lint
 commit: status
+commit: fix
 #
 # TODO
 #ifneq (${GIT_STATUS},)
@@ -47,6 +48,9 @@ diff:
 
 execute:
 	./bin/${NAME} ${COMMAND_LINE}
+
+fix:
+	go fix ./...
 
 init:
 	go mod init ${TARGET}
