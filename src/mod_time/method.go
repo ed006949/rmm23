@@ -28,10 +28,7 @@ func (r *Time) UnmarshalJSON(inbound []byte) (err error) {
 }
 
 func (r *Time) MarshalJSON() (outbound []byte, err error) {
-	var (
-		interim = r.Time.Unix()
-	)
-	switch outbound, err = json.Marshal(&interim); {
+	switch outbound, err = json.Marshal(new(r.Time.Unix())); {
 	case err != nil:
 		log.Error().Err(err).Send()
 
