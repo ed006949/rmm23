@@ -3,13 +3,12 @@ package main
 import (
 	"net/netip"
 
-	"rmm23/src/l"
-	"rmm23/src/mod_net"
-	"rmm23/src/mod_vfs"
-
 	"github.com/avfs/avfs"
 	"github.com/avfs/avfs/vfs/memfs"
 	"github.com/rs/zerolog/log"
+	"rmm23/src/l"
+	"rmm23/src/mod_net"
+	"rmm23/src/mod_vfs"
 )
 
 func main() {
