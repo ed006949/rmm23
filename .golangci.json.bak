@@ -9,10 +9,10 @@
       "cyclop",
       "gocognit",
       "funlen",
-      "nakedret"
+      "nakedret",
+      "wsl_v5"
     ],
     "enable": [
-      "wsl_v5",
       "tagalign"
     ],
     "settings": {
@@ -36,6 +36,35 @@
         "allow-whole-block": false,
         "branch-max-lines": 2
       }
+    }
+  },
+  "formatters": {
+    "enable": [
+      "gofmt",
+      "goimports",
+      "gci",
+      "golines",
+      "swaggo"
+    ],
+    "settings": {
+      "gci": {
+        "sections": [
+          "standard",
+          "default"
+        ]
+      },
+      "golines": {
+        "max-len": 1024,
+        "tab-len": 4,
+        "shorten-comments": false,
+        "reformat-tags": true,
+        "chain-split-dots": true
+      }
+    },
+    "exclusions": {
+      "warn-unused": true,
+      "generated": "strict",
+      "paths": []
     }
   }
 }

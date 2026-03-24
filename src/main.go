@@ -6,6 +6,8 @@ import (
 	"github.com/avfs/avfs"
 	"github.com/avfs/avfs/vfs/memfs"
 	"github.com/rs/zerolog/log"
+	_ "github.com/vjeantet/ldapserver" // LDAP server implementation
+
 	"rmm23/src/l"
 	"rmm23/src/mod_net"
 	"rmm23/src/mod_vfs"
