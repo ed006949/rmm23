@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
-
 	"rmm23/src/mod_dn"
 	"rmm23/src/mod_strings"
 	"rmm23/src/mod_time"
@@ -27,13 +26,13 @@ type Entry struct {
 	BaseDN mod_dn.DN       `json:"baseDN"`           //
 
 	// element meta data
-	UUID            uuid.UUID     `json:"uuid,omitempty"            ldap:"entryUUID"`   //  must be unique
-	DN              mod_dn.DN     `json:"dn"              ldap:"entryDN"`               //  must be unique
-	ObjectClass     []string      `json:"objectClass,omitempty"     ldap:"objectClass"` //  Entry type
-	CreatorsName    mod_dn.DN     `json:"creatorsName"    ldap:"creatorsName"`          //
-	CreateTimestamp mod_time.Time `json:"createTimestamp" ldap:"createTimestamp"`       //
-	ModifiersName   mod_dn.DN     `json:"modifiersName"   ldap:"modifiersName"`         //
-	ModifyTimestamp mod_time.Time `json:"modifyTimestamp" ldap:"modifyTimestamp"`       //
+	UUID            uuid.UUID     `json:"uuid,omitempty"        ldap:"entryUUID"`       //  must be unique
+	DN              mod_dn.DN     `json:"dn"                    ldap:"entryDN"`         //  must be unique
+	ObjectClass     []string      `json:"objectClass,omitempty" ldap:"objectClass"`     //  Entry type
+	CreatorsName    mod_dn.DN     `json:"creatorsName"          ldap:"creatorsName"`    //
+	CreateTimestamp mod_time.Time `json:"createTimestamp"       ldap:"createTimestamp"` //
+	ModifiersName   mod_dn.DN     `json:"modifiersName"         ldap:"modifiersName"`   //
+	ModifyTimestamp mod_time.Time `json:"modifyTimestamp"       ldap:"modifyTimestamp"` //
 
 	// element data
 	CN                   string         `json:"cn,omitempty"                   ldap:"cn"`                   //  RDN in group's context

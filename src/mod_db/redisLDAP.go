@@ -6,7 +6,6 @@ import (
 	"github.com/go-ldap/ldap/v3"
 	"github.com/google/uuid"
 	"github.com/rs/zerolog/log"
-
 	"rmm23/src/l"
 	"rmm23/src/mod_dn"
 	"rmm23/src/mod_ldap"

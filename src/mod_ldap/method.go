@@ -4,7 +4,6 @@ import (
 	"strings"
 
 	"github.com/go-ldap/ldap/v3"
-
 	"rmm23/src/mod_errors"
 	"rmm23/src/mod_slices"
 	"rmm23/src/mod_strings"

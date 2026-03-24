@@ -11,9 +11,8 @@ import (
 	"encoding/pem"
 
 	"github.com/rs/zerolog/log"
-	"software.sslmate.com/src/go-pkcs12"
-
 	"rmm23/src/mod_errors"
+	"software.sslmate.com/src/go-pkcs12"
 )
 
 type Certificate struct {

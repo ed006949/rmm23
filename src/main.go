@@ -3,13 +3,13 @@ package main
 import (
 	"net/netip"
 
-	"github.com/avfs/avfs"
-	"github.com/avfs/avfs/vfs/memfs"
-	"github.com/rs/zerolog/log"
-
 	"rmm23/src/l"
 	"rmm23/src/mod_net"
 	"rmm23/src/mod_vfs"
+
+	"github.com/avfs/avfs"
+	"github.com/avfs/avfs/vfs/memfs"
+	"github.com/rs/zerolog/log"
 )
 
 func main() {
@@ -94,12 +94,15 @@ func main() {
 		return
 	}
 
-	a, _ := mod_net.Subnets.Subnets(netip.MustParsePrefix("10.240.192.0/18"), 30)
+	bb := 30
+	cc := 64
+
+	a, _ := mod_net.Subnets.Subnets(netip.MustParsePrefix("10.240.192.0/18"), bb)
 	for c, d := range a {
 		switch {
 		case c >= 0 && c < 2:
 			log.Info().Msgf("%05d %18s", c, d)
-		case c >= (2304+64+64) && c < (2304+64+64+64):
+		case c >= (2304+cc+cc) && c < (2304+cc+cc+cc):
 			log.Info().Msgf("%05d %18s", c, d)
 		case c >= 4094 && c < 4096:
 			log.Info().Msgf("%05d %18s", c, d)

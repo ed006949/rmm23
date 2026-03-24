@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
-
 	"rmm23/src/mod_dn"
 	"rmm23/src/mod_strings"
 	"rmm23/src/mod_time"
@@ -32,7 +31,7 @@ type EntryV2 struct {
 	// LDAP Operational Attributes (RFC 4512)
 	// ========================================
 	// Distinguished Name and UUID
-	EntryDN   mod_dn.DN `json:"entryDN"   ldap:"entryDN"`             // DN of the entry
+	EntryDN   mod_dn.DN `json:"entryDN"             ldap:"entryDN"`   // DN of the entry
 	EntryUUID uuid.UUID `json:"entryUUID,omitempty" ldap:"entryUUID"` // UUID of the entry
 
 	// Timestamps and creators (operational attributes)
@@ -43,7 +42,7 @@ type EntryV2 struct {
 
 	// Structural information (operational attributes)
 	StructuralObjectClass string    `json:"structuralObjectClass,omitempty" ldap:"structuralObjectClass"` // Structural objectClass
-	SubschemaSubentry     mod_dn.DN `json:"subschemaSubentry"     ldap:"subschemaSubentry"`               // Schema entry DN
+	SubschemaSubentry     mod_dn.DN `json:"subschemaSubentry"               ldap:"subschemaSubentry"`     // Schema entry DN
 	HasSubordinates       bool      `json:"hasSubordinates,omitempty"       ldap:"hasSubordinates"`       // Has children
 	SubordinateCount      int64     `json:"subordinateCount,omitempty"      ldap:"subordinateCount"`      // Number of children
 

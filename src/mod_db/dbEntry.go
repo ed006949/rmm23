@@ -6,7 +6,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/redis/rueidis"
 	"github.com/redis/rueidis/om"
-
 	"rmm23/src/mod_dn"
 	"rmm23/src/mod_strings"
 	"rmm23/src/mod_time"
@@ -23,13 +22,13 @@ type DBEntry struct {
 
 	// db operational
 	BaseDN          mod_dn.DN     `json:"baseDN"`                                       //
-	ObjectClass     []string      `json:"objectClass,omitempty"     ldap:"objectClass"` //
-	UUID            uuid.UUID     `json:"uuid,omitempty"            ldap:"entryUUID"`   //  must be unique
-	DN              mod_dn.DN     `json:"dn"              ldap:"entryDN"`               //  must be unique
-	CreatorsName    mod_dn.DN     `json:"creatorsName"    ldap:"creatorsName"`          //
-	CreateTimestamp mod_time.Time `json:"createTimestamp" ldap:"createTimestamp"`       //
-	ModifiersName   mod_dn.DN     `json:"modifiersName"   ldap:"modifiersName"`         //
-	ModifyTimestamp mod_time.Time `json:"modifyTimestamp" ldap:"modifyTimestamp"`       //
+	ObjectClass     []string      `json:"objectClass,omitempty" ldap:"objectClass"`     //
+	UUID            uuid.UUID     `json:"uuid,omitempty"        ldap:"entryUUID"`       //  must be unique
+	DN              mod_dn.DN     `json:"dn"                    ldap:"entryDN"`         //  must be unique
+	CreatorsName    mod_dn.DN     `json:"creatorsName"          ldap:"creatorsName"`    //
+	CreateTimestamp mod_time.Time `json:"createTimestamp"       ldap:"createTimestamp"` //
+	ModifiersName   mod_dn.DN     `json:"modifiersName"         ldap:"modifiersName"`   //
+	ModifyTimestamp mod_time.Time `json:"modifyTimestamp"       ldap:"modifyTimestamp"` //
 }
 
 func (r *RedisRepository) CreateDBEntryIndex() (err error) {

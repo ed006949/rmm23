@@ -2,7 +2,6 @@ package mod_ldap
 
 import (
 	"github.com/go-ldap/ldap/v3"
-
 	"rmm23/src/mod_url"
 )
 
