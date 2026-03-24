@@ -2,6 +2,7 @@ package mod_db
 
 import (
 	"github.com/redis/rueidis"
+
 	"rmm23/src/mod_errors"
 )
 
