@@ -27,6 +27,9 @@ clean:
 #commit: lint
 commit: status
 commit: fix
+commit: lint
+commit: vet
+commit: update
 #
 # TODO
 #ifneq (${GIT_STATUS},)
@@ -85,7 +88,8 @@ update:
 	go mod tidy
 
 vet:
-	go vet ./...
+#	go vet ./...
+	go vet -composites=false ./...
 #	go vet -vettool=${HOME}/go/bin/shadow ./...
 #	go vet -vettool=${HOME}/go/bin/waitgroup ./...
 
