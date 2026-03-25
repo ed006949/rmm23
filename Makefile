@@ -5,10 +5,6 @@ GIT_COMMIT	=	`git rev-parse --short HEAD`
 all:	commit
 all:	race
 all:	build
-#all:	fix
-#all:	lint
-#all:	vet
-#all:	status
 
 build:
 	go build -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}" ./src/*.go
