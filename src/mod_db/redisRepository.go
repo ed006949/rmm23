@@ -101,7 +101,7 @@ func (r *RedisRepository) FindCert(id string) (cert *Cert, err error) {
 //
 
 func (r *RedisRepository) DeleteEntry(id string) (err error) {
-	log.Info().Str("DN", id).Msg("delete")
+	log.Debug().Str("DN", id).Msg("delete")
 
 	switch {
 	case l.Run.DryRunValue():
@@ -118,7 +118,7 @@ func (r *RedisRepository) DeleteEntry(id string) (err error) {
 }
 
 func (r *RedisRepository) DeleteCert(id string) (err error) {
-	log.Info().Str("DN", id).Msg("delete")
+	log.Debug().Str("DN", id).Msg("delete")
 
 	switch {
 	case l.Run.DryRunValue():
