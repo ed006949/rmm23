@@ -5,6 +5,7 @@ import (
 	"math"
 
 	"github.com/redis/rueidis"
+
 	"rmm23/src/mod_reflect"
 	"rmm23/src/mod_strings"
 )
@@ -128,6 +129,10 @@ func (r *RedisRepository) getInfo(indexNames ...string) (err error) {
 				switch {
 				case math.IsNaN(f):
 					return []byte(`"NaN"`), nil
+				case math.IsInf(f, 1):
+					return []byte(`"+Inf"`), nil
+				case math.IsInf(f, -1):
+					return []byte(`"-Inf"`), nil
 				}
 
 				return json.Marshal(f)
