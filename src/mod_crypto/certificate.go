@@ -11,8 +11,9 @@ import (
 	"encoding/pem"
 
 	"github.com/rs/zerolog/log"
-	"rmm23/src/mod_errors"
 	"software.sslmate.com/src/go-pkcs12"
+
+	"rmm23/src/mod_errors"
 )
 
 type Certificate struct {
@@ -28,11 +29,11 @@ type Certificate struct {
 	CertificateRequestDER []byte   `json:"-"`
 	RevocationListDER     []byte   `json:"-"`
 
-	PrivateKeyPEM         []byte   `json:"-"`
-	CertificatePEM        []byte   `json:"-"`
-	CertificateCAChainPEM [][]byte `json:"-"`
-	CertificateRequestPEM []byte   `json:"-"`
-	RevocationListPEM     []byte   `json:"-"`
+	PrivateKeyPEM         []byte   `json:"privateKeyPEM,omitempty"`
+	CertificatePEM        []byte   `json:"certificatePEM,omitempty"`
+	CertificateCAChainPEM [][]byte `json:"CertificateCAChainPEM,omitempty"`
+	CertificateRequestPEM []byte   `json:"certificateRequestPEM,omitempty"`
+	RevocationListPEM     []byte   `json:"revocationListPEM,omitempty"`
 
 	PrivateKey         crypto.PrivateKey        `json:"-"`
 	Certificate        *x509.Certificate        `json:"-"`
