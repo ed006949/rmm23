@@ -3,11 +3,12 @@ GIT_STATUS	=	`git status --short`
 GIT_COMMIT	=	`git rev-parse --short HEAD`
 
 all:	commit
-all:	vet
-all:	lint
 all:	race
 all:	build
-all:	status
+#all:	fix
+#all:	lint
+#all:	vet
+#all:	status
 
 build:
 	go build -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}" ./src/*.go
@@ -24,7 +25,6 @@ clean:
 	-go get -u ./...
 	-go mod tidy
 
-#commit: lint
 commit: status
 commit: fix
 commit: lint
@@ -113,15 +113,15 @@ gitignore:
 #
 #
 init_hook:
-	echo "installing hook 'prepare-commit-msg'"
-	echo '#!/bin/sh' > ./.git/hooks/prepare-commit-msg
-	echo '' >> ./.git/hooks/prepare-commit-msg
-	echo 'COMMIT_MSG_FILE=$$1' >> ./.git/hooks/prepare-commit-msg
-	echo 'COMMIT_SOURCE=$$2' >> ./.git/hooks/prepare-commit-msg
-	echo 'SHA1=$$3' >> ./.git/hooks/prepare-commit-msg
-	echo 'OLLAMA_MODEL="mevatron/diffsense:1.5b"' >> ./.git/hooks/prepare-commit-msg
-	echo 'git diff --staged | ollama run "$$OLLAMA_MODEL" | tee -a "$$COMMIT_MSG_FILE"' >> ./.git/hooks/prepare-commit-msg
-	chmod -v +x ./.git/hooks/prepare-commit-msg
+#	echo "installing hook 'prepare-commit-msg'"
+#	echo '#!/bin/sh' > ./.git/hooks/prepare-commit-msg
+#	echo '' >> ./.git/hooks/prepare-commit-msg
+#	echo 'COMMIT_MSG_FILE=$$1' >> ./.git/hooks/prepare-commit-msg
+#	echo 'COMMIT_SOURCE=$$2' >> ./.git/hooks/prepare-commit-msg
+#	echo 'SHA1=$$3' >> ./.git/hooks/prepare-commit-msg
+#	echo 'OLLAMA_MODEL="mevatron/diffsense:1.5b"' >> ./.git/hooks/prepare-commit-msg
+#	echo 'git diff --staged | ollama run "$$OLLAMA_MODEL" | tee -a "$$COMMIT_MSG_FILE"' >> ./.git/hooks/prepare-commit-msg
+#	chmod -v +x ./.git/hooks/prepare-commit-msg
 
 #
 # init local package
