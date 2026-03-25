@@ -22,10 +22,7 @@ clean:
 	-go mod tidy
 
 commit: status
-commit: fix
-commit: lint
-commit: vet
-commit: update
+commit: normalize
 #
 # TODO
 #ifneq (${GIT_STATUS},)
@@ -61,6 +58,11 @@ install:
 
 lint:
 	golangci-lint run ./... --fix
+
+normalize: fix
+normalize: lint
+normalize: vet
+normalize: update
 
 race:
 	go run -race ./... ${COMMAND_LINE}
