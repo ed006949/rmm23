@@ -9,7 +9,7 @@ import (
 )
 
 type ConfigRoot struct {
-	Conf Conf `json:"conf"`
+	Conf Conf `json:"configuration"`
 }
 
 type Conf struct {
