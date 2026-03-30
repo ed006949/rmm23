@@ -12,7 +12,7 @@ require (
 	github.com/google/uuid v1.6.0
 	github.com/redis/rueidis v1.0.73
 	github.com/redis/rueidis/om v1.0.73
-	github.com/rs/zerolog v1.34.0
+	github.com/rs/zerolog v1.35.0
 	github.com/vjeantet/ldapserver v1.0.1
 	gopkg.in/ini.v1 v1.67.1
 	software.sslmate.com/src/go-pkcs12 v0.7.0
