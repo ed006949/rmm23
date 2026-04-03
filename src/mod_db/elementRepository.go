@@ -13,8 +13,6 @@ type RedisRepository struct {
 	client rueidis.Client
 	info   map[string]*ftInfo
 	entry  om.Repository[Entry]
-	cert   om.Repository[Cert]
-	// issued    om.Repository[Cert]
 }
 
 // NewRedisRepository creates a new RedisRepository.
@@ -23,6 +21,5 @@ func NewRedisRepository(ctx context.Context, client rueidis.Client) *RedisReposi
 		ctx:    ctx,
 		client: client,
 		entry:  om.NewJSONRepository[Entry](entryKeyHeader, Entry{}, client, om.WithIndexName(entryKeyHeader)),
-		cert:   om.NewJSONRepository[Cert](certKeyHeader, Cert{}, client, om.WithIndexName(certKeyHeader)),
 	}
 }

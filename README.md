@@ -79,6 +79,55 @@ Welcome to the Remote Monitoring and Management (episode 23).
     * backend: redis DB
     * frontend: LDAP
 
+## MUST / SHOULD / LATER
+
+### MUST
+
+- Redis-backed storage with Rueidis + RedisJSON
+- optimistic concurrency with `redis:",ver"`
+- absolute expiration support with `redis:",exat"`
+- stable Redis key for every entry with `redis:",key"`
+- LDAP entry identity:
+    - `entryUUID`
+    - `entryDN`
+- LDAP object model:
+    - `objectClass`
+    - `structuralObjectClass`
+- LDAP operational metadata:
+    - `creatorsName`
+    - `createTimestamp`
+    - `modifiersName`
+    - `modifyTimestamp`
+- schema model:
+    - `attributeTypes`
+    - `objectClasses`
+    - `syntaxes`
+    - `matchingRules`
+- schema discovery support via `subschemaSubentry`
+
+### SHOULD
+
+- `schemaVersion` for future migrations
+- `hasSubordinates` for tree navigation
+- schema-driven validation before save/update
+- index strategy for common LDAP search fields
+- support for standard LDAP core schema concepts
+- compatibility-focused schema responses for LDAP clients
+- normalized comparisons via matching rules
+- internal object type/kind discriminator
+
+### LATER
+
+- sync / replication support
+- `entryCSN`
+- `numSubordinates`
+- multi-master or slave replication
+- advanced LDAP operational attributes beyond the basic set
+- conflict resolution policies for sync
+- schema import/export tooling
+- richer search/filter optimization
+- password policy operational attributes
+
 
 * Entities:
     * `0x00` `a.uid`
@@ -327,52 +376,3 @@ TODO
 ### JSON
 
 * pass string data surrounded with `"` ?
-
-## MUST / SHOULD / LATER
-
-### MUST
-
-- Redis-backed storage with Rueidis + RedisJSON
-- optimistic concurrency with `redis:",ver"`
-- absolute expiration support with `redis:",exat"`
-- stable Redis key for every entry with `redis:",key"`
-- LDAP entry identity:
-    - `entryUUID`
-    - `entryDN`
-- LDAP object model:
-    - `objectClass`
-    - `structuralObjectClass`
-- LDAP operational metadata:
-    - `creatorsName`
-    - `createTimestamp`
-    - `modifiersName`
-    - `modifyTimestamp`
-- schema model:
-    - `attributeTypes`
-    - `objectClasses`
-    - `syntaxes`
-    - `matchingRules`
-- schema discovery support via `subschemaSubentry`
-
-### SHOULD
-
-- `schemaVersion` for future migrations
-- `hasSubordinates` for tree navigation
-- schema-driven validation before save/update
-- index strategy for common LDAP search fields
-- support for standard LDAP core schema concepts
-- compatibility-focused schema responses for LDAP clients
-- normalized comparisons via matching rules
-- internal object type/kind discriminator
-
-### LATER
-
-- sync / replication support
-- `entryCSN`
-- `numSubordinates`
-- multi-master or slave replication
-- advanced LDAP operational attributes beyond the basic set
-- conflict resolution policies for sync
-- schema import/export tooling
-- richer search/filter optimization
-- password policy operational attributes 

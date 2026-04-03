@@ -25,20 +25,14 @@ func (r *Conf) Dial(ctx context.Context) (err error) {
 	switch {
 	case !l.Run.DryRunValue():
 		_ = r.Repo.DropEntryIndex()
-		_ = r.Repo.DropCertIndex()
 
 		switch err = r.Repo.CreateEntryIndex(); {
 		case err != nil:
 			return
 		}
-
-		switch err = r.Repo.CreateCertIndex(); {
-		case err != nil:
-			return
-		}
 	}
 
-	switch err = r.Repo.getInfo(_entry, _certificate); {
+	switch err = r.Repo.getInfo(_entry); {
 	case err != nil:
 		return
 	}

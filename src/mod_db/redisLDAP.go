@@ -17,15 +17,8 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 	var (
 		ldap2doc = func(fnBaseDN string, fnSearchResultType string, fnSearchResult *ldap.SearchResult) (fnErr error) {
 			var (
-				entryType attrEntryType
-				baseDN    mod_dn.DN
+				baseDN mod_dn.DN
 			)
-			switch fnErr = entryType.Parse(fnSearchResultType); {
-			case fnErr != nil:
-				log.Error().Err(fnErr).Send()
-
-				return
-			}
 
 			switch fnErr = baseDN.UnmarshalText([]byte(fnBaseDN)); {
 			case fnErr != nil:
@@ -50,11 +43,10 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 				}
 
 				for _, entry := range fnEntry {
-					entry.Type = entryType
 					entry.BaseDN = baseDN
 					entry.Status = entryStatusLoad
-
 					entry.Key = uuid.NewSHA1(uuid.Nil, []byte(entry.DN.String())).String()
+					entry.SyncObjectClasses()
 
 					_ = r.DeleteEntry(entry.Key)
 				}
@@ -72,27 +64,27 @@ func (r *RedisRepository) GetLDAPDocs(ctx context.Context, inbound *mod_ldap.Con
 
 				// Parse LDAP Entries's Certificates `userPKCS12`
 				var (
-					fnCerts []*Cert
+					fnCerts []*Entry
 				)
 
 				for _, b := range bulkEntries {
 					for _, d := range b.GetRawAttributeValues(mod_strings.F_userPKCS12.String()) {
 						var (
-							fnCert = new(Cert)
+							fnCert = new(Entry)
 						)
 						switch forErr := fnCert.parseRaw(d); {
 						case forErr != nil:
-							log.Error().Err(fnErr).Send()
+							log.Error().Err(forErr).Send()
 
 							continue
 						}
 
 						fnCerts = append(fnCerts, fnCert)
-						_ = r.DeleteCert(fnCert.Key)
+						_ = r.DeleteEntry(fnCert.Key)
 					}
 				}
 
-				switch e := r.SaveMultiCert(fnCerts...); {
+				switch e := r.SaveMultiEntry(fnCerts...); {
 				case e != nil:
 					for a, b := range e {
 						switch {

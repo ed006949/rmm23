@@ -70,7 +70,7 @@ func (r *RedisRepository) GetFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB) 
 	for a, b := range content {
 		var (
 			forErr  error
-			forCert = new(Cert)
+			forCert = new(Entry)
 		)
 
 		switch forErr = forCert.parseRaw(b...); {
@@ -78,9 +78,9 @@ func (r *RedisRepository) GetFSCerts(ctx context.Context, vfsDB *mod_vfs.VFSDB) 
 			continue
 		}
 
-		_ = r.DeleteCert(forCert.Key)
+		_ = r.DeleteEntry(forCert.Key)
 
-		switch forErr = r.SaveCert(forCert); {
+		switch forErr = r.SaveEntry(forCert); {
 		case forErr != nil:
 			log.Error().Err(forErr).Str("certificate", a).Send()
 		}

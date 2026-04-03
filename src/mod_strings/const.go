@@ -12,20 +12,19 @@ const (
 )
 
 const (
-	F_key EntryFieldName = "key"
-	F_ver EntryFieldName = "ver"
-
-	F_type   EntryFieldName = "type"
+	F_key    EntryFieldName = "key"
+	F_ver    EntryFieldName = "ver"
 	F_status EntryFieldName = "status"
 	F_baseDN EntryFieldName = "baseDN"
 
-	F_uuid            EntryFieldName = "uuid"
-	F_dn              EntryFieldName = "dn"
-	F_objectClass     EntryFieldName = "objectClass"
-	F_creatorsName    EntryFieldName = "creatorsName"
-	F_createTimestamp EntryFieldName = "createTimestamp"
-	F_modifiersName   EntryFieldName = "modifiersName"
-	F_modifyTimestamp EntryFieldName = "modifyTimestamp"
+	F_uuid                  EntryFieldName = "uuid"
+	F_dn                    EntryFieldName = "dn"
+	F_objectClass           EntryFieldName = "objectClass"
+	F_structuralObjectClass EntryFieldName = "structuralObjectClass"
+	F_creatorsName          EntryFieldName = "creatorsName"
+	F_createTimestamp       EntryFieldName = "createTimestamp"
+	F_modifiersName         EntryFieldName = "modifiersName"
+	F_modifyTimestamp       EntryFieldName = "modifyTimestamp"
 
 	F_cn                   EntryFieldName = "cn"
 	F_dc                   EntryFieldName = "dc"

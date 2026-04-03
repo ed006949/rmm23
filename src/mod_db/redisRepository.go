@@ -36,28 +36,6 @@ func (r *RedisRepository) SaveEntry(e *Entry) (err error) {
 	return
 }
 
-func (r *RedisRepository) SaveCert(e *Cert) (err error) {
-	log.Info().Str("DN", e.Subject.String()).Msg("save")
-
-	switch {
-	case l.Run.DryRunValue():
-		return
-	}
-
-	var (
-		fn = func() error { return r.cert.Save(r.ctx, e) }
-	)
-
-	switch err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, fn); {
-	case err == nil:
-		e.Status = entryStatusReady
-	}
-
-	_ = r.getInfo()
-
-	return
-}
-
 //
 
 func (r *RedisRepository) SaveMultiEntry(e ...*Entry) (err []error) {
@@ -72,30 +50,12 @@ func (r *RedisRepository) SaveMultiEntry(e ...*Entry) (err []error) {
 	return
 }
 
-func (r *RedisRepository) SaveMultiCert(e ...*Cert) (err []error) {
-	switch {
-	case l.Run.DryRunValue():
-		return
-	}
-
-	err = r.cert.SaveMulti(r.ctx, e...)
-	_ = r.getInfo()
-
-	return
-}
-
 //
 
 func (r *RedisRepository) FindEntry(id string) (entry *Entry, err error) {
 	log.Info().Str("DN", id).Msg("find")
 
 	return r.entry.Fetch(r.ctx, id)
-}
-
-func (r *RedisRepository) FindCert(id string) (cert *Cert, err error) {
-	log.Info().Str("DN", id).Msg("find")
-
-	return r.cert.Fetch(r.ctx, id)
 }
 
 //
@@ -117,23 +77,6 @@ func (r *RedisRepository) DeleteEntry(id string) (err error) {
 	return
 }
 
-func (r *RedisRepository) DeleteCert(id string) (err error) {
-	log.Debug().Str("DN", id).Msg("delete")
-
-	switch {
-	case l.Run.DryRunValue():
-		return
-	}
-
-	var (
-		fn = func() error { return r.cert.Remove(r.ctx, id) }
-	)
-
-	err = mod_reflect.RetryWithCtx(r.ctx, 0, l.RetryInterval, fn)
-
-	return
-}
-
 //
 
 func (r *RedisRepository) DropEntryIndex() (err error) {
@@ -143,17 +86,6 @@ func (r *RedisRepository) DropEntryIndex() (err error) {
 	}
 
 	err = r.entry.DropIndex(r.ctx)
-
-	return
-}
-
-func (r *RedisRepository) DropCertIndex() (err error) {
-	switch {
-	case l.Run.DryRunValue():
-		return
-	}
-
-	err = r.cert.DropIndex(r.ctx)
 
 	return
 }
@@ -170,30 +102,12 @@ func (r *RedisRepository) SearchEntryQ(query string) (count int64, entries []*En
 	})
 }
 
-func (r *RedisRepository) SearchCertQ(query string) (count int64, entries []*Cert, err error) {
-	_ = r.waitIndex(r.cert.IndexName())
-
-	return r.cert.Search(r.ctx, func(search om.FtSearchIndex) rueidis.Completed {
-		return search.Query(query).
-			Limit().OffsetNum(0, connMaxPaging).
-			Build()
-	})
-}
-
 func (r *RedisRepository) SearchEntryFV(field mod_strings.EntryFieldName, value string) (count int64, entries []*Entry, err error) {
 	return r.SearchEntryFVs(&mod_strings.FVs{{field, value}})
 }
 
-func (r *RedisRepository) SearchCertFV(field mod_strings.EntryFieldName, value string) (count int64, entries []*Cert, err error) {
-	return r.SearchCertFVs(&mod_strings.FVs{{field, value}})
-}
-
 func (r *RedisRepository) SearchEntryFVs(fvs *mod_strings.FVs) (count int64, entries []*Entry, err error) {
 	return r.SearchEntryQ(r.info[_entry].Attributes.buildQuery(fvs))
-}
-
-func (r *RedisRepository) SearchCertFVs(fvs *mod_strings.FVs) (count int64, entries []*Cert, err error) {
-	return r.SearchCertQ(r.info[_certificate].Attributes.buildQuery(fvs))
 }
 
 // SearchEntryFVsField is not working:

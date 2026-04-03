@@ -11,7 +11,7 @@ import (
 	"rmm23/src/mod_time"
 )
 
-func (r *Cert) parseCertificate(inbound *mod_crypto.Certificate) (err error) {
+func (r *Entry) parseCertificate(inbound *mod_crypto.Certificate) (err error) {
 	switch {
 	case inbound == nil:
 		return mod_errors.ENODATA
@@ -23,7 +23,7 @@ func (r *Cert) parseCertificate(inbound *mod_crypto.Certificate) (err error) {
 	return
 }
 
-func (r *Cert) parseRaw(inbound ...[]byte) (err error) {
+func (r *Entry) parseRaw(inbound ...[]byte) (err error) {
 	var (
 		certificate = new(mod_crypto.Certificate)
 	)
@@ -45,7 +45,7 @@ func (r *Cert) parseRaw(inbound ...[]byte) (err error) {
 	return
 }
 
-func (r *Cert) normalize() {
+func (r *Entry) normalize() {
 	var (
 		certUUID = uuid.NewSHA1(uuid.NameSpaceOID, r.Certificate.Certificate.Raw)
 	)
@@ -63,6 +63,11 @@ func (r *Cert) normalize() {
 	r.IPAddresses = mod_errors.StripErr1(mod_net.ParseNetIPs(r.Certificate.Certificate.IPAddresses))
 	r.URIs = r.Certificate.Certificate.URIs
 	r.IsCA = r.Certificate.Certificate.IsCA
-	// r.NotBeforeUnix.Set(r.NotBefore)
-	// r.NotAfterUnix.Set(r.NotAfter)
+
+	switch {
+	case r.IsCA:
+		r.ObjectClasses = ObjectClassList{{Name: "pkiCA"}}
+	default:
+		r.ObjectClasses = ObjectClassList{{Name: "pkiUser"}}
+	}
 }

@@ -43,3 +43,4 @@
         - prefer `var ()` over `:=`
         - use `zerolog` for logging
         - avoid variable shadowing
+        - don't code until I ask you to

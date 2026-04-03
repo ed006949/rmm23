@@ -14,13 +14,11 @@ const (
 )
 
 const (
-	_ldap        = "ldap"
-	_entry       = "entry"
-	_certificate = "certificate"
+	_ldap  = "ldap"
+	_entry = "entry"
 )
 
 const (
 	entryKeyHeader = _entry
 	// entryKeyHeader = _ldap + HeaderSeparator + _entry.
-	certKeyHeader = _certificate
 )
