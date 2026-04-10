@@ -15,7 +15,7 @@ require (
 	github.com/rs/zerolog v1.35.0
 	github.com/vjeantet/ldapserver v1.0.1
 	gopkg.in/ini.v1 v1.67.1
-	software.sslmate.com/src/go-pkcs12 v0.7.0
+	software.sslmate.com/src/go-pkcs12 v0.7.1
 )
 
 require (
