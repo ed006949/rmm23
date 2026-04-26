@@ -29,3 +29,10 @@ discordapp.net
 discordcdn.com
 dis.gd
 discordstatus.com
+jetbrains.ai
+api.jetbrains.ai
+junie.jetbrains.com
+jetbrains.com
+account.jetbrains.com
+youtrack.jetbrains.com
+plugins.jetbrains.com
