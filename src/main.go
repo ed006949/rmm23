@@ -3,14 +3,11 @@ package main
 import (
 	"net/netip"
 
-	"github.com/avfs/avfs"
-	"github.com/avfs/avfs/vfs/memfs"
 	"github.com/rs/zerolog/log"
 	_ "github.com/vjeantet/ldapserver" // LDAP server implementation
 
 	"rmm23/src/l"
 	"rmm23/src/mod_net"
-	"rmm23/src/mod_vfs"
 )
 
 func main() {
@@ -40,60 +37,60 @@ func main() {
 		Bool(l.Run.DryRunName(), l.Run.DryRunValue()).
 		Msg("main")
 
-	var (
-		config = new(ConfigRoot)
-		vfsDB  = &mod_vfs.VFSDB{
-			List: make(map[string]string),
-			VFS: memfs.NewWithOptions(
-				&memfs.Options{
-					Idm:        avfs.NotImplementedIdm,
-					User:       nil,
-					Name:       "",
-					OSType:     avfs.CurrentOSType(),
-					SystemDirs: nil,
-				},
-			),
-		}
-	)
-	switch err = l.Run.ConfigUnmarshal(&config); {
-	case err != nil:
-		return
-	}
-
-	switch err = config.Conf.DB.Dial(ctx); {
-	case err != nil:
-		return
-	}
-
-	defer func() {
-		_ = config.Conf.DB.Close()
-	}()
-
-	switch {
-	case !l.Run.DryRunValue():
-		switch err = config.Conf.DB.Repo.GetLDAPDocs(ctx, config.Conf.LDAP); {
-		case err != nil:
-			return
-		}
-	}
-
-	switch err = vfsDB.CopyFromFS(config.Conf.Legacy.PKI); {
-	case err != nil:
-		return
-	}
-
-	switch {
-	case !l.Run.DryRunValue():
-		switch err = config.Conf.DB.Repo.GetFSCerts(ctx, vfsDB); {
-		case err != nil:
-			return
-		}
-	}
-
-	switch err = config.Conf.DB.Repo.CheckIPHostNumber(config.Conf.Networking.User.Subnet, config.Conf.Networking.User.Bits); {
-	case err != nil:
-		return
-	}
+	// var (
+	// 	config = new(ConfigRoot)
+	// 	vfsDB  = &mod_vfs.VFSDB{
+	// 		List: make(map[string]string),
+	// 		VFS: memfs.NewWithOptions(
+	// 			&memfs.Options{
+	// 				Idm:        avfs.NotImplementedIdm,
+	// 				User:       nil,
+	// 				Name:       "",
+	// 				OSType:     avfs.CurrentOSType(),
+	// 				SystemDirs: nil,
+	// 			},
+	// 		),
+	// 	}
+	// )
+	// switch err = l.Run.ConfigUnmarshal(&config); {
+	// case err != nil:
+	// 	return
+	// }
+	//
+	// switch err = config.Conf.DB.Dial(ctx); {
+	// case err != nil:
+	// 	return
+	// }
+	//
+	// defer func() {
+	// 	_ = config.Conf.DB.Close()
+	// }()
+	//
+	// switch {
+	// case !l.Run.DryRunValue():
+	// 	switch err = config.Conf.DB.Repo.GetLDAPDocs(ctx, config.Conf.LDAP); {
+	// 	case err != nil:
+	// 		return
+	// 	}
+	// }
+	//
+	// switch err = vfsDB.CopyFromFS(config.Conf.Legacy.PKI); {
+	// case err != nil:
+	// 	return
+	// }
+	//
+	// switch {
+	// case !l.Run.DryRunValue():
+	// 	switch err = config.Conf.DB.Repo.GetFSCerts(ctx, vfsDB); {
+	// 	case err != nil:
+	// 		return
+	// 	}
+	// }
+	//
+	// switch err = config.Conf.DB.Repo.CheckIPHostNumber(config.Conf.Networking.User.Subnet, config.Conf.Networking.User.Bits); {
+	// case err != nil:
+	// 	return
+	// }
 
 	bb := 30
 	cc := 64
@@ -103,7 +100,7 @@ func main() {
 		switch {
 		case c >= 0 && c < 2:
 			log.Info().Msgf("%05d %18s", c, d)
-		case c >= (2304+cc+cc) && c < (2304+cc+cc+cc):
+		case c >= (2304+cc+cc+cc) && c < (2304+cc+cc+cc+cc):
 			log.Info().Msgf("%05d %18s", c, d)
 		case c >= 4094 && c < 4096:
 			log.Info().Msgf("%05d %18s", c, d)
