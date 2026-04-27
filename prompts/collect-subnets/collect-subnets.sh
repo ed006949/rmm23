@@ -12,6 +12,8 @@ OUT_FILE="subnet.txt"
 ASN_OUT_FILE="asn-all.txt"
 OPTIMIZER_SCRIPT="optimize-subnets.py"
 OPTIMIZED_OUT_FILE="subnet_optimized.txt"
+JUNIPER_OUT_FILE="subnet_optimized.juniper.conf"
+JUNIPER_PREFIX_LIST_NAME="ForeignDestinations"
 
 ###############################################################################
 # Temp files
@@ -87,10 +89,10 @@ run_optimizer() {
 
   if command -v python3 >/dev/null 2>&1; then
     log "running optimizer with python3: $OPTIMIZER_SCRIPT"
-    python3 "$OPTIMIZER_SCRIPT"
+    sort -u "$OUT_FILE" | python3 "$OPTIMIZER_SCRIPT" > "$OPTIMIZED_OUT_FILE"
   elif command -v python >/dev/null 2>&1; then
     log "running optimizer with python: $OPTIMIZER_SCRIPT"
-    python "$OPTIMIZER_SCRIPT"
+    sort -u "$OUT_FILE" | python "$OPTIMIZER_SCRIPT" > "$OPTIMIZED_OUT_FILE"
   else
     warn "python/python3 not found, skipping optimizer"
     return 0
@@ -101,6 +103,32 @@ run_optimizer() {
   else
     warn "optimizer finished but output not found: $OPTIMIZED_OUT_FILE"
   fi
+}
+
+generate_juniper_prefix_list() {
+  if [[ ! -f "$OPTIMIZED_OUT_FILE" ]]; then
+    warn "optimized subnet file not found: $OPTIMIZED_OUT_FILE"
+    return 0
+  fi
+
+  log "generating Juniper prefix-list config: $JUNIPER_OUT_FILE"
+
+  {
+    echo "delete policy-options prefix-list $JUNIPER_PREFIX_LIST_NAME"
+
+    while IFS= read -r raw_subnet || [[ -n "$raw_subnet" ]]; do
+      subnet="$(trim_line "$raw_subnet")"
+      [[ -z "$subnet" ]] && continue
+
+      if subnet="$(normalize_subnet "$subnet")"; then
+        echo "set policy-options prefix-list $JUNIPER_PREFIX_LIST_NAME $subnet"
+      else
+        warn "invalid optimized subnet skipped in Juniper export: $raw_subnet"
+      fi
+    done < "$OPTIMIZED_OUT_FILE"
+  } > "$JUNIPER_OUT_FILE"
+
+  log "Juniper config written: $JUNIPER_OUT_FILE"
 }
 
 ###############################################################################
@@ -287,7 +315,7 @@ if [[ -f "$LOCAL_SUBNET_FILE" ]]; then
 fi
 
 ###############################################################################
-# Step 6: Final output + optimizer
+# Step 6: Final output + optimizer + Juniper export
 ###############################################################################
 sort -u "$TMP_SUBNETS" > "$OUT_FILE"
 
@@ -295,5 +323,6 @@ log "raw subnet list written: $OUT_FILE"
 log "merged ASN list written: $ASN_OUT_FILE"
 
 run_optimizer
+generate_juniper_prefix_list
 
 log "done"

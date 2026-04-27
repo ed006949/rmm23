@@ -41,3 +41,9 @@ jb.gg
 intellij.net
 myjetbrains.com
 jetbrains.com.cn
+youtube.com
+youtu.be
+music.youtube.com
+youtubei.googleapis.com
+ytimg.com
+googlevideo.com
