@@ -47,3 +47,4 @@ music.youtube.com
 youtubei.googleapis.com
 ytimg.com
 googlevideo.com
+kino.pub
