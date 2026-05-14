@@ -1,10 +1,7 @@
 #!/usr/bin/env bash
 set -Eeuo pipefail
 
-AUTHORIZED_KEYS_MNG="${AUTHORIZED_KEYS_MNG:-/root/.ssh/authorized_keys}"
-AUTHORIZED_KEYS_ROOT="${AUTHORIZED_KEYS_ROOT:-/root/.ssh/authorized_keys}"
-SWAP_DISK="${SWAP_DISK:-}"
-SWAP_SIZE_MIB="${SWAP_SIZE_MIB:-0}"
+SWAP_DISK="${SWAP_DISK:-/dev/sdb}"
 SSH_DROPIN_DIR="/etc/ssh/sshd_config.d"
 SSH_ROOT_CONF="${SSH_DROPIN_DIR}/90-root-key-only.conf"
 SSH_KEYS_ONLY_CONF="${SSH_DROPIN_DIR}/91-all-users-key-only.conf"
@@ -13,6 +10,9 @@ FSTAB_FILE="/etc/fstab"
 CRYPT_NAME="cryptswap"
 MAPPER_PATH="/dev/mapper/${CRYPT_NAME}"
 SWAP_LABEL="SWAP"
+
+AUTHORIZED_KEYS_MNG_CONTENT='ssh-ed25519 AAAA...replace-with-real-mng-key comment'
+AUTHORIZED_KEYS_ROOT_CONTENT='ssh-ed25519 AAAA...replace-with-real-root-key comment'
 
 log() {
   printf '[+] %s\n' "$*"
@@ -58,11 +58,11 @@ install_prerequisites() {
 
 ensure_authorized_keys() {
   local user="$1"
-  local src="$2"
+  local content="$2"
   local home_dir ssh_dir target uid gid
 
   id "$user" >/dev/null 2>&1 || die "user not found: $user"
-  [[ -f "$src" ]] || die "authorized_keys source not found: $src"
+  [[ -n "$content" ]] || die "authorized_keys content is empty for user: $user"
 
   home_dir="$(getent passwd "$user" | cut -d: -f6)"
   [[ -n "$home_dir" ]] || die "failed to resolve home for user: $user"
@@ -73,19 +73,21 @@ ensure_authorized_keys() {
   gid="$(id -g "$user")"
 
   install -d -m 700 -o "$uid" -g "$gid" "$ssh_dir"
-  install -m 600 -o "$uid" -g "$gid" "$src" "$target"
-  log "Installed authorized_keys for ${user} from ${src}"
+  printf '%s\n' "$content" > "$target"
+  chown "$uid:$gid" "$target"
+  chmod 600 "$target"
+  log "Installed embedded authorized_keys for ${user}"
 }
 
 configure_ssh_key_only() {
   log "Configuring sshd drop-ins"
   install -d -m 755 "$SSH_DROPIN_DIR"
 
-  cat > "$SSH_ROOT_CONF" <<CFG
+  cat > "$SSH_ROOT_CONF" <<'CFG'
 PermitRootLogin prohibit-password
 CFG
 
-  cat > "$SSH_KEYS_ONLY_CONF" <<CFG
+  cat > "$SSH_KEYS_ONLY_CONF" <<'CFG'
 PubkeyAuthentication yes
 PasswordAuthentication no
 KbdInteractiveAuthentication no
@@ -111,29 +113,36 @@ list_current_swaps() {
 }
 
 remove_old_swaps() {
-  local swap_name swap_type
-
   log "Disabling active swap devices"
   while read -r swap_name swap_type _; do
     [[ -n "${swap_name:-}" ]] || continue
     swapoff "$swap_name" || true
   done < <(swapon --show=NAME,TYPE --noheadings --raw || true)
 
-  log "Removing swap entries from ${FSTAB_FILE}"
-  cp -a "$FSTAB_FILE" "${FSTAB_FILE}.bak.$(date +%s)"
-  grep -Ev '^[[:space:]]*($|#)' "$FSTAB_FILE" | cat >/dev/null || true
-  sed -i -E '/^[[:space:]]*[^#].*[[:space:]]swap[[:space:]]/d' "$FSTAB_FILE"
-  sed -i -E '/cryptswap|swapfile|[[:space:]]swap[[:space:]]/d' "$CRYPTTAB_FILE" 2>/dev/null || true
+  if [[ -f "$FSTAB_FILE" ]]; then
+    log "Removing swap entries from ${FSTAB_FILE}"
+    cp -a "$FSTAB_FILE" "${FSTAB_FILE}.bak.$(date +%s)"
+    sed -i -E '/^[[:space:]]*[^#].*[[:space:]]swap[[:space:]]/d' "$FSTAB_FILE"
+  fi
 
-  log "Deleting swap files referenced in current swapon output"
+  if [[ -f "$CRYPTTAB_FILE" ]]; then
+    log "Removing swap entries from ${CRYPTTAB_FILE}"
+    cp -a "$CRYPTTAB_FILE" "${CRYPTTAB_FILE}.bak.$(date +%s)"
+    sed -i -E '/cryptswap|swapfile|[[:space:]]swap([,[:space:]]|$)/d' "$CRYPTTAB_FILE"
+  fi
+
+  log "Deleting common swap files"
+  rm -f /swap.img /swapfile
+
+  log "Deleting active swap files from swapon output"
   while read -r swap_name swap_type _; do
     [[ "$swap_type" == "file" ]] || continue
     rm -f -- "$swap_name"
   done < <(swapon --show=NAME,TYPE --noheadings --raw || true)
 
-  log "Wiping swap signatures on swap partitions"
+  log "Wiping old swap signatures"
   while read -r path fstype; do
-    [[ "$fstype" == "swap" ]] || continue
+    [[ -n "${path:-}" ]] || continue
     swapoff "$path" || true
     wipefs -a "$path" || true
   done < <(lsblk -pnro PATH,FSTYPE | awk '$2=="swap"{print $1, $2}')
@@ -144,17 +153,10 @@ remove_old_swaps() {
   fi
 }
 
-resolve_swap_disk() {
-  [[ -n "$SWAP_DISK" ]] && return 0
-
-  SWAP_DISK="$(findmnt -n -o SOURCE / | sed -E 's/p?[0-9]+$//' | sed -E 's/[0-9]+$//')"
-  [[ -b "$SWAP_DISK" ]] || die "failed to detect root disk automatically; set SWAP_DISK=/dev/sdX or /dev/nvme0n1"
-}
-
 find_or_create_swap_partition() {
-  local part_path part_num sectors mib start_mib end_mib free_line free_start free_end
+  local part_path part_num free_line start_mib
 
-  resolve_swap_disk
+  [[ -b "$SWAP_DISK" ]] || die "swap disk not found: ${SWAP_DISK}"
   log "Using disk: ${SWAP_DISK}"
 
   part_path="$(lsblk -pnro PATH,PARTLABEL "$SWAP_DISK" | awk '$2=="'"$SWAP_LABEL"'"{print $1; exit}')"
@@ -163,20 +165,14 @@ find_or_create_swap_partition() {
     return 0
   fi
 
-  [[ "$SWAP_SIZE_MIB" =~ ^[0-9]+$ ]] || die "SWAP_SIZE_MIB must be an integer MiB value"
-  (( SWAP_SIZE_MIB > 0 )) || die "set SWAP_SIZE_MIB to the desired swap partition size in MiB"
-
   free_line="$(parted -m "$SWAP_DISK" unit MiB print free | awk -F: '$5=="free"{last=$0} END{print last}')"
   [[ -n "$free_line" ]] || die "no free space found on ${SWAP_DISK}"
 
-  free_start="$(awk -F: '{gsub("MiB", "", $2); print int($2)}' <<<"$free_line")"
-  free_end="$(awk -F: '{gsub("MiB", "", $3); print int($3)}' <<<"$free_line")"
-  start_mib="$free_start"
-  end_mib="$(( start_mib + SWAP_SIZE_MIB ))"
-  (( end_mib <= free_end )) || die "not enough free space on ${SWAP_DISK}: need ${SWAP_SIZE_MIB} MiB"
+  start_mib="$(awk -F: '{gsub("MiB", "", $2); print int($2)}' <<<"$free_line")"
+  [[ -n "$start_mib" ]] || die "failed to detect start of free space on ${SWAP_DISK}"
 
-  log "Creating GPT swap partition ${SWAP_LABEL} from ${start_mib}MiB to ${end_mib}MiB"
-  parted -s "$SWAP_DISK" mkpart "$SWAP_LABEL" linux-swap "${start_mib}MiB" "${end_mib}MiB"
+  log "Creating GPT swap partition ${SWAP_LABEL} from ${start_mib}MiB to 100%"
+  parted -s "$SWAP_DISK" mkpart "$SWAP_LABEL" linux-swap "${start_mib}MiB" 100%
   partprobe "$SWAP_DISK"
   udevadm settle
 
@@ -191,7 +187,7 @@ find_or_create_swap_partition() {
 }
 
 configure_encrypted_swap() {
-  local swap_part partuuid
+  local swap_part partuuid crypttab_tmp
 
   swap_part="$(find_or_create_swap_partition)"
   [[ -b "$swap_part" ]] || die "swap partition not found: ${swap_part}"
@@ -203,9 +199,13 @@ configure_encrypted_swap() {
   partuuid="$(blkid -s PARTUUID -o value "$swap_part")"
   [[ -n "$partuuid" ]] || die "failed to read PARTUUID for ${swap_part}"
 
-  grep -vE "^[[:space:]]*${CRYPT_NAME}[[:space:]]" "$CRYPTTAB_FILE" 2>/dev/null > "${CRYPTTAB_FILE}.tmp" || true
-  mv "${CRYPTTAB_FILE}.tmp" "$CRYPTTAB_FILE" 2>/dev/null || true
-  printf '%s\n' "${CRYPT_NAME} PARTUUID=${partuuid} /dev/urandom swap,cipher=aes-xts-plain64,size=256,discard" >> "$CRYPTTAB_FILE"
+  crypttab_tmp="$(mktemp)"
+  if [[ -f "$CRYPTTAB_FILE" ]]; then
+    grep -vE "^[[:space:]]*${CRYPT_NAME}[[:space:]]" "$CRYPTTAB_FILE" > "$crypttab_tmp" || true
+  fi
+  printf '%s\n' "${CRYPT_NAME} PARTUUID=${partuuid} /dev/urandom swap,cipher=aes-xts-plain64,size=256,discard" >> "$crypttab_tmp"
+  install -m 644 "$crypttab_tmp" "$CRYPTTAB_FILE"
+  rm -f "$crypttab_tmp"
 
   cryptsetup open --type plain --key-file /dev/urandom "$swap_part" "$CRYPT_NAME"
   mkswap -f "$MAPPER_PATH"
@@ -220,25 +220,24 @@ configure_encrypted_swap() {
 
 main() {
   require_root
-
   require_cmd apt-get
   require_cmd swapon
   require_cmd lsblk
-  require_cmd sshd
 
-  # do NOT require cryptsetup/parted/sgdisk/etc before installing prerequisites
   install_system_updates
   install_prerequisites
 
-  # now we can safely insist on them
+  require_cmd sshd
   require_cmd cryptsetup
   require_cmd parted
   require_cmd sgdisk
   require_cmd findmnt
   require_cmd blkid
+  require_cmd partprobe
+  require_cmd udevadm
 
-  ensure_authorized_keys mng "$AUTHORIZED_KEYS_MNG"
-  ensure_authorized_keys root "$AUTHORIZED_KEYS_ROOT"
+  ensure_authorized_keys mng "$AUTHORIZED_KEYS_MNG_CONTENT"
+  ensure_authorized_keys root "$AUTHORIZED_KEYS_ROOT_CONTENT"
   configure_ssh_key_only
   list_current_swaps
   remove_old_swaps
