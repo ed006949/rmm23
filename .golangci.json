@@ -9,7 +9,8 @@
       "cyclop",
       "gocognit",
       "funlen",
-      "nakedret"
+      "nakedret",
+      "gomodguard"
     ],
     "enable": [
       "wsl_v5",
