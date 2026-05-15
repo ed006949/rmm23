@@ -48,3 +48,10 @@ youtubei.googleapis.com
 ytimg.com
 googlevideo.com
 kino.pub
+claude.ai
+anthropic.com
+api.anthropic.com
+console.anthropic.com
+status.anthropic.com
+cdn.usefathom.com
+intercomcdn.com
