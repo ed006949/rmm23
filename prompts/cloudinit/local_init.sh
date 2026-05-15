@@ -13,9 +13,9 @@ MAPPER_PATH="/dev/mapper/${CRYPT_NAME}"
 SWAP_LABEL="SWAP"
 SWAP_PARTITION=""
 
-AUTHORIZED_KEYS_MNG_CONTENT='type data comment'
-
-AUTHORIZED_KEYS_ROOT_CONTENT='type data comment'
+AUTHORIZED_KEYS_FILE="${AUTHORIZED_KEYS_FILE:-./authorized_keys}"
+AUTHORIZED_KEYS_USERS_STRING="${AUTHORIZED_KEYS_USERS:-root mng}"
+read -r -a AUTHORIZED_KEYS_USERS <<< "$AUTHORIZED_KEYS_USERS_STRING"
 
 log() {
   printf '[+] %s\n' "$*" >&2
@@ -36,6 +36,11 @@ require_root() {
 
 require_cmd() {
   command -v "$1" >/dev/null 2>&1 || die "missing command: $1"
+}
+
+read_authorized_keys() {
+  [[ -f "$AUTHORIZED_KEYS_FILE" ]] || die "authorized_keys file not found: ${AUTHORIZED_KEYS_FILE}"
+  [[ -s "$AUTHORIZED_KEYS_FILE" ]] || die "authorized_keys file is empty: ${AUTHORIZED_KEYS_FILE}"
 }
 
 install_system_updates() {
@@ -61,11 +66,11 @@ install_prerequisites() {
 
 ensure_authorized_keys() {
   local user="$1"
-  local content="$2"
+  local keys_file="$2"
   local home_dir ssh_dir target uid gid
 
   id "$user" >/dev/null 2>&1 || die "user not found: $user"
-  [[ -n "$content" ]] || die "authorized_keys content is empty for user: $user"
+  [[ -f "$keys_file" ]] || die "authorized_keys file not found: $keys_file"
 
   home_dir="$(getent passwd "$user" | cut -d: -f6)"
   [[ -n "$home_dir" ]] || die "failed to resolve home for user: $user"
@@ -76,10 +81,8 @@ ensure_authorized_keys() {
   gid="$(id -g "$user")"
 
   install -d -m 700 -o "$uid" -g "$gid" "$ssh_dir"
-  printf '%s\n' "$content" > "$target"
-  chown "$uid:$gid" "$target"
-  chmod 600 "$target"
-  log "Installed embedded authorized_keys for ${user}"
+  install -m 600 -o "$uid" -g "$gid" "$keys_file" "$target"
+  log "Installed authorized_keys for ${user} from ${keys_file}"
 }
 
 configure_ssh_key_only() {
@@ -191,7 +194,7 @@ find_or_create_swap_partition() {
 }
 
 configure_encrypted_swap() {
-  local partuuid crypttab_tmp
+  local crypttab_tmp
 
   find_or_create_swap_partition
   [[ -n "$SWAP_PARTITION" ]] || die "swap partition variable is empty"
@@ -201,20 +204,16 @@ configure_encrypted_swap() {
   swapoff "$SWAP_PARTITION" || true
   wipefs -a "$SWAP_PARTITION" || true
 
-  
-#  partuuid="$(blkid -s PARTUUID -o value "$SWAP_PARTITION")"
-#  [[ -n "$partuuid" ]] || die "failed to read PARTUUID for ${SWAP_PARTITION}"
-
   crypttab_tmp="$(mktemp)"
   if [[ -f "$CRYPTTAB_FILE" ]]; then
     grep -vE "^[[:space:]]*${CRYPT_NAME}[[:space:]]" "$CRYPTTAB_FILE" > "$crypttab_tmp" || true
   fi
-#  printf '%s\n' "${CRYPT_NAME} PARTUUID=${partuuid} /dev/urandom swap,cipher=aes-xts-plain64,size=256,discard" >> "$crypttab_tmp"
   printf '%s\n' "${CRYPT_NAME} PARTLABEL=${SWAP_LABEL} /dev/urandom swap,cipher=aes-xts-plain64,size=256,discard" >> "$crypttab_tmp"
   install -m 644 "$crypttab_tmp" "$CRYPTTAB_FILE"
   rm -f "$crypttab_tmp"
 
   if cryptsetup status "$CRYPT_NAME" >/dev/null 2>&1; then
+    swapoff "$MAPPER_PATH" || true
     cryptsetup close "$CRYPT_NAME" || true
   fi
 
@@ -230,6 +229,8 @@ configure_encrypted_swap() {
 }
 
 main() {
+  local user
+
   require_root
   require_cmd apt-get
   require_cmd swapon
@@ -246,8 +247,11 @@ main() {
   require_cmd partprobe
   require_cmd udevadm
 
-  ensure_authorized_keys mng "$AUTHORIZED_KEYS_MNG_CONTENT"
-  ensure_authorized_keys root "$AUTHORIZED_KEYS_ROOT_CONTENT"
+  read_authorized_keys
+  for user in "${AUTHORIZED_KEYS_USERS[@]}"; do
+    ensure_authorized_keys "$user" "$AUTHORIZED_KEYS_FILE"
+  done
+
   configure_ssh_key_only
   list_current_swaps
   remove_old_swaps
