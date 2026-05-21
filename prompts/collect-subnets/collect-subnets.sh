@@ -16,6 +16,11 @@ JUNIPER_OUT_FILE="subnet_optimized.juniper.conf"
 JUNIPER_PREFIX_LIST_NAME="flegion"
 
 ###############################################################################
+# Vars
+###############################################################################
+AB_size_limit=1024
+
+###############################################################################
 # Temp files
 ###############################################################################
 TMP_IPS="$(mktemp)"
@@ -114,23 +119,42 @@ generate_juniper_prefix_list() {
   log "generating Juniper prefix-list config: $JUNIPER_OUT_FILE"
 
   {
+    # base cleanup
     echo "delete policy-options prefix-list $JUNIPER_PREFIX_LIST_NAME"
-#    echo "delete routing-instances via-ISP1"
-#    echo "set routing-instances via-ISP1 instance-type virtual-router"
-#    echo "set routing-instances via-ISP1 routing-options instance-export export_direct"
     echo "delete groups route-via-ISP1"
-    echo "delete groups security-addressbook-$JUNIPER_PREFIX_LIST_NAME"
+#    echo "delete groups security-addressbook-$JUNIPER_PREFIX_LIST_NAME"
+
+    ab_size_limit=${AB_size_limit:-1024}
+    ab_index=1
+    ab_entry_count=0
+
+    # current address-book group name (will suffix with index)
+    current_ab_group="security-addressbook-${JUNIPER_PREFIX_LIST_NAME}-${ab_index}"
+
+#    # clean split groups as well
+#    echo "delete groups security-addressbook-${JUNIPER_PREFIX_LIST_NAME}-*"
 
     while IFS= read -r raw_subnet || [[ -n "$raw_subnet" ]]; do
       subnet="$(trim_line "$raw_subnet")"
       [[ -z "$subnet" ]] && continue
 
       if subnet="$(normalize_subnet "$subnet")"; then
+        # prefix-list (unchanged)
         echo "set policy-options prefix-list $JUNIPER_PREFIX_LIST_NAME $subnet"
         echo "set groups route-via-ISP1 routing-instances <*> routing-options static route $subnet next-table ISP1.inet.0"
-        echo "set groups security-addressbook-$JUNIPER_PREFIX_LIST_NAME security address-book <*> address $subnet $subnet"
-        echo "set groups security-addressbook-$JUNIPER_PREFIX_LIST_NAME security address-book <*> address-set $JUNIPER_PREFIX_LIST_NAME address $subnet"
-#        echo "set routing-instances via-ISP1 routing-options static route $subnet next-table ISP1.inet.0"
+
+        # rotate to new address-book group when limit reached
+        if (( ab_entry_count >= ab_size_limit )); then
+          ab_index=$((ab_index + 1))
+          ab_entry_count=0
+          current_ab_group="security-addressbook-${JUNIPER_PREFIX_LIST_NAME}-${ab_index}"
+        fi
+
+        # per-group address-book and address-set
+        echo "set groups ${current_ab_group} security address-book <*> address $subnet $subnet"
+        echo "set groups ${current_ab_group} security address-book <*> address-set ${JUNIPER_PREFIX_LIST_NAME}-${ab_index} address $subnet"
+
+        ab_entry_count=$((ab_entry_count + 1))
       else
         warn "invalid optimized subnet skipped in Juniper export: $raw_subnet"
       fi
