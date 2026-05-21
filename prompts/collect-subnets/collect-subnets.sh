@@ -13,7 +13,7 @@ ASN_OUT_FILE="asn-all.txt"
 OPTIMIZER_SCRIPT="optimize-subnets.py"
 OPTIMIZED_OUT_FILE="subnet_optimized.txt"
 JUNIPER_OUT_FILE="subnet_optimized.juniper.conf"
-JUNIPER_PREFIX_LIST_NAME="ForeignDestinations"
+JUNIPER_PREFIX_LIST_NAME="flegion"
 
 ###############################################################################
 # Temp files
@@ -119,6 +119,7 @@ generate_juniper_prefix_list() {
 #    echo "set routing-instances via-ISP1 instance-type virtual-router"
 #    echo "set routing-instances via-ISP1 routing-options instance-export export_direct"
     echo "delete groups route-via-ISP1"
+    echo "delete groups security-addressbook-$JUNIPER_PREFIX_LIST_NAME"
 
     while IFS= read -r raw_subnet || [[ -n "$raw_subnet" ]]; do
       subnet="$(trim_line "$raw_subnet")"
@@ -127,6 +128,8 @@ generate_juniper_prefix_list() {
       if subnet="$(normalize_subnet "$subnet")"; then
         echo "set policy-options prefix-list $JUNIPER_PREFIX_LIST_NAME $subnet"
         echo "set groups route-via-ISP1 routing-instances <*> routing-options static route $subnet next-table ISP1.inet.0"
+        echo "set groups security-addressbook-$JUNIPER_PREFIX_LIST_NAME security address-book <*> address $subnet $subnet"
+        echo "set groups security-addressbook-$JUNIPER_PREFIX_LIST_NAME security address-book <*> address-set $JUNIPER_PREFIX_LIST_NAME address $subnet"
 #        echo "set routing-instances via-ISP1 routing-options static route $subnet next-table ISP1.inet.0"
       else
         warn "invalid optimized subnet skipped in Juniper export: $raw_subnet"

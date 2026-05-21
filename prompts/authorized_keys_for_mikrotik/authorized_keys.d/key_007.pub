@@ -1,0 +1,1 @@
+restrict,command="internal-sftp",from="10.240.255.234" ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAEIiy/6hVsF4UW/tYK8FwgjR32Wil12VX1RO6mRJAbWPZ8TCr1ywwwCnXnbdc1c0YzrVtjj48ugU0f4ZJGojFR6NABk7Bf8kC9cnBv1ZwN6OcFihC6Lwdmn2ba1De582zt12kUManMalaCfgd4fdb6yR/bTX1GVKwaNA/AlKbNANEYrHA== root@OPNsense.fabric.home-holding.io
