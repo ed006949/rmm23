@@ -16,11 +16,6 @@ JUNIPER_OUT_FILE="subnet_optimized.juniper.conf"
 JUNIPER_PREFIX_LIST_NAME="flegion"
 
 ###############################################################################
-# Vars
-###############################################################################
-AB_size_limit=1024
-
-###############################################################################
 # Temp files
 ###############################################################################
 TMP_IPS="$(mktemp)"
@@ -111,6 +106,12 @@ run_optimizer() {
 }
 
 generate_juniper_prefix_list() {
+  local ab_size_limit total_subnets total_abs idx
+  local ab_index ab_entry_count
+  local subnet raw_subnet
+  local current_ab_set
+  local parent_group
+
   if [[ ! -f "$OPTIMIZED_OUT_FILE" ]]; then
     warn "optimized subnet file not found: $OPTIMIZED_OUT_FILE"
     return 0
@@ -118,41 +119,57 @@ generate_juniper_prefix_list() {
 
   log "generating Juniper prefix-list config: $JUNIPER_OUT_FILE"
 
+  ab_size_limit="${AB_size_limit:-1024}"
+  parent_group="security-addressbook-${JUNIPER_PREFIX_LIST_NAME}"
+
+  total_subnets=0
+  while IFS= read -r raw_subnet || [[ -n "$raw_subnet" ]]; do
+    subnet="$(trim_line "$raw_subnet")"
+    [[ -z "$subnet" ]] && continue
+
+    if subnet="$(normalize_subnet "$subnet")"; then
+      total_subnets=$((total_subnets + 1))
+    else
+      warn "invalid optimized subnet skipped in counting phase: $raw_subnet"
+    fi
+  done < "$OPTIMIZED_OUT_FILE"
+
+  if (( total_subnets == 0 )); then
+    warn "no valid optimized subnets found for Juniper export"
+    : > "$JUNIPER_OUT_FILE"
+    return 0
+  fi
+
+  total_abs=$(( (total_subnets + ab_size_limit - 1) / ab_size_limit ))
+
   {
-    # base cleanup
     echo "delete policy-options prefix-list $JUNIPER_PREFIX_LIST_NAME"
     echo "delete groups route-via-ISP1"
-#    echo "delete groups security-addressbook-$JUNIPER_PREFIX_LIST_NAME"
+    echo "delete groups ${parent_group}"
 
-    ab_size_limit=${AB_size_limit:-1024}
+    for (( idx=1; idx<=total_abs; idx++ )); do
+      echo "set groups ${parent_group} security address-book <*> address-set ${JUNIPER_PREFIX_LIST_NAME}-${idx}"
+    done
+
     ab_index=1
     ab_entry_count=0
-
-    # current address-book group name (will suffix with index)
-    current_ab_group="security-addressbook-${JUNIPER_PREFIX_LIST_NAME}-${ab_index}"
-
-#    # clean split groups as well
-#    echo "delete groups security-addressbook-${JUNIPER_PREFIX_LIST_NAME}-*"
+    current_ab_set="${JUNIPER_PREFIX_LIST_NAME}-${ab_index}"
 
     while IFS= read -r raw_subnet || [[ -n "$raw_subnet" ]]; do
       subnet="$(trim_line "$raw_subnet")"
       [[ -z "$subnet" ]] && continue
 
       if subnet="$(normalize_subnet "$subnet")"; then
-        # prefix-list (unchanged)
-        echo "set policy-options prefix-list $JUNIPER_PREFIX_LIST_NAME $subnet"
-        echo "set groups route-via-ISP1 routing-instances <*> routing-options static route $subnet next-table ISP1.inet.0"
-
-        # rotate to new address-book group when limit reached
         if (( ab_entry_count >= ab_size_limit )); then
           ab_index=$((ab_index + 1))
           ab_entry_count=0
-          current_ab_group="security-addressbook-${JUNIPER_PREFIX_LIST_NAME}-${ab_index}"
+          current_ab_set="${JUNIPER_PREFIX_LIST_NAME}-${ab_index}"
         fi
 
-        # per-group address-book and address-set
-        echo "set groups ${current_ab_group} security address-book <*> address $subnet $subnet"
-        echo "set groups ${current_ab_group} security address-book <*> address-set ${JUNIPER_PREFIX_LIST_NAME}-${ab_index} address $subnet"
+        echo "set policy-options prefix-list $JUNIPER_PREFIX_LIST_NAME $subnet"
+        echo "set groups route-via-ISP1 routing-instances <*> routing-options static route $subnet next-table ISP1.inet.0"
+        echo "set groups ${parent_group} security address-book <*> address $subnet $subnet"
+        echo "set groups ${parent_group} security address-book <*> address-set ${current_ab_set} address $subnet"
 
         ab_entry_count=$((ab_entry_count + 1))
       else
@@ -162,6 +179,8 @@ generate_juniper_prefix_list() {
   } > "$JUNIPER_OUT_FILE"
 
   log "Juniper config written: $JUNIPER_OUT_FILE"
+  log "valid subnets: $total_subnets"
+  log "address-sets in group ${parent_group}: $total_abs"
 }
 
 ###############################################################################
