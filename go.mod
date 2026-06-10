@@ -14,8 +14,8 @@ require (
 	github.com/redis/rueidis/om v1.0.75
 	github.com/rs/zerolog v1.35.1
 	github.com/vjeantet/ldapserver v1.0.1
-	gopkg.in/ini.v1 v1.67.2
-	software.sslmate.com/src/go-pkcs12 v0.7.1
+	gopkg.in/ini.v1 v1.67.3
+	software.sslmate.com/src/go-pkcs12 v0.7.2
 )
 
 require (
@@ -39,8 +39,8 @@ require (
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/skeema/knownhosts v1.3.2 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	golang.org/x/crypto v0.52.0 // indirect
+	golang.org/x/crypto v0.53.0 // indirect
 	golang.org/x/net v0.55.0 // indirect
-	golang.org/x/sys v0.45.0 // indirect
+	golang.org/x/sys v0.46.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )

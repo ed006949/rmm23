@@ -147,9 +147,9 @@ generate_juniper_prefix_list() {
     echo "delete groups route-via-ISP1"
     echo "delete groups ${parent_group}"
 
-    for (( idx=1; idx<=total_abs; idx++ )); do
-      echo "set groups ${parent_group} security address-book <*> address-set ${JUNIPER_PREFIX_LIST_NAME}-${idx}"
-    done
+#    for (( idx=1; idx<=total_abs; idx++ )); do
+#      echo "set groups ${parent_group} security address-book <*> address-set ${JUNIPER_PREFIX_LIST_NAME}-${idx}"
+#    done
 
     ab_index=1
     ab_entry_count=0
@@ -168,8 +168,8 @@ generate_juniper_prefix_list() {
 
         echo "set policy-options prefix-list $JUNIPER_PREFIX_LIST_NAME $subnet"
         echo "set groups route-via-ISP1 routing-instances <*> routing-options static route $subnet next-table ISP1.inet.0"
-        echo "set groups ${parent_group} security address-book <*> address $subnet $subnet"
-        echo "set groups ${parent_group} security address-book <*> address-set ${current_ab_set} address $subnet"
+#        echo "set groups ${parent_group} security address-book <*> address $subnet $subnet"
+#        echo "set groups ${parent_group} security address-book <*> address-set ${current_ab_set} address $subnet"
 
         ab_entry_count=$((ab_entry_count + 1))
       else
