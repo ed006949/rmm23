@@ -68,3 +68,8 @@ leaseweb.com
 
 abgw-fra2-arp1-r01.acronis.com
 acronis.com
+
+nutanix.com
+www.nutanix.com
+portal.nutanix.com
+download.nutanix.com
