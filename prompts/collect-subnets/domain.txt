@@ -73,3 +73,9 @@ nutanix.com
 www.nutanix.com
 portal.nutanix.com
 download.nutanix.com
+
+bc.googleusercontent.com
+googleusercontent.com
+free.ds.melbicom.net
+ds.melbicom.net
+melbicom.net
