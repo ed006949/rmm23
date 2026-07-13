@@ -48,6 +48,7 @@ youtubei.googleapis.com
 ytimg.com
 googlevideo.com
 kino.pub
+kino.watch
 claude.ai
 anthropic.com
 api.anthropic.com
