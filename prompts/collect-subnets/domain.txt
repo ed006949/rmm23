@@ -82,3 +82,5 @@ ds.melbicom.net
 melbicom.net
 
 moonshot.cn
+moonshot.ai
+api.moonshot.ai
