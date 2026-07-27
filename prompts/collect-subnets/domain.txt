@@ -84,3 +84,11 @@ melbicom.net
 moonshot.cn
 moonshot.ai
 api.moonshot.ai
+
+openai.com
+chatgpt.com
+oaistatic.com
+oaiusercontent.com
+chat.openai.com
+ios.chat.openai.com
+android.chat.openai.com
