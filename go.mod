@@ -7,11 +7,11 @@ require (
 	github.com/avfs/avfs v0.35.0
 	github.com/fatih/structs v1.1.0
 	github.com/go-asn1-ber/asn1-ber v1.5.8
-	github.com/go-git/go-git/v5 v5.19.1
+	github.com/go-git/go-git/v5 v5.19.2
 	github.com/go-ldap/ldap/v3 v3.4.14
 	github.com/google/uuid v1.6.0
-	github.com/redis/rueidis v1.0.76
-	github.com/redis/rueidis/om v1.0.76
+	github.com/redis/rueidis v1.0.77
+	github.com/redis/rueidis/om v1.0.77
 	github.com/rs/zerolog v1.35.1
 	github.com/vjeantet/ldapserver v1.0.1
 	gopkg.in/ini.v1 v1.67.3
@@ -22,7 +22,7 @@ require (
 	dario.cat/mergo v1.0.2 // indirect
 	github.com/Azure/go-ntlmssp v0.1.1 // indirect
 	github.com/Microsoft/go-winio v0.6.2 // indirect
-	github.com/cloudflare/circl v1.6.4 // indirect
+	github.com/cloudflare/circl v1.6.5 // indirect
 	github.com/cyphar/filepath-securejoin v0.7.0 // indirect
 	github.com/emirpasic/gods v1.18.1 // indirect
 	github.com/go-git/gcfg v1.5.1-0.20230307220236-3a3c6141e376 // indirect
@@ -39,8 +39,8 @@ require (
 	github.com/sergi/go-diff v1.4.0 // indirect
 	github.com/skeema/knownhosts v1.3.2 // indirect
 	github.com/xanzy/ssh-agent v0.3.3 // indirect
-	golang.org/x/crypto v0.54.0 // indirect
-	golang.org/x/net v0.57.0 // indirect
+	golang.org/x/crypto v0.55.0 // indirect
+	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/sys v0.47.0 // indirect
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 )
