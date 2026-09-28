@@ -1,6 +1,7 @@
 DATE		=	`date +%s`
 GIT_STATUS	=	`git status --short`
 GIT_COMMIT	=	`git rev-parse --short HEAD`
+GO_VERSION	=	$(shell go version | awk '{print $$3}' | sed 's/^go//')
 
 all:	commit
 all:	race
@@ -84,6 +85,10 @@ test:
 update:
 	go get -u ./...
 	go mod tidy
+
+upgrade:
+	go mod edit -go=$(GO_VERSION)
+	$(MAKE) update
 
 vet:
 #	go vet ./...
