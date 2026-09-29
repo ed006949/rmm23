@@ -1,41 +1,34 @@
-DATE		=	`date +%s`
-GIT_STATUS	=	`git status --short`
-GIT_COMMIT	=	`git rev-parse --short HEAD`
-GO_VERSION	=	$(shell go version | awk '{print $$3}' | sed 's/^go//')
+include Makefile.local
 
-all:	commit
-all:	race
-all:	build
+DATE		:=	$(shell date +%s)
+GIT_STATUS	:=	$(shell git status --short)
+GIT_COMMIT	:=	$(shell git rev-parse --short HEAD)
+GO_VERSION	:=	$(shell go version | awk '{print $$3}' | sed 's/^go//')
+
+LDFLAGS		:=	-s -w -X '$(NAME)/src/l.buildName=$(NAME)' -X '$(NAME)/src/l.buildTime=$(DATE)' -X '$(NAME)/src/l.buildCommit=$(GIT_COMMIT)'
+GOBUILD		:=	go build -trimpath
+
+.PHONY: all build clean commit diff execute fix init install lint normalize race release run status test update upgrade vet gitignore init_hook init_localpackage clean-clean-clean-clean init-init-init-init
+
+all: commit race build
 
 build:
-	go build -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}" ./src/*.go
-	GOOS=freebsd GOARCH=amd64 go build -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}-freebsd-amd64" ./src/*.go
-	go build -gcflags=all="-N -l" -ldflags="-X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath -o "./bin/${NAME}-delve" ./src/*.go
+	$(GOBUILD) -ldflags="$(LDFLAGS)" -o ./bin/$(NAME) ./src/*.go
+	GOOS=freebsd GOARCH=amd64 $(GOBUILD) -ldflags="$(LDFLAGS)" -o ./bin/$(NAME)-freebsd-amd64 ./src/*.go
+	$(GOBUILD) -gcflags=all="-N -l" -ldflags="$(LDFLAGS)" -o ./bin/$(NAME)-delve ./src/*.go
 
 clean:
 	-go clean -i -r -x -cache -testcache -modcache -fuzzcache
-	-rm -v go.mod
-	-rm -v go.sum
-	-find ./ -name ".DS_Store" -delete
-	-find ./ -name "._.DS_Store" -delete
-	-go mod init ${TARGET}
+	-rm -v go.mod go.sum
+	-find . -name ".DS_Store" -delete
+	-find . -name "._.DS_Store" -delete
+	-go mod init $(TARGET)
 	-go get -u ./...
 	-go mod tidy
 
-commit: status
-commit: normalize
-#
-# TODO
-#ifneq (${GIT_STATUS},)
-#
-ifneq ($(shell git status --short),)
-#	@for file in $(shell git status --porcelain | awk '{print $$2}'); do \
-#		echo "Committing: $$file"; \
-#		git add "$$file"; \
-#		git commit --no-edit; \
-#	done
+commit: status normalize
+ifneq ($(GIT_STATUS),)
 	git add .
-#	git commit -m "Makefile commit (${DATE})"
 	git commit --no-edit
 	git push
 endif
@@ -44,37 +37,34 @@ diff:
 	git diff
 
 execute:
-	./bin/${NAME} ${COMMAND_LINE}
+	./bin/$(NAME) $(COMMAND_LINE)
 
 fix:
 	go fix ./...
 
 init:
-	go mod init ${TARGET}
+	go mod init $(TARGET)
 	go get -u ./...
 	go mod tidy
 
 install:
-	@echo ${NAME} ${PACKAGE} ${TARGET} ${DATE} ${GIT_STATUS}
+	@echo $(NAME) $(PACKAGE) $(TARGET) $(DATE) $(GIT_STATUS)
 
 lint:
 	golangci-lint run ./... --fix
 
-normalize: fix
-normalize: lint
-normalize: vet
-normalize: update
+normalize: fix lint vet update
 
 race:
-	go run -race ./... ${COMMAND_LINE}
+	go run -race ./... $(COMMAND_LINE)
 
 release: commit
-	git tag v${VERSION}
-	git push origin v${VERSION}
-	gh release create v${VERSION} --generate-notes --latest=true
+	git tag v$(VERSION)
+	git push origin v$(VERSION)
+	gh release create v$(VERSION) --generate-notes --latest=true
 
 run:
-	go run -ldflags="-s -w -X '${NAME}/src/l.buildName=${NAME}' -X '${NAME}/src/l.buildTime=${DATE}' -X '${NAME}/src/l.buildCommit=${GIT_COMMIT}'" -trimpath ./... ${COMMAND_LINE}
+	go run -ldflags="$(LDFLAGS)" -trimpath ./... $(COMMAND_LINE)
 
 status:
 	git status
@@ -91,62 +81,42 @@ upgrade:
 	$(MAKE) update
 
 vet:
-#	go vet ./...
 	go vet -composites=false ./...
-#	go vet -vettool=${HOME}/go/bin/shadow ./...
-#	go vet -vettool=${HOME}/go/bin/waitgroup ./...
-
-include Makefile.local
 
 #
 # possibly destructive actions
-# possibly destructive actions
-#
-
-#
-#
-#
 #
 gitignore:
-	curl -o ./.gitignore ${GITIGNORE_URL}
+	curl -o ./.gitignore $(GITIGNORE_URL)
 	cat ./.local.gitignore >> ./.gitignore
 
-#
-#
-#
-#
 init_hook:
-#	echo "installing hook 'prepare-commit-msg'"
-#	echo '#!/bin/sh' > ./.git/hooks/prepare-commit-msg
-#	echo '' >> ./.git/hooks/prepare-commit-msg
-#	echo 'COMMIT_MSG_FILE=$$1' >> ./.git/hooks/prepare-commit-msg
-#	echo 'COMMIT_SOURCE=$$2' >> ./.git/hooks/prepare-commit-msg
-#	echo 'SHA1=$$3' >> ./.git/hooks/prepare-commit-msg
-#	echo 'OLLAMA_MODEL="mevatron/diffsense:1.5b"' >> ./.git/hooks/prepare-commit-msg
-#	echo 'git diff --staged | ollama run "$$OLLAMA_MODEL" | tee -a "$$COMMIT_MSG_FILE"' >> ./.git/hooks/prepare-commit-msg
-#	chmod -v +x ./.git/hooks/prepare-commit-msg
+	@echo "installing hook 'prepare-commit-msg'"
+	@echo '#!/bin/sh' > ./.git/hooks/prepare-commit-msg
+	@echo '' >> ./.git/hooks/prepare-commit-msg
+	@echo 'COMMIT_MSG_FILE=$$1' >> ./.git/hooks/prepare-commit-msg
+	@echo 'COMMIT_SOURCE=$$2' >> ./.git/hooks/prepare-commit-msg
+	@echo 'SHA1=$$3' >> ./.git/hooks/prepare-commit-msg
+	@echo 'OLLAMA_MODEL="mevatron/diffsense:1.5b"' >> ./.git/hooks/prepare-commit-msg
+	@echo 'git diff --staged | ollama run "$$OLLAMA_MODEL" | tee -a "$$COMMIT_MSG_FILE"' >> ./.git/hooks/prepare-commit-msg
+	chmod -v +x ./.git/hooks/prepare-commit-msg
 
 #
 # init local package
 # > make init_localpackage localpackage=package_name
 #
 init_localpackage:
-ifneq (${localpackage},)
-	mkdir ./src/${localpackage}
-#	echo "package ${localpackage}" > ./src/${localpackage}/${localpackage}.go
-	echo "package ${localpackage}" > ./src/${localpackage}/const.go
-	echo "package ${localpackage}" > ./src/${localpackage}/errors.go
-	echo "package ${localpackage}" > ./src/${localpackage}/func.go
-	echo "package ${localpackage}" > ./src/${localpackage}/init.go
-	echo "package ${localpackage}" > ./src/${localpackage}/method.go
-	echo "package ${localpackage}" > ./src/${localpackage}/type.go
-	echo "package ${localpackage}" > ./src/${localpackage}/var.go
+ifneq ($(localpackage),)
+	mkdir ./src/$(localpackage)
+	echo "package $(localpackage)" > ./src/$(localpackage)/const.go
+	echo "package $(localpackage)" > ./src/$(localpackage)/errors.go
+	echo "package $(localpackage)" > ./src/$(localpackage)/func.go
+	echo "package $(localpackage)" > ./src/$(localpackage)/init.go
+	echo "package $(localpackage)" > ./src/$(localpackage)/method.go
+	echo "package $(localpackage)" > ./src/$(localpackage)/type.go
+	echo "package $(localpackage)" > ./src/$(localpackage)/var.go
 endif
 
-#
-#
-#
-#
 clean-clean-clean-clean: clean
 	-gh auth logout
 
@@ -154,29 +124,21 @@ clean-clean-clean-clean: clean
 # new repo init
 # > make init-init-init-init
 #
-init-init-init-init:	clean-clean-clean-clean
+init-init-init-init: clean-clean-clean-clean
 	-gh auth logout
 	gh auth login --with-token < ~/.git_token
-	-gh repo delete ${NAME} --yes
+	-gh repo delete $(NAME) --yes
 	-rm -Rfv ./.git
 	git init
 	oco hook set
 	git config commit.gpgSign false
-	gh repo create ${NAME} --private --source=.
-#	git config --add --bool push.autoSetupRemote true
-#ifneq (${GPG_KEY},)
-#	git config --add --bool commit.gpgSign true
-#	git config --add --string user.signingkey ${GPG_KEY}
-#endif
+	gh repo create $(NAME) --private --source=.
 	git add .
-	git commit -m "Makefile initial commit (${DATE})"
-#	git commit --no-edit
+	git commit -m "Makefile initial commit ($(DATE))"
 	git push --set-upstream origin master
-#	git push
-	go mod init ${TARGET}
+	go mod init $(TARGET)
 	go get -u ./...
 	go mod tidy
 	git add .
-	git commit -m "Makefile initial update (${DATE})"
-#	git commit --no-edit
+	git commit -m "Makefile initial update ($(DATE))"
 	git push

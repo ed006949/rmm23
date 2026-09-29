@@ -3,7 +3,7 @@ module rmm23
 go 1.27.1
 
 require (
-	github.com/ProtonMail/go-crypto v1.5.1
+	github.com/ProtonMail/go-crypto v1.5.2
 	github.com/avfs/avfs v0.35.0
 	github.com/fatih/structs v1.1.0
 	github.com/go-asn1-ber/asn1-ber v1.5.8
