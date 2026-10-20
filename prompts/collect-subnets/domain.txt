@@ -145,3 +145,10 @@ platform.kimi.com
 
 moonshot.ai
 platform.moonshot.ai
+
+openrouter.ai
+
+nousresearch.com
+portal.nousresearch.com
+
+ubnt.com
